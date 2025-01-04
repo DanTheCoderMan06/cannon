@@ -1,0 +1,28 @@
+[package]
+name = "venture/universal-systems"
+
+version = "0.1.0"
+registry = "https://github.com/UpliftGames/wally-index"
+realm = "shared"
+
+[server-dependencies]
+ProfileService = "brittonfischer/profileservice@2.1.5"
+Cmdr = "evaera/cmdr@1.12.0"
+
+[dependencies]
+debugLoggerUtil = "bubshurb/debugloggerutil@1.0.0"
+Component = "bubshurb/component@1.0.0"
+Signal = "stravant/goodsignal@0.2.1"
+contextActionServiceUtil = "bubshurb/contextactionserviceutil@1.0.0"
+Zone = "shadowengineer/zoneplus@0.1.1"
+network = "bubshurb/network@1.6.0"
+loader = "sleitnick/loader@2.0.0"
+Promise = "evaera/promise@4.0.0"
+Trove = "sleitnick/trove@1.1.0"
+Sift = "csqrl/sift@0.0.8"
+React = "jsdotlua/react@17.1.0"
+ReactRoblox = "jsdotlua/react-roblox@17.1.0"
+ReactSpring = "chriscerie/react-spring@2.0.0"
+Icon = "m-ethods/topbarplus@3.0.5"
+Input = "sleitnick/input@2.3.0"
+reflex = "littensy/react-reflex@0.3.5"

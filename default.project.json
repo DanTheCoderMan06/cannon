@@ -1,0 +1,46 @@
+{
+    "name": "universal-systems",
+    "tree": {
+        "$className": "DataModel",
+        "ReplicatedStorage": {
+            "$className": "ReplicatedStorage",
+            "client": {
+                "$path": "src/client/core"
+            },
+            "shared": {
+                "$path": "src/shared"
+            },
+            "sharedPackages": {
+                "$path": "Packages"
+            },
+            "zap": {
+                "$path": "zapOutput/client/zap.luau"
+            },
+            "$ignoreUnknownInstances": true
+        },
+        "ServerScriptService": {
+            "$className": "ServerScriptService",
+            "$path": "src/server/startup"
+        },
+        "ServerStorage": {
+            "$className": "ServerStorage",
+            "server": {
+                "$path": "src/server/core"
+            },
+            "serverPackages": {
+                "$path": "ServerPackages"
+            },
+            "zap": {
+                "$path": "zapOutput/server/zap.luau"
+            },
+            "$ignoreUnknownInstances": true
+        },
+        "StarterPlayer": {
+            "$className": "StarterPlayer",
+            "StarterPlayerScripts": {
+                "$className": "StarterPlayerScripts",
+                "$path": "src/client/startup"
+            }
+        }
+    }
+}
