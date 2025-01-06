@@ -4,7 +4,7 @@ local RunService = game:GetService("RunService")
 local ServerScriptService = game:GetService("ServerScriptService")
 
 local Player = Players.LocalPlayer
-local Character = Player.Character or Player.CharacterAdded:Wait()
+local Character = Player.Character
 local Humanoid = Character:WaitForChild("Humanoid")
 
 local sharedModules = ReplicatedStorage.sharedPackages
@@ -26,6 +26,7 @@ function stateController.getEvents()
 end
 
 function stateController.start()
+	print("Start init")
 	local LocalEvent = Signal.new()
 	stateController.events.radgollEvent = LocalEvent
 
@@ -54,7 +55,7 @@ function stateController.start()
 	for _, scale in pairs(Humanoid:GetChildren()) do
 		if scale:IsA("NumberValue") then
 			scale.Changed:Connect(function()
-				spawn(SetMotorsToDefault)
+				task.spawn(SetMotorsToDefault)
 			end)
 		end
 	end
@@ -111,12 +112,13 @@ function stateController.start()
 		end
 	end)
 
-	zap.getUp.SetCallback(function(...)
+	zap.getUp.On(function(...)
 		LocalEvent:Fire(false)
 	end)
 
 	initialized = true
 	initializedEvent:Fire()
+	print("Initialized")
 end
 
 return stateController

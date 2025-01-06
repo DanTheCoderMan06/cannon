@@ -14,7 +14,7 @@ local stateController = require(script.Parent.stateController)
 local ForceModule = ReplicatedStorage.shared.utilities.forceUtil
 
 local Player = Players.LocalPlayer
-local Character = Player.Character or Player.CharacterAdded:Wait()
+local Character = Player.Character
 
 local Humanoid = Character:WaitForChild("Humanoid")
 local Root = Character:WaitForChild("HumanoidRootPart")
@@ -100,9 +100,14 @@ end
 local ragdollController = {}
 function ragdollController.start()
 	print("Start")
-	local LocalEvent = stateController.getEvents().radgollEvent
+	local LocalEvent
 
-	LocalEvent.Event:Connect(LocalRagdoll)
+	task.spawn(function()
+		local events = stateController.getEvents()
+		LocalEvent = events.radgollEvent
+
+		LocalEvent.Event:Connect(LocalRagdoll)
+	end)
 
 	local function GetMassOfModel(model)
 		local mass = 0
@@ -119,7 +124,7 @@ function ragdollController.start()
 		return mass
 	end
 
-	zap.replicateRagdollState.SetCallback(function(data)
+	zap.replicateRagdollState.On(function(data)
 		local force = data.force
 		local rotforce = data.rotforce
 		local Delay = data.delay
@@ -145,5 +150,7 @@ function ragdollController.start()
 		DelayValue = DelayValue + (Delay - 3)
 	end)
 end
+
+print("Required")
 
 return ragdollController

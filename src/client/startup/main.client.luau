@@ -13,10 +13,12 @@ task.spawn(function()
 
 	Player.CharacterAdded:Connect(function()
 		print("start char")
-		startupUtil.startup({
-			path = clientModules.character,
-			nameFormat = CONTROLLER_NAME_FORMAT,
-		})
+		task.defer(function()
+			startupUtil.startup({
+				path = clientModules.character.controllers,
+				nameFormat = CONTROLLER_NAME_FORMAT,
+			})
+		end)
 	end)
 end)
 

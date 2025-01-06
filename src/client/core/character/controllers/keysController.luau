@@ -4,10 +4,10 @@ local CAS = game:GetService("ContextActionService")
 local RunService = game:GetService("RunService")
 
 local Player = Players.LocalPlayer
-local Character = Player.Character or Player.CharacterAdded:Wait()
+local Character = Player.Character
 local Humanoid = Character:WaitForChild("Humanoid")
 
-local RagdollEvent = require(ReplicatedStorage.client.character.stateController).getEvents().radgollEvent
+local RagdollEvent = require(ReplicatedStorage.client.character.controllers.stateController).getEvents().radgollEvent
 
 local function Ragdoll(bool)
 	if Humanoid.Health > 0 then
@@ -30,6 +30,7 @@ end
 local controlsController = {}
 
 function controlsController.start()
+	print("Start")
 	if RunService:IsStudio() then
 		print("Ragdoll Support")
 		CAS:BindAction("ragdoll", ActivateRagdoll, true, Enum.KeyCode.F, Enum.KeyCode.ButtonX)
