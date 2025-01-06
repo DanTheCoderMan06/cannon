@@ -1,12 +1,13 @@
 local Players = game:GetService("Players")
+local ServerStorage = game:GetService("ServerStorage")
 local Workspace = game:GetService("Workspace")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local createUtil = require(ReplicatedStorage.shared.utilities.createUtil)
+--local createUtil = require(ReplicatedStorage.shared.utilities.createUtil)
 
 local folderService = {}
 
-local zap = require(ReplicatedStorage.zap)
+local zap = require(ServerStorage.zap)
 
 local PlayerInfo = {}
 

@@ -34,7 +34,9 @@ function startupUtil.startup(servicesOrControllersConfig, components)
 	end
 
 	Loader.SpawnAll(loadedServicesOrControllers, "start")
-	Loader.LoadDescendants(components)
+	if components then
+		Loader.LoadDescendants(components)
+	end
 end
 
 return table.freeze(startupUtil)

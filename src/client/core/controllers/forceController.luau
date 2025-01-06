@@ -20,6 +20,7 @@ local forceController = {}
 local zap = require(ReplicatedStorage.zap)
 
 function forceController.start()
+	print("Start")
 	zap.applyForceLocally.On(ApplyForce)
 end
 

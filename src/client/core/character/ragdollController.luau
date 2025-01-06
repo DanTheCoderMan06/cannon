@@ -99,6 +99,7 @@ end
 -- INITIALIZATION --
 local ragdollController = {}
 function ragdollController.start()
+	print("Start")
 	local LocalEvent = stateController.getEvents().radgollEvent
 
 	LocalEvent.Event:Connect(LocalRagdoll)
