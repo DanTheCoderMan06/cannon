@@ -11,4 +11,4 @@ local SERVICE_NAME_FORMAT = "Service$"
 startupUtil.startup({
 	path = serverModules.services,
 	nameFormat = SERVICE_NAME_FORMAT,
-}, serverModules.components)
+}, serverModules.services)

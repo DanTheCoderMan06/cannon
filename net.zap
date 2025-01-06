@@ -1,2 +1,37 @@
 opt server_output = "zapOutput/server/zap.luau"
 opt client_output = "zapOutput/client/zap.luau"
+
+event getUp = {
+    from: Server,
+    type: Reliable,
+    call: ManyAsync,
+    data: unknown
+}
+
+event editRagdollState = {
+    from: Client,
+    type: Reliable,
+    call: ManyAsync,
+    data: boolean
+}
+
+event replicateRagdollState = {
+	from: Server,
+    type: Reliable,
+    call: ManyAsync,
+    data: unknown
+}
+
+event applyForceLocally = {
+    from: Server,
+    type: Reliable,
+    call: ManyAsync,
+    data: unknown
+}
+
+event replicateNewMotors = {
+	from: Server,
+    type: Reliable,
+    call: ManyAsync,
+    data: Instance(Motor6D)[]
+}

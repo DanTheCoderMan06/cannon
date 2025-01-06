@@ -10,4 +10,14 @@ local CONTROLLER_NAME_FORMAT = "Controller$"
 startupUtil.startup({
 	path = clientModules.controllers,
 	nameFormat = CONTROLLER_NAME_FORMAT,
-}, clientModules.components)
+}, clientModules)
+
+local Players = game:GetService("Players")
+local Player = Players.LocalPlayer
+
+Player.CharacterAdded:Connect(function()
+	startupUtil.startup({
+		path = clientModules.character,
+		nameFormat = CONTROLLER_NAME_FORMAT,
+	}, clientModules)
+end)

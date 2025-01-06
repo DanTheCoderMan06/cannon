@@ -12,7 +12,7 @@ Cmdr = "evaera/cmdr@1.12.0"
 [dependencies]
 debugLoggerUtil = "bubshurb/debugloggerutil@1.0.0"
 Component = "bubshurb/component@1.0.0"
-Signal = "stravant/goodsignal@0.2.1"
+Signal = "data-oriented-house/lemonsignal@1.10.0"
 contextActionServiceUtil = "bubshurb/contextactionserviceutil@1.0.0"
 Zone = "shadowengineer/zoneplus@0.1.1"
 network = "bubshurb/network@1.6.0"

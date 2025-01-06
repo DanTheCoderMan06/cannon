@@ -1,0 +1,148 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local Debris = game:GetService("Debris")
+local UIS = game:GetService("UserInputService")
+
+local sharedPackages = ReplicatedStorage.sharedPackages
+local Signal = require(sharedPackages.Signal)
+
+local DelayValue = 0
+
+local stateController = require(script.Parent.stateController)
+
+local ForceModule = ReplicatedStorage.shared.utilities.forceUtil
+
+local Player = Players.LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+
+local Humanoid = Character:WaitForChild("Humanoid")
+local Root = Character:WaitForChild("HumanoidRootPart")
+
+local motorController = require(ReplicatedStorage.client.controllers.motorController)
+local zap = require(ReplicatedStorage.zap)
+
+local Sift = require(ReplicatedStorage.sharedPackages.Sift)
+
+-- FUNCTIONS --
+local function LocalRagdoll(bool)
+	if UIS.VREnabled then
+		return
+	end
+
+	local State = Humanoid:GetState()
+	if bool then
+		if State ~= Enum.HumanoidStateType.Physics then
+			zap.editRagdollState.Fire(true)
+			DelayValue = DelayValue + 3
+
+			Humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+			Root.CanCollide = false
+
+			for _, bodyPart in pairs(Character:GetChildren()) do
+				if bodyPart:IsA("BasePart") then
+					for _, motor in pairs(bodyPart:GetChildren()) do
+						if motor:IsA("Motor6D") then
+							motorController.addMotor(motor)
+							--motor.Parent = Motors
+						end
+					end
+				end
+			end
+		end
+	else
+		if State == Enum.HumanoidStateType.Physics then
+			zap.editRagdollState.Fire(false)
+			DelayValue = DelayValue + 3
+
+			local function returnMotor(joint, part)
+				local Joint = Sift.Array.at(Sift.Array.find(motorController.getMotors(), joint))
+				if Joint then
+					if part then
+						Joint.Parent = part
+					end
+				end
+			end
+
+			if Humanoid.RigType == Enum.HumanoidRigType.R15 then
+				returnMotor("Neck", Character:FindFirstChild("Head"))
+				returnMotor("Waist", Character:FindFirstChild("UpperTorso"))
+				returnMotor("Root", Character:FindFirstChild("LowerTorso"))
+				returnMotor("LeftShoulder", Character:FindFirstChild("LeftUpperArm"))
+				returnMotor("LeftElbow", Character:FindFirstChild("LeftLowerArm"))
+				returnMotor("LeftWrist", Character:FindFirstChild("LeftHand"))
+				returnMotor("RightShoulder", Character:FindFirstChild("RightUpperArm"))
+				returnMotor("RightElbow", Character:FindFirstChild("RightLowerArm"))
+				returnMotor("RightWrist", Character:FindFirstChild("RightHand"))
+				returnMotor("LeftHip", Character:FindFirstChild("LeftUpperLeg"))
+				returnMotor("LeftKnee", Character:FindFirstChild("LeftLowerLeg"))
+				returnMotor("LeftAnkle", Character:FindFirstChild("LeftFoot"))
+				returnMotor("RightHip", Character:FindFirstChild("RightUpperLeg"))
+				returnMotor("RightKnee", Character:FindFirstChild("RightLowerLeg"))
+				returnMotor("RightAnkle", Character:FindFirstChild("RightFoot"))
+			else
+				returnMotor("Neck", Character:FindFirstChild("Torso"))
+				returnMotor("RootJoint", Character:FindFirstChild("HumanoidRootPart"))
+				returnMotor("Left Shoulder", Character:FindFirstChild("Torso"))
+				returnMotor("Right Shoulder", Character:FindFirstChild("Torso"))
+				returnMotor("Left Hip", Character:FindFirstChild("Torso"))
+				returnMotor("Right Hip", Character:FindFirstChild("Torso"))
+			end
+
+			Root.CanCollide = true
+
+			Humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+		end
+	end
+end
+
+-- INITIALIZATION --
+local ragdollController = {}
+function ragdollController.start()
+	local LocalEvent = stateController.getEvents().radgollEvent
+
+	LocalEvent.Event:Connect(LocalRagdoll)
+
+	local function GetMassOfModel(model)
+		local mass = 0
+		for i, v in pairs(model:GetChildren()) do
+			if v:IsA("BasePart") then
+				mass = mass + v:GetMass()
+			elseif v:IsA("Accoutrement") then
+				local Handle = v:FindFirstChildOfClass("BasePart")
+				if Handle then
+					mass = mass + Handle:GetMass()
+				end
+			end
+		end
+		return mass
+	end
+
+	zap.replicateRagdollState.SetCallback(function(data)
+		local force = data.force
+		local rotforce = data.rotforce
+		local Delay = data.delay
+		local State = Humanoid:GetState()
+		if State ~= Enum.HumanoidStateType.Physics and State ~= Enum.HumanoidStateType.Dead then
+			LocalEvent:Fire(true)
+		end
+
+		local CharacterMass = GetMassOfModel(Character)
+
+		local torso = Character:FindFirstChild("UpperTorso") or Character:FindFirstChild("Torso")
+		local f = force and (force * CharacterMass) or (Vector3.new())
+		local angfor = rotforce and (rotforce * CharacterMass) or (Vector3.new())
+
+		ForceModule:ApplyForce(torso, f, angfor)
+
+		local DelayVal
+		if Delay and tonumber(Delay) then
+			DelayVal = Delay
+		else
+			DelayVal = 0
+		end
+		DelayValue = DelayValue + (Delay - 3)
+	end)
+end
+
+return ragdollController

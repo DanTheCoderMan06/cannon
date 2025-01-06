@@ -40,6 +40,10 @@
             "StarterPlayerScripts": {
                 "$className": "StarterPlayerScripts",
                 "$path": "src/client/startup"
+            },
+            "StarterCharacterScripts": {
+                "$className": "StarterCharacterScripts",
+                "$path": "src/client/character"
             }
         }
     }
