@@ -28,8 +28,6 @@ function startupUtil.startup(servicesOrControllersConfig, components)
 			if module.client then
 				table.freeze(module.client)
 			end
-		else
-			print(module)
 		end
 
 		table.freeze(module)

@@ -12,10 +12,9 @@ task.spawn(function()
 	local Player = Players.LocalPlayer
 
 	Player.CharacterAdded:Connect(function()
-		print("start char")
 		task.defer(function()
 			startupUtil.startup({
-				path = clientModules.character.controllers,
+				path = clientModules.character,
 				nameFormat = CONTROLLER_NAME_FORMAT,
 			})
 		end)

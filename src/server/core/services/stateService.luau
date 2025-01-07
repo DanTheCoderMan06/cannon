@@ -12,7 +12,8 @@ local stateService = {}
 
 function stateService.start()
 	zap.editRagdollState.On(function(player, bool)
-		local MotorFolder = folderService.getPlayerInfo()[player.Name].Motors
+		local playerInfo = folderService.getPlayerInfo()
+		local MotorFolder = playerInfo[player.Name].Motors
 
 		local Character = player.Character
 		if Character ~= nil then
@@ -29,6 +30,8 @@ function stateService.start()
 						for _, motor in pairs(bodyPart:GetChildren()) do
 							if motor:IsA("Motor6D") then
 								table.insert(MotorFolder, motor)
+								motor.Enabled = false
+								motor:SetAttribute("serverLoaded", true)
 							end
 						end
 					end
@@ -39,12 +42,14 @@ function stateService.start()
 				end
 
 				local function returnMotor(joint, part)
-					local Joint = Sift.Array.at(Sift.Array.find(MotorFolder, joint))
-					if Joint then
-						if part then
-							Joint.Parent = part
-						end
-					end
+					local Joint = Sift.Array.at(
+						MotorFolder,
+						Sift.Array.findWhere(MotorFolder, function(value)
+							return value.Name == joint
+						end)
+					)
+					Joint.Enabled = true
+					Joint:SetAttribute("serverLoaded", nil)
 				end
 
 				if Humanoid.RigType == Enum.HumanoidRigType.R15 then
@@ -71,6 +76,8 @@ function stateService.start()
 					returnMotor("Left Hip", Character:FindFirstChild("Torso"))
 					returnMotor("Right Hip", Character:FindFirstChild("Torso"))
 				end
+
+				table.clear(MotorFolder)
 			end
 		end
 

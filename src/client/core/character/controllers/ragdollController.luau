@@ -44,6 +44,7 @@ local function LocalRagdoll(bool)
 					for _, motor in pairs(bodyPart:GetChildren()) do
 						if motor:IsA("Motor6D") then
 							motorController.addMotor(motor)
+							motor.Enabled = false
 							--motor.Parent = Motors
 						end
 					end
@@ -56,7 +57,12 @@ local function LocalRagdoll(bool)
 			DelayValue = DelayValue + 3
 
 			local function returnMotor(joint, part)
-				local Joint = Sift.Array.at(Sift.Array.find(motorController.getMotors(), joint))
+				local Joint = Sift.Array.at(
+					motorController.getMotors(),
+					Sift.Array.findWhere(motorController.getMotors(), function(value)
+						return value.Name == joint
+					end)
+				)
 				if Joint then
 					if part then
 						Joint.Parent = part
@@ -88,7 +94,7 @@ local function LocalRagdoll(bool)
 				returnMotor("Left Hip", Character:FindFirstChild("Torso"))
 				returnMotor("Right Hip", Character:FindFirstChild("Torso"))
 			end
-
+			motorController.clearLocalMotors()
 			Root.CanCollide = true
 
 			Humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
@@ -99,14 +105,13 @@ end
 -- INITIALIZATION --
 local ragdollController = {}
 function ragdollController.start()
-	print("Start")
 	local LocalEvent
 
 	task.spawn(function()
 		local events = stateController.getEvents()
 		LocalEvent = events.radgollEvent
 
-		LocalEvent.Event:Connect(LocalRagdoll)
+		LocalEvent:Connect(LocalRagdoll)
 	end)
 
 	local function GetMassOfModel(model)
@@ -150,7 +155,5 @@ function ragdollController.start()
 		DelayValue = DelayValue + (Delay - 3)
 	end)
 end
-
-print("Required")
 
 return ragdollController

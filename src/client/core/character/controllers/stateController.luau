@@ -26,13 +26,8 @@ function stateController.getEvents()
 end
 
 function stateController.start()
-	print("Start init")
 	local LocalEvent = Signal.new()
 	stateController.events.radgollEvent = LocalEvent
-
-	local DelayValue = ReplicatedStorage:WaitForChild("Delay")
-
-	local isHoldingTool = false
 
 	local function SetMotorsToDefault()
 		RunService.Heartbeat:Wait()
@@ -118,7 +113,6 @@ function stateController.start()
 
 	initialized = true
 	initializedEvent:Fire()
-	print("Initialized")
 end
 
 return stateController

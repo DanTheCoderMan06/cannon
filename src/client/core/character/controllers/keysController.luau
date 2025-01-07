@@ -7,7 +7,7 @@ local Player = Players.LocalPlayer
 local Character = Player.Character
 local Humanoid = Character:WaitForChild("Humanoid")
 
-local RagdollEvent = require(ReplicatedStorage.client.character.controllers.stateController).getEvents().radgollEvent
+local RagdollEvent
 
 local function Ragdoll(bool)
 	if Humanoid.Health > 0 then
@@ -30,7 +30,7 @@ end
 local controlsController = {}
 
 function controlsController.start()
-	print("Start")
+	RagdollEvent = require(ReplicatedStorage.client.character.controllers.stateController).getEvents().radgollEvent
 	if RunService:IsStudio() then
 		print("Ragdoll Support")
 		CAS:BindAction("ragdoll", ActivateRagdoll, true, Enum.KeyCode.F, Enum.KeyCode.ButtonX)
