@@ -33,12 +33,14 @@ function Cannon.new(args)
 			task.wait(0.5)
 			self.character = self.owner.Character
 			if self.character then
+				if not self.character.PrimaryPart then
+					continue
+				end
 				if
 					(self.character.PrimaryPart.Position - self.cannonModel.center.characterPosition.WorldPosition).Magnitude
 						< globalConfig.triggerRadius
 					and not self.busy
 				then
-					print("Go")
 					self:useCannon()
 				end
 			end
@@ -81,7 +83,7 @@ function Cannon:fireCannon()
 		self.cannonModel.center.fireDirection.WorldPosition,
 		20,
 		5000,
-		4,
+		1,
 		4,
 		false,
 		true,

@@ -21,6 +21,7 @@ local Humanoid
 local Root
 
 local motorController = require(ReplicatedStorage.client.controllers.motorController)
+local windController = require(ReplicatedStorage.client.controllers.windController)
 local zap = require(ReplicatedStorage.zap)
 
 local Sift = require(ReplicatedStorage.sharedPackages.Sift)
@@ -131,6 +132,7 @@ function ragdollController.start()
 	end
 
 	zap.replicateRagdollState.On(function(data)
+		windController.toggle(true)
 		local force = data.force
 		local rotforce = data.rotforce
 		local Delay = data.delay
@@ -138,7 +140,7 @@ function ragdollController.start()
 		if State ~= Enum.HumanoidStateType.Physics and State ~= Enum.HumanoidStateType.Dead then
 			LocalEvent:Fire(true)
 		end
-
+		windController.toggle(true)
 		local CharacterMass = GetMassOfModel(Character)
 
 		local torso = Character:FindFirstChild("UpperTorso") or Character:FindFirstChild("Torso")

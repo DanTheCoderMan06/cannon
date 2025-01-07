@@ -18,6 +18,8 @@ local zap = require(ReplicatedStorage.zap)
 local initialized = false
 local initializedEvent = Signal.new()
 
+local windController = require(ReplicatedStorage.client.controllers.windController)
+
 function stateController.getEvents()
 	if not initialized then
 		initializedEvent:Wait()
@@ -58,8 +60,15 @@ function stateController.start()
 		if Root then
 			local Speed = Root.AssemblyLinearVelocity.Magnitude
 			if Speed > 75 and not Player:GetAttribute("inCannon") then
+				windController.toggle(false)
 				LocalEvent:Fire(true)
 			end
+		end
+	end
+
+	local function onStateChanged(oldState, newState)
+		if newState == Enum.HumanoidStateType.Landed then
+			HumanoidLanded()
 		end
 	end
 
@@ -101,6 +110,8 @@ function stateController.start()
 				end
 			end
 		end)
+
+		Humanoid.StateChanged:Connect(onStateChanged)
 	end)
 end
 
