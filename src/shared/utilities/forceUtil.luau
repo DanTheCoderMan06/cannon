@@ -1,9 +1,15 @@
 --//Client Module
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerStorage = game:GetService("ServerStorage")
 local Workspace = game:GetService("Workspace")
 
-local zap = require(ReplicatedStorage.zap)
+local zap
+if RunService:IsClient() then
+	require(ReplicatedStorage:WaitForChild("zap"))
+else
+	require(ServerStorage:WaitForChild("zap"))
+end
 
 local PhysicsModule = {}
 

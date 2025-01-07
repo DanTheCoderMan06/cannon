@@ -4,6 +4,8 @@ local Workspace = game:GetService("Workspace")
 local Debris = game:GetService("Debris")
 local UIS = game:GetService("UserInputService")
 
+local Player = Players.LocalPlayer
+
 local sharedPackages = ReplicatedStorage.sharedPackages
 local Signal = require(sharedPackages.Signal)
 
@@ -11,13 +13,12 @@ local DelayValue = 0
 
 local stateController = require(script.Parent.stateController)
 
-local ForceModule = ReplicatedStorage.shared.utilities.forceUtil
+local ForceModule = require(ReplicatedStorage.shared.utilities.forceUtil)
 
 local Player = Players.LocalPlayer
-local Character = Player.Character
-
-local Humanoid = Character:WaitForChild("Humanoid")
-local Root = Character:WaitForChild("HumanoidRootPart")
+local Character
+local Humanoid
+local Root
 
 local motorController = require(ReplicatedStorage.client.controllers.motorController)
 local zap = require(ReplicatedStorage.zap)
@@ -153,6 +154,12 @@ function ragdollController.start()
 			DelayVal = 0
 		end
 		DelayValue = DelayValue + (Delay - 3)
+	end)
+
+	Player.CharacterAdded:Connect(function(character)
+		Character = character
+		Humanoid = Character:WaitForChild("Humanoid")
+		Root = Character:WaitForChild("HumanoidRootPart")
 	end)
 end
 

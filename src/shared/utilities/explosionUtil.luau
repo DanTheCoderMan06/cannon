@@ -1,10 +1,11 @@
 local RNG = Random.new(tick())
 
+local ServerStorage = game:GetService("ServerStorage")
 local Workspace = game:GetService("Workspace")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-local ForceModule = ReplicatedStorage.shared.utilities.forceUtil
-local zap = require(ReplicatedStorage.zap)
+local ForceModule = require(ReplicatedStorage.shared.utilities.forceUtil)
+local zap = require(ServerStorage.zap)
 local Admins = {}
 
 local function GetMassOfModel(model)
@@ -24,7 +25,16 @@ end
 
 local module = {}
 
-function module:CreateExplosion(position, radius, force, forceheight, Delay, explodeToPieces)
+function module:CreateExplosion(
+	position,
+	radius,
+	force,
+	forceheight,
+	Delay,
+	explodeToPieces,
+	exclusive,
+	targetCharacter
+)
 	local Explosion = Instance.new("Explosion")
 	Explosion.Position = position
 	Explosion.BlastRadius = radius
@@ -37,6 +47,11 @@ function module:CreateExplosion(position, radius, force, forceheight, Delay, exp
 
 	Explosion.Hit:Connect(function(HitPart)
 		local character = HitPart.Parent
+		if exclusive then
+			if character ~= targetCharacter then
+				return
+			end
+		end
 		local human = character:FindFirstChild("Humanoid")
 		if explodeToPieces == true then
 			if character and human then
@@ -57,7 +72,7 @@ function module:CreateExplosion(position, radius, force, forceheight, Delay, exp
 							end
 						elseif v:IsA("BasePart") then
 							local force =
-								Vector3.new(RNG:NextNumber(-10, 10), 3000 * v:GetMass(), RNG:NextNumber(-10, 10))
+								Vector3.new(RNG:NextNumber(-10, 10), 1000 * v:GetMass(), RNG:NextNumber(-10, 10))
 							ForceModule:ApplyForce(v, force)
 						end
 					end

@@ -4,8 +4,8 @@ local RunService = game:GetService("RunService")
 local ServerScriptService = game:GetService("ServerScriptService")
 
 local Player = Players.LocalPlayer
-local Character = Player.Character
-local Humanoid = Character:WaitForChild("Humanoid")
+local Character
+local Humanoid
 
 local sharedModules = ReplicatedStorage.sharedPackages
 local Signal = require(sharedModules.Signal)
@@ -45,34 +45,6 @@ function stateController.start()
 		end
 	end
 
-	task.spawn(SetMotorsToDefault)
-
-	for _, scale in pairs(Humanoid:GetChildren()) do
-		if scale:IsA("NumberValue") then
-			scale.Changed:Connect(function()
-				task.spawn(SetMotorsToDefault)
-			end)
-		end
-	end
-
-	Humanoid.Died:Connect(function()
-		local FindRoot = Character:FindFirstChild("HumanoidRootPart")
-		if FindRoot then
-			FindRoot.CanCollide = false
-			Humanoid.AutoRotate = false
-		end
-
-		for _, bodyPart in pairs(Character:GetChildren()) do
-			if bodyPart:IsA("BasePart") then
-				for _, motor in pairs(bodyPart:GetChildren()) do
-					if motor:IsA("Motor6D") then
-						motor:Destroy()
-					end
-				end
-			end
-		end
-	end)
-
 	local function HumanoidPhysics()
 		Humanoid.AutoRotate = false
 	end
@@ -85,27 +57,11 @@ function stateController.start()
 		local Root = Character:FindFirstChild("HumanoidRootPart")
 		if Root then
 			local Speed = Root.AssemblyLinearVelocity.Magnitude
-			if Speed > 75 then
+			if Speed > 75 and not Player:GetAttribute("inCannon") then
 				LocalEvent:Fire(true)
 			end
 		end
 	end
-
-	Humanoid.FallingDown:Connect(function(bool)
-		if bool then
-			LocalEvent:Fire(true)
-		end
-	end)
-
-	Humanoid.StateChanged:Connect(function(oldstate, newstate)
-		if newstate == Enum.HumanoidStateType.Physics then
-			HumanoidPhysics()
-		elseif newstate == Enum.HumanoidStateType.GettingUp then
-			HumanoidGettingUp()
-		elseif newstate == Enum.HumanoidStateType.Landed then
-			HumanoidLanded()
-		end
-	end)
 
 	zap.getUp.On(function(...)
 		LocalEvent:Fire(false)
@@ -113,6 +69,39 @@ function stateController.start()
 
 	initialized = true
 	initializedEvent:Fire()
+
+	Player.CharacterAdded:Connect(function(character)
+		Character = character
+		Humanoid = Character:WaitForChild("Humanoid")
+
+		task.spawn(SetMotorsToDefault)
+
+		for _, scale in pairs(Humanoid:GetChildren()) do
+			if scale:IsA("NumberValue") then
+				scale.Changed:Connect(function()
+					task.spawn(SetMotorsToDefault)
+				end)
+			end
+		end
+
+		Humanoid.Died:Connect(function()
+			local FindRoot = Character:FindFirstChild("HumanoidRootPart")
+			if FindRoot then
+				FindRoot.CanCollide = false
+				Humanoid.AutoRotate = false
+			end
+
+			for _, bodyPart in pairs(Character:GetChildren()) do
+				if bodyPart:IsA("BasePart") then
+					for _, motor in pairs(bodyPart:GetChildren()) do
+						if motor:IsA("Motor6D") then
+							motor:Destroy()
+						end
+					end
+				end
+			end
+		end)
+	end)
 end
 
 return stateController

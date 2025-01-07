@@ -30,7 +30,7 @@ function startupUtil.startup(servicesOrControllersConfig, components)
 			end
 		end
 
-		table.freeze(module)
+		--table.freeze(module)
 	end
 
 	Loader.SpawnAll(loadedServicesOrControllers, "start")
