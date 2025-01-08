@@ -10,6 +10,11 @@ local spr = require(game.ReplicatedStorage.sharedPackages.spr)
 local Player = Players.LocalPlayer
 
 local castleFolder = workspace:WaitForChild("castles")
+local castleFloor = ReplicatedStorage.assets.castleFloor
+local floorHeight = castleFloor.ceiling.Position.Y - castleFloor.floor.Position.Y
+
+local currentCastle
+local currentPlatform
 
 function castleController.animateFloor(floor)
 	local models = {}
@@ -52,8 +57,8 @@ function castleController.animateFloor(floor)
 	end
 end
 
-function castleController.getFloors()
-	local pstats = Player:WaitForChild("leaderstats")
+function castleController.getFloors(targetPlayer)
+	local pstats = targetPlayer:WaitForChild("leaderstats")
 	for i, v in pairs(pstats:GetChildren()) do
 		if v:GetAttribute("statName") == "floors" then
 			return v.Value
@@ -61,16 +66,35 @@ function castleController.getFloors()
 	end
 end
 
+function castleController.updatePlatform()
+	if not currentPlatform then
+		currentPlatform = ReplicatedStorage.assets.playerPlatform:Clone()
+		Player.RespawnLocation = currentPlatform:FindFirstChildWhichIsA("SpawnLocation")
+		currentPlatform.Parent = workspace
+	end
+	currentPlatform:PivotTo(
+		currentCastle.CFrame
+			* CFrame.new(
+				0,
+				(castleController.getFloors(Players:FindFirstChild(currentCastle.Name)) + 1) * floorHeight,
+				0
+			)
+	)
+end
+
 function castleController.start()
-	local startingFloors = castleController.getFloors()
+	local startingFloors = castleController.getFloors(Player)
 
 	local playerCastle = castleFolder:WaitForChild(Player.Name):FindFirstChildWhichIsA("Folder")
+	currentCastle = playerCastle.Parent
 
 	playerCastle.ChildAdded:Connect(function(child)
 		if tonumber(child.Name) > startingFloors then
 			castleController.animateFloor(child)
 		end
 	end)
+
+	castleController.updatePlatform()
 end
 
 return castleController

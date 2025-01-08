@@ -46,6 +46,7 @@ function castleService.start()
 		newSpot.Name = player.Name
 		newCastle.Parent = newSpot
 		castleService.updateTower(player)
+		--[[
 		task.delay(6, function()
 			print("Test tower!")
 			local oldData = dataService.getPlayerData(player)
@@ -53,6 +54,7 @@ function castleService.start()
 			dataService.updatePlayerData(player, oldData)
 			castleService.updateTower(player)
 		end)
+		--]]
 	end)
 	Players.PlayerRemoving:Connect(function(player)
 		for i, v in pairs(castleFolder:GetChildren()) do
