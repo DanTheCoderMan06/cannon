@@ -23,6 +23,8 @@ local RNG = Random.new()
 local viewportRef = React.createRef()
 local cameraRef = React.createRef()
 
+local Trove = require(sharedPackages.Trove)
+
 -- FUNCTIONS
 function WindService.new(setting)
 	local Object = {}
@@ -40,6 +42,8 @@ function WindService.new(setting)
 	Object.Part = ReplicatedStorage.assets:WaitForChild("Wind")
 	Object.Time = 0.01
 
+	Object.Trove = Trove.new()
+
 	Object.target = { CFrame = CFrame.new() }
 
 	return Object
@@ -48,7 +52,7 @@ end
 -- METHODS
 function WindService:Start()
 	local LastUsed = tick()
-	self.While = RunService.Heartbeat:Connect(function()
+	self.Trove:BindToRenderStep("stripes", Enum.RenderPriority.Last.Value, function()
 		if (tick() - LastUsed) >= self.Time then
 			LastUsed = tick()
 			if self.Current < self.Amount then
@@ -59,16 +63,7 @@ function WindService:Start()
 end
 
 function WindService:Stop()
-	if self.Connection then
-		if self.Connection.Connected then
-			self.Connection:Disconnect()
-		end
-	end
-	if self.While then
-		if self.While.Connected then
-			self.While:Disconnect()
-		end
-	end
+	self.Trove:Destroy()
 end
 
 function WindService:GetRandomPosition()
@@ -122,7 +117,6 @@ function WindService:CreateWind()
 
 	-- START ENDING:
 	task.delay(self.Lifetime, function()
-		WindService:FadeWind(Part)
 		Render:Disconnect()
 		windParts:ReturnPart(Part)
 		self.Current -= 1
@@ -136,6 +130,7 @@ end
 function WindService.start()
 	local newservice = WindService.new({})
 	local container = ReactRoblox.createRoot(Instance.new("Folder"))
+	local stripesTransparency, setStripesTransparency = React.createBinding(0)
 	container:render(ReactRoblox.createPortal(
 		React.createElement("ScreenGui", {
 			ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
@@ -152,6 +147,7 @@ function WindService.start()
 				LightColor = Color3.fromRGB(255, 255, 255),
 				Size = UDim2.fromScale(1, 1),
 				ref = viewportRef,
+				ImageTransparency = stripesTransparency,
 			}, {
 				camera = React.createElement("Camera", {
 					CFrame = CFrame.new(),
@@ -164,9 +160,10 @@ function WindService.start()
 	))
 	toggleWindSignal:Connect(function(bool)
 		if not windParts then
-			windParts = cache.new(ReplicatedStorage.assets:WaitForChild("Wind"), 100, viewportRef:getValue())
+			windParts = cache.new(ReplicatedStorage.assets:WaitForChild("Wind"), 600, viewportRef:getValue())
 		end
 		viewportRef:getValue().CurrentCamera = cameraRef:getValue()
+		print(bool)
 		if bool then
 			newservice:Start()
 		else

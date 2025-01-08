@@ -66,12 +66,6 @@ function stateController.start()
 		end
 	end
 
-	local function onStateChanged(oldState, newState)
-		if newState == Enum.HumanoidStateType.Landed then
-			HumanoidLanded()
-		end
-	end
-
 	zap.getUp.On(function(...)
 		LocalEvent:Fire(false)
 	end)
@@ -110,8 +104,6 @@ function stateController.start()
 				end
 			end
 		end)
-
-		Humanoid.StateChanged:Connect(onStateChanged)
 	end)
 end
 

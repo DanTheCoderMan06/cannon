@@ -33,7 +33,8 @@ function module:CreateExplosion(
 	Delay,
 	explodeToPieces,
 	exclusive,
-	targetCharacter
+	targetCharacter,
+	cameraOffset
 )
 	local Explosion = Instance.new("Explosion")
 	Explosion.Position = position
@@ -97,7 +98,10 @@ function module:CreateExplosion(
 
 						local applyForce = ((root.Position + Vector3.new(0, forceheight, 0)) - Explosion.Position).Unit
 							* force
-						zap.replicateRagdollState.Fire(player, { force = applyForce, delay = Delay })
+						zap.replicateRagdollState.Fire(
+							player,
+							{ force = applyForce, delay = Delay, camera = cameraOffset ~= nil, offset = cameraOffset }
+						)
 					end
 				else
 					local mass = GetMassOfModel(character)

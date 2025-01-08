@@ -87,7 +87,9 @@ function Cannon:fireCannon()
 		4,
 		false,
 		true,
-		self.character
+		self.character,
+		self.cannonModel.center.characterDirection.WorldPosition
+			- self.cannonModel.center.characterPosition.WorldPosition
 	)
 end
 

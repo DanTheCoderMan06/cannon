@@ -22,8 +22,9 @@ local Root
 
 local motorController = require(ReplicatedStorage.client.controllers.motorController)
 local windController = require(ReplicatedStorage.client.controllers.windController)
+local cameraController = require(ReplicatedStorage.client.controllers.cameraController)
 local zap = require(ReplicatedStorage.zap)
-
+local camerashaker = require(ReplicatedStorage.sharedPackages.camerashaker)
 local Sift = require(ReplicatedStorage.sharedPackages.Sift)
 
 -- FUNCTIONS --
@@ -67,7 +68,7 @@ local function LocalRagdoll(bool)
 				)
 				if Joint then
 					if part then
-						Joint.Parent = part
+						Joint.Enabled = false
 					end
 				end
 			end
@@ -108,7 +109,9 @@ end
 local ragdollController = {}
 function ragdollController.start()
 	local LocalEvent
-
+	local camShake = camerashaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
+		workspace.CurrentCamera.CFrame = workspace.CurrentCamera.CFrame * shakeCf
+	end)
 	task.spawn(function()
 		local events = stateController.getEvents()
 		LocalEvent = events.radgollEvent
@@ -142,10 +145,13 @@ function ragdollController.start()
 		end
 		windController.toggle(true)
 		local CharacterMass = GetMassOfModel(Character)
-
 		local torso = Character:FindFirstChild("UpperTorso") or Character:FindFirstChild("Torso")
 		local f = force and (force * CharacterMass) or (Vector3.new())
 		local angfor = rotforce and (rotforce * CharacterMass) or (Vector3.new())
+
+		if data.camera then
+			cameraController.trackObject(Player.Character.PrimaryPart, data.offset)
+		end
 
 		ForceModule:ApplyForce(torso, f, angfor)
 
@@ -156,6 +162,7 @@ function ragdollController.start()
 			DelayVal = 0
 		end
 		DelayValue = DelayValue + (Delay - 3)
+		camShake:Shake(camerashaker.Presets.Explosion)
 	end)
 
 	Player.CharacterAdded:Connect(function(character)
