@@ -78,6 +78,9 @@ function dataService.updatePlayerData(player: Player, newData)
 end
 
 function dataService.getPlayerData(player: Player)
+	repeat
+		task.wait()
+	until Profiles[player] ~= nil
 	return Sift.Dictionary.copyDeep(Profiles[player].Data)
 end
 
