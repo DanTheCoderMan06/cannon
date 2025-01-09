@@ -25,6 +25,19 @@ function module.getCannon(playerLevel)
 	end
 end
 
+function module.getNextCannon(playerLevel)
+	local isNextCannon = false
+	for cannonName, cannonInfo in pairs(module.cannons) do
+		if isNextCannon then
+			return cannonName
+		end
+		if playerLevel <= cannonInfo.max then
+			isNextCannon = true
+		end
+	end
+	return module.getCannon(playerLevel)
+end
+
 function module.getPower(level)
 	return 4
 end

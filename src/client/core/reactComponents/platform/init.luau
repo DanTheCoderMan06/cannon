@@ -38,6 +38,7 @@ local function imageIcon(props)
 		Image = props.value or "",
 		Size = UDim2.fromScale(0.08, 1),
 		LayoutOrder = 1,
+		Visible = props.value ~= nil,
 	})
 end
 
