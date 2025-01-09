@@ -21,12 +21,15 @@ function Cannon.new(args)
 
 	self.Trove = Trove.new()
 
-	self.cannonModel = ReplicatedStorage.assets.cannons:FindFirstChild(self.model):Clone()
-	self.cannonModel.Parent = workspace.playerCannons
+	self.cannonModel = args.model
 
 	self.busy = false
 
 	self.enabled = true
+
+	self.power = args.power
+
+	print(self.power)
 
 	task.spawn(function()
 		while self.enabled do
@@ -82,7 +85,7 @@ function Cannon:fireCannon()
 	explosionUtil:CreateExplosion(
 		self.cannonModel.center.fireDirection.WorldPosition,
 		20,
-		5000,
+		self.power * 5000,
 		1,
 		4,
 		false,

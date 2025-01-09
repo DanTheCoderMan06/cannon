@@ -16,6 +16,8 @@ local dataService = require(ServerStorage.server.services.dataService)
 local castleFloor = ReplicatedStorage.assets:WaitForChild("castleFloor")
 local floorHeight = castleFloor.ceiling.Position.Y - castleFloor.floor.Position.Y
 
+local playerPlatforms = workspace:WaitForChild("playerPlatforms")
+
 function castleService.updateTower(player)
 	local playerData = dataService.getPlayerData(player)
 	local playerSpot = castleFolder:FindFirstChild(player.Name)
@@ -24,7 +26,7 @@ function castleService.updateTower(player)
 		if not playerCastle:FindFirstChild(i) then
 			local newfloor = castleFloor:Clone()
 			newfloor.Name = i
-			newfloor:PivotTo(playerSpot.CFrame * CFrame.new(0, floorHeight * i, 0))
+			newfloor:PivotTo(playerSpot.CFrame * CFrame.new(0, floorHeight * (i + 0.5), 0))
 			newfloor.Parent = playerCastle
 		end
 	end
@@ -38,6 +40,19 @@ function castleService.findSpot()
 	end
 end
 
+function castleService.updatePlatform(player, newspot)
+	playerPlatforms:FindFirstChild(player.Name):PivotTo(
+		newspot.CFrame
+			* CFrame.new(
+				0,
+				(dataService.getPlayerData(Players:FindFirstChild(newspot.Name)).floors + 1) * floorHeight,
+				0
+			)
+	)
+	player.RespawnLocation = playerPlatforms:FindFirstChild(player.Name):FindFirstChildWhichIsA("SpawnLocation")
+	player:LoadCharacter()
+end
+
 function castleService.start()
 	Players.PlayerAdded:Connect(function(player)
 		local newCastle = Instance.new("Folder")
@@ -46,6 +61,10 @@ function castleService.start()
 		newSpot.Name = player.Name
 		newCastle.Parent = newSpot
 		castleService.updateTower(player)
+		local newplatform = ReplicatedStorage.assets.playerPlatform:Clone()
+		newplatform.Name = player.Name
+		newplatform.Parent = playerPlatforms
+		castleService.updatePlatform(player, newSpot)
 		--[[
 		task.delay(6, function()
 			print("Test tower!")
@@ -57,6 +76,7 @@ function castleService.start()
 		--]]
 	end)
 	Players.PlayerRemoving:Connect(function(player)
+		playerPlatforms:FindFirstChild(player.Name):Destroy()
 		for i, v in pairs(castleFolder:GetChildren()) do
 			if v:FindFirstChildWhichIsA("Folder") and v.Name == player.Name then
 				v:ClearAllChildren()
