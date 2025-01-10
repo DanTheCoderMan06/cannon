@@ -2,6 +2,8 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local cannonConfig = require(ReplicatedStorage.shared.config.cannonConfig)
 local boughtLevels = 0
 
+local dataController = require(ReplicatedStorage.client.controllers.dataController)
+
 return {
 	cannon = {
 		callback = function()
@@ -96,7 +98,7 @@ return {
 		end,
 		title = "+10 FLOORS",
 		description = '100 <font color="#008000">\u{E002}</font>',
-		initModel = ReplicatedStorage.assets.tenfloors,
+		initModel = ReplicatedStorage.assets.twofloors,
 	},
 	fiftyFloors = {
 		callback = function()
@@ -104,7 +106,7 @@ return {
 		end,
 		title = "+40 FLOORS",
 		description = '100 <font color="#008000">\u{E002}</font>',
-		initModel = ReplicatedStorage.assets.fiftyfloors,
+		initModel = ReplicatedStorage.assets.fivefloors,
 	},
 	doubleGunpowder = {
 		callback = function()
@@ -183,6 +185,35 @@ return {
 				end))
 				updateModel(v.Value)
 			end
+		end,
+	},
+	changeTower = {
+		callback = function()
+			print("Touched!")
+		end,
+		title = "SET STATUS",
+		description = "PUBLIC 👥",
+		updateValues = function(trove, updateEvent)
+			trove:Add(dataController.dataChanged:Connect(function(newdata)
+				updateEvent:Fire({
+					title = "TOWER STATUS",
+					description = if newdata.towerStatus == 0
+						then "PUBLIC 🌐"
+						elseif newdata.towerStatus == 1 then "FRIENDS ONLY 👥"
+						else "PRIVATE 🔒",
+				})
+			end))
+		end,
+		init = function()
+			local Players = game:GetService("Players")
+			local playerData = dataController.currentData
+			return {
+				title = "TOWER STATUS",
+				description = if playerData.towerStatus == 0
+					then "PUBLIC 🌐"
+					elseif playerData.towerStatus == 1 then "FRIENDS ONLY 👥"
+					else "PRIVATE 🔒",
+			}
 		end,
 	},
 }

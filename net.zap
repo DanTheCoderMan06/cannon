@@ -36,3 +36,9 @@ event replicateNewMotors = {
     data: Instance(Motor6D)[]
 }
 
+event dataChanged = {
+	from: Server,
+    type: Reliable,
+    call: SingleAsync,
+    data: unknown
+}

@@ -110,47 +110,48 @@ function castleController.start()
 	local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
 
 	for platformName, platform in pairs(platformConfig) do
-		task.spawn(function()
-			castleController.setupPlatform(playerPlatform.platforms:WaitForChild(platformName))
+		print(platformName)
+		task.wait(1)
+		castleController.setupPlatform(playerPlatform.platforms:WaitForChild(platformName))
 
-			local newPurchase = ReplicatedStorage.assets.purchasePlatform:Clone()
-			newPurchase.Parent = playerPlatform.platforms
-			newPurchase:PivotTo(playerPlatform.platforms:WaitForChild(platformName).CFrame)
+		local newPurchase = ReplicatedStorage.assets.purchasePlatform:Clone()
+		newPurchase.Parent = playerPlatform.platforms
+		newPurchase:PivotTo(playerPlatform.platforms:WaitForChild(platformName).CFrame)
 
-			if typeof(platform.initModel) == "Instance" then
-				local updateTrove = Trove.new()
-				local modelFolder = Instance.new("Folder")
-				modelFolder.Name = platformName .. "_Model"
-				modelFolder.Parent = newPurchase
-				updateTrove:AttachToInstance(modelFolder)
+		if typeof(platform.initModel) == "Instance" then
+			local updateTrove = Trove.new()
+			local modelFolder = Instance.new("Folder")
+			modelFolder.Name = platformName .. "_Model"
+			modelFolder.Parent = newPurchase
+			updateTrove:AttachToInstance(modelFolder)
 
-				local newModel = platform.initModel:Clone()
-				newModel:PivotTo(newPurchase:FindFirstChild("modelPlatform", true).WorldCFrame)
-				newModel.Parent = modelFolder
-			elseif typeof(platform.initModel) == "function" then
-				local updateTrove = Trove.new()
-				local updateSignal = Signal.new()
-				local modelFolder = Instance.new("Folder")
-				modelFolder.Name = platformName .. "_Model"
-				modelFolder.Parent = newPurchase
-				updateTrove:AttachToInstance(modelFolder)
+			local newModel = platform.initModel:Clone()
+			newModel:PivotTo(newPurchase:FindFirstChild("modelPlatform", true).WorldCFrame)
+			newModel.Parent = modelFolder
+			--Causing Crash
+		elseif typeof(platform.initModel) == "function" then
+			local updateTrove = Trove.new()
+			local updateSignal = Signal.new()
+			local modelFolder = Instance.new("Folder")
+			modelFolder.Name = platformName .. "_Model"
+			modelFolder.Parent = newPurchase
+			updateTrove:AttachToInstance(modelFolder)
 
-				updateTrove:Add(
-					updateSignal:Connect(function(newModel)
-						modelFolder:ClearAllChildren()
-						newModel:PivotTo(newPurchase:FindFirstChild("modelPlatform", true).WorldCFrame)
-						newModel.Parent = modelFolder
-					end),
-					"Disconnect"
-				)
+			updateTrove:Add(
+				updateSignal:Connect(function(newModel)
+					modelFolder:ClearAllChildren()
+					newModel:PivotTo(newPurchase:FindFirstChild("modelPlatform", true).WorldCFrame)
+					newModel.Parent = modelFolder
+				end),
+				"Disconnect"
+			)
 
-				updateTrove:Add(updateSignal, "Destroy")
+			updateTrove:Add(updateSignal, "Destroy")
 
-				task.defer(function()
-					platform.initModel(updateTrove, updateSignal)
-				end)
-			end
-		end)
+			task.defer(function()
+				platform.initModel(updateTrove, updateSignal)
+			end)
+		end
 	end
 
 	local startingFloors = castleController.getFloors(Player)
@@ -166,12 +167,15 @@ function castleController.start()
 	local pTrove = Trove.new()
 	pTrove:AttachToInstance(playerPlatform)
 
-	pTrove:BindToRenderStep("rotateModels", Enum.RenderPriority.Last.Value, function(dt)
+	pTrove:BindToRenderStep("rotateModels", Enum.RenderPriority.Last.Value + 1, function(dt)
 		local targetModels = {}
 		local targetCFrames = {}
 		for _, v in pairs(playerPlatform.platforms:GetChildren()) do
 			if v:IsA("Model") and v:FindFirstChildWhichIsA("Folder", true) then
 				local model = v:FindFirstChildWhichIsA("Folder", true):FindFirstChildWhichIsA("Model")
+				if not model then
+					continue
+				end
 				table.insert(targetModels, model.PrimaryPart)
 				table.insert(targetCFrames, model.PrimaryPart.CFrame * CFrame.Angles(0, math.rad(1), 0))
 			end

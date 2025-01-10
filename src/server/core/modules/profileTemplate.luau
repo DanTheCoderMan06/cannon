@@ -3,4 +3,5 @@ return {
 	floors = 0,
 	cannon = 0,
 	highscore = 0,
+	towerStatus = 0, -- 0 PUBLIC 1 FRIENDS 2 PRIVATE
 }

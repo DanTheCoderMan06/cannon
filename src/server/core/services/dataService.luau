@@ -14,6 +14,8 @@ local Profiles = {}
 
 local dataService = {}
 
+local zap = require(ServerStorage.zap)
+
 local Sift = require(sharedPackages.Sift)
 
 function dataService.start()
@@ -39,6 +41,8 @@ function dataService.start()
 				leaderstats.Name = "leaderstats"
 				leaderstats.Parent = player
 				dataService.updateLeaderstats(player)
+
+				zap.dataChanged.Fire(player, profile.Data)
 			else
 				profile:EndSession()
 			end
@@ -74,6 +78,7 @@ end
 
 function dataService.updatePlayerData(player: Player, newData)
 	Profiles[player].Data = newData
+	zap.dataChanged.Fire(player, newData)
 	dataService.updateLeaderstats(player)
 end
 
