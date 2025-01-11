@@ -55,3 +55,9 @@ funct selectPlatform = {
     rets: boolean
 }
 
+funct purchaseUpgrade = {
+    call: Async,
+    args: string,
+    rets: boolean
+}
+

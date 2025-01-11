@@ -1,3 +1,5 @@
+local MarketplaceService = game:GetService("MarketplaceService")
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local cannonConfig = require(ReplicatedStorage.shared.config.cannonConfig)
 local boughtLevels = 0
@@ -8,36 +10,51 @@ local zap = require(ReplicatedStorage.zap)
 
 local spr = require(ReplicatedStorage.sharedPackages.spr)
 
+local gamepassConfig = require(ReplicatedStorage.shared.config.gamepassConfig)
+
 return {
 	cannon = {
-		callback = function()
-			print("Touched!")
+		callback = function(callbackEvent)
+			local success = zap.purchaseCannon.Call("cannon")
+			callbackEvent:Fire(success)
 		end,
 		title = "UPGRADE CANNON",
 		description = "N/A",
 		updateValues = function(trove, updateEvent)
 			local Players = game:GetService("Players")
 			local stats = Players.LocalPlayer:WaitForChild("leaderstats")
+			local playerData = dataController.currentData
+			local cannonValue
 			for _, v in pairs(stats:GetChildren()) do
 				if v:GetAttribute("statName") ~= "cannon" then
 					continue
 				end
+				cannonValue = v
 				trove:Add(v:GetPropertyChangedSignal("Value"):Connect(function()
 					updateEvent:Fire({
 						title = "LEVEL " .. v.Value,
-						description = tostring(cannonConfig.costFormula(v.Value + 1, 0)) .. "$",
+						description = tostring(cannonConfig.costFormula(v.Value + 1, playerData.boughtFloors)) .. "$",
 					})
 				end))
 			end
+			trove:Add(dataController.dataChanged:Connect(function(newdata)
+				playerData = newdata
+				updateEvent:Fire({
+					title = "LEVEL " .. cannonValue.Value,
+					description = tostring(cannonConfig.costFormula(cannonValue.Value + 1, playerData.boughtFloors))
+						.. "$",
+				})
+			end))
 		end,
 		init = function()
 			local Players = game:GetService("Players")
 			local stats = Players.LocalPlayer:WaitForChild("leaderstats")
+			local playerData = dataController.currentData
 			for _, v in pairs(stats:GetChildren()) do
 				if v:GetAttribute("statName") == "cannon" then
 					return {
 						title = "LEVEL " .. v.Value,
-						description = tostring(cannonConfig.costFormula(v.Value + 1, 0)) .. "$",
+						description = tostring(cannonConfig.costFormula(v.Value + 1, playerData.boughtFloors)) .. "$",
 					}
 				end
 			end
@@ -60,10 +77,22 @@ return {
 				updateModel(v.Value)
 			end
 		end,
+		callbackFunction = function(success, states)
+			if success then
+				spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(0.992156, 1, 0.580392) })
+			else
+				spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(1, 0, 0) })
+			end
+
+			task.delay(1, function()
+				spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(0, 1, 81 / 255) })
+			end)
+		end,
 	},
 	floor = {
-		callback = function()
-			print("Touched!")
+		callback = function(callbackEvent)
+			local success = zap.purchaseUpgrade.Call("floor")
+			callbackEvent:Fire(success)
 		end,
 		title = "+1 FLOOR",
 		description = "N/A",
@@ -95,10 +124,21 @@ return {
 			end
 		end,
 		initModel = ReplicatedStorage.assets.miniFloor,
+		callbackFunction = function(success, states)
+			if success then
+				spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(0.992156, 1, 0.580392) })
+			else
+				spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(1, 0, 0) })
+			end
+
+			task.delay(1, function()
+				spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(0, 1, 81 / 255) })
+			end)
+		end,
 	},
 	tenFloors = {
 		callback = function()
-			print("Touched!")
+			MarketplaceService:PromptProductPurchase(Players.LocalPlayer, gamepassConfig.tenFloors.id)
 		end,
 		title = "+10 FLOORS",
 		description = '100 <font color="#008000">\u{E002}</font>',
@@ -106,19 +146,20 @@ return {
 	},
 	fiftyFloors = {
 		callback = function()
-			print("Touched!")
+			MarketplaceService:PromptProductPurchase(Players.LocalPlayer, gamepassConfig.fiftyFloors.id)
 		end,
 		title = "+40 FLOORS",
 		description = '100 <font color="#008000">\u{E002}</font>',
 		initModel = ReplicatedStorage.assets.fivefloors,
 	},
-	doubleGunpowder = {
+	buyArtillery = {
 		callback = function()
-			print("Touched!")
+			MarketplaceService:PromptGamePassPurchase(Players.LocalPlayer, gamepassConfig.buyArtillery.id)
 		end,
-		title = "x2 POWER",
+		title = "ARTILLERY",
 		description = '100 <font color="#008000">\u{E002}</font>',
-		initModel = function(modelTrove, updateModelEvent)
+		initModel = ReplicatedStorage.assets.miniArtillery,
+		--[[function(modelTrove, updateModelEvent) old double cannon
 			local function updateModel(value)
 				local newModel =
 					ReplicatedStorage.assets.minicannons:FindFirstChild(cannonConfig.getNextCannon(value)):Clone()
@@ -165,10 +206,11 @@ return {
 				updateModel(v.Value)
 			end
 		end,
+		--]]
 	},
 	newCannon = {
 		callback = function()
-			print("Touched!")
+			MarketplaceService:PromptProductPurchase(Players.LocalPlayer, gamepassConfig.newCannon.id)
 		end,
 		title = "UPGRADE CANNON",
 		description = '100 <font color="#008000">\u{E002}</font>',
@@ -210,7 +252,6 @@ return {
 			end))
 		end,
 		init = function()
-			local Players = game:GetService("Players")
 			local playerData = dataController.currentData
 			return {
 				title = "TOWER STATUS",

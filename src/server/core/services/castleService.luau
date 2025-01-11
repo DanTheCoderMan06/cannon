@@ -33,6 +33,11 @@ function castleService.updateTower(player)
 			newfloor.Parent = playerCastle
 		end
 	end
+	for _, v in pairs(playerPlatforms:GetChildren()) do
+		if v:GetAttribute("currentTower") == player.Name then
+			castleService.updatePlatform(Players:FindFirstChild(v.Name), playerSpot)
+		end
+	end
 end
 
 function castleService.findSpot()
@@ -44,14 +49,13 @@ function castleService.findSpot()
 end
 
 function castleService.updatePlatform(player, newspot)
-	playerPlatforms:FindFirstChild(player.Name):PivotTo(
-		newspot.CFrame
-			* CFrame.new(
-				0,
-				(dataService.getPlayerData(Players:FindFirstChild(newspot.Name)).floors + 1) * floorHeight - 1,
-				0
-			)
-	)
+	local targetCFrame = newspot.CFrame
+		* CFrame.new(
+			0,
+			(dataService.getPlayerData(Players:FindFirstChild(newspot.Name)).floors + 1) * floorHeight - 1,
+			0
+		)
+	playerPlatforms:FindFirstChild(player.Name):PivotTo(targetCFrame)
 	player.RespawnLocation = playerPlatforms:FindFirstChild(player.Name):FindFirstChildWhichIsA("SpawnLocation")
 	player:LoadCharacter()
 	playerPlatforms

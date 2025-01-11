@@ -48,7 +48,9 @@ function cannonService.start()
 		cTrove:AttachToInstance(targetCannon)
 	end)
 	Players.PlayerRemoving:Connect(function(player)
-		playerCannons:FindFirstChild(player.Name):Destroy()
+		if playerCannons:FindFirstChild(player.Name) then
+			playerCannons:FindFirstChild(player.Name):Destroy()
+		end
 	end)
 end
 

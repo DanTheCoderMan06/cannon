@@ -113,12 +113,12 @@ function castleController.setupPlatform(targetPlatform, callbackSignal, modelUse
 	))
 end
 
-function castleController.updateSpot(spot, newValue)
+function castleController.updateSpot(spot, newValue, override)
 	if math.floor(newValue / 20) == 0 then
 		return
 	end
 	for i = 1, math.floor(newValue / 20) do
-		if not spot:FindFirstChildWhichIsA("Model"):FindFirstChild(i) then
+		if not spot:FindFirstChildWhichIsA("Model"):FindFirstChild(i) or override then
 			local newMiniFloor = ReplicatedStorage.assets.miniFloor:Clone()
 			newMiniFloor:PivotTo(spot.CFrame * CFrame.new(0, ((i - 1) * floorHeight * 0.025), 0))
 			newMiniFloor.Name = tostring(i)
@@ -148,6 +148,31 @@ function castleController.updatePrompt(prompt, status)
 		prompt.ActionText = "Blocked"
 		prompt.ObjectText = "PRIVATE 🔒"
 	end
+end
+
+local touchZones = {}
+
+function castleController.updateZone(zoneName, targetPart, platform, callbackSignal)
+	local touchZone = touchZones[zoneName]
+	if touchZone then
+		touchZone:Destroy()
+		touchZone = nil
+	end
+	touchZone = Zone.new(targetPart)
+	local lastTriggered = 0
+	touchZone.partEntered:Connect(function(part)
+		if not Players.LocalPlayer.Character then
+			return
+		end
+		if not part:IsDescendantOf(Players.LocalPlayer.Character) then
+			return
+		end
+		if tick() - lastTriggered < 1 then
+			return
+		end
+		lastTriggered = tick()
+		platform.callback(callbackSignal)
+	end)
 end
 
 function castleController.start()
@@ -200,30 +225,28 @@ function castleController.start()
 			touchTrove:AttachToInstance(playerPlatform)
 
 			local lastTriggered = 0
-			local touchZone = Zone.new(playerPlatform.platforms:FindFirstChild(platformName))
-			touchZone.partEntered:Connect(function(part)
-				print("Go")
-				if not Players.LocalPlayer.Character then
-					return
-				end
-				if not part:IsDescendantOf(Players.LocalPlayer.Character) then
-					return
-				end
-				if tick() - lastTriggered < 1 then
-					return
-				end
-				lastTriggered = tick()
-				platform.callback(callbackSignal)
-			end)
-			if platformName == "changeTower" then
-				print(touchZone.localPlayerEntered)
-				task.spawn(function()
-					while true do
-						task.wait()
-						--print(touchZone:getParts())
-					end
-				end)
-			end
+
+			touchTrove:Add(
+				playerPlatform.platforms
+					:FindFirstChild(platformName)
+					:GetPropertyChangedSignal("CFrame")
+					:Connect(function()
+						newPurchase:PivotTo(playerPlatform.platforms:FindFirstChild(platformName).CFrame)
+						castleController.updateZone(
+							platformName,
+							playerPlatform.platforms:FindFirstChild(platformName),
+							platform,
+							callbackSignal
+						)
+					end)
+			)
+
+			castleController.updateZone(
+				platformName,
+				playerPlatform.platforms:FindFirstChild(platformName),
+				platform,
+				callbackSignal
+			)
 		end)
 	end
 
@@ -240,7 +263,11 @@ function castleController.start()
 	local pTrove = Trove.new()
 	pTrove:AttachToInstance(playerPlatform)
 
+	local rotateAngle = 0
+
 	pTrove:BindToRenderStep("rotateModels", Enum.RenderPriority.Last.Value + 1, function(dt)
+		rotateAngle += 1
+
 		local targetModels = {}
 		local targetCFrames = {}
 		for _, v in pairs(playerPlatform.platforms:GetChildren()) do
@@ -249,8 +276,10 @@ function castleController.start()
 				if not model then
 					continue
 				end
+				local targetCFrame = v:FindFirstChild("modelPlatform", true).WorldCFrame
+
 				table.insert(targetModels, model.PrimaryPart)
-				table.insert(targetCFrames, model.PrimaryPart.CFrame * CFrame.Angles(0, math.rad(1), 0))
+				table.insert(targetCFrames, targetCFrame * CFrame.Angles(0, math.rad(rotateAngle), 0))
 			end
 		end
 		workspace:BulkMoveTo(targetModels, targetCFrames, Enum.BulkMoveMode.FireCFrameChanged)
@@ -280,6 +309,9 @@ function castleController.start()
 					end)
 				end)
 				castleController.updateSpot(playerSpot, v.Value)
+				playerTroves[player.Name]:Add(playerSpot:GetPropertyChangedSignal("CFrame"):Connect(function()
+					castleController.updateSpot(playerSpot, v.Value, true)
+				end))
 			end
 		end
 
@@ -289,11 +321,9 @@ function castleController.start()
 
 		towerPrompt.Parent = playerSpot
 
-		playerTroves[player.Name]:Add(function()
-			playerCastle:GetAttributeChangedSignal("status"):Connect(function()
-				castleController.updatePrompt(towerPrompt, playerCastle:GetAttribute("status"))
-			end)
-		end)
+		playerTroves[player.Name]:Add(playerCastle:GetAttributeChangedSignal("status"):Connect(function()
+			castleController.updatePrompt(towerPrompt, playerCastle:GetAttribute("status"))
+		end))
 		--TODO: Fix prompt updating
 		castleController.updatePrompt(towerPrompt, playerCastle:GetAttribute("status"))
 
