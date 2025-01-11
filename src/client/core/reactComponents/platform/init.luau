@@ -82,6 +82,16 @@ return function(props)
 
 			props.updateValues(bTrove, editSignal)
 
+			bTrove:Add(
+				props.callbackSignal:Connect(function(data)
+					print(props)
+					if props.callbackFunction ~= nil then
+						props.callbackFunction(data, { model = props.modelUsed })
+					end
+				end),
+				"Disconnect"
+			)
+
 			return function()
 				bTrove:Destroy()
 				editSignal:DisconnectAll()

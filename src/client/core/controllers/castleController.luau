@@ -10,6 +10,7 @@ local ReactRoblox = require(game.ReplicatedStorage.sharedPackages.ReactRoblox)
 local React = require(game.ReplicatedStorage.sharedPackages.React)
 local Sift = require(game.ReplicatedStorage.sharedPackages.Sift)
 local Signal = require(game.ReplicatedStorage.sharedPackages.Signal)
+local Zone = require(game.ReplicatedStorage.sharedPackages.Zone)
 
 local Player = Players.LocalPlayer
 
@@ -82,7 +83,7 @@ function castleController.getCannonLevel(targetPlayer)
 	end
 end
 
-function castleController.setupPlatform(targetPlatform)
+function castleController.setupPlatform(targetPlatform, callbackSignal, modelUsed)
 	local container = ReactRoblox.createRoot(Instance.new("Folder"))
 	container:render(ReactRoblox.createPortal(
 		React.createElement("BillboardGui", {
@@ -95,10 +96,14 @@ function castleController.setupPlatform(targetPlatform)
 			Size = UDim2.fromScale(12, 6),
 			Adornee = targetPlatform,
 			ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+			ResetOnSpawn = false,
 		}, {
 			React.createElement(
 				platformUI,
-				Sift.Dictionary.merge(platformConfig[targetPlatform.Name], { name = targetPlatform.Name })
+				Sift.Dictionary.merge(
+					platformConfig[targetPlatform.Name],
+					{ name = targetPlatform.Name, callbackSignal = callbackSignal, modelUsed = modelUsed }
+				)
 			),
 		}),
 		Players.LocalPlayer.PlayerGui,
@@ -110,48 +115,65 @@ function castleController.start()
 	local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
 
 	for platformName, platform in pairs(platformConfig) do
-		print(platformName)
-		task.wait(1)
-		castleController.setupPlatform(playerPlatform.platforms:WaitForChild(platformName))
-
+		local callbackSignal = Signal.new()
 		local newPurchase = ReplicatedStorage.assets.purchasePlatform:Clone()
-		newPurchase.Parent = playerPlatform.platforms
-		newPurchase:PivotTo(playerPlatform.platforms:WaitForChild(platformName).CFrame)
+		castleController.setupPlatform(playerPlatform.platforms:WaitForChild(platformName), callbackSignal, newPurchase)
 
-		if typeof(platform.initModel) == "Instance" then
-			local updateTrove = Trove.new()
+		task.defer(function()
 			local modelFolder = Instance.new("Folder")
-			modelFolder.Name = platformName .. "_Model"
-			modelFolder.Parent = newPurchase
-			updateTrove:AttachToInstance(modelFolder)
+			newPurchase.Parent = playerPlatform.platforms
+			newPurchase:PivotTo(playerPlatform.platforms:WaitForChild(platformName).CFrame)
 
-			local newModel = platform.initModel:Clone()
-			newModel:PivotTo(newPurchase:FindFirstChild("modelPlatform", true).WorldCFrame)
-			newModel.Parent = modelFolder
+			if typeof(platform.initModel) == "Instance" then
+				local updateTrove = Trove.new()
+				modelFolder.Name = platformName .. "_Model"
+				modelFolder.Parent = newPurchase
+				updateTrove:AttachToInstance(modelFolder)
+
+				local newModel = platform.initModel:Clone()
+				newModel:PivotTo(newPurchase:FindFirstChild("modelPlatform", true).WorldCFrame)
+				newModel.Parent = modelFolder
 			--Causing Crash
-		elseif typeof(platform.initModel) == "function" then
-			local updateTrove = Trove.new()
-			local updateSignal = Signal.new()
-			local modelFolder = Instance.new("Folder")
-			modelFolder.Name = platformName .. "_Model"
-			modelFolder.Parent = newPurchase
-			updateTrove:AttachToInstance(modelFolder)
+			elseif typeof(platform.initModel) == "function" then
+				local updateTrove = Trove.new()
+				local updateSignal = Signal.new()
+				modelFolder.Name = platformName .. "_Model"
+				modelFolder.Parent = newPurchase
+				updateTrove:AttachToInstance(modelFolder)
 
-			updateTrove:Add(
-				updateSignal:Connect(function(newModel)
-					modelFolder:ClearAllChildren()
-					newModel:PivotTo(newPurchase:FindFirstChild("modelPlatform", true).WorldCFrame)
-					newModel.Parent = modelFolder
-				end),
-				"Disconnect"
-			)
+				updateTrove:Add(
+					updateSignal:Connect(function(newModel)
+						modelFolder:ClearAllChildren()
+						newModel:PivotTo(newPurchase:FindFirstChild("modelPlatform", true).WorldCFrame)
+						newModel.Parent = modelFolder
+					end),
+					"Disconnect"
+				)
 
-			updateTrove:Add(updateSignal, "Destroy")
+				updateTrove:Add(updateSignal, "Destroy")
 
-			task.defer(function()
-				platform.initModel(updateTrove, updateSignal)
+				task.defer(function()
+					platform.initModel(updateTrove, updateSignal)
+				end)
+			end
+
+			local touchTrove = Trove.new()
+			touchTrove:AttachToInstance(playerPlatform)
+
+			local lastTriggered = 0
+			local touchZone = Zone.new(playerPlatform.platforms:FindFirstChild(platformName))
+			touchZone.localPlayerEntered:Connect(function()
+				print("Go")
+				if tick() - lastTriggered < 1 then
+					return
+				end
+				lastTriggered = tick()
+				platform.callback(callbackSignal)
 			end)
-		end
+			if platformName == "changeTower" then
+				print(touchZone)
+			end
+		end)
 	end
 
 	local startingFloors = castleController.getFloors(Player)

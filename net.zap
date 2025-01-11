@@ -42,3 +42,16 @@ event dataChanged = {
     call: SingleAsync,
     data: unknown
 }
+
+funct changePrivacy = {
+    call: Async,
+    args: unknown,
+    rets: boolean
+}
+
+funct selectPlatform = {
+    call: Async,
+    args: Instance(Player)?,
+    rets: boolean
+}
+

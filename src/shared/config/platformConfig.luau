@@ -4,6 +4,10 @@ local boughtLevels = 0
 
 local dataController = require(ReplicatedStorage.client.controllers.dataController)
 
+local zap = require(ReplicatedStorage.zap)
+
+local spr = require(ReplicatedStorage.sharedPackages.spr)
+
 return {
 	cannon = {
 		callback = function()
@@ -188,8 +192,9 @@ return {
 		end,
 	},
 	changeTower = {
-		callback = function()
-			print("Touched!")
+		callback = function(callbackEvent)
+			local result = zap.changePrivacy.Call()
+			callbackEvent:Fire(result)
 		end,
 		title = "SET STATUS",
 		description = "PUBLIC 👥",
@@ -214,6 +219,17 @@ return {
 					elseif playerData.towerStatus == 1 then "FRIENDS ONLY 👥"
 					else "PRIVATE 🔒",
 			}
+		end,
+		callbackFunction = function(success, states) -- callBackFunction is just a function to change the staes if needed
+			if success then
+				spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(0.992156, 1, 0.580392) })
+			else
+				spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(1, 0, 0) })
+			end
+
+			task.delay(1, function()
+				spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(0, 1, 81 / 255) })
+			end)
 		end,
 	},
 }

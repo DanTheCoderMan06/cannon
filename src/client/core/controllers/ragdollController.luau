@@ -108,6 +108,9 @@ end
 -- INITIALIZATION --
 local ragdollController = {}
 function ragdollController.start()
+	if true then
+		return
+	end
 	local LocalEvent
 	local camShake = camerashaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
 		workspace.CurrentCamera.CFrame = workspace.CurrentCamera.CFrame * shakeCf
