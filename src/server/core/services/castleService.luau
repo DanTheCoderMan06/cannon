@@ -48,7 +48,7 @@ function castleService.updatePlatform(player, newspot)
 		newspot.CFrame
 			* CFrame.new(
 				0,
-				(dataService.getPlayerData(Players:FindFirstChild(newspot.Name)).floors + 1) * floorHeight,
+				(dataService.getPlayerData(Players:FindFirstChild(newspot.Name)).floors + 1) * floorHeight - 1,
 				0
 			)
 	)
@@ -60,6 +60,8 @@ function castleService.updatePlatform(player, newspot)
 end
 --TODO: Check if function works correctly
 function castleService.updateTowerPrivacy(player, newStatus)
+	local playerTower = castleFolder:FindFirstChild(player.Name):FindFirstChildWhichIsA("Folder")
+	playerTower:SetAttribute("status", newStatus)
 	if newStatus == 1 then
 		for _, v in pairs(playerPlatforms:GetChildren()) do
 			if v.Name == "spot" then
@@ -71,7 +73,7 @@ function castleService.updateTowerPrivacy(player, newStatus)
 					continue
 				end
 				if not player:IsFriendsWith(platformPlayer.UserId) then
-					castleService.updatePlatform(platformPlayer, playerPlatforms:FindFirstChild(platformPlayer.Name))
+					castleService.updatePlatform(platformPlayer, castleFolder:FindFirstChild(platformPlayer.Name))
 				end
 			end
 		end
@@ -85,7 +87,7 @@ function castleService.updateTowerPrivacy(player, newStatus)
 				if platformPlayer == player then
 					continue
 				end
-				castleService.updatePlatform(platformPlayer, playerPlatforms:FindFirstChild(platformPlayer.Name))
+				castleService.updatePlatform(platformPlayer, castleFolder:FindFirstChild(platformPlayer.Name))
 			end
 		end
 	end
@@ -103,6 +105,8 @@ function castleService.start()
 		newplatform.Name = player.Name
 		newplatform.Parent = playerPlatforms
 		castleService.updatePlatform(player, newSpot)
+		local playerData = dataService.getPlayerData(player)
+		newCastle:SetAttribute("status", playerData.towerStatus)
 		--[[
 		task.delay(6, function()
 			print("Test tower!")
@@ -128,7 +132,7 @@ function castleService.start()
 			end
 			if v:GetAttribute("currentTower") == player.Name then
 				local platformPlayer = Players:FindFirstChild(v.Name)
-				castleService.updatePlatform(platformPlayer, playerPlatforms:FindFirstChild(platformPlayer.Name))
+				castleService.updatePlatform(platformPlayer, castleFolder:FindFirstChild(platformPlayer.Name))
 			end
 		end
 	end)
@@ -146,7 +150,7 @@ function castleService.start()
 	end)
 	zap.selectPlatform.SetCallback(function(player, targetPlayer)
 		targetPlayer = targetPlayer or player
-		local targetPlayerData = dataService.getPlayerData(targetPlayer).Data
+		local targetPlayerData = dataService.getPlayerData(targetPlayer)
 		if targetPlayerData.towerStatus == 2 then
 			if player ~= targetPlayer then
 				return
@@ -157,7 +161,7 @@ function castleService.start()
 			end
 		end
 		print(targetPlayer.Name)
-		castleService.updatePlatform(player, playerPlatforms:FindFirstChild(targetPlayer.Name))
+		castleService.updatePlatform(player, castleFolder:FindFirstChild(targetPlayer.Name))
 		return true
 	end)
 end

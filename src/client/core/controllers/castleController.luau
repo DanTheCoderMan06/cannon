@@ -12,6 +12,8 @@ local Sift = require(game.ReplicatedStorage.sharedPackages.Sift)
 local Signal = require(game.ReplicatedStorage.sharedPackages.Signal)
 local Zone = require(game.ReplicatedStorage.sharedPackages.Zone)
 
+local zap = require(ReplicatedStorage.zap)
+
 local Player = Players.LocalPlayer
 
 local castleFolder = workspace:WaitForChild("castles")
@@ -111,6 +113,43 @@ function castleController.setupPlatform(targetPlatform, callbackSignal, modelUse
 	))
 end
 
+function castleController.updateSpot(spot, newValue)
+	if math.floor(newValue / 20) == 0 then
+		return
+	end
+	for i = 1, math.floor(newValue / 20) do
+		if not spot:FindFirstChildWhichIsA("Model"):FindFirstChild(i) then
+			local newMiniFloor = ReplicatedStorage.assets.miniFloor:Clone()
+			newMiniFloor:PivotTo(spot.CFrame * CFrame.new(0, ((i - 1) * floorHeight * 0.025), 0))
+			newMiniFloor.Name = tostring(i)
+			newMiniFloor.Parent = spot:FindFirstChildWhichIsA("Model")
+		end
+	end
+end
+
+function castleController.findSpot()
+	local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
+
+	for i, v in pairs(playerPlatform.teleports:GetChildren()) do
+		if v.Name == "spot" then
+			return v
+		end
+	end
+end
+
+function castleController.updatePrompt(prompt, status)
+	if status == 0 then
+		prompt.ActionText = "Teleport"
+		prompt.ObjectText = "PUBLIC 🌐"
+	elseif status == 1 then
+		prompt.ActionText = "Teleport"
+		prompt.ObjectText = "FRIENDS ONLY 👥"
+	else
+		prompt.ActionText = "Blocked"
+		prompt.ObjectText = "PRIVATE 🔒"
+	end
+end
+
 function castleController.start()
 	local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
 
@@ -162,8 +201,14 @@ function castleController.start()
 
 			local lastTriggered = 0
 			local touchZone = Zone.new(playerPlatform.platforms:FindFirstChild(platformName))
-			touchZone.localPlayerEntered:Connect(function()
+			touchZone.partEntered:Connect(function(part)
 				print("Go")
+				if not Players.LocalPlayer.Character then
+					return
+				end
+				if not part:IsDescendantOf(Players.LocalPlayer.Character) then
+					return
+				end
 				if tick() - lastTriggered < 1 then
 					return
 				end
@@ -171,16 +216,22 @@ function castleController.start()
 				platform.callback(callbackSignal)
 			end)
 			if platformName == "changeTower" then
-				print(touchZone)
+				print(touchZone.localPlayerEntered)
+				task.spawn(function()
+					while true do
+						task.wait()
+						--print(touchZone:getParts())
+					end
+				end)
 			end
 		end)
 	end
 
 	local startingFloors = castleController.getFloors(Player)
 
-	local playerCastle = castleFolder:WaitForChild(Player.Name):FindFirstChildWhichIsA("Folder")
+	local localPlayerCastle = castleFolder:WaitForChild(Player.Name):FindFirstChildWhichIsA("Folder")
 
-	playerCastle.ChildAdded:Connect(function(child)
+	localPlayerCastle.ChildAdded:Connect(function(child)
 		if tonumber(child.Name) > startingFloors then
 			castleController.animateFloor(child)
 		end
@@ -204,6 +255,86 @@ function castleController.start()
 		end
 		workspace:BulkMoveTo(targetModels, targetCFrames, Enum.BulkMoveMode.FireCFrameChanged)
 	end)
+
+	local playerLeaderboard = playerPlatform:FindFirstChild("teleports")
+
+	local playerTroves = {}
+
+	local function playerAdded(player)
+		playerTroves[player.Name] = Trove.new()
+		local playerSpot = castleController.findSpot()
+		playerSpot.Name = player.Name
+
+		local towerModel = Instance.new("Model")
+		towerModel.Name = player.Name
+
+		ReplicatedStorage.assets.towerHighlight:Clone().Parent = towerModel
+
+		towerModel.Parent = playerSpot
+
+		for _, v in pairs(player:WaitForChild("leaderstats"):GetChildren()) do
+			if v:GetAttribute("statName") == "floors" then
+				playerTroves[player.Name]:Add(function()
+					v:GetPropertyChangedSignal("Value"):Connect(function()
+						castleController.updateSpot(playerSpot, v.Value)
+					end)
+				end)
+				castleController.updateSpot(playerSpot, v.Value)
+			end
+		end
+
+		local towerPrompt = ReplicatedStorage.assets.towerPrompt:Clone()
+
+		local playerCastle = castleFolder:WaitForChild(player.Name):FindFirstChildWhichIsA("Folder")
+
+		towerPrompt.Parent = playerSpot
+
+		playerTroves[player.Name]:Add(function()
+			playerCastle:GetAttributeChangedSignal("status"):Connect(function()
+				castleController.updatePrompt(towerPrompt, playerCastle:GetAttribute("status"))
+			end)
+		end)
+		--TODO: Fix prompt updating
+		castleController.updatePrompt(towerPrompt, playerCastle:GetAttribute("status"))
+
+		towerPrompt.PromptShown:Connect(function()
+			spr.target(towerModel.towerHighlight, 0.9, 3, { OutlineTransparency = 0 })
+		end)
+
+		towerPrompt.PromptHidden:Connect(function()
+			spr.target(towerModel.towerHighlight, 0.9, 3, { OutlineTransparency = 1 })
+		end)
+
+		towerPrompt.Triggered:Connect(function()
+			local success = zap.selectPlatform.Call(player)
+
+			if success then
+				spr.target(towerModel.towerHighlight, 0.9, 3, { OutlineColor = Color3.new(0.580392, 1, 0.768627) })
+			else
+				spr.target(towerModel.towerHighlight, 0.9, 3, { OutlineColor = Color3.new(1, 0, 0) })
+			end
+
+			task.delay(1, function()
+				spr.target(towerModel.towerHighlight, 0.9, 3, { OutlineColor = Color3.new(1, 1, 1) })
+			end)
+		end)
+	end
+
+	Players.PlayerAdded:Connect(playerAdded)
+
+	Players.PlayerRemoving:Connect(function(player)
+		playerTroves[player.Name]:Destroy()
+		for i, v in pairs(playerPlatform.teleports:GetChildren()) do
+			if v.Name == player.Name then
+				v.Name = "spot"
+				v:ClearAllChildren()
+			end
+		end
+	end)
+
+	for i, v in pairs(Players:GetPlayers()) do
+		playerAdded(v)
+	end
 end
 
 return castleController
