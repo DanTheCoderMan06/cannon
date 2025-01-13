@@ -20,6 +20,8 @@ local castleFolder = workspace:WaitForChild("castles")
 local castleFloor = ReplicatedStorage.assets.castleFloor
 local floorHeight = castleFloor.ceiling.Position.Y - castleFloor.floor.Position.Y
 
+local forceUtil = require(ReplicatedStorage.shared.utilities.forceUtil)
+
 local cannonConfig = require(ReplicatedStorage.shared.config.cannonConfig)
 
 local reactComponents = ReplicatedStorage.client.reactComponents
@@ -73,40 +75,69 @@ function cannonController.start()
 
 		task.wait(cannonConfig.cannonFirePeriod)
 
-		local startPosition = cannonPosition:FindFirstChild("characterPosition", true).WorldCFrame
+		local startPosition = CFrame.new(
+			cannonPosition:FindFirstChild("characterPosition", true).WorldPosition,
+			cannonPosition:FindFirstChild("fireDirection", true).WorldPosition
+		)
 		local startTime = tick()
 
 		local events = stateController.getEvents()
-		events.radgollEvent:Fire(true)
 
 		local lastFixed
-		w:Destroy()
+		local timeElapsed
+		local newPosition
+		local finishedSignal = Signal.new()
+
 		pTrove:BindToRenderStep("physics_" .. os.time(), Enum.RenderPriority.Last.Value, function()
-			local timeElapsed = tick() - startTime
-			if timeElapsed > physics.time then
+			timeElapsed = tick() - startTime
+			if timeElapsed > physics.time + 1 then
 				pTrove:Destroy()
 				return
 			end
 			local actualHorizontal = timeElapsed * physics.horizontalVelocity
 			local fixedHorizontal = math.fmod(actualHorizontal, cannonConfig.maxDistance)
 			lastFixed = fixedHorizontal
-			local newPosition = startPosition
+			newPosition = startPosition
 				* CFrame.new(
-					fixedHorizontal,
+					0,
 					(timeElapsed * physics.verticalVelocity + 0.5 * -workspace.Gravity * math.pow(timeElapsed, 2)),
-					0
+					-fixedHorizontal
 				)
-			--[[
 			if fixedHorizontal > lastFixed then
 				spr.target(movePart, 1, 10, { CFrame = newPosition })
 			else
 				spr.target(movePart, 1, 200, { CFrame = newPosition })
 			end
-			--]]
-			character.PrimaryPart.CFrame = newPosition
+			if timeElapsed >= physics.time - 2 then
+				local rayTest = workspace:Raycast(Player.Character.PrimaryPart.Position, -Vector3.new(0, 100, 0))
+				if rayTest then
+					if math.abs(rayTest.Position.Y - Player.Character.PrimaryPart.Position.Y) < 15 then
+						pTrove:Destroy()
+						finishedSignal:Fire()
+					end
+				end
+			end
 		end)
-		task.delay(physics.time, function()
+
+		finishedSignal:Connect(function()
+			events.radgollEvent:Fire(true)
+			local actualHorizontal = physics.time * physics.horizontalVelocity
+			local fixedHorizontal = math.fmod(actualHorizontal, cannonConfig.maxDistance)
+			local targetPosition = startPosition
+				* CFrame.new(
+					0,
+					(physics.time * physics.verticalVelocity + 0.5 * -workspace.Gravity * math.pow(physics.time, 2)),
+					-fixedHorizontal
+				)
+			print(targetPosition.Position - newPosition.Position)
+			forceUtil:OnApplyForce(
+				Player.Character.PrimaryPart,
+				(targetPosition.Position - newPosition.Position).Unit * 25,
+				0,
+				newPosition.Position
+			)
 			zap.finishedPath.Fire()
+			finishedSignal:Destroy()
 		end)
 	end)
 end

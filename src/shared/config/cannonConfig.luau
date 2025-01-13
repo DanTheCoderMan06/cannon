@@ -5,7 +5,7 @@ local function cost(l1, l2)
 end
 local module = {
 	cannonFirePeriod = 1,
-	cannonAngle = 20,
+	cannonAngle = 45,
 	costFormula = function(level, boughtLevels)
 		return cost(level, boughtLevels)
 	end,
