@@ -2,7 +2,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CAS = game:GetService("ContextActionService")
 local RunService = game:GetService("RunService")
-
+local Signal = require(ReplicatedStorage.sharedPackages.Signal)
 local controlsController = {}
 
 function controlsController.start()
@@ -12,6 +12,7 @@ function controlsController.start()
 
 	local function Ragdoll(bool)
 		if Player.Character.Humanoid.Health > 0 then
+			print(bool)
 			RagdollEvent:Fire(bool)
 		end
 	end

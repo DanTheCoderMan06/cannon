@@ -29,7 +29,6 @@ local cannonChangedSignal = Signal.new()
 local stateController = require(ReplicatedStorage.client.controllers.stateController)
 
 function cannonController.start()
-	local events = stateController.getEvents()
 	local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
 	local cannonPart = playerPlatform:WaitForChild("cannonPart", true)
 	local cannonPosition = playerPlatform:WaitForChild("cannonPosition", true)
@@ -77,10 +76,11 @@ function cannonController.start()
 		local startPosition = cannonPosition:FindFirstChild("characterPosition", true).WorldCFrame
 		local startTime = tick()
 
+		local events = stateController.getEvents()
 		events.radgollEvent:Fire(true)
 
 		local lastFixed
-
+		w:Destroy()
 		pTrove:BindToRenderStep("physics_" .. os.time(), Enum.RenderPriority.Last.Value, function()
 			local timeElapsed = tick() - startTime
 			if timeElapsed > physics.time then
@@ -96,11 +96,14 @@ function cannonController.start()
 					(timeElapsed * physics.verticalVelocity + 0.5 * -workspace.Gravity * math.pow(timeElapsed, 2)),
 					0
 				)
+			--[[
 			if fixedHorizontal > lastFixed then
 				spr.target(movePart, 1, 10, { CFrame = newPosition })
 			else
 				spr.target(movePart, 1, 200, { CFrame = newPosition })
 			end
+			--]]
+			character.PrimaryPart.CFrame = newPosition
 		end)
 		task.delay(physics.time, function()
 			zap.finishedPath.Fire()

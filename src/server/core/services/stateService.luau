@@ -11,7 +11,7 @@ local folderService = require(script.Parent.folderService)
 local stateService = {}
 
 function stateService.start()
-	zap.editRagdollState.On(function(player, bool)
+	zap.editRagdollState.SetCallback(function(player, bool)
 		local playerInfo = folderService.getPlayerInfo()
 		local MotorFolder = playerInfo[player.Name].Motors
 

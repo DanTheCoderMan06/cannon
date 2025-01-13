@@ -8,11 +8,10 @@ event getUp = {
     data: unknown
 }
 
-event editRagdollState = {
-    from: Client,
-    type: Reliable,
-    call: ManyAsync,
-    data: boolean
+funct editRagdollState = {
+    call: Async,
+    args: boolean,
+    rets: unknown
 }
 
 event replicateRagdollState = {

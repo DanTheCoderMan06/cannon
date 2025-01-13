@@ -48,7 +48,7 @@ function stateController.start()
 	end
 
 	local function HumanoidPhysics()
-		Humanoid.AutoRotate = false
+		--Humanoid.AutoRotate = false
 	end
 
 	local function HumanoidGettingUp()

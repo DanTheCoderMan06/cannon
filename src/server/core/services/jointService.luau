@@ -38,10 +38,6 @@ local jointService = {}
 local zone = require(sharedModules.Zone)
 
 function jointService.start()
-	local test = zone.new(workspace:WaitForChild("testPart"))
-	test.playerEntered:Connect(function()
-		print("Go")
-	end)
 	local function PlayerAdded(player)
 		local function setCollisionGroup(object)
 			if object:IsA("BasePart") then

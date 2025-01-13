@@ -38,18 +38,18 @@ local function LocalRagdoll(bool)
 	local State = Humanoid:GetState()
 	if bool then
 		if State ~= Enum.HumanoidStateType.Physics then
-			zap.editRagdollState.Fire(true)
+			zap.editRagdollState.Call(true)
 			DelayValue = DelayValue + 3
 
-			Humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+			Humanoid:ChangeState(Enum.HumanoidStateType.Ragdoll)
 			Root.CanCollide = false
 
 			for _, bodyPart in pairs(Character:GetChildren()) do
 				if bodyPart:IsA("BasePart") then
 					for _, motor in pairs(bodyPart:GetChildren()) do
 						if motor:IsA("Motor6D") then
-							motorController.addMotor(motor)
 							motor.Enabled = false
+							motorController.addMotor(motor)
 							--motor.Parent = Motors
 						end
 					end
@@ -58,7 +58,7 @@ local function LocalRagdoll(bool)
 		end
 	else
 		if State == Enum.HumanoidStateType.Physics then
-			zap.editRagdollState.Fire(false)
+			zap.editRagdollState.Call(false)
 			DelayValue = DelayValue + 3
 
 			local function returnMotor(joint, part)
@@ -110,14 +110,11 @@ end
 -- INITIALIZATION --
 local ragdollController = {}
 function ragdollController.start()
-	if true then
-		return
-	end
 	local LocalEvent
 	local camShake = camerashaker.new(Enum.RenderPriority.Camera.Value, function(shakeCf)
 		workspace.CurrentCamera.CFrame = workspace.CurrentCamera.CFrame * shakeCf
 	end)
-	task.spawn(function()
+	task.defer(function()
 		local events = stateController.getEvents()
 		LocalEvent = events.radgollEvent
 
