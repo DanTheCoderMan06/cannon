@@ -138,14 +138,12 @@ function castleController.findSpot()
 end
 
 function castleController.updatePrompt(prompt, status)
+	prompt.ActionText = prompt.Parent.Name
 	if status == 0 then
-		prompt.ActionText = "Teleport"
 		prompt.ObjectText = "PUBLIC 🌐"
 	elseif status == 1 then
-		prompt.ActionText = "Teleport"
 		prompt.ObjectText = "FRIENDS ONLY 👥"
 	else
-		prompt.ActionText = "Blocked"
 		prompt.ObjectText = "PRIVATE 🔒"
 	end
 end
@@ -254,8 +252,14 @@ function castleController.start()
 
 	local localPlayerCastle = castleFolder:WaitForChild(Player.Name):FindFirstChildWhichIsA("Folder")
 
+	local lastAnimated = 0
 	localPlayerCastle.ChildAdded:Connect(function(child)
 		if tonumber(child.Name) > startingFloors then
+			if tick() - lastAnimated < 2 then
+				return
+			end
+			lastAnimated = tick()
+			task.wait(0.5)
 			castleController.animateFloor(child)
 		end
 	end)

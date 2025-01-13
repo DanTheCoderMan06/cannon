@@ -22,6 +22,7 @@ local floorConfig = require(ReplicatedStorage.shared.config.floorConfig)
 local gamepassConfig = require(ReplicatedStorage.shared.config.gamepassConfig)
 
 local castleService = require(ServerStorage.server.services.castleService)
+local cannonService = require(ServerStorage.server.services.cannonService)
 
 function upgradesService.start()
 	MarketplaceService.ProcessReceipt = function(recieptInfo)
@@ -57,6 +58,8 @@ function upgradesService.start()
 
 		if purchaseType == "cannon" then
 			playerData.cannon += 1
+			dataService.updatePlayerData(player, playerData)
+			cannonService.addCannon(player, cannonConfig.getCannon(playerData.cannon))
 		else
 			playerData.floors += 1
 			dataService.updatePlayerData(player, playerData)

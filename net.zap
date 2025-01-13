@@ -61,3 +61,24 @@ funct purchaseUpgrade = {
     rets: boolean
 }
 
+event enterCannon = {
+	from: Client,
+    type: Reliable,
+    call: SingleAsync,
+    data: unknown
+}
+
+event finishedPath = {
+	from: Client,
+    type: Reliable,
+    call: SingleAsync,
+    data: unknown
+}
+
+event simulatePhysics = {
+	from: Server,
+    type: Reliable,
+    call: SingleAsync,
+    data: unknown
+}
+

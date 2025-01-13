@@ -3,6 +3,7 @@ local RunService = game:GetService("RunService")
 local ServerStorage
 local dataService
 local castleService
+local cannonService
 
 local cannonConfig = require(ReplicatedStorage.shared.config.cannonConfig)
 
@@ -10,6 +11,7 @@ if RunService:IsServer() then
 	ServerStorage = game:GetService("ServerStorage")
 	dataService = require(ServerStorage.server.services.dataService)
 	castleService = require(ServerStorage.server.services.castleService)
+	cannonService = require(ServerStorage.server.services.cannonService)
 end
 
 return {
@@ -44,6 +46,7 @@ return {
 			local newCannon = cannonConfig.getNextCannon(player.cannon)
 			playerData.cannon = newCannon.max
 			dataService.updatePlayerData(player, playerData)
+			cannonService.addCannon(player, cannonConfig.getCannon(playerData.cannon))
 		end,
 	},
 }

@@ -11,11 +11,12 @@ local zap = require(ReplicatedStorage.zap)
 local spr = require(ReplicatedStorage.sharedPackages.spr)
 
 local gamepassConfig = require(ReplicatedStorage.shared.config.gamepassConfig)
+local floorConfig = require(ReplicatedStorage.shared.config.floorConfig)
 
 return {
 	cannon = {
 		callback = function(callbackEvent)
-			local success = zap.purchaseCannon.Call("cannon")
+			local success = zap.purchaseUpgrade.Call("cannon")
 			callbackEvent:Fire(success)
 		end,
 		title = "UPGRADE CANNON",
@@ -32,16 +33,16 @@ return {
 				cannonValue = v
 				trove:Add(v:GetPropertyChangedSignal("Value"):Connect(function()
 					updateEvent:Fire({
-						title = "LEVEL " .. v.Value,
-						description = tostring(cannonConfig.costFormula(v.Value + 1, playerData.boughtFloors)) .. "$",
+						title = "LEVEL " .. tostring(v.Value),
+						description = tostring(cannonConfig.costFormula(v.Value + 1, playerData.boughtLevels)) .. "$",
 					})
 				end))
 			end
 			trove:Add(dataController.dataChanged:Connect(function(newdata)
 				playerData = newdata
 				updateEvent:Fire({
-					title = "LEVEL " .. cannonValue.Value,
-					description = tostring(cannonConfig.costFormula(cannonValue.Value + 1, playerData.boughtFloors))
+					title = "LEVEL " .. tostring(cannonValue.Value),
+					description = tostring(cannonConfig.costFormula(cannonValue.Value + 1, playerData.boughtLevels))
 						.. "$",
 				})
 			end))
@@ -54,20 +55,20 @@ return {
 				if v:GetAttribute("statName") == "cannon" then
 					return {
 						title = "LEVEL " .. v.Value,
-						description = tostring(cannonConfig.costFormula(v.Value + 1, playerData.boughtFloors)) .. "$",
+						description = tostring(cannonConfig.costFormula(v.Value + 1, playerData.boughtLevels)) .. "$",
 					}
 				end
 			end
 		end,
 		initModel = function(modelTrove, updateModelEvent)
 			local Players = game:GetService("Players")
-			local stats = Players.LocalPlayer:WaitForChild("leaderstats")
+			local leaderstatsstats = Players.LocalPlayer:WaitForChild("leaderstats")
 			local function updateModel(value)
 				local newModel =
 					ReplicatedStorage.assets.minicannons:FindFirstChild(cannonConfig.getCannon(value + 1)):Clone()
 				updateModelEvent:Fire(newModel)
 			end
-			for _, v in pairs(stats:GetChildren()) do
+			for _, v in pairs(leaderstatsstats:GetChildren()) do
 				if v:GetAttribute("statName") ~= "cannon" then
 					continue
 				end
@@ -99,26 +100,40 @@ return {
 		updateValues = function(trove, updateEvent)
 			local Players = game:GetService("Players")
 			local stats = Players.LocalPlayer:WaitForChild("leaderstats")
+			local playerData = dataController.currentData
+			local floorValue
 			for _, v in pairs(stats:GetChildren()) do
 				if v:GetAttribute("statName") ~= "floors" then
 					continue
 				end
+				floorValue = v
 				trove:Add(v:GetPropertyChangedSignal("Value"):Connect(function()
+					print(tostring(floorConfig.costFormula(v.Value + 1, playerData.boughtFloors)))
 					updateEvent:Fire({
-						title = "+1 FLOOR",
-						description = tostring(cannonConfig.costFormula(v.Value + 1, boughtLevels)) .. "$",
+						title = "LEVEL " .. tostring(v.Value),
+						description = tostring(floorConfig.costFormula(v.Value + 1, playerData.boughtFloors)) .. "$",
 					})
 				end))
 			end
+			trove:Add(dataController.dataChanged:Connect(function(newdata)
+				print("go")
+				playerData = newdata
+				updateEvent:Fire({
+					title = "LEVEL " .. tostring(floorValue.Value),
+					description = tostring(floorConfig.costFormula(floorValue.Value + 1, playerData.boughtFloors))
+						.. "$",
+				})
+			end))
 		end,
 		init = function()
 			local Players = game:GetService("Players")
 			local stats = Players.LocalPlayer:WaitForChild("leaderstats")
+			local playerData = dataController.currentData
 			for _, v in pairs(stats:GetChildren()) do
 				if v:GetAttribute("statName") == "floors" then
 					return {
-						title = "+1 FLOOR",
-						description = tostring(cannonConfig.costFormula(v.Value + 1, boughtLevels)) .. "$",
+						title = "LEVEL " .. v.Value,
+						description = tostring(floorConfig.costFormula(v.Value + 1, playerData.boughtFloors)) .. "$",
 					}
 				end
 			end

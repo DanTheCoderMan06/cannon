@@ -74,7 +74,7 @@ return function(props)
 			local editSignal = Signal.new()
 
 			editSignal:Connect(function(newinfo)
-				setTitle(newinfo.description)
+				setTitle(newinfo.title)
 				setDescription({
 					type(newinfo.description) == "table" and unpack(newinfo.description) or newinfo.description,
 				})
@@ -106,7 +106,7 @@ return function(props)
 		BorderSizePixel = 0,
 		Size = UDim2.fromScale(1, 1),
 	}, {
-		title = React.createElement("TextLabel", {
+		titleFrame = React.createElement("TextLabel", {
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 			BackgroundTransparency = 1,
 			BorderColor3 = Color3.fromRGB(0, 0, 0),

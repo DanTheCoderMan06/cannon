@@ -33,6 +33,8 @@ local function LocalRagdoll(bool)
 		return
 	end
 
+	print("GO")
+
 	local State = Humanoid:GetState()
 	if bool then
 		if State ~= Enum.HumanoidStateType.Physics then
