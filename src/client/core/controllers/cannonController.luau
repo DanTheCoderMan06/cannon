@@ -1,3 +1,4 @@
+local PhysicsService = game:GetService("PhysicsService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CAS = game:GetService("ContextActionService")
@@ -29,6 +30,8 @@ local reactComponents = ReplicatedStorage.client.reactComponents
 local cannonChangedSignal = Signal.new()
 
 local stateController = require(ReplicatedStorage.client.controllers.stateController)
+local windController = require(ReplicatedStorage.client.controllers.windController)
+local cameraController = require(ReplicatedStorage.client.controllers.cameraController)
 
 function cannonController.start()
 	local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
@@ -64,21 +67,24 @@ function cannonController.start()
 		pTrove:AttachToInstance(character)
 		local movePart = ReplicatedStorage.assets.movePart:Clone()
 		movePart.CFrame = character.PrimaryPart.CFrame
+
+		movePart.CFrame = cannonPosition:FindFirstChild("characterPosition", true).WorldCFrame
+			* CFrame.Angles(0, math.rad(-90), 0)
+		movePart.Parent = character
+		pTrove:Add(movePart)
+
 		local w = Instance.new("Weld")
 		w.Part0 = movePart
 		w.Part1 = character.PrimaryPart
 		w.Parent = movePart
-		movePart.CFrame = cannonPosition:FindFirstChild("characterPosition", true).WorldCFrame
-		movePart.Parent = character
-		pTrove:Add(w)
-		pTrove:Add(movePart)
+		w.C0 = CFrame.Angles(0, math.rad(90), 0)
 
 		task.wait(cannonConfig.cannonFirePeriod)
 
 		local startPosition = CFrame.new(
-			cannonPosition:FindFirstChild("characterPosition", true).WorldPosition,
-			cannonPosition:FindFirstChild("fireDirection", true).WorldPosition
-		)
+			cannonPosition:FindFirstChild("characterPosition", true).WorldPosition
+			--cannonPosition:FindFirstChild("fireDirection", true).WorldPosition
+		) * CFrame.Angles(0, math.rad(-90), 0)
 		local startTime = tick()
 
 		local events = stateController.getEvents()
@@ -87,40 +93,35 @@ function cannonController.start()
 		local timeElapsed
 		local newPosition
 		local finishedSignal = Signal.new()
+		events.radgollEvent:Fire(true)
 
-		pTrove:BindToRenderStep("physics_" .. os.time(), Enum.RenderPriority.Last.Value, function()
+		local targetParams = RaycastParams.new()
+		targetParams.FilterType = Enum.RaycastFilterType.Exclude
+		targetParams.FilterDescendantsInstances = { character }
+		windController.toggle(true)
+		cameraController.trackObject(Players.LocalPlayer.Character.PrimaryPart, Vector3.new(0, 10, 0))
+		movePart:Destroy()
+		pTrove:BindToRenderStep("physics_" .. os.time(), Enum.RenderPriority.First.Value, function()
 			timeElapsed = tick() - startTime
-			if timeElapsed > physics.time + 1 then
-				pTrove:Destroy()
-				return
-			end
 			local actualHorizontal = timeElapsed * physics.horizontalVelocity
 			local fixedHorizontal = math.fmod(actualHorizontal, cannonConfig.maxDistance)
-			lastFixed = fixedHorizontal
 			newPosition = startPosition
 				* CFrame.new(
 					0,
 					(timeElapsed * physics.verticalVelocity + 0.5 * -workspace.Gravity * math.pow(timeElapsed, 2)),
 					-fixedHorizontal
 				)
-			if fixedHorizontal > lastFixed then
-				spr.target(movePart, 1, 10, { CFrame = newPosition })
-			else
-				spr.target(movePart, 1, 200, { CFrame = newPosition })
-			end
-			if timeElapsed >= physics.time - 2 then
-				local rayTest = workspace:Raycast(Player.Character.PrimaryPart.Position, -Vector3.new(0, 100, 0))
-				if rayTest then
-					if math.abs(rayTest.Position.Y - Player.Character.PrimaryPart.Position.Y) < 15 then
-						pTrove:Destroy()
-						finishedSignal:Fire()
-					end
-				end
+				* CFrame.Angles(-math.rad(math.fmod(timeElapsed * 180, 360)), 0, 0)
+			character:PivotTo(newPosition)
+			if character.PrimaryPart.Position.Y < 10 and timeElapsed > physics.time - 2 then
+				pTrove:Destroy()
+				finishedSignal:Fire()
+				return
 			end
 		end)
 
 		finishedSignal:Connect(function()
-			events.radgollEvent:Fire(true)
+			--[[
 			local actualHorizontal = physics.time * physics.horizontalVelocity
 			local fixedHorizontal = math.fmod(actualHorizontal, cannonConfig.maxDistance)
 			local targetPosition = startPosition
@@ -129,15 +130,22 @@ function cannonController.start()
 					(physics.time * physics.verticalVelocity + 0.5 * -workspace.Gravity * math.pow(physics.time, 2)),
 					-fixedHorizontal
 				)
-			print(targetPosition.Position - newPosition.Position)
-			forceUtil:OnApplyForce(
+						forceUtil:OnApplyForce(
 				Player.Character.PrimaryPart,
 				(targetPosition.Position - newPosition.Position).Unit * 25,
 				0,
 				newPosition.Position
 			)
-			zap.finishedPath.Fire()
-			finishedSignal:Destroy()
+			--]]
+			task.delay(3, function()
+				repeat
+					task.wait()
+				until not character or character.PrimaryPart.Position.Y < 1
+				print(((character.PrimaryPart.Position - startPosition.Position) * Vector3.new(1, 0, 1)).Magnitude)
+				zap.finishedPath.Fire()
+				finishedSignal:Destroy()
+				windController.toggle(false)
+			end)
 		end)
 	end)
 end

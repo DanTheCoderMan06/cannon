@@ -12,12 +12,15 @@ function cameraController.trackObject(target, offset)
 	spr.target(workspace.CurrentCamera, 0.25, 2.5, { FieldOfView = 120 })
 	camTrove = Trove.new()
 	camTrove:BindToRenderStep("trackObject", Enum.RenderPriority.Camera.Value, function(dt)
+		workspace.CurrentCamera.CFrame = CFrame.new(target.CFrame.Position + offset, target.CFrame.Position)
+		--[[
 		spr.target(
 			workspace.CurrentCamera,
 			0.85,
 			10,
 			{ CFrame = CFrame.new(target.CFrame.Position + offset, target.CFrame.Position) }
 		)
+		--]]
 	end)
 end
 

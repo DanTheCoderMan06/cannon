@@ -69,6 +69,13 @@ function cannonService.launchPlayer(player)
 	simulatedPaths[player.Name] = simulatedPhysics
 end
 
+function cannonService.awardPlayer(player, playerPath)
+	local playerData = dataService.getPlayerData(player)
+	local award = cannonConfig.rewardFormula(playerPath.horizontalVelocity)
+	playerData.money += award
+	dataService.updatePlayerData(player, playerData)
+end
+
 function cannonService.start()
 	Players.PlayerAdded:Connect(function(player)
 		local playerData = dataService.getPlayerData(player)
@@ -100,7 +107,7 @@ function cannonService.start()
 		if not character then
 			return
 		end
-		if character:GetAttribute("inCannon") then
+		if not character:GetAttribute("inCannon") then
 			return
 		end
 		if not simulatedPaths[player.Name] then
@@ -109,7 +116,9 @@ function cannonService.start()
 		local path = Sift.Dictionary.copyDeep(simulatedPaths[player.Name])
 		simulatedPaths[player.Name] = nil
 		print("Finished Path!")
-		character:LoadCharacter()
+		print(path)
+		cannonService.awardPlayer(player, path)
+		player:LoadCharacter()
 	end)
 end
 

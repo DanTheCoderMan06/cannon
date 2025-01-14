@@ -90,7 +90,7 @@ function stateController.start()
 		Humanoid.Died:Connect(function()
 			local FindRoot = Character:FindFirstChild("HumanoidRootPart")
 			if FindRoot then
-				FindRoot.CanCollide = false
+				--FindRoot.CanCollide = false
 				Humanoid.AutoRotate = false
 			end
 

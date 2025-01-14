@@ -42,10 +42,11 @@ local function LocalRagdoll(bool)
 			DelayValue = DelayValue + 3
 
 			Humanoid:ChangeState(Enum.HumanoidStateType.Ragdoll)
-			Root.CanCollide = false
+			--Root.CanCollide = false
 
 			for _, bodyPart in pairs(Character:GetChildren()) do
 				if bodyPart:IsA("BasePart") then
+					bodyPart.CanCollide = true
 					for _, motor in pairs(bodyPart:GetChildren()) do
 						if motor:IsA("Motor6D") then
 							motor.Enabled = false

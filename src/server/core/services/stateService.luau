@@ -1,3 +1,4 @@
+local PhysicsService = game:GetService("PhysicsService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 local ServerStorage = game:GetService("ServerStorage")
@@ -11,6 +12,9 @@ local folderService = require(script.Parent.folderService)
 local stateService = {}
 
 function stateService.start()
+	PhysicsService:RegisterCollisionGroup("players")
+	PhysicsService:CollisionGroupSetCollidable("players", "players", false)
+
 	zap.editRagdollState.SetCallback(function(player, bool)
 		local playerInfo = folderService.getPlayerInfo()
 		local MotorFolder = playerInfo[player.Name].Motors
@@ -27,6 +31,7 @@ function stateService.start()
 
 				for _, bodyPart in pairs(Character:GetChildren()) do
 					if bodyPart:IsA("BasePart") then
+						bodyPart.CollisionGroup = "players"
 						for _, motor in pairs(bodyPart:GetChildren()) do
 							if motor:IsA("Motor6D") then
 								table.insert(MotorFolder, motor)
@@ -38,7 +43,7 @@ function stateService.start()
 				end
 			else
 				if Root then
-					Root.CanCollide = true
+					--Root.CanCollide = true
 				end
 
 				local function returnMotor(joint, part)
