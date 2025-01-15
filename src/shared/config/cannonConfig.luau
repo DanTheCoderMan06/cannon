@@ -9,7 +9,7 @@ local module = {
 	costFormula = function(level, boughtLevels)
 		return cost(level, boughtLevels)
 	end,
-	maxDistance = 1000000,
+	maxDistance = 50000,
 	cannons = {
 		["cannon1"] = {
 			["max"] = 4,
@@ -248,7 +248,7 @@ function module.getNextCannon(playerLevel)
 end
 
 function module.getPower(playerLevel)
-	return math.pow(playerLevel, 1.3) * 20
+	return math.pow(playerLevel, 1.3) * 10
 end
 
 return module

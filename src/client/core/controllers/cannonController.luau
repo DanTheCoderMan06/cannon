@@ -101,7 +101,10 @@ function cannonController.start()
 		windController.toggle(true)
 		cameraController.trackObject(Players.LocalPlayer.Character.PrimaryPart, Vector3.new(0, 10, 0))
 		movePart:Destroy()
+
 		local multiplier = physics.time / 10
+		local min = math.huge
+
 		pTrove:BindToRenderStep("physics_" .. os.time(), Enum.RenderPriority.First.Value, function()
 			timeElapsed = (tick() - startTime) * multiplier
 			local actualHorizontal = timeElapsed * physics.horizontalVelocity
@@ -113,6 +116,14 @@ function cannonController.start()
 					-fixedHorizontal
 				)
 				* CFrame.Angles(-math.rad(math.fmod(timeElapsed * 180 / multiplier, 360)), 0, 0)
+			if newPosition.Position.Y > 0 then
+				min = math.min(newPosition.Position.Y, min)
+			end
+			if not character.PrimaryPart then
+				pTrove:Destroy()
+				finishedSignal:Fire()
+				return
+			end
 			if math.abs(character.PrimaryPart.Position.Y) < 1 and timeElapsed > physics.time / multiplier - 2 then
 				pTrove:Destroy()
 				finishedSignal:Fire()
@@ -124,6 +135,7 @@ function cannonController.start()
 		end)
 
 		finishedSignal:Connect(function()
+			print(min)
 			--[[
 			local actualHorizontal = physics.time * physics.horizontalVelocity
 			local fixedHorizontal = math.fmod(actualHorizontal, cannonConfig.maxDistance)
