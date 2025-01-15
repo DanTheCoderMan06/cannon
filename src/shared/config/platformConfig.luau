@@ -66,6 +66,7 @@ return {
 			local function updateModel(value)
 				local newModel =
 					ReplicatedStorage.assets.minicannons:FindFirstChild(cannonConfig.getCannon(value + 1)):Clone()
+				print(newModel.Name)
 				updateModelEvent:Fire(newModel)
 			end
 			for _, v in pairs(leaderstatsstats:GetChildren()) do
@@ -233,6 +234,7 @@ return {
 			local Players = game:GetService("Players")
 			local stats = Players.LocalPlayer:WaitForChild("leaderstats")
 			local function updateModel(value)
+				print("Go")
 				local newModel =
 					ReplicatedStorage.assets.minicannons:FindFirstChild(cannonConfig.getNextCannon(value)):Clone()
 				updateModelEvent:Fire(newModel)
