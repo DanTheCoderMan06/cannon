@@ -31,6 +31,10 @@ local zap = require(ServerStorage.zap)
 local simulatedPaths = {}
 
 function cannonService.addCannon(player, cannonName)
+	if not playerPlatforms:WaitForChild(player.Name):FindFirstChild("cannonPosition") then
+		warn("[CannonService]: Attempted to give null player cannon!")
+		return
+	end
 	playerPlatforms:WaitForChild(player.Name):FindFirstChild("cannonPosition"):ClearAllChildren()
 	local targetCannon = ReplicatedStorage.assets.cannons:FindFirstChild(cannonName):Clone()
 	local cTrove = Trove.new()

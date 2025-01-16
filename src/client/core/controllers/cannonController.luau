@@ -37,21 +37,23 @@ function cannonController.start()
 	local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
 	local cannonPart = playerPlatform:WaitForChild("cannonPart", true)
 	local cannonPosition = playerPlatform:WaitForChild("cannonPosition", true)
-	local cannonZone = Zone.new(cannonPart)
-	local lastTriggered = 0
+	task.delay(2, function()
+		local cannonZone = Zone.new(cannonPart)
+		local lastTriggered = 0
 
-	cannonZone.partEntered:Connect(function(part)
-		if not Players.LocalPlayer.Character then
-			return
-		end
-		if not part:IsDescendantOf(Players.LocalPlayer.Character) then
-			return
-		end
-		if tick() - lastTriggered < 1 then
-			return
-		end
-		lastTriggered = tick()
-		zap.enterCannon.Fire()
+		cannonZone.partEntered:Connect(function(part)
+			if not Players.LocalPlayer.Character then
+				return
+			end
+			if not part:IsDescendantOf(Players.LocalPlayer.Character) then
+				return
+			end
+			if tick() - lastTriggered < 1 then
+				return
+			end
+			lastTriggered = tick()
+			zap.enterCannon.Fire()
+		end)
 	end)
 
 	cannonPosition.ChildAdded:Connect(function(child)
@@ -164,7 +166,9 @@ function cannonController.start()
 			for _, v in pairs(character:GetDescendants()) do
 				if v:IsA("BasePart") then
 					v.AssemblyLinearVelocity = (endPosition.Position - newPosition.Position).Unit
-						* math.min((endPosition.Position - newPosition.Position).Magnitude, 30) --(endPosition.Position - newPosition.Position) * multiplier * 0.5
+						* math.min((endPosition.Position - newPosition.Position).Magnitude, 300) --(endPosition.Position - newPosition.Position) * multiplier * 0.5
+					v.AssemblyLinearVelocity = v.AssemblyLinearVelocity * Vector3.new(1, 0, 1)
+						+ Vector3.new(0, -math.min(100, v.AssemblyLinearVelocity.Y), 0)
 					v.AssemblyAngularVelocity = Vector3.new(1, 0, 1)
 				end
 			end
