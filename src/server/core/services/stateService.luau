@@ -14,6 +14,7 @@ local stateService = {}
 function stateService.start()
 	PhysicsService:RegisterCollisionGroup("players")
 	PhysicsService:CollisionGroupSetCollidable("players", "players", false)
+	PhysicsService:CollisionGroupSetCollidable("Default", "players", true)
 
 	zap.editRagdollState.SetCallback(function(player, bool)
 		local playerInfo = folderService.getPlayerInfo()

@@ -89,7 +89,7 @@ function cannonController.start()
 
 		local events = stateController.getEvents()
 
-		local lastFixed
+		local oldPosition
 		local timeElapsed
 		local newPosition
 		local finishedSignal = Signal.new()
@@ -102,13 +102,19 @@ function cannonController.start()
 		cameraController.trackObject(Players.LocalPlayer.Character.PrimaryPart, Vector3.new(0, 10, 0))
 		movePart:Destroy()
 
-		local multiplier = physics.time / 10
+		local multiplier = 1
+		if physics.time > 10 then
+			multiplier = physics.time / 10
+		elseif physics.time < 2 then
+			multiplier = physics.time / 2
+		end
 		local min = math.huge
 
 		pTrove:BindToRenderStep("physics_" .. os.time(), Enum.RenderPriority.First.Value, function()
 			timeElapsed = (tick() - startTime) * multiplier
 			local actualHorizontal = timeElapsed * physics.horizontalVelocity
 			local fixedHorizontal = math.fmod(actualHorizontal, cannonConfig.maxDistance)
+			oldPosition = newPosition
 			newPosition = startPosition
 				* CFrame.new(
 					0,
@@ -124,39 +130,51 @@ function cannonController.start()
 				finishedSignal:Fire()
 				return
 			end
-			if math.abs(character.PrimaryPart.Position.Y) < 1 and timeElapsed > physics.time / multiplier - 2 then
+			if
+				math.abs(newPosition.Position.Y) < math.max(physics.verticalVelocity * 0.1, 10)
+				and timeElapsed > physics.time / multiplier
+			then
+				print("destroy")
 				pTrove:Destroy()
-				finishedSignal:Fire()
 				Player.Character.PrimaryPart.Anchored = true
+				finishedSignal:Fire()
 				return
 			else
 				character:PivotTo(newPosition)
 			end
 		end)
 
-		finishedSignal:Connect(function()
-			print(min)
-			--[[
-			local actualHorizontal = physics.time * physics.horizontalVelocity
-			local fixedHorizontal = math.fmod(actualHorizontal, cannonConfig.maxDistance)
-			local targetPosition = startPosition
-				* CFrame.new(
-					0,
-					(physics.time * physics.verticalVelocity + 0.5 * -workspace.Gravity * math.pow(physics.time, 2)),
-					-fixedHorizontal
+		finishedSignal:Connect(function() --TODO: Use raycast + spr to  finish up dummy falling
+			local mapParams = RaycastParams.new()
+			mapParams.FilterDescendantsInstances = { workspace.Map }
+			mapParams.FilterType = Enum.RaycastFilterType.Include
+			local direction = (newPosition.Position - oldPosition.Position).Unit * 1000
+			local endPosition = workspace:Raycast(newPosition.Position, direction, mapParams)
+			if not endPosition then
+				endPosition = { Position = newPosition.Position * Vector3.new(1, 0, 1) } -- No direction found?
+			end
+			character:PivotTo(
+				CFrame.new(newPosition.Position, endPosition.Position):Lerp(
+					CFrame.new(newPosition.Position, endPosition.Position)
+						* CFrame.new(0, 0, -(endPosition.Position - newPosition.Position).Magnitude),
+					0.9
 				)
-						forceUtil:OnApplyForce(
-				Player.Character.PrimaryPart,
-				(targetPosition.Position - newPosition.Position).Unit * 25,
-				0,
-				newPosition.Position
 			)
-			--]]
+
+			for _, v in pairs(character:GetDescendants()) do
+				if v:IsA("BasePart") then
+					v.AssemblyLinearVelocity = (endPosition.Position - newPosition.Position).Unit
+						* math.min((endPosition.Position - newPosition.Position).Magnitude, 30) --(endPosition.Position - newPosition.Position) * multiplier * 0.5
+					v.AssemblyAngularVelocity = Vector3.new(1, 0, 1)
+				end
+			end
+
+			character.PrimaryPart.Anchored = false
 			task.delay(3, function()
 				repeat
 					task.wait()
-				until not character or character.PrimaryPart.Position.Y < 1
-				print(((character.PrimaryPart.Position - startPosition.Position) * Vector3.new(1, 0, 1)).Magnitude)
+				until not character or character.PrimaryPart.AssemblyLinearVelocity.Magnitude < 2
+
 				zap.finishedPath.Fire()
 				finishedSignal:Destroy()
 				windController.toggle(false)
