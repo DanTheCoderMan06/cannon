@@ -1,6 +1,6 @@
 return {
-	cloudSky = 5000,
-	cloudLerp = 500,
-	nightSky = 10000,
-	nightSkyLerp = 1000,
+	cloudSky = 50000,
+	cloudSkyLerp = 10000,
+	nightSky = 250000,
+	nightSkyLerp = 5000,
 }

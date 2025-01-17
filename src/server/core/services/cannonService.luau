@@ -122,7 +122,9 @@ function cannonService.start()
 		print("Finished Path!")
 		print(path)
 		cannonService.awardPlayer(player, path)
-		--player:LoadCharacter()
+		task.delay(5, function()
+			player:LoadCharacter()
+		end)
 	end)
 end
 

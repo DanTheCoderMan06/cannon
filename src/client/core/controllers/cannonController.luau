@@ -31,7 +31,7 @@ local cannonChangedSignal = Signal.new()
 
 local stateController = require(ReplicatedStorage.client.controllers.stateController)
 local windController = require(ReplicatedStorage.client.controllers.windController)
-local cameraController = require(ReplicatedStorage.client.controllers.cameraController)
+local effectsController = require(ReplicatedStorage.client.controllers.effectsController)
 
 function cannonController.start()
 	local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
@@ -101,7 +101,6 @@ function cannonController.start()
 		targetParams.FilterType = Enum.RaycastFilterType.Exclude
 		targetParams.FilterDescendantsInstances = { character }
 		windController.toggle(true)
-		cameraController.trackObject(Players.LocalPlayer.Character.PrimaryPart, Vector3.new(0, 10, 0))
 		movePart:Destroy()
 
 		local multiplier = 1
@@ -182,6 +181,8 @@ function cannonController.start()
 				zap.finishedPath.Fire()
 				finishedSignal:Destroy()
 				windController.toggle(false)
+
+				effectsController.finishedPath(physics)
 			end)
 		end)
 	end)

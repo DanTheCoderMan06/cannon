@@ -41,7 +41,6 @@ function dataService.start()
 				leaderstats.Name = "leaderstats"
 				leaderstats.Parent = player
 				dataService.updateLeaderstats(player)
-				profile.Data.cannon = 0
 				zap.dataChanged.Fire(player, profile.Data)
 			else
 				profile:EndSession()

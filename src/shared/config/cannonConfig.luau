@@ -248,7 +248,7 @@ function module.getNextCannon(playerLevel)
 end
 
 function module.getPower(playerLevel)
-	return math.log(1 + 204 * (playerLevel + 1), 1.01) * 100 - 50000
+	return math.log(1 + 190 * (playerLevel + 1), 1.01) * 50 - 26000
 end
 
 return module
