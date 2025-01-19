@@ -3,6 +3,11 @@ local function cost(l1, l2)
 	local m = math.floor(la / 5) * 5
 	return math.round(math.pow(m, 1.2)) + 100
 end
+
+local function power(playerLevel)
+	return math.log(1 + 190 * (playerLevel + 1), 1.01) * 50 - 26000
+end
+
 local module = {
 	cannonFirePeriod = 1,
 	cannonAngle = 45,
@@ -10,6 +15,11 @@ local module = {
 		return cost(level, boughtLevels)
 	end,
 	maxDistance = 55000,
+	specialCannons = { ["artillery"] = {
+		power = power(120),
+	}, ["railgun"] = {
+		power = power(205),
+	} },
 	cannons = {
 		["cannon1"] = {
 			["max"] = 4,

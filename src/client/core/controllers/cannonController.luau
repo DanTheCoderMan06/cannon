@@ -123,16 +123,14 @@ function cannonController.start()
 					-fixedHorizontal
 				)
 				* CFrame.Angles(-math.rad(math.fmod(timeElapsed * 180 / multiplier, 360)), 0, 0)
-			if newPosition.Position.Y > 0 then
-				min = math.min(newPosition.Position.Y, min)
-			end
+			min = math.min(newPosition.Position.Y, min)
 			if not character.PrimaryPart then
 				pTrove:Destroy()
 				finishedSignal:Fire()
 				return
 			end
 			if
-				math.abs(newPosition.Position.Y) < math.max(physics.verticalVelocity * 0.1, 10)
+				math.abs(newPosition.Position.Y) <= math.max(physics.verticalVelocity * 0.1, 10)
 				and timeElapsed > physics.time / multiplier
 			then
 				print("destroy")
@@ -165,24 +163,27 @@ function cannonController.start()
 			for _, v in pairs(character:GetDescendants()) do
 				if v:IsA("BasePart") then
 					v.AssemblyLinearVelocity = (endPosition.Position - newPosition.Position).Unit
-						* math.min((endPosition.Position - newPosition.Position).Magnitude, 300) --(endPosition.Position - newPosition.Position) * multiplier * 0.5
+							* math.min((endPosition.Position - newPosition.Position).Magnitude, 300)
+						+ Vector3.new(40, 0, 0) --(endPosition.Position - newPosition.Position) * multiplier * 0.5
 					v.AssemblyLinearVelocity = v.AssemblyLinearVelocity * Vector3.new(1, 0, 1)
-						+ Vector3.new(0, -math.min(100, v.AssemblyLinearVelocity.Y), 0)
+						+ Vector3.new(0, -math.min(70, v.AssemblyLinearVelocity.Y), 0)
 					v.AssemblyAngularVelocity = Vector3.new(1, 0, 1)
 				end
 			end
 
 			character.PrimaryPart.Anchored = false
+
 			task.delay(3, function()
 				repeat
 					task.wait()
 				until not character or character.PrimaryPart.AssemblyLinearVelocity.Magnitude < 2
 
-				zap.finishedPath.Fire()
 				finishedSignal:Destroy()
 				windController.toggle(false)
 
 				effectsController.finishedPath(physics)
+
+				zap.finishedPath.Fire()
 			end)
 		end)
 	end)

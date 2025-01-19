@@ -21,8 +21,10 @@ local playerPlatforms = workspace:WaitForChild("playerPlatforms")
 local playerCannons = workspace:WaitForChild("playerCannons")
 
 local cannonConfig = require(ReplicatedStorage.shared.config.cannonConfig)
+local gamepassConfig = require(ReplicatedStorage.shared.config.gamepassConfig)
 
 local physicsUtil = require(ReplicatedStorage.shared.utilities.physicsUtil)
+local marketplaceUtil = require(ReplicatedStorage.shared.utilities.marketplaceUtil)
 
 local Trove = require(ReplicatedStorage.sharedPackages.Trove)
 
@@ -53,11 +55,12 @@ function cannonService.launchPlayer(player)
 		:FindFirstChild("cannonPosition")
 		:FindFirstChildWhichIsA("Folder", true)
 		:GetAttribute("cannonName")
-	print(playerCannon)
-	local cannonPower = cannonConfig.cannons[playerCannon].power
+	local cannonPower = cannonConfig.cannons[playerCannon]
 	local playerData = dataService.getPlayerData(player)
-	if not cannonPower then
+	if cannonPower then
 		cannonPower = cannonConfig.getPower(playerData.cannon)
+	else
+		cannonPower = cannonConfig.specialCannons[playerCannon].power
 	end
 	local playerHeight = math.abs(
 		playerPlatforms:WaitForChild(player.Name):FindFirstChild("cannonPosition").Position.Y
@@ -77,6 +80,7 @@ function cannonService.awardPlayer(player, playerPath)
 	local playerData = dataService.getPlayerData(player)
 	local award = cannonConfig.rewardFormula(playerPath.horizontalVelocity)
 	playerData.money += award
+	playerData.highscore = math.max(playerData.highscore, math.round(playerPath.distance))
 	dataService.updatePlayerData(player, playerData)
 end
 
@@ -91,6 +95,7 @@ function cannonService.start()
 		end
 		simulatedPaths[player.Name] = nil
 	end)
+
 	zap.enterCannon.SetCallback(function(player)
 		local character = player.Character
 		if not character then
@@ -106,6 +111,7 @@ function cannonService.start()
 		end
 		cannonService.launchPlayer(player)
 	end)
+
 	zap.finishedPath.SetCallback(function(player)
 		local character = player.Character
 		if not character then
@@ -122,9 +128,24 @@ function cannonService.start()
 		print("Finished Path!")
 		print(path)
 		cannonService.awardPlayer(player, path)
-		task.delay(5, function()
+		task.delay(1, function()
 			player:LoadCharacter()
 		end)
+	end)
+
+	zap.toggleCannon.SetCallback(function(player, target)
+		local targetCannon = gamepassConfig.artilleryGamepasses[tostring(target)]
+		print(target)
+		if tonumber(target) then
+			if not marketplaceUtil.userOwnsGamepass(player, tonumber(target)) then
+				return
+			end
+			cannonService.addCannon(player, targetCannon)
+		else
+			local playerData = dataService.getPlayerData(player)
+			cannonService.addCannon(player, cannonConfig.getCannon(playerData.cannon))
+		end
+		return true
 	end)
 end
 

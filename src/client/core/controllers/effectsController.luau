@@ -24,6 +24,7 @@ function effectsController.start()
 	local localPlayer = Players.LocalPlayer
 	local clouds = Instance.new("Clouds")
 	clouds.Parent = workspace.Terrain
+	clouds.Cover = 0
 	RunService:BindToRenderStep("effectsHandler", Enum.RenderPriority.Last.Value, function()
 		local character = localPlayer.Character
 		if not character then

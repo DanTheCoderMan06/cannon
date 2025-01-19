@@ -6,12 +6,12 @@ local castleService
 local cannonService
 
 local cannonConfig = require(ReplicatedStorage.shared.config.cannonConfig)
+local marketplaceUtil = require(ReplicatedStorage.shared.utilities.marketplaceUtil)
 
 if RunService:IsServer() then
 	ServerStorage = game:GetService("ServerStorage")
 	dataService = require(ServerStorage.server.services.dataService)
 	castleService = require(ServerStorage.server.services.castleService)
-	cannonService = require(ServerStorage.server.services.cannonService)
 end
 
 return {
@@ -35,9 +35,17 @@ return {
 			castleService.updateTower(player)
 		end,
 	},
-	artilleryGamepass = {
-		id = 1,
-		callback = function(player) end,
+	buyArtillery = {
+		id = 1028783141,
+		callback = function(player)
+			marketplaceUtil.updatePlayerCache(player, 1028783141)
+		end,
+	},
+	buyRailgun = {
+		id = 7038888075,
+		callback = function(player)
+			marketplaceUtil.updatePlayerCache(player, 7038888075)
+		end,
 	},
 	newCannon = {
 		id = 2697043453,
@@ -46,7 +54,10 @@ return {
 			local newCannon = cannonConfig.getNextCannon(player.cannon)
 			playerData.cannon = newCannon.max
 			dataService.updatePlayerData(player, playerData)
-			cannonService.addCannon(player, cannonConfig.getCannon(playerData.cannon))
 		end,
+	},
+	artilleryGamepasses = {
+		["1028783141"] = "artillery",
+		["7038888075"] = "railgun",
 	},
 }

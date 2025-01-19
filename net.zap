@@ -81,3 +81,8 @@ event simulatePhysics = {
     data: unknown
 }
 
+funct toggleCannon = {
+    call: Async,
+    args: unknown,
+    rets: boolean
+}
