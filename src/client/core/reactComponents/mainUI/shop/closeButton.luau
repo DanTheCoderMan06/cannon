@@ -42,48 +42,8 @@ return function(props)
 				},
 			})
 		end,
-		[React.Event.Activated] = function()
-			task.spawn(function()
-				api.start({
-					clicked = 1,
-					config = {
-						tension = 700,
-						friction = 30,
-					},
-				})
-				props.onActivated()
-				task.delay(0.05, function()
-					api.start({
-						clicked = 0,
-						config = {
-							tension = 700,
-							friction = 30,
-						},
-					})
-				end)
-			end)
-		end,
 	}, {
 		uIAspectRatioConstraint = React.createElement("UIAspectRatioConstraint"),
-		overlay = React.createElement("ImageButton", {
-			AnchorPoint = Vector2.new(0.5, 0.5),
-			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-			BackgroundTransparency = 1,
-			BorderColor3 = Color3.fromRGB(0, 0, 0),
-			BorderSizePixel = 0,
-			Image = "rbxassetid://123565630442478",
-			Position = styles.rotate:map(function(val)
-				return UDim2.fromScale(0.5, 0.5 + 0.05 * val)
-			end),
-			ScaleType = Enum.ScaleType.Fit,
-			Size = styles.rotate:map(function(val)
-				return UDim2.fromScale(0.9, 0.9):Lerp(UDim2.fromScale(1, 1), val)
-			end),
-			Rotation = styles.rotate:map(function(val)
-				return val * 5
-			end),
-			ZIndex = 10,
-		}),
 		content = React.createElement("ImageButton", {
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
@@ -102,6 +62,28 @@ return function(props)
 				return val * 5
 			end),
 			ZIndex = 5,
+			[React.Event.Activated] = function()
+				task.spawn(function()
+					print("Go")
+					api.start({
+						clicked = 1,
+						config = {
+							tension = 700,
+							friction = 30,
+						},
+					})
+					props.onActivated()
+					task.delay(0.05, function()
+						api.start({
+							clicked = 0,
+							config = {
+								tension = 700,
+								friction = 30,
+							},
+						})
+					end)
+				end)
+			end,
 		}, {
 			text = React.createElement("ImageLabel", {
 				AnchorPoint = Vector2.new(0.5, 0.5),

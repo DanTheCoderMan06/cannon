@@ -43,10 +43,11 @@ return function(props)
 			}),
 			floors = React.createElement(button, {
 				buttonText = "Floors",
-				index = 1,
+				index = 3,
 				onActivated = function()
+					props.selectSectionEvent:Fire("floors")
 					api.start({
-						hoverPosition = UDim2.fromScale(0.174, 0.454),
+						hoverPosition = UDim2.fromScale(0.174 + 0.66, 0.454),
 						config = {
 							tension = 600,
 							friction = 30,
@@ -56,10 +57,11 @@ return function(props)
 			}),
 			cannons = React.createElement(button, {
 				buttonText = "Special Cannons",
-				index = 2,
+				index = 1,
 				onActivated = function()
+					props.selectSectionEvent:Fire("cannons")
 					api.start({
-						hoverPosition = UDim2.fromScale(0.174 + 0.33, 0.454),
+						hoverPosition = UDim2.fromScale(0.174, 0.454),
 						config = {
 							tension = 600,
 							friction = 30,
@@ -69,10 +71,11 @@ return function(props)
 			}),
 			gamepasses = React.createElement(button, {
 				buttonText = "Gamepasses",
-				index = 3,
+				index = 2,
 				onActivated = function()
+					props.selectSectionEvent:Fire("gamepasses")
 					api.start({
-						hoverPosition = UDim2.fromScale(0.174 + 0.66, 0.454),
+						hoverPosition = UDim2.fromScale(0.174 + 0.33, 0.454),
 						config = {
 							tension = 600,
 							friction = 30,

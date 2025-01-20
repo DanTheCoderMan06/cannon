@@ -15,17 +15,27 @@ local Trove = require(sharedPackages.Trove)
 local menuUi = require(ReplicatedStorage.client.reactComponents.mainUI)
 
 local selectedUIEvent = Signal.new()
+local selectSectionEvent = Signal.new()
 
 function uiController.start()
 	local container = ReactRoblox.createRoot(Instance.new("Folder"))
 	container:render(
 		ReactRoblox.createPortal(
-			React.createElement("ScreenGui", {
-				ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
-				ResetOnSpawn = false,
-				DisplayOrder = 1,
-				IgnoreGuiInset = true,
-			}, { content = React.createElement(menuUi, { selectedUIEvent = selectedUIEvent }) }),
+			React.createElement(
+				"ScreenGui",
+				{
+					ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+					ResetOnSpawn = false,
+					DisplayOrder = 1,
+					IgnoreGuiInset = true,
+				},
+				{
+					content = React.createElement(
+						menuUi,
+						{ selectedUIEvent = selectedUIEvent, selectSectionEvent = selectSectionEvent }
+					),
+				}
+			),
 			Players.LocalPlayer.PlayerGui,
 			"menuUI"
 		)

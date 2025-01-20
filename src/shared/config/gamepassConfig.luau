@@ -24,6 +24,8 @@ return {
 			dataService.updatePlayerData(player, playerData)
 			castleService.updateTower(player)
 		end,
+		type = "floors",
+		infoType = Enum.InfoType.Product,
 	},
 	fiftyFloors = {
 		id = 2697043455,
@@ -34,18 +36,24 @@ return {
 			dataService.updatePlayerData(player, playerData)
 			castleService.updateTower(player)
 		end,
+		type = "floors",
+		infoType = Enum.InfoType.Product,
 	},
 	buyArtillery = {
 		id = 1028783141,
 		callback = function(player)
 			marketplaceUtil.updatePlayerCache(player, 1028783141)
 		end,
+		type = "cannons",
+		infoType = Enum.InfoType.GamePass,
 	},
 	buyRailgun = {
 		id = 1035960145,
 		callback = function(player)
 			marketplaceUtil.updatePlayerCache(player, 1035960145)
 		end,
+		type = "cannons",
+		infoType = Enum.InfoType.GamePass,
 	},
 	newCannon = {
 		id = 2697043453,
@@ -55,6 +63,8 @@ return {
 			playerData.cannon = newCannon.max
 			dataService.updatePlayerData(player, playerData)
 		end,
+		type = "cannons",
+		infoType = Enum.InfoType.Product,
 	},
 	artilleryGamepasses = {
 		["1028783141"] = "artillery",

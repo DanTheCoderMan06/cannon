@@ -8,6 +8,7 @@ local Signal = require(sharedPackages.Signal)
 local marketplaceUtil = {}
 local playerCache = {}
 local playerEvents = {}
+local gamepassInfoCache = {}
 
 local function safeCall(callback)
 	local s, r = pcall(callback)
@@ -16,6 +17,16 @@ local function safeCall(callback)
 		warn("SAFECALL FAILED: " .. r)
 		s, r = pcall(callback)
 	end
+end
+
+function marketplaceUtil.getProductInfo(gamepassId, infoType)
+	if gamepassInfoCache[gamepassId] then
+		return gamepassInfoCache[gamepassId]
+	end
+	safeCall(function()
+		gamepassInfoCache[gamepassId] = MarketplaceService:GetProductInfo(gamepassId, infoType)
+	end)
+	return gamepassInfoCache[gamepassId]
 end
 
 function marketplaceUtil.userOwnsGamepass(player, gamepassId)

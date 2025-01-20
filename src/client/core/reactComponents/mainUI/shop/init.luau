@@ -7,11 +7,13 @@ local React = require(sharedPackages.React)
 local ReactSpring = require(sharedPackages.ReactSpring)
 local components = ReplicatedStorage.client.reactComponents
 local Trove = require(sharedPackages.Trove)
+local Sift = require(sharedPackages.Sift)
 
 local shopUI = ReplicatedStorage.client.reactComponents.mainUI.shop
 
 local closeButton = require(shopUI.closeButton)
 local buttonsFolder = require(shopUI.buttonsFolder)
+local productGroup = require(shopUI.productGroup)
 
 local reactUtil = require(shared.utilities.reactUtil)
 
@@ -101,13 +103,15 @@ return function(props)
 				AspectRatio = 0.804,
 			}),
 
-			buttonsFolder = React.createElement(buttonsFolder, { styles = styles }),
+			buttonsFolder = React.createElement(buttonsFolder, Sift.Dictionary.merge({ styles = styles }, props)),
 			closeButton = React.createElement(closeButton, {
 				styles = styles,
 				onActivated = function()
+					print("Go")
 					props.selectedUIEvent:Fire("")
 				end,
 			}),
+			productGroupFrame = React.createElement(productGroup, props),
 		}),
 	})
 end
