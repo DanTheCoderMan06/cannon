@@ -1,0 +1,29 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local shared = ReplicatedStorage.shared
+local sharedPackages = ReplicatedStorage.sharedPackages
+
+local React = require(sharedPackages.React)
+local ReactSpring = require(sharedPackages.ReactSpring)
+local components = ReplicatedStorage.client.reactComponents
+
+local rewardsButton = require(components.mainUI.rewardsButton)
+local shopButton = require(components.mainUI.shopButton)
+local shop = require(components.mainUI.shop)
+
+return function(props)
+	print("Go")
+	return React.createElement("Frame", {
+		AnchorPoint = Vector2.new(0, 0.0),
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+		BackgroundTransparency = 1,
+		BorderColor3 = Color3.fromRGB(0, 0, 0),
+		BorderSizePixel = 0,
+		Position = UDim2.fromScale(0, 0.),
+		Size = UDim2.fromScale(1, 1),
+	}, {
+		rewardsButtonFrame = React.createElement(rewardsButton, props),
+		shopButtonFrame = React.createElement(shopButton, props),
+		shop = React.createElement(shop, props),
+	})
+end

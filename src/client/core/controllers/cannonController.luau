@@ -109,28 +109,25 @@ function cannonController.start()
 		elseif physics.time < 2 then
 			multiplier = physics.time / 2
 		end
-		local min = math.huge
 
 		pTrove:BindToRenderStep("physics_" .. os.time(), Enum.RenderPriority.First.Value, function()
 			timeElapsed = (tick() - startTime) * multiplier
 			local actualHorizontal = timeElapsed * physics.horizontalVelocity
 			local fixedHorizontal = math.fmod(actualHorizontal, cannonConfig.maxDistance)
-			oldPosition = newPosition
-			newPosition = startPosition
+			local calculatedPosition = startPosition
 				* CFrame.new(
 					0,
 					(timeElapsed * physics.verticalVelocity + 0.5 * -workspace.Gravity * math.pow(timeElapsed, 2)),
 					-fixedHorizontal
 				)
 				* CFrame.Angles(-math.rad(math.fmod(timeElapsed * 180 / multiplier, 360)), 0, 0)
-			min = math.min(newPosition.Position.Y, min)
 			if not character.PrimaryPart then
 				pTrove:Destroy()
 				finishedSignal:Fire()
 				return
 			end
 			if
-				math.abs(newPosition.Position.Y) <= math.max(physics.verticalVelocity * 0.1, 10)
+				math.abs(calculatedPosition.Position.Y) <= math.max(physics.verticalVelocity * 0.1, 10)
 				and timeElapsed > physics.time / multiplier
 			then
 				print("destroy")
@@ -139,6 +136,8 @@ function cannonController.start()
 				finishedSignal:Fire()
 				return
 			else
+				oldPosition = newPosition
+				newPosition = calculatedPosition
 				character:PivotTo(newPosition)
 			end
 		end)
@@ -180,7 +179,7 @@ function cannonController.start()
 
 				finishedSignal:Destroy()
 				windController.toggle(false)
-
+				character.PrimaryPart.Anchored = true
 				effectsController.finishedPath(physics)
 
 				zap.finishedPath.Fire()

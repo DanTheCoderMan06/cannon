@@ -42,9 +42,9 @@ return {
 		end,
 	},
 	buyRailgun = {
-		id = 7038888075,
+		id = 1035960145,
 		callback = function(player)
-			marketplaceUtil.updatePlayerCache(player, 7038888075)
+			marketplaceUtil.updatePlayerCache(player, 1035960145)
 		end,
 	},
 	newCannon = {
@@ -58,6 +58,6 @@ return {
 	},
 	artilleryGamepasses = {
 		["1028783141"] = "artillery",
-		["7038888075"] = "railgun",
+		["1035960145"] = "railgun",
 	},
 }
