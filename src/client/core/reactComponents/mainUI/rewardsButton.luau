@@ -42,7 +42,9 @@ return function(props)
 				overlayImage = "rbxassetid://116797538593247",
 				buttonText = "Rewards",
 				image = "rbxassetid://109156736467684",
-				onActivated = function() end,
+				onActivated = function()
+					props.selectedUIEvent:Fire("rewards")
+				end,
 			}),
 		}),
 

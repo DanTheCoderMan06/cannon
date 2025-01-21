@@ -108,18 +108,20 @@ return function(props)
 			BorderSizePixel = 0,
 			Image = claimed and "rbxassetid://105652446380406" or "rbxassetid://133893845022134",
 			LayoutOrder = 3,
-			Position = props.clicked:map(function(val)
+			Position = styles.clicked:map(function(val)
 				return UDim2.fromScale(0.497, 0.913):Lerp(UDim2.fromScale(0.497, 0.913 + 0.02), val)
 			end),
 			ScaleType = Enum.ScaleType.Fit,
-			Size = UDim2.fromScale(0.694, 0.255),
+			Size = styles.hover:map(function(val)
+				return UDim2.fromScale(0.694 * 0.9, 0.255 * 0.9):Lerp(UDim2.fromScale(0.694, 0.255), val)
+			end),
 			Visible = not locked,
-			Rotation = props.rotate:map(function(val)
+			Rotation = styles.hover:map(function(val)
 				return val * 5
 			end),
 			[React.Event.MouseEnter] = function()
 				api.start({
-					rotate = 1,
+					hover = 1,
 					config = {
 						tension = 900,
 						friction = 15,
@@ -128,7 +130,7 @@ return function(props)
 			end,
 			[React.Event.MouseLeave] = function()
 				api.start({
-					rotate = 0,
+					hover = 0,
 					config = {
 						tension = 900,
 						friction = 15,

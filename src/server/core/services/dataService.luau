@@ -18,6 +18,16 @@ local zap = require(ServerStorage.zap)
 
 local Sift = require(sharedPackages.Sift)
 
+function dataService.giveRewards(player)
+	local profile = Profiles[player]
+	if os.time() - profile.Data.lastClaimed >= 24 * 60 * 60 then
+		profile.Data.lastClaimed = os.time()
+		profile.Data.daysPlayed += 1
+		table.insert(profile.Data.daysClaimed, profile.Data.daysPlayed)
+		zap.dataChanged.Fire(player, profile.Data)
+	end
+end
+
 function dataService.start()
 	local function PlayerAdded(player)
 		local profile = PlayerStore:StartSessionAsync(`Player_{player.UserId}`, {
@@ -37,10 +47,14 @@ function dataService.start()
 				Profiles[player] = profile
 				print(`Profile loaded for {player.DisplayName}!`)
 
+				profile.Data.lastEntered = os.time()
+
 				local leaderstats = ReplicatedStorage.assets.statsFolder:Clone()
 				leaderstats.Name = "leaderstats"
 				leaderstats.Parent = player
 				dataService.updateLeaderstats(player)
+
+				dataService.giveRewards(player)
 				zap.dataChanged.Fire(player, profile.Data)
 			else
 				profile:EndSession()
@@ -60,6 +74,15 @@ function dataService.start()
 		local profile = Profiles[player]
 		if profile ~= nil then
 			profile:EndSession()
+		end
+	end)
+
+	task.spawn(function()
+		while true do
+			task.wait(30)
+			for player, profile in pairs(Profiles) do
+				dataService.giveRewards(player)
+			end
 		end
 	end)
 end

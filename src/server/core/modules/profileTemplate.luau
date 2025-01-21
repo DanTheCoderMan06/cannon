@@ -6,4 +6,11 @@ return {
 	towerStatus = 0, -- 0 PUBLIC 1 FRIENDS 2 PRIVATE
 	boughtLevels = 0,
 	boughtFloors = 0,
+	cannons = {},
+	lastClaimed = 0,
+	daysPlayed = 0,
+	daysClaimed = {},
+	lastEntered = 0,
+
+	notificationQueue = {},
 }

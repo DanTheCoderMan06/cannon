@@ -15,11 +15,17 @@ local module = {
 		return cost(level, boughtLevels)
 	end,
 	maxDistance = 55000,
-	specialCannons = { ["artillery"] = {
-		power = power(120),
-	}, ["railgun"] = {
-		power = power(205),
-	} },
+	specialCannons = {
+		["artillery"] = {
+			power = power(120),
+		},
+		["railgun"] = {
+			power = power(205),
+		},
+		["circusCannon"] = {
+			power = power(60),
+		},
+	},
 	cannons = {
 		["cannon1"] = {
 			["max"] = 4,

@@ -10,6 +10,7 @@ local components = ReplicatedStorage.client.reactComponents
 local rewardsButton = require(components.mainUI.rewardsButton)
 local shopButton = require(components.mainUI.shopButton)
 local shop = require(components.mainUI.shop)
+local rewards = require(components.mainUI.rewards)
 
 return function(props)
 	print("Go")
@@ -25,5 +26,6 @@ return function(props)
 		rewardsButtonFrame = React.createElement(rewardsButton, props),
 		shopButtonFrame = React.createElement(shopButton, props),
 		shop = React.createElement(shop, props),
+		rewards = React.createElement(rewards, props),
 	})
 end
