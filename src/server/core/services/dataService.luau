@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local ServerStorage = game:GetService("ServerStorage")
 
 local sharedPackages = ReplicatedStorage.sharedPackages
@@ -26,6 +27,18 @@ function dataService.giveRewards(player)
 		table.insert(profile.Data.daysClaimed, profile.Data.daysPlayed)
 		zap.dataChanged.Fire(player, profile.Data)
 	end
+end
+
+function dataService.getGlobalPlayerData(user)
+	if Players:GetPlayerByUserId(user) and RunService:IsStudio() == false then
+		return Profiles[Players:GetPlayerByUserId(user)]
+	end
+	local playerData = PlayerStore:GetAsync(user)
+	return playerData
+end
+
+function dataService.overwriteUserData(playerData)
+	playerData:SetAsync()
 end
 
 function dataService.start()
