@@ -33,7 +33,7 @@ function dataService.getGlobalPlayerData(user)
 	if Players:GetPlayerByUserId(user) and RunService:IsStudio() == false then
 		return Profiles[Players:GetPlayerByUserId(user)]
 	end
-	local playerData = PlayerStore:GetAsync(user)
+	local playerData = PlayerStore:GetAsync("Player_" .. tostring(user))
 	return playerData
 end
 
@@ -69,6 +69,8 @@ function dataService.start()
 
 				dataService.giveRewards(player)
 				zap.dataChanged.Fire(player, profile.Data)
+
+				print(profile.Data)
 			else
 				profile:EndSession()
 			end

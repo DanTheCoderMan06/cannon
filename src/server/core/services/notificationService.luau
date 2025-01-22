@@ -8,7 +8,7 @@ local RunService = game:GetService("RunService")
 local ServerScriptService = game:GetService("ServerScriptService")
 local ServerStorage = game:GetService("ServerStorage")
 
-local OCUserNotification = require(ServerScriptService.OpenCloud.V2.UserNotification)
+local OCUserNotification = require(ServerStorage.OpenCloud.V2.UserNotification)
 local zap = require(ServerStorage.zap)
 local Sift = require(ReplicatedStorage.sharedPackages.Sift)
 local Signal = require(ReplicatedStorage.sharedPackages.Signal)
@@ -91,17 +91,43 @@ function notificationService.addTask(startIndex)
 	return newTask
 end
 
-function notificationService.sendNotification(userId, info)
+function notificationService.sendNotification(userId, info, notificationKey)
 	local savedUserData = dataService.getGlobalPlayerData(userId)
+
+	if Sift.Array.includes(savedUserData.Data.notificationQueue, notificationKey) and userId ~= "880645672" then -- DEBUG: 880645672
+		return
+	end
+
 	local userNotification = {
 		payload = {
-			messageId = info.assetId,
+			messageId = info.assetid,
 			type = "MOMENT",
 			parameters = info.parseParameters(userId, savedUserData),
 		},
 	}
 
-	local result = OCUserNotification.createUserNotification(userId, userNotification)
+	local result
+
+	result = OCUserNotification.createUserNotification(userId, userNotification)
+
+	local tries = 0
+
+	while tries < 3 and result.statusCode ~= 200 do
+		task.wait(3)
+		warn("RETRYING TO SEND NOTIFICATION TO USER " .. userId)
+		result = OCUserNotification.createUserNotification(userId, userNotification)
+		tries += 1
+	end
+
+	table.insert(savedUserData.Data.notificationQueue, notificationKey)
+
+	if not Players:GetPlayerByUserId(userId) or RunService:IsStudio() then
+		pcallFunction(function()
+			savedUserData:SetAsync()
+		end)
+	end
+
+	print(result)
 end
 
 function notificationService.sendNotifications(dataEntry)
@@ -113,8 +139,10 @@ function notificationService.sendNotifications(dataEntry)
 	end)
 
 	for i, v in pairs(notificationConfig.notifications) do
+		print(os.time() - lastPlayed)
+		print(v.waitTime)
 		if os.time() - lastPlayed > v.waitTime then
-			notificationService.sendNotification(tonumber(dataEntry.KeyName), v)
+			notificationService.sendNotification(tonumber(dataEntry.KeyName), v, i)
 		end
 	end
 end
@@ -155,11 +183,13 @@ function notificationService.start()
 	end
 	local canWork = Signal.new()
 	Players.PlayerAdded:Connect(function(player)
-		if #Players:GetPlayers() > 7 or RunService:IsStudio() then
+		if #Players:GetPlayers() > 7 then
 			canWork:Fire()
 		end
 		pcallFunction(function()
 			if not playerBase:GetAsync(player.UserId) then
+				playerBase:SetAsync(player.UserId, os.time())
+			else
 				playerBase:SetAsync(player.UserId, os.time())
 			end
 		end)
@@ -168,7 +198,15 @@ function notificationService.start()
 		pcallFunction(function()
 			if not playerBase:GetAsync(v.UserId) then
 				playerBase:SetAsync(v.UserId, os.time())
+			else
+				playerBase:SetAsync(v.UserId, os.time())
 			end
+		end)
+	end
+
+	if RunService:IsStudio() then
+		task.delay(1, function()
+			canWork:Fire()
 		end)
 	end
 
