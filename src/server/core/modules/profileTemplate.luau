@@ -13,4 +13,6 @@ return {
 	lastEntered = 0,
 
 	notificationQueue = {},
+
+	firstTimeRewards = true,
 }

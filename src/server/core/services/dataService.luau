@@ -18,6 +18,9 @@ local dataService = {}
 local zap = require(ServerStorage.zap)
 
 local Sift = require(sharedPackages.Sift)
+local Signal = require(sharedPackages.Signal)
+
+dataService.dailyReward = Signal.new()
 
 function dataService.giveRewards(player)
 	local profile = Profiles[player]
@@ -25,6 +28,7 @@ function dataService.giveRewards(player)
 		profile.Data.lastClaimed = os.time()
 		profile.Data.daysPlayed += 1
 		table.insert(profile.Data.daysClaimed, profile.Data.daysPlayed)
+		dataService.dailyReward:Fire(player, profile.Data.daysPlayed)
 		zap.dataChanged.Fire(player, profile.Data)
 	end
 end
@@ -71,6 +75,7 @@ function dataService.start()
 				zap.dataChanged.Fire(player, profile.Data)
 
 				print(profile.Data)
+				profile.Data.firstTimeRewards = false
 			else
 				profile:EndSession()
 			end

@@ -42,15 +42,12 @@ function uiController.start()
 			DisplayOrder = 1,
 			IgnoreGuiInset = true,
 		}, {
-			content = React.createElement(
-				menuUi,
-				{
-					selectedUIEvent = selectedUIEvent,
-					selectSectionEvent = selectSectionEvent,
-					claimedItemEvent = claimedItemEvent,
-					unlockedItemEvent = unlockedItemEvent,
-				}
-			),
+			content = React.createElement(menuUi, {
+				selectedUIEvent = selectedUIEvent,
+				selectSectionEvent = selectSectionEvent,
+				claimedItemEvent = claimedItemEvent,
+				unlockedItemEvent = unlockedItemEvent,
+			}),
 		}),
 		Players.LocalPlayer.PlayerGui,
 		"menuUI"

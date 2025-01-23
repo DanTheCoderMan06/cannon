@@ -1,17 +1,32 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ExperienceNotificationService = game:GetService("ExperienceNotificationService")
+local RunService = game:GetService("RunService")
 
 local shared = ReplicatedStorage.shared
 local sharedPackages = ReplicatedStorage.sharedPackages
 
 local React = require(sharedPackages.React)
 local ReactSpring = require(sharedPackages.ReactSpring)
+local Trove = require(sharedPackages.Trove)
 local components = ReplicatedStorage.client.reactComponents
 
-local genericButton = require(components.generics.genericButton)
+local dataController = require(ReplicatedStorage.client.controllers.dataController)
+
+local firstTime = false
 
 return function(props)
 	local styles, api = ReactSpring.useSpring(function()
 		return { rotate = 0, clicked = 0 }
+	end)
+
+	React.useEffect(function()
+		local uiTrove = Trove.new()
+
+		uiTrove:Add(dataController.dataChanged:Connect(function(data)
+			if data.firstTimeRewards then
+				firstTime = true
+			end
+		end))
 	end)
 
 	return React.createElement("ImageButton", {
@@ -73,6 +88,12 @@ return function(props)
 						},
 					})
 					props.onActivated()
+					if firstTime or RunService:IsStudio() then
+						firstTime = false
+						if ExperienceNotificationService:CanPromptOptInAsync() then
+							ExperienceNotificationService:PromptOptIn()
+						end
+					end
 					task.delay(0.05, function()
 						api.start({
 							clicked = 0,

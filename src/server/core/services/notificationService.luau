@@ -28,6 +28,8 @@ local currentIndex = 0
 local idsPerTask = 500
 
 local notificationConfig = require(ReplicatedStorage.shared.config.notificationConfig)
+local rewardsConfig = require(ReplicatedStorage.shared.config.rewardsConfig)
+
 local dataService = require(ServerStorage.server.services.dataService)
 
 local function pcallFunction(callback)
@@ -89,6 +91,34 @@ function notificationService.addTask(startIndex)
 		serverTasks:SetAsync(currentTime, newTask)
 	end)
 	return newTask
+end
+
+--For simple Notification (So that other services can use)
+function notificationService.sendSimpleNotification(userId, assetId, params)
+	local newParams = {}
+	for key, value in pairs(params) do
+		newParams[key] = { stringValue = value }
+	end
+	local userNotification = {
+		payload = {
+			messageId = assetId,
+			type = "MOMENT",
+			parameters = newParams,
+		},
+	}
+
+	local result
+
+	result = OCUserNotification.createUserNotification(userId, userNotification)
+
+	local tries = 0
+
+	while tries < 3 and result.statusCode ~= 200 do
+		task.wait(3)
+		warn("RETRYING TO SEND NOTIFICATION TO USER " .. userId)
+		result = OCUserNotification.createUserNotification(userId, userNotification)
+		tries += 1
+	end
 end
 
 function notificationService.sendNotification(userId, info, notificationKey)
@@ -252,6 +282,15 @@ function notificationService.start()
 				serverTasks:SetAsync(foundTask.id, foundTask)
 				print("Added task!")
 			end)
+		end
+	end)
+
+	dataService.dailyReward:Connect(function(player: Player, day: IntValue)
+		local dailyReward = rewardsConfig.getDailyReward(day)
+		if dailyReward then
+			notificationService.sendSimpleNotification(player.UserId, rewardsConfig.rewardNotification.assetId, {
+				rewardName = dailyReward.name,
+			})
 		end
 	end)
 end
