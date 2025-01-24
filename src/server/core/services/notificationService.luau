@@ -22,10 +22,10 @@ notificationService.currentTasks = {}
 notificationService.currentTask = nil
 
 local playerBase = DataStoreService:GetDataStore("playerBase")
-local serverTasks = DataStoreService:GetDataStore("notificationTask")
+local serverTasks = DataStoreService:GetDataStore("notificationTasks")
 
 local currentIndex = 0
-local idsPerTask = 500
+local idsPerTask = 1000
 
 local notificationConfig = require(ReplicatedStorage.shared.config.notificationConfig)
 local rewardsConfig = require(ReplicatedStorage.shared.config.rewardsConfig)
@@ -45,7 +45,7 @@ end
 function notificationService.retrieveTask()
 	local currentTasks
 	pcallFunction(function()
-		currentTasks = serverTasks:ListKeysAsync("", 100, "", true)
+		currentTasks = serverTasks:ListKeysAsync("", 300, "", true)
 	end)
 	local foundTask
 	local lastTask
@@ -60,7 +60,7 @@ function notificationService.retrieveTask()
 			end)
 			if not lastTask then
 				lastTask = taskInfo
-			elseif lastTask.finish < taskInfo.finish then
+			elseif tonumber(lastTask.id) < tonumber(taskInfo.id) then
 				lastTask = taskInfo
 			end
 			if taskInfo.occupied then
@@ -79,7 +79,13 @@ function notificationService.retrieveTask()
 	return { found = foundTask, last = lastTask, foundIndex = foundKey }
 end
 
-function notificationService.addTask(startIndex)
+function notificationService.addTask(endTask)
+	local startIndex = 0
+	if endTask then
+		if endTask.start < notificationService.totalPlayerBase then
+			startIndex = endTask.start
+		end
+	end
 	local currentTime = os.time()
 	local newTask = {
 		start = startIndex,
@@ -114,17 +120,46 @@ function notificationService.sendSimpleNotification(userId, assetId, params)
 	local tries = 0
 
 	while tries < 3 and result.statusCode ~= 200 do
-		task.wait(3)
+		task.wait(1)
 		warn("RETRYING TO SEND NOTIFICATION TO USER " .. userId)
 		result = OCUserNotification.createUserNotification(userId, userNotification)
 		tries += 1
 	end
 end
 
-function notificationService.sendNotification(userId, info, notificationKey)
+function notificationService.fetchMax()
+	local keysPage
+	local totalMax = 0
+	pcallFunction(function()
+		keysPage = playerBase:ListKeysAsync("", idsPerTask)
+	end)
+	totalMax += idsPerTask
+	while true do
+		if keysPage.IsFinished then
+			break
+		end
+		pcallFunction(function()
+			keysPage:AdvanceToNextPageAsync()
+		end)
+		totalMax += idsPerTask
+	end
+	return totalMax
+end
+
+function notificationService.sendNotification(userId, info, notificationKey, timeElapsed)
 	local savedUserData = dataService.getGlobalPlayerData(userId)
 
-	if Sift.Array.includes(savedUserData.Data.notificationQueue, notificationKey) and userId ~= "880645672" then -- DEBUG: 880645672
+	local amountExisting = 0
+
+	for _, v in pairs(savedUserData.Data.notificationQueue) do
+		if v == notificationKey then
+			amountExisting += 1
+		end
+	end
+
+	print(amountExisting)
+
+	if amountExisting * info.waitTime > timeElapsed then
 		return
 	end
 
@@ -143,7 +178,7 @@ function notificationService.sendNotification(userId, info, notificationKey)
 	local tries = 0
 
 	while tries < 3 and result.statusCode ~= 200 do
-		task.wait(3)
+		task.wait(1)
 		warn("RETRYING TO SEND NOTIFICATION TO USER " .. userId)
 		result = OCUserNotification.createUserNotification(userId, userNotification)
 		tries += 1
@@ -164,6 +199,7 @@ function notificationService.sendNotifications(dataEntry)
 	task.wait(1)
 	print("SENDING TO USER: " .. dataEntry.KeyName)
 	local lastPlayed
+
 	pcallFunction(function()
 		lastPlayed = playerBase:GetAsync(dataEntry.KeyName)
 	end)
@@ -171,9 +207,7 @@ function notificationService.sendNotifications(dataEntry)
 	for i, v in pairs(notificationConfig.notifications) do
 		print(os.time() - lastPlayed)
 		print(v.waitTime)
-		if os.time() - lastPlayed > v.waitTime then
-			notificationService.sendNotification(tonumber(dataEntry.KeyName), v, i)
-		end
+		notificationService.sendNotification(tonumber(dataEntry.KeyName), v, i, os.time() - lastPlayed)
 	end
 end
 
@@ -184,7 +218,7 @@ function notificationService.completeWork(taskInfo)
 	end)
 	for i = 1, math.floor(taskInfo.start / idsPerTask) do
 		if keysPage.IsFinished then
-			return -- No tasks to do
+			return
 		end
 		pcallFunction(function()
 			keysPage:AdvanceToNextPageAsync()
@@ -195,6 +229,7 @@ function notificationService.completeWork(taskInfo)
 		currentPage = keysPage:GetCurrentPage()
 	end)
 	currentIndex = 0
+	print(currentPage)
 	for i, v in ipairs(currentPage) do
 		currentIndex += 1
 		if taskInfo.stop then
@@ -208,7 +243,7 @@ function notificationService.completeWork(taskInfo)
 end
 
 function notificationService.start()
-	if game.PrivateServerId ~= "" then
+	if game.PrivateServerId ~= "" and not RunService:IsStudio() then
 		return -- Private Server
 	end
 	local canWork = Signal.new()
@@ -242,6 +277,8 @@ function notificationService.start()
 
 	canWork:Wait()
 
+	notificationService.totalPlayerBase = notificationService.fetchMax()
+
 	local foundTask
 	task.spawn(function()
 		while true do
@@ -251,7 +288,7 @@ function notificationService.start()
 			local endTask = foundTask.last
 
 			if not target then
-				target = notificationService.addTask(endTask ~= nil and endTask.finish or 0)
+				target = notificationService.addTask(endTask)
 			else
 				target.occupied = true
 				pcallFunction(function()

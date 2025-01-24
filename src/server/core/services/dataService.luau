@@ -20,6 +20,8 @@ local zap = require(ServerStorage.zap)
 local Sift = require(sharedPackages.Sift)
 local Signal = require(sharedPackages.Signal)
 
+local notificationConfig = require(ReplicatedStorage.shared.config.notificationConfig)
+
 dataService.dailyReward = Signal.new()
 
 function dataService.giveRewards(player)
@@ -31,6 +33,11 @@ function dataService.giveRewards(player)
 		dataService.dailyReward:Fire(player, profile.Data.daysPlayed)
 		zap.dataChanged.Fire(player, profile.Data)
 	end
+	for _, v in pairs(profile.Data.notificationQueue) do
+		local notificationInfo = notificationConfig.notifications[v]
+		notificationInfo.callback(profile)
+	end
+	table.clear(profile.Data.notificationQueue)
 end
 
 function dataService.getGlobalPlayerData(user)
