@@ -7,7 +7,7 @@ return {
 	boughtLevels = 0,
 	boughtFloors = 0,
 	cannons = {},
-	lastClaimed = 0,
+	lastClaimed = os.time(),
 	daysPlayed = 0,
 	daysClaimed = {},
 	lastEntered = 0,
@@ -15,4 +15,6 @@ return {
 	notificationQueue = {},
 
 	firstTimeRewards = true,
+
+	distanceIncreased = false,
 }

@@ -31,6 +31,7 @@ function castleService.updateTower(player)
 			newfloor.Name = i
 			newfloor:PivotTo(playerSpot.CFrame * CFrame.new(0, floorHeight * (i + 0.5), 0))
 			newfloor.Parent = playerCastle
+			task.wait()
 		end
 	end
 	for _, v in pairs(playerPlatforms:GetChildren()) do

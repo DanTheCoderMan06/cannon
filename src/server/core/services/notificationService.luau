@@ -22,10 +22,11 @@ notificationService.currentTasks = {}
 notificationService.currentTask = nil
 
 local playerBase = DataStoreService:GetDataStore("playerBase")
-local serverTasks = DataStoreService:GetDataStore("notificationTasks")
+local serverTasks = DataStoreService:GetDataStore("notificationTasksStore")
+local lastChecked = DataStoreService:GetDataStore("lastChecked")
 
 local currentIndex = 0
-local idsPerTask = 1000
+local idsPerTask = 1
 
 local notificationConfig = require(ReplicatedStorage.shared.config.notificationConfig)
 local rewardsConfig = require(ReplicatedStorage.shared.config.rewardsConfig)
@@ -58,6 +59,9 @@ function notificationService.retrieveTask()
 			pcallFunction(function()
 				taskInfo = serverTasks:GetAsync(key.KeyName)
 			end)
+			if RunService:IsStudio() then
+				print("TASK FOUND: " .. HttpService:JSONEncode(taskInfo))
+			end
 			if not lastTask then
 				lastTask = taskInfo
 			elseif tonumber(lastTask.id) < tonumber(taskInfo.id) then
@@ -80,12 +84,23 @@ function notificationService.retrieveTask()
 end
 
 function notificationService.addTask(endTask)
+	local lastCheckedIndex
 	local startIndex = 0
+
+	pcallFunction(function()
+		lastCheckedIndex = lastChecked:GetAsync("lastChecked")
+	end)
+
 	if endTask then
-		if endTask.start < notificationService.totalPlayerBase then
-			startIndex = endTask.start
+		if endTask.finish < notificationService.totalPlayerBase then
+			startIndex = endTask.finish
+		end
+	elseif lastCheckedIndex then
+		if lastCheckedIndex < notificationService.totalPlayerBase then
+			startIndex = lastCheckedIndex
 		end
 	end
+
 	local currentTime = os.time()
 	local newTask = {
 		start = startIndex,
@@ -151,23 +166,29 @@ function notificationService.sendNotification(userId, info, notificationKey, tim
 
 	local amountExisting = 0
 
-	for _, v in pairs(savedUserData.Data.notificationQueue) do
-		if v == notificationKey then
-			amountExisting += 1
+	if info.multiple then
+		for _, v in pairs(savedUserData.Data.notificationQueue) do
+			if v == notificationKey then
+				amountExisting += 1
+			end
+		end
+	else
+		if Sift.Array.includes(savedUserData.Data.notificationQueue, notificationKey) then
+			return false
 		end
 	end
 
 	print(amountExisting)
 
 	if amountExisting * info.waitTime > timeElapsed then
-		return
+		return false
 	end
 
 	local userNotification = {
 		payload = {
 			messageId = info.assetid,
 			type = "MOMENT",
-			parameters = info.parseParameters(userId, savedUserData),
+			parameters = info.parseParameters(userId, savedUserData.Data),
 		},
 	}
 
@@ -193,6 +214,8 @@ function notificationService.sendNotification(userId, info, notificationKey, tim
 	end
 
 	print(result)
+
+	return true
 end
 
 function notificationService.sendNotifications(dataEntry)
@@ -207,11 +230,18 @@ function notificationService.sendNotifications(dataEntry)
 	for i, v in pairs(notificationConfig.notifications) do
 		print(os.time() - lastPlayed)
 		print(v.waitTime)
-		notificationService.sendNotification(tonumber(dataEntry.KeyName), v, i, os.time() - lastPlayed)
+		local success = notificationService.sendNotification(tonumber(dataEntry.KeyName), v, i, os.time() - lastPlayed)
+		if success then
+			break -- max is one
+		end
 	end
 end
 
 function notificationService.completeWork(taskInfo)
+	pcallFunction(function()
+		lastChecked:SetAsync("lastChecked", taskInfo.finish)
+	end)
+
 	local keysPage
 	pcallFunction(function()
 		keysPage = playerBase:ListKeysAsync("", idsPerTask)
@@ -275,9 +305,11 @@ function notificationService.start()
 		end)
 	end
 
-	canWork:Wait()
+	--canWork:Wait()
 
 	notificationService.totalPlayerBase = notificationService.fetchMax()
+
+	print(notificationService.totalPlayerBase)
 
 	local foundTask
 	task.spawn(function()
@@ -319,15 +351,6 @@ function notificationService.start()
 				serverTasks:SetAsync(foundTask.id, foundTask)
 				print("Added task!")
 			end)
-		end
-	end)
-
-	dataService.dailyReward:Connect(function(player: Player, day: IntValue)
-		local dailyReward = rewardsConfig.getDailyReward(day)
-		if dailyReward then
-			notificationService.sendSimpleNotification(player.UserId, rewardsConfig.rewardNotification.assetId, {
-				rewardName = dailyReward.name,
-			})
 		end
 	end)
 end
