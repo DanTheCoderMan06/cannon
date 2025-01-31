@@ -14,7 +14,6 @@ local castleFolder = workspace:WaitForChild("castles")
 local dataService = require(ServerStorage.server.services.dataService)
 
 local castleFloor = ReplicatedStorage.assets:WaitForChild("castleFloor")
-local floorHeight = castleFloor.ceiling.Position.Y - castleFloor.floor.Position.Y
 
 local playerPlatforms = workspace:WaitForChild("playerPlatforms")
 

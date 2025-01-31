@@ -14,12 +14,21 @@ local Sift = require(sharedPackages.Sift)
 local castleFolder = workspace:WaitForChild("castles")
 local dataService = require(ServerStorage.server.services.dataService)
 
+local objectcache = require(sharedPackages.objectcache)
+
 local castleFloor = ReplicatedStorage.assets:WaitForChild("castleFloor")
-local floorHeight = castleFloor.ceiling.Position.Y - castleFloor.floor.Position.Y
+local floorHeight = castleFloor:FindFirstChild("ceiling", true).Position.Y
+	- castleFloor:FindFirstChild("floor", true).Position.Y
 
 local playerPlatforms = workspace:WaitForChild("playerPlatforms")
 
 local zap = require(ServerStorage.zap)
+
+local floorStorage = Instance.new("Folder")
+floorStorage.Name = "floorStorage"
+floorStorage.Parent = ServerStorage
+
+local floors = objectcache.new(castleFloor, 10, floorStorage)
 
 function castleService.updateTower(player)
 	local playerData = dataService.getPlayerData(player)
@@ -27,9 +36,8 @@ function castleService.updateTower(player)
 	local playerCastle = playerSpot:FindFirstChildWhichIsA("Folder")
 	for i = 0, playerData.floors do
 		if not playerCastle:FindFirstChild(i) then
-			local newfloor = castleFloor:Clone()
+			local newfloor = floors:GetPart(playerSpot.CFrame * CFrame.new(0, floorHeight * i, 0))
 			newfloor.Name = i
-			newfloor:PivotTo(playerSpot.CFrame * CFrame.new(0, floorHeight * (i + 0.5), 0))
 			newfloor.Parent = playerCastle
 			task.wait()
 		end
@@ -39,6 +47,7 @@ function castleService.updateTower(player)
 			castleService.updatePlatform(Players:FindFirstChild(v.Name), playerSpot)
 		end
 	end
+	floors:Update()
 end
 
 function castleService.findSpot()
@@ -126,6 +135,10 @@ function castleService.start()
 		playerPlatforms:FindFirstChild(player.Name):Destroy()
 		for i, v in pairs(castleFolder:GetChildren()) do
 			if v:FindFirstChildWhichIsA("Folder") and v.Name == player.Name then
+				for _, floorItem in pairs(v:GetChildren()) do
+					task.wait()
+					floors:ReturnPart(floorItem)
+				end
 				v:ClearAllChildren()
 				v.Name = "spot"
 			end

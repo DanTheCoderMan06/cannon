@@ -375,7 +375,7 @@ function jointService.start()
 				for _, scale in pairs(Humanoid:GetChildren()) do
 					if scale:IsA("NumberValue") then
 						scale.Changed:Connect(function()
-							task.spawn(SetMotorsToDefault)
+							--task.spawn(SetMotorsToDefault)
 						end)
 					end
 				end

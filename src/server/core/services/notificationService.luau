@@ -1,4 +1,5 @@
 local DataStoreService = game:GetService("DataStoreService")
+local MemoryStoreService = game:GetService("MemoryStoreService")
 local HttpService = game:GetService("HttpService")
 local MessagingService = game:GetService("MessagingService")
 local PhysicsService = game:GetService("PhysicsService")
@@ -22,8 +23,8 @@ notificationService.currentTasks = {}
 notificationService.currentTask = nil
 
 local playerBase = DataStoreService:GetDataStore("playerBase")
-local serverTasks = DataStoreService:GetDataStore("notificationTasksStore")
-local lastChecked = DataStoreService:GetDataStore("lastChecked")
+local serverTasks = MemoryStoreService:GetHashMap("serverTasks")
+local lastChecked = MemoryStoreService:GetHashMap("lastChecked")
 
 local currentIndex = 0
 local idsPerTask = 1
@@ -34,6 +35,10 @@ local rewardsConfig = require(ReplicatedStorage.shared.config.rewardsConfig)
 local dataService = require(ServerStorage.server.services.dataService)
 
 local function pcallFunction(callback)
+	if RunService:IsStudio() then
+		callback()
+		return
+	end
 	local s, r = pcall(callback)
 
 	while not s do
@@ -46,17 +51,21 @@ end
 function notificationService.retrieveTask()
 	local currentTasks
 	pcallFunction(function()
-		currentTasks = serverTasks:ListKeysAsync("", 300, "", true)
+		print("Access")
+		currentTasks = serverTasks:ListItemsAsync(5)
 	end)
+
 	local foundTask
 	local lastTask
 	local foundKey
+
 	while not foundTask do
 		local currentPage = currentTasks:GetCurrentPage()
 		for _, key in pairs(currentPage) do
 			print(key.KeyName)
 			local taskInfo
 			pcallFunction(function()
+				print("Access")
 				taskInfo = serverTasks:GetAsync(key.KeyName)
 			end)
 			if RunService:IsStudio() then
@@ -64,7 +73,7 @@ function notificationService.retrieveTask()
 			end
 			if not lastTask then
 				lastTask = taskInfo
-			elseif tonumber(lastTask.id) < tonumber(taskInfo.id) then
+			elseif tonumber(lastTask.timeCreated) < tonumber(taskInfo.timeCreated) then
 				lastTask = taskInfo
 			end
 			if taskInfo.occupied then
@@ -87,29 +96,34 @@ function notificationService.addTask(endTask)
 	local lastCheckedIndex
 	local startIndex = 0
 
-	pcallFunction(function()
-		lastCheckedIndex = lastChecked:GetAsync("lastChecked")
-	end)
-
 	if endTask then
 		if endTask.finish < notificationService.totalPlayerBase then
 			startIndex = endTask.finish
 		end
-	elseif lastCheckedIndex then
-		if lastCheckedIndex < notificationService.totalPlayerBase then
-			startIndex = lastCheckedIndex
+	else
+		pcallFunction(function()
+			print("Access")
+			lastCheckedIndex = lastChecked:GetAsync("lastChecked")
+		end)
+		if lastCheckedIndex then
+			if lastCheckedIndex < notificationService.totalPlayerBase then
+				startIndex = lastCheckedIndex
+			end
 		end
 	end
 
 	local currentTime = os.time()
+	local uid = HttpService:GenerateGUID(false)
 	local newTask = {
 		start = startIndex,
 		finish = startIndex + idsPerTask,
 		occupied = true,
-		id = currentTime,
+		timeCreated = currentTime,
+		id = uid,
 	}
 	pcallFunction(function()
-		serverTasks:SetAsync(currentTime, newTask)
+		print("Access")
+		serverTasks:SetAsync(uid, newTask, 300000)
 	end)
 	return newTask
 end
@@ -239,7 +253,7 @@ end
 
 function notificationService.completeWork(taskInfo)
 	pcallFunction(function()
-		lastChecked:SetAsync("lastChecked", taskInfo.finish)
+		lastChecked:SetAsync("lastChecked", taskInfo.finish, 300000)
 	end)
 
 	local keysPage
@@ -273,7 +287,7 @@ function notificationService.completeWork(taskInfo)
 end
 
 function notificationService.start()
-	if game.PrivateServerId ~= "" and not RunService:IsStudio() then
+	if game.PrivateServerId ~= "" or RunService:IsStudio() then
 		return -- Private Server
 	end
 	local canWork = Signal.new()
@@ -282,20 +296,12 @@ function notificationService.start()
 			canWork:Fire()
 		end
 		pcallFunction(function()
-			if not playerBase:GetAsync(player.UserId) then
-				playerBase:SetAsync(player.UserId, os.time())
-			else
-				playerBase:SetAsync(player.UserId, os.time())
-			end
+			playerBase:SetAsync(player.UserId, os.time())
 		end)
 	end)
 	for _, v in pairs(Players:GetPlayers()) do
 		pcallFunction(function()
-			if not playerBase:GetAsync(v.UserId) then
-				playerBase:SetAsync(v.UserId, os.time())
-			else
-				playerBase:SetAsync(v.UserId, os.time())
-			end
+			playerBase:SetAsync(v.UserId, os.time())
 		end)
 	end
 
@@ -324,7 +330,8 @@ function notificationService.start()
 			else
 				target.occupied = true
 				pcallFunction(function()
-					serverTasks:SetAsync(foundTask.foundIndex, target)
+					print("Access")
+					serverTasks:SetAsync(foundTask.foundIndex, target, 300000)
 				end)
 			end
 
@@ -348,7 +355,7 @@ function notificationService.start()
 			foundTask.occupied = false
 			foundTask.stop = currentIndex
 			pcallFunction(function()
-				serverTasks:SetAsync(foundTask.id, foundTask)
+				serverTasks:SetAsync(foundTask.id, foundTask, 300000)
 				print("Added task!")
 			end)
 		end

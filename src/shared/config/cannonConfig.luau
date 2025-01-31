@@ -25,6 +25,9 @@ local module = {
 		["circusCannon"] = {
 			power = power(60),
 		},
+		armyCannon = {
+			power = power(120),
+		},
 	},
 	cannons = {
 		["cannon1"] = {

@@ -259,7 +259,7 @@ local module = {
 			name = "Cash",
 		},
 		{
-			day = 299,
+			day = 29,
 			callback = function(playerData)
 				playerData.floors += 500
 			end,
