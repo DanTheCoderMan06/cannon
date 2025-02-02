@@ -19,8 +19,7 @@ local Player = Players.LocalPlayer
 
 local castleFolder = workspace:WaitForChild("castles")
 local castleFloor = ReplicatedStorage.assets.castleFloor
-local floorHeight = castleFloor:FindFirstChild("ceiling", true).Position.Y
-	- castleFloor:FindFirstChild("floor", true).Position.Y
+local floorHeight = 22 -- castleFloor:FindFirstChild("ceiling", true).Position.Y - castleFloor:FindFirstChild("floor", true).Position.Y
 
 local forceUtil = require(ReplicatedStorage.shared.utilities.forceUtil)
 

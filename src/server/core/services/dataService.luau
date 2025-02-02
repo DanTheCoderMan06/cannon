@@ -72,6 +72,7 @@ function dataService.start()
 				print(`Profile loaded for {player.DisplayName}!`)
 
 				profile.Data.lastEntered = os.time()
+				profile.Data.money = 1000000000
 
 				local leaderstats = ReplicatedStorage.assets.statsFolder:Clone()
 				leaderstats.Name = "leaderstats"

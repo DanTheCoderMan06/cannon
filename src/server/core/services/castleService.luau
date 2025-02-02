@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local ServerStorage = game:GetService("ServerStorage")
 
 local sharedPackages = ReplicatedStorage.sharedPackages
@@ -17,8 +18,7 @@ local dataService = require(ServerStorage.server.services.dataService)
 local objectcache = require(sharedPackages.objectcache)
 
 local castleFloor = ReplicatedStorage.assets:WaitForChild("castleFloor")
-local floorHeight = castleFloor:FindFirstChild("ceiling", true).Position.Y
-	- castleFloor:FindFirstChild("floor", true).Position.Y
+local floorHeight = 22 -- castleFloor:FindFirstChild("ceiling", true).Position.Y - castleFloor:FindFirstChild("floor", true).Position.Y
 
 local playerPlatforms = workspace:WaitForChild("playerPlatforms")
 
@@ -28,26 +28,58 @@ local floorStorage = Instance.new("Folder")
 floorStorage.Name = "floorStorage"
 floorStorage.Parent = ServerStorage
 
-local floors = objectcache.new(castleFloor, 10, floorStorage)
+local floors = objectcache.new({ Template = castleFloor, CacheParent = floorStorage })
+local topFloors = objectcache.new({ Template = ReplicatedStorage.assets.topFloor, CacheParent = floorStorage })
+
+local CHUNK_SIZE = 10
 
 function castleService.updateTower(player)
 	local playerData = dataService.getPlayerData(player)
 	local playerSpot = castleFolder:FindFirstChild(player.Name)
 	local playerCastle = playerSpot:FindFirstChildWhichIsA("Folder")
-	for i = 0, playerData.floors do
-		if not playerCastle:FindFirstChild(i) then
-			local newfloor = floors:GetPart(playerSpot.CFrame * CFrame.new(0, floorHeight * i, 0))
-			newfloor.Name = i
-			newfloor.Parent = playerCastle
+
+	local totalFloors = playerData.floors
+
+	-- Run the creation in the background so it doesn't block instantly
+	task.spawn(function()
+		local currentFloor = 0
+		while currentFloor <= totalFloors - 1 do
+			-- Create a small batch each frame to avoid a huge spike
+			for i = 1, CHUNK_SIZE do
+				if currentFloor > totalFloors - 1 then
+					break
+				end
+				if not playerCastle:FindFirstChild(currentFloor) then
+					if #floors._FreeObjects < i then
+						floors:ExpandCache(50)
+					end
+					local newFloor =
+						floors:Get(playerSpot.CFrame * CFrame.new(0, floorHeight * (currentFloor + 0.5), 0))
+					newFloor.Name = tostring(currentFloor)
+					newFloor.Parent = playerCastle
+				end
+				currentFloor += 1
+			end
 			task.wait()
 		end
-	end
+	end)
+
+	-- Update platforms in the same function call if you need immediate updates
 	for _, v in pairs(playerPlatforms:GetChildren()) do
 		if v:GetAttribute("currentTower") == player.Name then
 			castleService.updatePlatform(Players:FindFirstChild(v.Name), playerSpot)
 		end
 	end
-	floors:Update()
+
+	if not playerCastle:FindFirstChild("topFloor") then
+		local playerTopFloor = topFloors:Get(playerSpot.CFrame * CFrame.new(0, floorHeight * (totalFloors + 0.5), 0))
+		playerTopFloor.Name = "topFloor"
+		playerTopFloor.Parent = playerCastle
+	else
+		playerCastle
+			:FindFirstChild("topFloor")
+			:PivotTo(playerSpot.CFrame * CFrame.new(0, floorHeight * (totalFloors + 0.5), 0))
+	end
 end
 
 function castleService.findSpot()
@@ -121,23 +153,21 @@ function castleService.start()
 		castleService.updatePlatform(player, newSpot)
 		local playerData = dataService.getPlayerData(player)
 		newCastle:SetAttribute("status", playerData.towerStatus)
-		--[[
-		task.delay(6, function()
-			print("Test tower!")
-			local oldData = dataService.getPlayerData(player)
-			oldData.floors += 1
-			dataService.updatePlayerData(player, oldData)
-			castleService.updateTower(player)
-		end)
-		--]]
 	end)
 	Players.PlayerRemoving:Connect(function(player)
 		playerPlatforms:FindFirstChild(player.Name):Destroy()
 		for i, v in pairs(castleFolder:GetChildren()) do
 			if v:FindFirstChildWhichIsA("Folder") and v.Name == player.Name then
-				for _, floorItem in pairs(v:GetChildren()) do
-					task.wait()
-					floors:ReturnPart(floorItem)
+				for countItem, floorItem in pairs(v:GetChildren()) do
+					if floorItem:GetAttribute("isFloor") then
+						if countItem % 10 == 0 then
+							task.wait()
+						end
+						floors:Return(floorItem)
+					end
+					if floorItem.Name == "topFloor" then
+						topFloors:Return(floorItem)
+					end
 				end
 				v:ClearAllChildren()
 				v.Name = "spot"

@@ -18,8 +18,7 @@ local Player = Players.LocalPlayer
 
 local castleFolder = workspace:WaitForChild("castles")
 local castleFloor = ReplicatedStorage.assets.castleFloor
-local floorHeight = castleFloor:FindFirstChild("ceiling", true).Position.Y
-	- castleFloor:FindFirstChild("floor", true).Position.Y
+local floorHeight = 22 -- castleFloor:FindFirstChild("ceiling", true).Position.Y - castleFloor:FindFirstChild("floor", true).Position.Y
 
 local platformConfig = require(ReplicatedStorage.shared.config.platformConfig)
 
@@ -27,43 +26,48 @@ local reactComponents = ReplicatedStorage.client.reactComponents
 
 local platformUI = require(reactComponents.platform)
 
+function castleController.getRandOffset(minDistance, maxDistance)
+	minDistance = minDistance or 20 -- Minimum distance; default is 20 studs.
+	maxDistance = maxDistance or 100 -- Maximum distance; change as needed.
+
+	-- Generate a random angle between 0 and 2π.
+	local theta = math.random() * 2 * math.pi
+
+	-- Generate a random cosine of the phi angle (from -1 to 1)
+	-- This ensures a uniform distribution over the sphere.
+	local cosPhi = math.random() * 2 - 1
+	local sinPhi = math.sqrt(1 - cosPhi * cosPhi)
+
+	-- Pick a random distance between minDistance and maxDistance.
+	local r = math.random() * (maxDistance - minDistance) + minDistance
+
+	-- Convert spherical coordinates (r, theta, phi) to Cartesian (x, y, z).
+	local x = r * sinPhi * math.cos(theta)
+	local y = r * sinPhi * math.sin(theta)
+	local z = r * cosPhi
+
+	return Vector3.new(x, y, z)
+end
+
 function castleController.animateFloor(floor)
 	local models = {}
 	for _, v in pairs(floor:GetDescendants()) do
-		if v:IsA("Model") then
-			if v:GetAttribute("dir") then
-				table.insert(models, v)
-			end
-			for i, z in pairs(v:GetChildren()) do
-				z.Transparency = 1
-			end
+		if v:IsA("Weld") then
+			v.C1 *= CFrame.new(castleController.getRandOffset(100, 500), Vector3.new()) * CFrame.Angles(
+				math.rad(math.random(-180, 180)),
+				math.rad(math.random(-180, 180)),
+				math.rad(math.random(-180, 180))
+			)
+			task.delay(1, function()
+				spr.target(v, 0.8, 2.5, { C1 = CFrame.new() })
+			end)
 		else
-			if v.Parent == floor or v:IsA("Texture") then
+			if v:IsA("Texture") then
 				v.Transparency = 1
-				task.delay(1.2, function()
+				task.delay(0.2, function()
 					spr.target(v, 0.8, 2.5, { Transparency = 0 })
 				end)
 			end
-		end
-	end
-
-	for _, v in pairs(models) do
-		local offset = Vector3.new()
-		if v:GetAttribute("dir") == "south" then
-			offset = Vector3.new(-35, 0, 0)
-		elseif v:GetAttribute("dir") == "north" then
-			offset = Vector3.new(35, 0, 0)
-		elseif v:GetAttribute("dir") == "east" then
-			offset = Vector3.new(0, 0, 35)
-		else
-			offset = Vector3.new(0, 0, -35)
-		end
-		for e, z in pairs(v:GetChildren()) do
-			local targetCFrame = z.CFrame
-			z.CFrame *= CFrame.new(offset)
-			task.delay(1, function()
-				spr.target(z, 0.8, 2.5, { CFrame = targetCFrame, Transparency = 0 })
-			end)
 		end
 	end
 end
@@ -249,20 +253,15 @@ function castleController.start()
 		end)
 	end
 
-	local startingFloors = castleController.getFloors(Player)
-
 	local localPlayerCastle = castleFolder:WaitForChild(Player.Name):FindFirstChildWhichIsA("Folder")
 
 	local lastAnimated = 0
-	localPlayerCastle.ChildAdded:Connect(function(child)
-		if tonumber(child.Name) > startingFloors then
-			if tick() - lastAnimated < 2 then
-				return
-			end
-			lastAnimated = tick()
-			task.wait(0.5)
-			castleController.animateFloor(child)
+	localPlayerCastle:WaitForChild("topFloor").PrimaryPart:GetPropertyChangedSignal("CFrame"):Connect(function()
+		if tick() - lastAnimated < 2 then
+			return
 		end
+		lastAnimated = tick()
+		castleController.animateFloor(localPlayerCastle:FindFirstChild("topFloor"))
 	end)
 
 	local pTrove = Trove.new()
