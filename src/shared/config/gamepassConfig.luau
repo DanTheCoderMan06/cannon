@@ -39,6 +39,22 @@ return {
 		type = "floors",
 		infoType = Enum.InfoType.Product,
 	},
+	buyCircusCannon = {
+		id = 1051314279,
+		callback = function(player)
+			marketplaceUtil.updatePlayerCache(player, 1051314279)
+		end,
+		type = "cannons",
+		infoType = Enum.InfoType.GamePass,
+	},
+	buyArmyCannon = {
+		id = 1051600321,
+		callback = function(player)
+			marketplaceUtil.updatePlayerCache(player, 1051600321)
+		end,
+		type = "cannons",
+		infoType = Enum.InfoType.GamePass,
+	},
 	buyArtillery = {
 		id = 1028783141,
 		callback = function(player)
@@ -69,5 +85,7 @@ return {
 	artilleryGamepasses = {
 		["1028783141"] = "artillery",
 		["1035960145"] = "railgun",
+		["1051600321"] = "armyCannon",
+		["1051314279"] = "circusCannon",
 	},
 }

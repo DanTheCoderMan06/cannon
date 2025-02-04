@@ -2,7 +2,7 @@ local uiController = {}
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterGui = game:GetService("StarterGui")
-local TweenService = game:GetService("TweenService")
+local ExperienceNotificationService = game:GetService("ExperienceNotificationService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 
@@ -16,6 +16,8 @@ local Trove = require(sharedPackages.Trove)
 local Sift = require(sharedPackages.Sift)
 local menuUi = require(ReplicatedStorage.client.reactComponents.mainUI)
 
+local zap = require(ReplicatedStorage.zap)
+
 local selectedUIEvent = Signal.new()
 local selectSectionEvent = Signal.new()
 local unlockedItemEvent = Signal.new()
@@ -24,6 +26,15 @@ local claimedItemEvent = Signal.new()
 local dataController = require(ReplicatedStorage.client.controllers.dataController)
 
 local rewardsConfig = require(ReplicatedStorage.shared.config.rewardsConfig)
+uiController.promptInEvent = Signal.new()
+
+function uiController.canPromptIn()
+	local success, canPrompt = pcall(function()
+		return ExperienceNotificationService:CanPromptOptInAsync()
+	end)
+
+	return success and canPrompt
+end
 
 function uiController.getNameFromDay(day)
 	for _, v in pairs(rewardsConfig.rewards) do
@@ -31,6 +42,13 @@ function uiController.getNameFromDay(day)
 			return v.name
 		end
 	end
+end
+
+function uiController.promptOptIn()
+	local success, errorMessage = pcall(function()
+		ExperienceNotificationService:PromptOptIn()
+	end)
+	return success, errorMessage
 end
 
 function uiController.start()
@@ -71,6 +89,13 @@ function uiController.start()
 			end
 		end
 		currentData = newData
+	end)
+
+	ExperienceNotificationService.OptInPromptClosed:Connect(function()
+		print("Closed")
+		local canSend = zap.hasNotificationsEnabled.Call()
+		print(canSend)
+		uiController.promptInEvent:Fire(canSend)
 	end)
 end
 

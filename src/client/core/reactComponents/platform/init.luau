@@ -63,6 +63,7 @@ return function(props)
 			if not initializedPlatforms[props.name] then
 				local initializedValues = props.init()
 				setTitle(initializedValues.title)
+				print(initializedValues)
 				setDescription({
 					type(initializedValues.description) == "table" and unpack(initializedValues.description)
 						or initializedValues.description,

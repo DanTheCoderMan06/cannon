@@ -53,16 +53,24 @@ function castleController.animateFloor(floor)
 	local models = {}
 	for _, v in pairs(floor:GetDescendants()) do
 		if v:IsA("Weld") then
-			v.C1 *= CFrame.new(castleController.getRandOffset(100, 500), Vector3.new()) * CFrame.Angles(
+			local oldC1 = v.C1
+			v.C1 *= CFrame.new(castleController.getRandOffset(100, 500), Vector3.new())
+			--[[* CFrame.Angles(
 				math.rad(math.random(-180, 180)),
 				math.rad(math.random(-180, 180)),
 				math.rad(math.random(-180, 180))
 			)
+				--]]
 			task.delay(1, function()
-				spr.target(v, 0.8, 2.5, { C1 = CFrame.new() })
+				spr.target(v, 0.8, 2.5, { C1 = oldC1 })
 			end)
 		else
 			if v:IsA("Texture") then
+				v.Transparency = 1
+				task.delay(0.2, function()
+					spr.target(v, 0.8, 2.5, { Transparency = 0 })
+				end)
+			elseif v:IsA("BasePart") then
 				v.Transparency = 1
 				task.delay(0.2, function()
 					spr.target(v, 0.8, 2.5, { Transparency = 0 })
@@ -90,7 +98,7 @@ function castleController.getCannonLevel(targetPlayer)
 	end
 end
 
-function castleController.setupPlatform(targetPlatform, callbackSignal, modelUsed)
+function castleController.setupPlatform(targetPlatform, callbackSignal, modelUsed, platformInfo)
 	local container = ReactRoblox.createRoot(Instance.new("Folder"))
 	container:render(ReactRoblox.createPortal(
 		React.createElement("BillboardGui", {
@@ -108,7 +116,7 @@ function castleController.setupPlatform(targetPlatform, callbackSignal, modelUse
 			React.createElement(
 				platformUI,
 				Sift.Dictionary.merge(
-					platformConfig[targetPlatform.Name],
+					platformInfo,
 					{ name = targetPlatform.Name, callbackSignal = callbackSignal, modelUsed = modelUsed }
 				)
 			),
@@ -181,15 +189,25 @@ end
 function castleController.start()
 	local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
 
-	for platformName, platform in pairs(platformConfig) do
+	for platformName, platform in pairs(platformConfig.platforms) do
 		local callbackSignal = Signal.new()
 		local newPurchase = ReplicatedStorage.assets.purchasePlatform:Clone()
-		castleController.setupPlatform(playerPlatform.platforms:WaitForChild(platformName), callbackSignal, newPurchase)
+		castleController.setupPlatform(
+			playerPlatform.platforms:WaitForChild(platformName),
+			callbackSignal,
+			newPurchase,
+			platform
+		)
 
 		task.defer(function()
 			local modelFolder = Instance.new("Folder")
-			newPurchase.Parent = playerPlatform.platforms
+			newPurchase.Parent = playerPlatform.platforms:WaitForChild(platformName)
 			newPurchase:PivotTo(playerPlatform.platforms:WaitForChild(platformName).CFrame)
+
+			local w = Instance.new("Weld")
+			w.Part0 = newPurchase.Parent
+			w.Part1 = newPurchase.PrimaryPart
+			w.Parent = newPurchase
 
 			if typeof(platform.initModel) == "Instance" then
 				local updateTrove = Trove.new()
@@ -234,7 +252,6 @@ function castleController.start()
 					:FindFirstChild(platformName)
 					:GetPropertyChangedSignal("CFrame")
 					:Connect(function()
-						newPurchase:PivotTo(playerPlatform.platforms:FindFirstChild(platformName).CFrame)
 						castleController.updateZone(
 							platformName,
 							playerPlatform.platforms:FindFirstChild(platformName),
@@ -269,23 +286,41 @@ function castleController.start()
 
 	local rotateAngle = 0
 
+	local timeStart = tick()
+
 	pTrove:BindToRenderStep("rotateModels", Enum.RenderPriority.Last.Value + 1, function(dt)
 		rotateAngle += 1
 
 		local targetModels = {}
 		local targetCFrames = {}
+
 		for _, v in pairs(playerPlatform.platforms:GetChildren()) do
-			if v:IsA("Model") and v:FindFirstChildWhichIsA("Folder", true) then
+			if v:IsA("BasePart") and v:FindFirstChildWhichIsA("Folder", true) then
 				local model = v:FindFirstChildWhichIsA("Folder", true):FindFirstChildWhichIsA("Model")
 				if not model then
 					continue
 				end
-				local targetCFrame = v:FindFirstChild("modelPlatform", true).WorldCFrame
-
+				local targetCFrame = CFrame.new(v.Position + Vector3.new(0, 5, 0))
+					* CFrame.Angles(0, math.rad(rotateAngle), 0)
 				table.insert(targetModels, model.PrimaryPart)
-				table.insert(targetCFrames, targetCFrame * CFrame.Angles(0, math.rad(rotateAngle), 0))
+				table.insert(targetCFrames, targetCFrame)
 			end
 		end
+
+		for _, v in pairs(playerPlatform.cannons:GetChildren()) do
+			if v:IsA("BasePart") and v:FindFirstChildWhichIsA("Folder", true) then
+				local model = v:FindFirstChildWhichIsA("Folder", true):FindFirstChildWhichIsA("Model")
+				if not model then
+					continue
+				end
+
+				local targetCFrame = CFrame.new(v.Position + Vector3.new(0, 5, 0))
+					* CFrame.Angles(0, math.rad(rotateAngle), 0)
+				table.insert(targetModels, model.PrimaryPart)
+				table.insert(targetCFrames, targetCFrame)
+			end
+		end
+
 		workspace:BulkMoveTo(targetModels, targetCFrames, Enum.BulkMoveMode.FireCFrameChanged)
 	end)
 
@@ -313,9 +348,6 @@ function castleController.start()
 					end)
 				end)
 				castleController.updateSpot(playerSpot, v.Value)
-				playerTroves[player.Name]:Add(playerSpot:GetPropertyChangedSignal("CFrame"):Connect(function()
-					castleController.updateSpot(playerSpot, v.Value, true)
-				end))
 			end
 		end
 
@@ -368,6 +400,80 @@ function castleController.start()
 
 	for i, v in pairs(Players:GetPlayers()) do
 		playerAdded(v)
+	end
+
+	-- Cannon Selection
+	local cannonSpots = playerPlatform:WaitForChild("cannons")
+	local globalCounter = 0
+	for cannonName, cannon in pairs(platformConfig.cannons) do
+		globalCounter += 1
+		local counter = globalCounter
+
+		local callbackSignal = Signal.new()
+		local newPurchase = ReplicatedStorage.assets.purchasePlatform:Clone()
+		castleController.setupPlatform(cannonSpots:WaitForChild(counter), callbackSignal, newPurchase, cannon)
+
+		task.defer(function()
+			local modelFolder = Instance.new("Folder")
+			newPurchase.Parent = cannonSpots:WaitForChild(counter)
+			newPurchase:PivotTo(cannonSpots:WaitForChild(counter).CFrame)
+
+			local w = Instance.new("Weld")
+			w.Part0 = newPurchase.Parent
+			w.Part1 = newPurchase.PrimaryPart
+			w.Parent = newPurchase
+
+			if typeof(cannon.initModel) == "Instance" then
+				local updateTrove = Trove.new()
+				modelFolder.Name = cannonName .. "_Model"
+				modelFolder.Parent = newPurchase
+				updateTrove:AttachToInstance(modelFolder)
+
+				local newModel = cannon.initModel:Clone()
+				newModel:PivotTo(newPurchase:FindFirstChild("modelPlatform", true).WorldCFrame)
+				newModel.Parent = modelFolder
+			--Causing Crash
+			elseif typeof(cannon.initModel) == "function" then
+				local updateTrove = Trove.new()
+				local updateSignal = Signal.new()
+				modelFolder.Name = cannonName .. "_Model"
+				modelFolder.Parent = newPurchase
+				updateTrove:AttachToInstance(modelFolder)
+
+				updateTrove:Add(
+					updateSignal:Connect(function(newModel)
+						modelFolder:ClearAllChildren()
+						newModel:PivotTo(newPurchase:FindFirstChild("modelPlatform", true).WorldCFrame)
+						newModel.Parent = modelFolder
+					end),
+					"Disconnect"
+				)
+
+				updateTrove:Add(updateSignal, "Destroy")
+
+				task.defer(function()
+					cannon.initModel(updateTrove, updateSignal)
+				end)
+			end
+
+			local touchTrove = Trove.new()
+			touchTrove:AttachToInstance(playerPlatform)
+
+			local lastTriggered = 0
+
+			castleController.updateZone(counter, cannonSpots:FindFirstChild(counter), cannon, callbackSignal)
+
+			touchTrove:Add(
+				playerPlatform.cannons:FindFirstChild(counter):GetPropertyChangedSignal("CFrame"):Connect(function()
+					castleController.updateZone(
+						counter,
+						playerPlatform.cannons:FindFirstChild(counter),
+						cannon,
+						callbackSignal
+					)
+				end)
+			)
+		end)
 	end
 end
 

@@ -4,6 +4,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local rewardsConfig = require(ReplicatedStorage.shared.config.rewardsConfig)
 
 return {
+	testNotification = "f453b630-ef25-5349-9102-78762be674ac",
 	notifications = {
 		freeFloors = {
 			multiple = true,

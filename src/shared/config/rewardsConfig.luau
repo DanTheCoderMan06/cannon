@@ -4,7 +4,14 @@ local function logFormula(playerLevel: IntValue)
 	return math.round(math.log(playerLevel, 10))
 end
 
+local function randomRewardLog(playerLevel)
+	return math.round(math.log(playerLevel, 10) * math.pow(playerLevel, 2.5)) * (math.random() + 0.5)
+end
+
 local module = {
+	luckyBlockWaitTime = 10,
+	playerJoinReward = 1000000,
+	luckyBlockFormula = randomRewardLog,
 	rewards = {
 		{
 			day = 1,

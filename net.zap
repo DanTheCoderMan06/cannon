@@ -1,6 +1,7 @@
 opt server_output = "zapOutput/server/zap.luau"
 opt client_output = "zapOutput/client/zap.luau"
 
+-- Ragdoll
 event getUp = {
     from: Server,
     type: Reliable,
@@ -35,6 +36,9 @@ event replicateNewMotors = {
     data: Instance(Motor6D)[]
 }
 
+--
+
+-- Data Replication
 event dataChanged = {
 	from: Server,
     type: Reliable,
@@ -48,6 +52,9 @@ funct changePrivacy = {
     rets: boolean
 }
 
+--
+
+--Castle Replication
 funct selectPlatform = {
     call: Async,
     args: Instance(Player)?,
@@ -59,7 +66,9 @@ funct purchaseUpgrade = {
     args: string,
     rets: boolean
 }
+--
 
+--Physics Replication
 event enterCannon = {
 	from: Client,
     type: Reliable,
@@ -80,9 +89,36 @@ event simulatePhysics = {
     call: SingleAsync,
     data: unknown
 }
+--
 
 funct toggleCannon = {
     call: Async,
     args: unknown,
     rets: boolean
 }
+
+--Notifications Service
+funct hasNotificationsEnabled = {
+    call: Async,
+    args: unknown,
+    rets: boolean
+}
+--
+
+--Lucky Block
+event spawnLuckyBlock = {
+	from: Server,
+    type: Reliable,
+    call: SingleAsync,
+    data: unknown
+}
+
+event claimLuckyBlock = {
+	from: Client,
+    type: Reliable,
+    call: SingleAsync,
+    data: struct {
+        id: string
+    }
+}
+--

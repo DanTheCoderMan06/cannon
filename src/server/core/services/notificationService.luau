@@ -286,9 +286,40 @@ function notificationService.completeWork(taskInfo)
 	currentIndex = taskInfo.finish
 end
 
+function notificationService.canSendNotification(player)
+	local newParams = {}
+	local userNotification = {
+		payload = {
+			messageId = notificationConfig.testNotification,
+			type = "MOMENT",
+			parameters = { name = { stringValue = player.Name } },
+		},
+	}
+
+	local result
+
+	result = OCUserNotification.createUserNotification(player.UserId, userNotification)
+
+	local tries = 0
+
+	while tries < 3 and result.statusCode ~= 200 do
+		task.wait(1)
+		warn("RETRYING TO SEND NOTIFICATION TO USER " .. player.UserId)
+		result = OCUserNotification.createUserNotification(player.UserId, userNotification)
+		tries += 1
+	end
+
+	return result.statusCode == 200
+end
+
 function notificationService.start()
+	zap.hasNotificationsEnabled.SetCallback(function(player, data)
+		local result = notificationService.canSendNotification(player)
+		return result
+	end)
+
 	if game.PrivateServerId ~= "" or RunService:IsStudio() then
-		return -- Private Server
+		return
 	end
 	local canWork = Signal.new()
 	Players.PlayerAdded:Connect(function(player)
@@ -314,8 +345,6 @@ function notificationService.start()
 	--canWork:Wait()
 
 	notificationService.totalPlayerBase = notificationService.fetchMax()
-
-	print(notificationService.totalPlayerBase)
 
 	local foundTask
 	task.spawn(function()
