@@ -47,17 +47,6 @@ return function(props)
 	local description, setDescription =
 		React.useState({ type(props.description) == "table" and unpack(props.description) or props.description })
 
-	local function renderElements()
-		local render = {}
-		for _, v in pairs(description) do
-			if type(v) == "number" then
-				table.insert(render, imageIcon({ value = v }))
-			else
-				table.insert(render, textBox({ value = v }))
-			end
-		end
-	end
-
 	if props.updateValues then
 		React.useEffect(function()
 			if not initializedPlatforms[props.name] then

@@ -26,6 +26,7 @@ end
 function luckyBlockService.start()
 	Players.PlayerAdded:Connect(function(player)
 		playerBlocks[tostring(player.UserId)] = {}
+		playerBlocks[tostring(player.UserId)].lastClaimed = tick()
 	end)
 	Players.PlayerRemoving:Connect(function(player)
 		playerBlocks[tostring(player.UserId)] = nil
@@ -35,13 +36,28 @@ function luckyBlockService.start()
 			player:Kick("Lucky Block service didn't set up properly, please rejoin!")
 			return
 		end
-		if not playerBlocks[tostring(player.UserId)][data.id] then
+		if
+			not playerBlocks[tostring(player.UserId)][data.id]
+			or type(playerBlocks[tostring(player.UserId)][data.id]) == "number"
+		then
 			return
 		end
 		local newBlock = playerBlocks[tostring(player.UserId)][data.id]
 		local playerData = dataService.getPlayerData(player)
 		playerData.money += newBlock.reward
 		dataService.updatePlayerData(player, playerData)
+	end)
+	zap.requestLuckyBlock.SetCallback(function(player)
+		if not playerBlocks[tostring(player.UserId)] then
+			player:Kick("Lucky Block service didn't set up properly, please rejoin!")
+			return
+		end
+		if tick() - playerBlocks[tostring(player.UserId)].lastClaimed < rewardsConfig.luckyBlockWaitTime then
+			return false
+		end
+		playerBlocks[tostring(player.UserId)].lastClaimed = tick()
+		task.defer(luckyBlockService.spawnLuckyBlock, player)
+		return true
 	end)
 end
 

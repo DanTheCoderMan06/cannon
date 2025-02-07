@@ -11,6 +11,12 @@ function reactUtil.simpleBinding(binding, offset)
 	end)
 end
 
+function reactUtil.secondsToMMSS(seconds: string)
+	local minutes = math.floor(seconds / 60)
+	local secondsCalc = seconds % 60
+	return string.format("%02d:%02d", minutes, secondsCalc)
+end
+
 function reactUtil.getValueIfAvailable(props, offset)
 	return props.styles ~= nil and reactUtil.simpleBinding(props.styles.transparency, offset) or offset
 end

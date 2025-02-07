@@ -109,7 +109,7 @@ funct hasNotificationsEnabled = {
 event spawnLuckyBlock = {
 	from: Server,
     type: Reliable,
-    call: SingleAsync,
+    call: ManyAsync,
     data: unknown
 }
 
@@ -120,5 +120,11 @@ event claimLuckyBlock = {
     data: struct {
         id: string
     }
+}
+
+funct requestLuckyBlock =  {
+    call: Async,
+    args: unknown,
+    rets: boolean
 }
 --

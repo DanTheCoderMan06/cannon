@@ -14,8 +14,12 @@ local spr = require(ReplicatedStorage.sharedPackages.spr)
 
 local gamepassConfig = require(ReplicatedStorage.shared.config.gamepassConfig)
 local floorConfig = require(ReplicatedStorage.shared.config.floorConfig)
+local rewardsConfig = require(ReplicatedStorage.shared.config.rewardsConfig)
 
 local marketplaceUtil = require(ReplicatedStorage.shared.utilities.marketplaceUtil)
+local reactUtil = require(ReplicatedStorage.shared.utilities.reactUtil)
+
+local startTimeLuckyBlock = tick()
 
 return {
 	cannons = {
@@ -276,6 +280,52 @@ return {
 		},
 	},
 	platforms = {
+		luckyBlock = {
+			callback = function(callbackEvent)
+				print("Start Lucky block")
+				local success = zap.requestLuckyBlock.Call()
+				callbackEvent:Fire(success)
+			end,
+			title = "LUCKY BLOCK!",
+			description = "00:00",
+			updateValues = function(trove, updateEvent)
+				zap.spawnLuckyBlock.On(function(data)
+					startTimeLuckyBlock = tick()
+				end)
+				trove:BindToRenderStep("renderTimeLuckyBlock", Enum.RenderPriority.Last.Value + 1, function()
+					local timeLeft = math.floor(
+						math.clamp(
+							rewardsConfig.luckyBlockWaitTime - (tick() - startTimeLuckyBlock),
+							0,
+							rewardsConfig.luckyBlockWaitTime
+						)
+					)
+
+					updateEvent:Fire({
+						title = timeLeft > 0 and reactUtil.secondsToMMSS(timeLeft) or "READY!",
+						description = "UNTIL REWARD",
+					})
+				end)
+			end,
+			init = function()
+				return {
+					title = "Loading...",
+					description = "UNTIL REWARD",
+				}
+			end,
+			initModel = ReplicatedStorage.assets.minicannons:FindFirstChild("cannon1"),
+			callbackFunction = function(success, states)
+				if success then
+					spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(0.992156, 1, 0.580392) })
+				else
+					spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(1, 0, 0) })
+				end
+
+				task.delay(1, function()
+					spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(0, 1, 81 / 255) })
+				end)
+			end,
+		},
 		tasks = {
 			callback = function(callbackEvent)
 				local success = false

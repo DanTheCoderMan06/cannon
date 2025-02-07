@@ -5,7 +5,7 @@ local function logFormula(playerLevel: IntValue)
 end
 
 local function randomRewardLog(playerLevel)
-	return math.round(math.log(playerLevel, 10) * math.pow(playerLevel, 2.5)) * (math.random() + 0.5)
+	return math.round(math.log(playerLevel + 100, 10) * math.pow(playerLevel + 100, 2.3) * (math.random() + 0.5))
 end
 
 local module = {

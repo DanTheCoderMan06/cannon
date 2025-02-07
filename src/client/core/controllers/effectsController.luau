@@ -6,11 +6,15 @@ local RunService = game:GetService("RunService")
 
 local effectsController = {}
 local Trove = require(game.ReplicatedStorage.sharedPackages.Trove)
+local React = require(game.ReplicatedStorage.sharedPackages.React)
+local ReactRoblox = require(game.ReplicatedStorage.sharedPackages.ReactRoblox)
 local spr = require(game.ReplicatedStorage.sharedPackages.spr)
 local camTrove
 
 local config = require(ReplicatedStorage.shared.config.effectsConfig)
 local cannonConfig = require(ReplicatedStorage.shared.config.cannonConfig)
+
+local effectsUi = require(ReplicatedStorage.client.reactComponents.generics.effectText)
 
 function effectsController.getHighScore()
 	for _, v in pairs(Players.LocalPlayer:WaitForChild("leaderstats"):GetChildren()) do
@@ -18,6 +22,32 @@ function effectsController.getHighScore()
 			return v.Value
 		end
 	end
+end
+
+function effectsController.rewardPopup(location: Vector3, text: string)
+	local p = ReplicatedStorage.assets.effectRewardPart:Clone()
+	p.Position = location
+	p.Parent = workspace
+
+	local container = ReactRoblox.createRoot(Instance.new("Folder"))
+	container:render(
+		ReactRoblox.createPortal(
+			React.createElement(effectsUi, { Adornee = p, text = text }, {}),
+			Players.LocalPlayer.PlayerGui,
+			"point: " .. tostring(location)
+		)
+	)
+
+	task.delay(0.4, function()
+		for _, v in pairs(p:GetChildren()) do
+			v.Enabled = false
+		end
+	end)
+
+	task.delay(2, function()
+		container:unmount()
+		p:Destroy()
+	end)
 end
 
 function effectsController.start()
