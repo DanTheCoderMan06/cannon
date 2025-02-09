@@ -67,6 +67,17 @@ function dataService.start()
 			end)
 			if player.Parent == Players then
 				Profiles[player] = profile
+				local connection
+				connection = Players.PlayerRemoving:Connect(function(playerLeaving)
+					if player ~= playerLeaving then
+						return
+					end
+					connection:Disconnect()
+					if profile ~= nil then
+						profile:EndSession()
+					end
+				end)
+
 				print(`Profile loaded for {player.DisplayName}!`)
 
 				profile.Data.lastEntered = os.time()
@@ -95,13 +106,6 @@ function dataService.start()
 	end
 
 	Players.PlayerAdded:Connect(PlayerAdded)
-
-	Players.PlayerRemoving:Connect(function(player)
-		local profile = Profiles[player]
-		if profile ~= nil then
-			profile:EndSession()
-		end
-	end)
 
 	task.spawn(function()
 		while true do
