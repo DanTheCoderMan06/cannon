@@ -19,14 +19,14 @@ return function(props)
 	React.useEffect(function()
 		local uiTrove = Trove.new()
 
-		uiTrove:Add(props.claimedItemEvent:Connect(function(itemName)
-			if itemName == props.name then
+		uiTrove:Add(props.claimedItemEvent:Connect(function(itemDay)
+			if itemDay == props.day then
 				setIsClaimed(true)
 			end
 		end))
 
-		uiTrove:Add(props.unlockedItemEvent:Connect(function(itemName)
-			if itemName == props.name then
+		uiTrove:Add(props.unlockedItemEvent:Connect(function(itemDay)
+			if itemDay == props.day then
 				setIsLocked(false)
 			end
 		end))

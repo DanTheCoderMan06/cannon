@@ -19,4 +19,7 @@ return {
 
 	invitedPlayers = {},
 	notificationsOn = false,
+
+	hasVIPOn = false,
+	vipTimeStart = 0,
 }

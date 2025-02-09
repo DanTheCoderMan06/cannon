@@ -5,6 +5,7 @@ local StarterGui = game:GetService("StarterGui")
 local ExperienceNotificationService = game:GetService("ExperienceNotificationService")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local TeleportService = game:GetService("TeleportService")
 
 local sharedPackages = ReplicatedStorage.sharedPackages
 local React = require(sharedPackages.React)
@@ -65,6 +66,7 @@ function uiController.start()
 				selectSectionEvent = selectSectionEvent,
 				claimedItemEvent = claimedItemEvent,
 				unlockedItemEvent = unlockedItemEvent,
+				dataChanged = dataController.dataChanged,
 			}),
 		}),
 		Players.LocalPlayer.PlayerGui,
@@ -77,22 +79,23 @@ function uiController.start()
 			currentData = newData
 			return
 		end
-		if not Sift.Array.equals(currentData.daysClaimed, newData.daysClaimed) then
+		if not Sift.Array.equalsDeep(newData.daysClaimed, currentData.daysClaimed) then
 			local newDays = Sift.Array.difference(newData.daysClaimed, currentData.daysClaimed)
+			print(newDays)
 			for _, v in pairs(newDays) do
-				claimedItemEvent:Fire(uiController.getNameFromDay(v))
+				print(uiController.getNameFromDay(v))
+				claimedItemEvent:Fire(v)
 			end
 		end
 		if newData.daysPlayed > currentData.daysPlayed then
 			for i = 1, newData.daysPlayed - currentData.daysPlayed do
-				unlockedItemEvent:Fire(uiController.getNameFromDay(currentData.daysPlayed + i))
+				unlockedItemEvent:Fire(currentData.daysPlayed + i)
 			end
 		end
 		currentData = newData
 	end)
 
 	ExperienceNotificationService.OptInPromptClosed:Connect(function()
-		print("Closed")
 		local canSend = zap.hasNotificationsEnabled.Call()
 		print(canSend)
 		uiController.promptInEvent:Fire(canSend)

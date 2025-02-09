@@ -128,3 +128,20 @@ funct requestLuckyBlock =  {
     rets: boolean
 }
 --
+
+--Rewards 
+event claimDailyReward = {
+	from: Client,
+    type: Reliable,
+    call: SingleAsync,
+    data: u8(..32)
+}
+--
+
+--Auto Farm
+funct toggleAutoFarm = {
+    call: Async,
+    args: unknown,
+    rets: boolean 
+}
+--

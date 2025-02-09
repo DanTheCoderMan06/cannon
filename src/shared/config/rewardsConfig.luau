@@ -12,15 +12,19 @@ local module = {
 	luckyBlockWaitTime = 10,
 	playerJoinReward = 1000000,
 	luckyBlockFormula = randomRewardLog,
+	vipRewardDuration = 10000,
+	vipGamepass = 1060138098,
 	rewards = {
 		{
 			day = 1,
-			callback = function(playerData)
-				playerData.money += 100 * logFormula(playerData.cannon)
+			callback = function(playerData, player)
+				local ServerStorage = game:GetService("ServerStorage")
+				local vipService = require(ServerStorage.server.services.vipService)
+				vipService.givePlayerTempVIP(player)
 			end,
 			type = "image",
 			image = "",
-			name = "Cash",
+			name = "VIP",
 		},
 		{
 			day = 2,

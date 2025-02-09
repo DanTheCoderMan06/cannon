@@ -65,7 +65,8 @@ function cannonService.launchPlayer(player)
 		playerPlatforms:WaitForChild(player.Name):FindFirstChild("cannonPosition").Position.Y
 			- castleFolder:FindFirstChild(player.Name).Position.Y
 	)
-	local simulatedPhysics = physicsUtil.getVariables(playerHeight, cannonPower)
+	local simulatedPhysics =
+		physicsUtil.getVariables(playerHeight, cannonPower * (player:GetAttribute("isVIP") and 1.5 or 1))
 
 	print("Player Fired ")
 	print(simulatedPhysics)

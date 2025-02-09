@@ -5,12 +5,14 @@ local sharedPackages = ReplicatedStorage.sharedPackages
 
 local React = require(sharedPackages.React)
 local ReactSpring = require(sharedPackages.ReactSpring)
+local Sift = require(sharedPackages.Sift)
 local components = ReplicatedStorage.client.reactComponents
 
 local rewardsButton = require(components.mainUI.rewardsButton)
 local shopButton = require(components.mainUI.shopButton)
 local shop = require(components.mainUI.shop)
 local rewards = require(components.mainUI.rewards)
+local autoFarmButton = require(components.mainUI.autoFarmButton)
 
 return function(props)
 	print("Go")
@@ -23,6 +25,7 @@ return function(props)
 		Position = UDim2.fromScale(0, 0.),
 		Size = UDim2.fromScale(1, 1),
 	}, {
+		autoFarmButton = React.createElement(autoFarmButton, props),
 		rewardsButtonFrame = React.createElement(rewardsButton, props),
 		shopButtonFrame = React.createElement(shopButton, props),
 		shop = React.createElement(shop, props),

@@ -1,3 +1,4 @@
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local shared = ReplicatedStorage.shared
@@ -5,9 +6,74 @@ local sharedPackages = ReplicatedStorage.sharedPackages
 
 local React = require(sharedPackages.React)
 local ReactSpring = require(sharedPackages.ReactSpring)
+local Trove = require(sharedPackages.Trove)
 local components = ReplicatedStorage.client.reactComponents
 
+local marketplaceUtil = require(ReplicatedStorage.shared.utilities.marketplaceUtil)
+
+local rewardsConfig = require(ReplicatedStorage.shared.config.rewardsConfig)
+
+local function lockedFrame(props)
+	return React.createElement("ImageLabel", {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+		BackgroundTransparency = 1,
+		BorderColor3 = Color3.fromRGB(0, 0, 0),
+		BorderSizePixel = 0,
+		Image = "rbxassetid://115932345440925",
+		ImageColor3 = Color3.fromRGB(70, 239, 64),
+		Position = UDim2.fromScale(0.5, 0.5),
+		ScaleType = Enum.ScaleType.Fit,
+		Size = UDim2.fromScale(1, 1),
+		Visible = props.owned,
+		ZIndex = 0,
+	}, {
+		text = React.createElement("TextLabel", {
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+			BackgroundTransparency = 1,
+			BorderColor3 = Color3.fromRGB(0, 0, 0),
+			BorderSizePixel = 0,
+			FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
+			Position = UDim2.fromScale(0.518, 0.495),
+			Size = UDim2.fromScale(0.814, 0.227),
+			Text = "OWNED",
+			TextColor3 = Color3.fromRGB(255, 255, 255),
+			TextScaled = true,
+			TextSize = 14,
+			TextWrapped = true,
+		}, {
+			iAspectRatioConstraint4 = React.createElement("UIAspectRatioConstraint", {
+				AspectRatio = 4.38,
+			}),
+
+			iStroke = React.createElement("UIStroke", {
+				Thickness = 1.5,
+			}),
+		}),
+	})
+end
+
 return function(props)
+	local owned, setIsOwned = React.useBinding(marketplaceUtil.userOwnsGamepass(Players.LocalPlayer, props.id))
+
+	React.useEffect(function()
+		local uiTrove = Trove.new()
+
+		uiTrove:Add(
+			props.dataChanged:Connect(function(newData)
+				if props.id == rewardsConfig.vipGamepass then
+					setIsOwned(newData.hasVIPOn)
+				end
+			end),
+			"Disconnect"
+		)
+
+		return function()
+			uiTrove:Destroy()
+		end
+	end)
+
 	local styles, api = ReactSpring.useSpring(function()
 		return { hover = 0, clicked = 0 }
 	end)
@@ -26,6 +92,8 @@ return function(props)
 			return val < 0.7
 		end),
 	}, {
+		lockedFrame = React.createElement(lockedFrame, { owned = owned }),
+
 		content = React.createElement("ImageLabel", {
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
@@ -118,7 +186,9 @@ return function(props)
 								friction = 30,
 							},
 						})
-						props.onActivated()
+						if not owned:getValue() then
+							props.onActivated()
+						end
 						task.delay(0.05, function()
 							api.start({
 								clicked = 0,

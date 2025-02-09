@@ -29,8 +29,6 @@ function dataService.giveRewards(player)
 	if os.time() - profile.Data.lastClaimed >= 24 * 60 * 60 then
 		profile.Data.lastClaimed = os.time()
 		profile.Data.daysPlayed += 1
-		table.insert(profile.Data.daysClaimed, profile.Data.daysPlayed)
-		dataService.dailyReward:Fire(player, profile.Data.daysPlayed)
 		zap.dataChanged.Fire(player, profile.Data)
 	end
 	for _, v in pairs(profile.Data.notificationQueue) do
@@ -72,7 +70,7 @@ function dataService.start()
 				print(`Profile loaded for {player.DisplayName}!`)
 
 				profile.Data.lastEntered = os.time()
-				profile.Data.money = 1000000000
+				profile.Data.daysClaimed = {}
 
 				local leaderstats = ReplicatedStorage.assets.statsFolder:Clone()
 				leaderstats.Name = "leaderstats"

@@ -17,6 +17,8 @@ local dataController = require(ReplicatedStorage.client.controllers.dataControll
 
 local rewardFrame = require(ReplicatedStorage.client.reactComponents.mainUI.rewards.reward)
 
+local zap = require(ReplicatedStorage.zap)
+
 local function viewportFrame(props)
 	local viewportRef = React.useRef()
 
@@ -103,7 +105,7 @@ return function(props)
 			end
 
 			local isLocked = currentData.daysPlayed < v.day
-			local isClaimed = table.find(currentData.daysClaimed, v.day) == nil
+			local isClaimed = table.find(currentData.daysClaimed, v.day) ~= nil
 
 			table.insert(
 				newRewards,
@@ -112,11 +114,12 @@ return function(props)
 					Sift.Dictionary.merge({
 						index = v.day,
 						onActivated = function()
-							print("Hi")
+							zap.claimDailyReward.Fire(v.day)
 						end,
 						isLocked = isLocked,
 						isClaimed = isClaimed,
 						name = v.name,
+						day = v.day,
 						image = children,
 					}, props)
 				)

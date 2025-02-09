@@ -71,6 +71,14 @@ return {
 		type = "cannons",
 		infoType = Enum.InfoType.GamePass,
 	},
+	buyVIP = {
+		id = 1060138098,
+		callback = function(player)
+			marketplaceUtil.updatePlayerCache(player, 1060138098)
+		end,
+		type = "gamepasses",
+		infoType = Enum.InfoType.GamePass,
+	},
 	newCannon = {
 		id = 2697043453,
 		callback = function(player)

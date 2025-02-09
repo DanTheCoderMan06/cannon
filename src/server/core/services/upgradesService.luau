@@ -20,6 +20,7 @@ local zap = require(ServerStorage.zap)
 local cannonConfig = require(ReplicatedStorage.shared.config.cannonConfig)
 local floorConfig = require(ReplicatedStorage.shared.config.floorConfig)
 local gamepassConfig = require(ReplicatedStorage.shared.config.gamepassConfig)
+local rewardsConfig = require(ReplicatedStorage.shared.config.rewardsConfig)
 
 local castleService = require(ServerStorage.server.services.castleService)
 local cannonService = require(ServerStorage.server.services.cannonService)
@@ -67,6 +68,26 @@ function upgradesService.start()
 		end
 
 		return true
+	end)
+
+	zap.claimDailyReward.SetCallback(function(player, rewardDay)
+		local info = rewardsConfig.getDailyReward(rewardDay)
+		if not info then
+			return
+		end
+		local playerData = dataService.getPlayerData(player)
+		print(playerData.daysPlayed)
+		if playerData.daysPlayed < rewardDay then
+			print(playerData.daysPlayed)
+			return
+		end
+		print(playerData.daysClaimed)
+		if table.find(playerData.daysClaimed, rewardDay) then
+			return
+		end
+		info.callback(playerData, player)
+		table.insert(playerData.daysClaimed, rewardDay)
+		dataService.updatePlayerData(player, playerData)
 	end)
 end
 
