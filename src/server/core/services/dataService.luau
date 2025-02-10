@@ -52,6 +52,7 @@ end
 
 function dataService.start()
 	local function PlayerAdded(player)
+		task.wait(5)
 		local profile = PlayerStore:StartSessionAsync(`Player_{player.UserId}`, {
 			Cancel = function()
 				return player.Parent ~= Players
@@ -72,10 +73,11 @@ function dataService.start()
 					if player ~= playerLeaving then
 						return
 					end
-					connection:Disconnect()
 					if profile ~= nil then
 						profile:EndSession()
 					end
+					profile = nil
+					connection:Disconnect()
 				end)
 
 				print(`Profile loaded for {player.DisplayName}!`)

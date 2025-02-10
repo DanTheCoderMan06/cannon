@@ -107,7 +107,6 @@ return function(props)
 			closeButton = React.createElement(closeButton, {
 				styles = styles,
 				onActivated = function()
-					print("Go")
 					props.selectedUIEvent:Fire("")
 				end,
 			}),

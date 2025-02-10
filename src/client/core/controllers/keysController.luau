@@ -10,6 +10,9 @@ local function constantMovement(dt)
 	if not character then
 		return
 	end
+	if character:GetAttribute("inCannon") then
+		return
+	end
 	local playerPlatform = workspace:WaitForChild("playerPlatforms"):FindFirstChild(Players.LocalPlayer.Name)
 	if not playerPlatform then
 		return
@@ -19,6 +22,22 @@ local function constantMovement(dt)
 		return
 	end
 	character:WaitForChild("Humanoid"):MoveTo(cannonPart.Position)
+end
+
+function controlsController.updateFarming()
+	local isFarming = Players.LocalPlayer:GetAttribute("autoFarming")
+
+	local FREEZE_ACTION = "freezeMovement"
+
+	if isFarming then
+		ContextActionService:BindAction(FREEZE_ACTION, function()
+			return Enum.ContextActionResult.Sink
+		end, false, unpack(Enum.PlayerActions:GetEnumItems()))
+		RunService:BindToRenderStep("moveCharacter", Enum.RenderPriority.Last.Value, constantMovement)
+	else
+		ContextActionService:UnbindAction(FREEZE_ACTION)
+		RunService:UnbindFromRenderStep("moveCharacter")
+	end
 end
 
 function controlsController.start()
@@ -55,20 +74,10 @@ function controlsController.start()
 	end
 
 	Players.LocalPlayer:GetAttributeChangedSignal("autoFarming"):Connect(function()
-		local isFarming = Players.LocalPlayer:GetAttribute("autoFarming")
-
-		local FREEZE_ACTION = "freezeMovement"
-
-		if isFarming then
-			ContextActionService:BindAction(FREEZE_ACTION, function()
-				return Enum.ContextActionResult.Sink
-			end, false, unpack(Enum.PlayerActions:GetEnumItems()))
-			RunService:BindToRenderStep("moveCharacter", Enum.RenderPriority.Last.Value, constantMovement)
-		else
-			ContextActionService:UnbindAction(FREEZE_ACTION)
-			RunService:UnbindFromRenderStep("moveCharacter")
-		end
+		controlsController.updateFarming()
 	end)
+
+	controlsController.updateFarming()
 end
 
 return controlsController

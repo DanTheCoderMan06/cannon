@@ -47,6 +47,9 @@ function autoFarmService.start()
 		while true do
 			task.wait(60)
 			for _, v in pairs(Players:GetPlayers()) do
+				if not v:GetAttribute("autoFarming") then
+					continue
+				end
 				if os.time() - startTimes[v.Name] > 20 or RunService:IsStudio() then
 					autoFarmService.migrate(v)
 				end

@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local SoundService = game:GetService("SoundService")
 
 local shared = ReplicatedStorage.shared
 local sharedPackages = ReplicatedStorage.sharedPackages
@@ -114,6 +115,7 @@ return function(props)
 				return UDim2.fromScale(0.9, 0.9):Lerp(UDim2.fromScale(1, 1), 1 - val)
 			end),
 			[React.Event.Activated] = function()
+				SoundService.effects.click:Play()
 				task.spawn(function()
 					api.start({
 						gold = 1,

@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local SoundService = game:GetService("SoundService")
 
 local shared = ReplicatedStorage.shared
 local sharedPackages = ReplicatedStorage.sharedPackages
@@ -114,6 +115,7 @@ return function(props)
 					Sift.Dictionary.merge({
 						index = v.day,
 						onActivated = function()
+							SoundService.effects.click:Play()
 							zap.claimDailyReward.Fire(v.day)
 						end,
 						isLocked = isLocked,

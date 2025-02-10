@@ -1,5 +1,6 @@
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local SoundService = game:GetService("SoundService")
 
 local shared = ReplicatedStorage.shared
 local sharedPackages = ReplicatedStorage.sharedPackages
@@ -178,6 +179,7 @@ return function(props)
 					})
 				end,
 				[React.Event.Activated] = function()
+					SoundService.effects.click:Play()
 					task.spawn(function()
 						api.start({
 							clicked = 1,

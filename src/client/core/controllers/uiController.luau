@@ -25,7 +25,7 @@ local unlockedItemEvent = Signal.new()
 local claimedItemEvent = Signal.new()
 
 local dataController = require(ReplicatedStorage.client.controllers.dataController)
-
+local musicController = require(ReplicatedStorage.client.controllers.musicController)
 local rewardsConfig = require(ReplicatedStorage.shared.config.rewardsConfig)
 uiController.promptInEvent = Signal.new()
 
@@ -67,6 +67,7 @@ function uiController.start()
 				claimedItemEvent = claimedItemEvent,
 				unlockedItemEvent = unlockedItemEvent,
 				dataChanged = dataController.dataChanged,
+				toggleMusicEvent = musicController.toggleMusicEvent,
 			}),
 		}),
 		Players.LocalPlayer.PlayerGui,
