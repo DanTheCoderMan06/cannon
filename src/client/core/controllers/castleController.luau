@@ -193,7 +193,7 @@ function castleController.start()
 		local callbackSignal = Signal.new()
 		local newPurchase = ReplicatedStorage.assets.purchasePlatform:Clone()
 		castleController.setupPlatform(
-			playerPlatform.platforms:WaitForChild(platformName),
+			playerPlatform:WaitForChild("platforms"):WaitForChild(platformName),
 			callbackSignal,
 			newPurchase,
 			platform
@@ -202,7 +202,6 @@ function castleController.start()
 		task.defer(function()
 			local modelFolder = Instance.new("Folder")
 			newPurchase.Parent = playerPlatform.platforms:WaitForChild(platformName)
-			newPurchase:PivotTo(playerPlatform.platforms:WaitForChild(platformName).CFrame)
 
 			local w = Instance.new("Weld")
 			w.Part0 = newPurchase.Parent
@@ -245,7 +244,9 @@ function castleController.start()
 			local touchTrove = Trove.new()
 			touchTrove:AttachToInstance(playerPlatform)
 
-			local lastTriggered = 0
+			task.delay(3, function()
+				newPurchase:PivotTo(playerPlatform.platforms:WaitForChild(platformName).CFrame)
+			end)
 
 			touchTrove:Add(
 				playerPlatform.platforms
@@ -270,7 +271,7 @@ function castleController.start()
 		end)
 	end
 
-	local localPlayerCastle = castleFolder:WaitForChild(Player.Name):FindFirstChildWhichIsA("Folder")
+	local localPlayerCastle = castleFolder:WaitForChild(Player.Name):FindFirstChildWhichIsA("Model")
 
 	local lastAnimated = 0
 	localPlayerCastle:WaitForChild("topFloor").PrimaryPart:GetPropertyChangedSignal("CFrame"):Connect(function()
@@ -300,6 +301,9 @@ function castleController.start()
 				if not model then
 					continue
 				end
+				if not model.PrimaryPart then
+					continue
+				end
 				local targetCFrame = CFrame.new(v.Position + Vector3.new(0, 5, 0))
 					* CFrame.Angles(0, math.rad(rotateAngle), 0)
 				table.insert(targetModels, model.PrimaryPart)
@@ -313,7 +317,9 @@ function castleController.start()
 				if not model then
 					continue
 				end
-
+				if not model.PrimaryPart then
+					continue
+				end
 				local targetCFrame = CFrame.new(v.Position + Vector3.new(0, 5, 0))
 					* CFrame.Angles(0, math.rad(rotateAngle), 0)
 				table.insert(targetModels, model.PrimaryPart)
@@ -353,7 +359,7 @@ function castleController.start()
 
 		local towerPrompt = ReplicatedStorage.assets.towerPrompt:Clone()
 
-		local playerCastle = castleFolder:WaitForChild(player.Name):FindFirstChildWhichIsA("Folder")
+		local playerCastle = castleFolder:WaitForChild(player.Name):FindFirstChildWhichIsA("Model")
 
 		towerPrompt.Parent = playerSpot
 
@@ -416,7 +422,6 @@ function castleController.start()
 		task.defer(function()
 			local modelFolder = Instance.new("Folder")
 			newPurchase.Parent = cannonSpots:WaitForChild(counter)
-			newPurchase:PivotTo(cannonSpots:WaitForChild(counter).CFrame)
 
 			local w = Instance.new("Weld")
 			w.Part0 = newPurchase.Parent
@@ -459,7 +464,9 @@ function castleController.start()
 			local touchTrove = Trove.new()
 			touchTrove:AttachToInstance(playerPlatform)
 
-			local lastTriggered = 0
+			task.delay(3, function()
+				newPurchase:PivotTo(cannonSpots:WaitForChild(counter).CFrame)
+			end)
 
 			castleController.updateZone(counter, cannonSpots:FindFirstChild(counter), cannon, callbackSignal)
 

@@ -18,7 +18,9 @@ local function textBox(props)
 		FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
 		Position = UDim2.fromScale(0, 0.295),
 		Size = UDim2.fromScale(0.3, 1),
-		Text = props.value,
+		Text = props.targetBinding:map(function(val)
+			return val[props.indexValue]
+		end),
 		TextColor3 = Color3.fromRGB(255, 255, 255),
 		TextScaled = true,
 		TextSize = 14,
@@ -35,7 +37,9 @@ local function imageIcon(props)
 		BackgroundTransparency = 1,
 		BorderColor3 = Color3.fromRGB(0, 0, 0),
 		BorderSizePixel = 0,
-		Image = props.value or "",
+		Image = props.targetBinding:map(function(val)
+			return val[props.indexValue]
+		end),
 		Size = UDim2.fromScale(0.08, 1),
 		LayoutOrder = 1,
 		Visible = props.value ~= nil,
@@ -43,12 +47,13 @@ local function imageIcon(props)
 end
 
 return function(props)
-	local title, setTitle = React.useState(props.title)
+	local title, setTitle = React.useBinding(props.title)
 	local description, setDescription =
-		React.useState({ type(props.description) == "table" and unpack(props.description) or props.description })
+		React.useBinding({ type(props.description) == "table" and unpack(props.description) or props.description })
 
 	if props.updateValues then
 		React.useEffect(function()
+			print("effect")
 			if not initializedPlatforms[props.name] then
 				local initializedValues = props.init()
 				setTitle(initializedValues.title)
@@ -86,7 +91,7 @@ return function(props)
 				editSignal:DisconnectAll()
 				editSignal:Destroy()
 			end
-		end, { title, description })
+		end, {})
 	end
 
 	return React.createElement("Frame", {
@@ -126,8 +131,8 @@ return function(props)
 				HorizontalAlignment = Enum.HorizontalAlignment.Center,
 				SortOrder = Enum.SortOrder.LayoutOrder,
 			}),
-			textBox1 = React.createElement(textBox, { value = description[1] }),
-			imageBox = React.createElement(imageIcon, { value = description[2] }),
+			textBox1 = React.createElement(textBox, { targetBinding = description, indexValue = 1 }),
+			imageBox = React.createElement(imageIcon, { targetBinding = description, indexValue = 1 }),
 		}),
 	})
 end

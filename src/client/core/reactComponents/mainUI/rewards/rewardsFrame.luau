@@ -84,6 +84,7 @@ return function(props)
 		if rewardsLoaded then
 			return
 		end
+		print("effect")
 		rewardsLoaded = true
 		local newRewards = {}
 		for i, v in pairs(rewardConfig.rewards) do

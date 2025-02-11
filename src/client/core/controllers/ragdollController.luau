@@ -152,10 +152,6 @@ function ragdollController.start()
 		local f = force and (force * CharacterMass) or (Vector3.new())
 		local angfor = rotforce and (rotforce * CharacterMass) or (Vector3.new())
 
-		if data.camera then
-			cameraController.trackObject(Player.Character.PrimaryPart, data.offset)
-		end
-
 		ForceModule:ApplyForce(torso, f, angfor)
 
 		local DelayVal

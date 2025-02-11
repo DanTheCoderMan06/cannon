@@ -13,15 +13,11 @@ local React = require(sharedPackages.React)
 local ReactRoblox = require(sharedPackages.ReactRoblox)
 local cache = require(sharedPackages.partcache)
 
-local windParts
-
 local sharedPackages = ReplicatedStorage.sharedPackages
 local Signal = require(sharedPackages.Signal)
 local toggleWindSignal = Signal.new()
 -- VARIABLES
 local RNG = Random.new()
-local viewportRef = React.createRef()
-local cameraRef = React.createRef()
 
 local Trove = require(sharedPackages.Trove)
 
@@ -51,6 +47,44 @@ end
 
 -- METHODS
 function WindService:Start()
+	self.viewportRef = React.createRef()
+	local cameraRef = React.createRef()
+	local container = ReactRoblox.createRoot(Instance.new("Folder"))
+	self.windParts =
+		cache.new(ReplicatedStorage.assets:WaitForChild("Wind"), 50, Instance.new("Folder", ReplicatedStorage))
+	container:render(ReactRoblox.createPortal(
+		React.createElement("ScreenGui", {
+			ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+			ResetOnSpawn = false,
+			DisplayOrder = 1000,
+			IgnoreGuiInset = true,
+		}, {
+			viewport = React.createElement("ViewportFrame", {
+				Ambient = Color3.fromRGB(255, 255, 255),
+				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+				BackgroundTransparency = 1,
+				BorderColor3 = Color3.fromRGB(0, 0, 0),
+				BorderSizePixel = 0,
+				LightColor = Color3.fromRGB(255, 255, 255),
+				Size = UDim2.fromScale(1, 1),
+				ref = self.viewportRef,
+				ImageTransparency = 0,
+			}, {
+				camera = React.createElement("Camera", {
+					CFrame = CFrame.new(),
+					ref = cameraRef,
+				}),
+			}),
+		}),
+		Players.LocalPlayer.PlayerGui,
+		"speedlines"
+	))
+	task.spawn(function()
+		repeat
+			task.wait()
+		until self.viewportRef:getValue()
+		self.viewportRef:getValue().CurrentCamera = cameraRef:getValue()
+	end)
 	local LastUsed = tick()
 	self.Trove:BindToRenderStep("stripes", Enum.RenderPriority.Last.Value, function()
 		if (tick() - LastUsed) >= self.Time then
@@ -60,6 +94,8 @@ function WindService:Start()
 			end
 		end
 	end)
+	self.Trove:Add(container, "unmount")
+	self.Trove:Add(self.windParts, "Dispose")
 end
 
 function WindService:Stop()
@@ -103,8 +139,8 @@ function projection(v1, v2) -- project v1 onto v2
 end
 
 function WindService:CreateWind()
-	local Part = windParts:GetPart()
-	Part.Parent = viewportRef:getValue()
+	local Part = self.windParts:GetPart()
+	Part.Parent = self.viewportRef:getValue()
 	Part.Position = self:GetRandomPosition()
 	self.Current += 1
 
@@ -118,7 +154,7 @@ function WindService:CreateWind()
 	-- START ENDING:
 	task.delay(self.Lifetime, function()
 		Render:Disconnect()
-		windParts:ReturnPart(Part)
+		self.windParts:ReturnPart(Part)
 		self.Current -= 1
 	end)
 end
@@ -129,41 +165,7 @@ end
 
 function WindService.start()
 	local newservice = WindService.new({})
-	local container = ReactRoblox.createRoot(Instance.new("Folder"))
-	local stripesTransparency, setStripesTransparency = React.createBinding(0)
-	container:render(ReactRoblox.createPortal(
-		React.createElement("ScreenGui", {
-			ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
-			ResetOnSpawn = false,
-			DisplayOrder = 1000,
-			IgnoreGuiInset = true,
-		}, {
-			viewport = React.createElement("ViewportFrame", {
-				Ambient = Color3.fromRGB(255, 255, 255),
-				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-				BackgroundTransparency = 1,
-				BorderColor3 = Color3.fromRGB(0, 0, 0),
-				BorderSizePixel = 0,
-				LightColor = Color3.fromRGB(255, 255, 255),
-				Size = UDim2.fromScale(1, 1),
-				ref = viewportRef,
-				ImageTransparency = stripesTransparency,
-			}, {
-				camera = React.createElement("Camera", {
-					CFrame = CFrame.new(),
-					ref = cameraRef,
-				}),
-			}),
-		}),
-		Players.LocalPlayer.PlayerGui,
-		"speedlines"
-	))
 	toggleWindSignal:Connect(function(bool)
-		if not windParts then
-			windParts = cache.new(ReplicatedStorage.assets:WaitForChild("Wind"), 600, viewportRef:getValue())
-		end
-		viewportRef:getValue().CurrentCamera = cameraRef:getValue()
-		print(bool)
 		if bool then
 			newservice:Start()
 		else

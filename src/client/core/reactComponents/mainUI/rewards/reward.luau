@@ -14,8 +14,8 @@ return function(props)
 		return { hover = 0, clicked = 0 }
 	end)
 
-	local claimed, setIsClaimed = React.useState(props.isClaimed)
-	local locked, setIsLocked = React.useState(props.isLocked)
+	local claimed, setIsClaimed = React.useBinding(props.isClaimed)
+	local locked, setIsLocked = React.useBinding(props.isLocked)
 
 	React.useEffect(function()
 		local uiTrove = Trove.new()
@@ -35,7 +35,7 @@ return function(props)
 		return function()
 			uiTrove:Destroy()
 		end
-	end, { claimed, locked })
+	end, {})
 
 	return React.createElement("ImageButton", {
 		AnchorPoint = Vector2.new(0.5, 0.5),
@@ -107,7 +107,9 @@ return function(props)
 			BackgroundTransparency = 1,
 			BorderColor3 = Color3.fromRGB(0, 0, 0),
 			BorderSizePixel = 0,
-			Image = claimed and "rbxassetid://105652446380406" or "rbxassetid://133893845022134",
+			Image = claimed:map(function(val)
+				return val and "rbxassetid://105652446380406" or "rbxassetid://133893845022134"
+			end),
 			LayoutOrder = 3,
 			Position = styles.clicked:map(function(val)
 				return UDim2.fromScale(0.497, 0.913):Lerp(UDim2.fromScale(0.497, 0.913 + 0.02), val)
@@ -116,7 +118,9 @@ return function(props)
 			Size = styles.hover:map(function(val)
 				return UDim2.fromScale(0.694 * 0.9, 0.255 * 0.9):Lerp(UDim2.fromScale(0.694, 0.255), val)
 			end),
-			Visible = not locked,
+			Visible = locked:map(function(val)
+				return not val
+			end),
 			Rotation = styles.hover:map(function(val)
 				return val * 5
 			end),
@@ -170,7 +174,9 @@ return function(props)
 				FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
 				Position = UDim2.fromScale(0.5, 0.5),
 				Size = UDim2.fromScale(0.723, 0.862),
-				Text = claimed and "Claimed" or "Claim",
+				Text = claimed:map(function(val)
+					return val and "Claimed" or "Claim"
+				end),
 				TextColor3 = styles.clicked:map(function(val)
 					return Color3.fromRGB(255, 255, 255)
 						:Lerp(claimed and Color3.fromRGB(255, 128, 128) or Color3.fromRGB(134, 231, 199), val)

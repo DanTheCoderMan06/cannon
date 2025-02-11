@@ -55,6 +55,7 @@ function effectsController.start()
 	local clouds = Instance.new("Clouds")
 	clouds.Parent = workspace.Terrain
 	clouds.Cover = 0
+	--[[ Fix this lata.
 	RunService:BindToRenderStep("effectsHandler", Enum.RenderPriority.Last.Value, function()
 		local character = localPlayer.Character
 		if not character then
@@ -91,6 +92,7 @@ function effectsController.start()
 			})
 		end
 	end)
+	--]]
 end
 
 function effectsController.finishedPath(results)

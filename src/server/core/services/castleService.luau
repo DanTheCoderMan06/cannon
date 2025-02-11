@@ -36,7 +36,7 @@ local CHUNK_SIZE = 10
 function castleService.updateTower(player)
 	local playerData = dataService.getPlayerData(player)
 	local playerSpot = castleFolder:FindFirstChild(player.Name)
-	local playerCastle = playerSpot:FindFirstChildWhichIsA("Folder")
+	local playerCastle = playerSpot:FindFirstChildWhichIsA("Model")
 
 	local totalFloors = playerData.floors
 
@@ -102,11 +102,11 @@ function castleService.updatePlatform(player, newspot)
 	player:LoadCharacter()
 	playerPlatforms
 		:FindFirstChild(player.Name)
-		:SetAttribute("currentTower", newspot:FindFirstChildWhichIsA("Folder").Name)
+		:SetAttribute("currentTower", newspot:FindFirstChildWhichIsA("Model").Name)
 end
 --TODO: Check if function works correctly
 function castleService.updateTowerPrivacy(player, newStatus)
-	local playerTower = castleFolder:FindFirstChild(player.Name):FindFirstChildWhichIsA("Folder")
+	local playerTower = castleFolder:FindFirstChild(player.Name):FindFirstChildWhichIsA("Model")
 	playerTower:SetAttribute("status", newStatus)
 	if newStatus == 1 then
 		for _, v in pairs(playerPlatforms:GetChildren()) do
@@ -141,7 +141,7 @@ end
 
 function castleService.start()
 	Players.PlayerAdded:Connect(function(player)
-		local newCastle = Instance.new("Folder")
+		local newCastle = Instance.new("Model")
 		newCastle.Name = player.Name
 		local newSpot = castleService.findSpot()
 		newSpot.Name = player.Name
@@ -157,7 +157,7 @@ function castleService.start()
 	Players.PlayerRemoving:Connect(function(player)
 		playerPlatforms:FindFirstChild(player.Name):Destroy()
 		for i, v in pairs(castleFolder:GetChildren()) do
-			if v:FindFirstChildWhichIsA("Folder") and v.Name == player.Name then
+			if v:FindFirstChildWhichIsA("Model") and v.Name == player.Name then
 				for countItem, floorItem in pairs(v:GetChildren()) do
 					if floorItem:GetAttribute("isFloor") then
 						if countItem % 10 == 0 then

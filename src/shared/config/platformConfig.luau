@@ -289,7 +289,7 @@ return {
 			title = "LUCKY BLOCK!",
 			description = "00:00",
 			updateValues = function(trove, updateEvent)
-				zap.spawnLuckyBlock.On(function(data)
+				zap.spawnLuckyBlock.On(function()
 					startTimeLuckyBlock = tick()
 				end)
 				trove:BindToRenderStep("renderTimeLuckyBlock", Enum.RenderPriority.Last.Value + 1, function()

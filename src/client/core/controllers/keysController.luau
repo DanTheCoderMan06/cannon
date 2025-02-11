@@ -2,6 +2,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ContextActionService = game:GetService("ContextActionService")
 local RunService = game:GetService("RunService")
+local StarterGui = game:GetService("StarterGui")
 local Signal = require(ReplicatedStorage.sharedPackages.Signal)
 local controlsController = {}
 
@@ -78,6 +79,13 @@ function controlsController.start()
 	end)
 
 	controlsController.updateFarming()
+
+	repeat
+		local success = pcall(function()
+			StarterGui:SetCore("ResetButtonCallback", false)
+		end)
+		task.wait()
+	until success
 end
 
 return controlsController
