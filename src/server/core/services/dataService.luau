@@ -10,7 +10,7 @@ local profileStore = require(serverPackages.ProfileStore)
 local Players = game:GetService("Players")
 
 local profileTemplate = require(ServerStorage.server.modules.profileTemplate)
-local PlayerStore = profileStore.New("PlayerStoreV2", profileTemplate)
+local PlayerStore = profileStore.New("PlayerDataStoreDEV1", profileTemplate)
 local Profiles = {}
 
 local dataService = {}
@@ -83,7 +83,6 @@ function dataService.start()
 				print(`Profile loaded for {player.DisplayName}!`)
 
 				profile.Data.lastEntered = os.time()
-				profile.Data.floors = 1
 
 				local leaderstats = ReplicatedStorage.assets.statsFolder:Clone()
 				leaderstats.Name = "leaderstats"

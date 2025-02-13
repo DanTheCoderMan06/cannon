@@ -36,13 +36,14 @@ local windController = require(ReplicatedStorage.client.controllers.windControll
 local effectsController = require(ReplicatedStorage.client.controllers.effectsController)
 local cameraController = require(ReplicatedStorage.client.controllers.cameraController)
 
-function cannonController.playLaunchSound()
+function cannonController.playLaunchSound(multiplier, physicsTime)
 	SoundService.effects.explosion:Play()
 	local launchSound = SoundService.launch:GetChildren()[math.random(1, #SoundService.launch:GetChildren())]
 	launchSound:Play()
 	task.delay(1, function()
 		local fallingSound = SoundService.effects.falling
-		fallingSound.PlaybackSpeed = fallingSound.TimeLength / 10
+		local flightDuration = physicsTime / multiplier
+		fallingSound.PlaybackSpeed = fallingSound.TimeLength / flightDuration
 		fallingSound:Play()
 	end)
 end
@@ -67,6 +68,26 @@ function cannonController.start()
 			end
 			lastTriggered = tick()
 			zap.enterCannon.Fire()
+		end)
+
+		cannonPart:GetPropertyChangedSignal("CFrame"):Connect(function()
+			cannonZone:destroy()
+			local cannonZone = Zone.new(cannonPart)
+			local lastTriggered = 0
+
+			cannonZone.partEntered:Connect(function(part)
+				if not Players.LocalPlayer.Character then
+					return
+				end
+				if not part:IsDescendantOf(Players.LocalPlayer.Character) then
+					return
+				end
+				if tick() - lastTriggered < 1 then
+					return
+				end
+				lastTriggered = tick()
+				zap.enterCannon.Fire()
+			end)
 		end)
 	end)
 
@@ -156,7 +177,7 @@ function cannonController.start()
 
 		cameraController.startShake()
 
-		cannonController.playLaunchSound()
+		cannonController.playLaunchSound(multiplier, physics.time)
 
 		--[[
 		local playedFallYet = false

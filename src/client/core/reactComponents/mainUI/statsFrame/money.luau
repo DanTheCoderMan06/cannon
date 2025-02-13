@@ -20,7 +20,8 @@ return function(props)
 
 		uiTrove:Add(
 			props.dataChanged:Connect(function(data)
-				setCurrentMoney(tostring(math.ceil(data.money)))
+				print(data)
+				setCurrentMoney((math.ceil(data.money)))
 			end),
 			"Disconnect"
 		)

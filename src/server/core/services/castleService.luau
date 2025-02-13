@@ -99,10 +99,14 @@ function castleService.updatePlatform(player, newspot)
 		)
 	playerPlatforms:FindFirstChild(player.Name):PivotTo(targetCFrame)
 	player.RespawnLocation = playerPlatforms:FindFirstChild(player.Name):FindFirstChildWhichIsA("SpawnLocation")
-	player:LoadCharacter()
 	playerPlatforms
 		:FindFirstChild(player.Name)
 		:SetAttribute("currentTower", newspot:FindFirstChildWhichIsA("Model").Name)
+	if player.Character then
+		if not player.Character:GetAttribute("inCannon") then
+			player:LoadCharacter()
+		end
+	end
 end
 --TODO: Check if function works correctly
 function castleService.updateTowerPrivacy(player, newStatus)
@@ -208,7 +212,6 @@ function castleService.start()
 				return
 			end
 		end
-		print(targetPlayer.Name)
 		castleService.updatePlatform(player, castleFolder:FindFirstChild(targetPlayer.Name))
 		return true
 	end)

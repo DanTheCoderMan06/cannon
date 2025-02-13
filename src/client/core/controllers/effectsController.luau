@@ -116,18 +116,8 @@ function effectsController.finishedPath(results)
 		finishedPathEffects:Destroy()
 		spr.stop(workspace.CurrentCamera, "CFrame")
 		local newCharacter = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
-		task.wait()
-		spr.target(workspace.CurrentCamera, 1, 2, {
-			CFrame = CFrame.new(
-				newCharacter:WaitForChild("Head").Position + Vector3.new(0, 10, 0),
-				newCharacter:WaitForChild("Head").Position
-			),
-		})
-		task.delay(2, function()
-			spr.stop(workspace.CurrentCamera, "CFrame")
-			workspace.CurrentCamera.CameraSubject = newCharacter
-			workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
-		end)
+		workspace.CurrentCamera.CameraSubject = newCharacter
+		workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
 	end)
 end
 

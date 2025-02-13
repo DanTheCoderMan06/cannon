@@ -1,4 +1,5 @@
 local Players = game:GetService("Players")
+local ReplicatedFirst = game:GetService("ReplicatedFirst")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CAS = game:GetService("ContextActionService")
 local RunService = game:GetService("RunService")
@@ -12,6 +13,7 @@ local React = require(game.ReplicatedStorage.sharedPackages.React)
 local Sift = require(game.ReplicatedStorage.sharedPackages.Sift)
 local Signal = require(game.ReplicatedStorage.sharedPackages.Signal)
 local Zone = require(game.ReplicatedStorage.sharedPackages.Zone)
+local ObjectCache = require(game.ReplicatedStorage.sharedPackages.objectcache)
 
 local zap = require(ReplicatedStorage.zap)
 
@@ -27,55 +29,45 @@ local reactComponents = ReplicatedStorage.client.reactComponents
 
 local platformUI = require(reactComponents.platform)
 
-function castleController.getRandOffset(minDistance, maxDistance)
-	minDistance = minDistance or 20 -- Minimum distance; default is 20 studs.
-	maxDistance = maxDistance or 100 -- Maximum distance; change as needed.
+local miniFloorFolder = Instance.new("Folder")
+miniFloorFolder.Name = "miniFloors"
+miniFloorFolder.Parent = ReplicatedFirst
 
-	-- Generate a random angle between 0 and 2π.
-	local theta = math.random() * 2 * math.pi
-
-	-- Generate a random cosine of the phi angle (from -1 to 1)
-	-- This ensures a uniform distribution over the sphere.
-	local cosPhi = math.random() * 2 - 1
-	local sinPhi = math.sqrt(1 - cosPhi * cosPhi)
-
-	-- Pick a random distance between minDistance and maxDistance.
-	local r = math.random() * (maxDistance - minDistance) + minDistance
-
-	-- Convert spherical coordinates (r, theta, phi) to Cartesian (x, y, z).
-	local x = r * sinPhi * math.cos(theta)
-	local y = r * sinPhi * math.sin(theta)
-	local z = r * cosPhi
-
-	return Vector3.new(x, y, z)
-end
+local miniFloorCache =
+	ObjectCache.new({ InitialSize = 72, Template = ReplicatedStorage.assets.miniFloor, CacheParent = miniFloorFolder })
 
 function castleController.animateFloor(floor)
-	local models = {}
-	for _, v in pairs(floor:GetDescendants()) do
+	task.wait(0.4)
+	for _, v in pairs(floor.PrimaryPart:GetChildren()) do
 		if v:IsA("Weld") then
 			local oldC1 = v.C1
-			v.C1 *= CFrame.new(castleController.getRandOffset(100, 500), Vector3.new())
-			--[[* CFrame.Angles(
-				math.rad(math.random(-180, 180)),
-				math.rad(math.random(-180, 180)),
-				math.rad(math.random(-180, 180))
-			)
-				--]]
-			task.delay(1, function()
-				spr.target(v, 0.8, 2.5, { C1 = oldC1 })
+			local offset
+			if v.Name == "structure" then
+				offset = CFrame.new(Vector3.new(-100, 0, -100))
+			elseif v.Name == "structure.001" then
+				offset = CFrame.new(Vector3.new(100, 0, -100))
+			elseif v.Name == "structure.002" then
+				offset = CFrame.new(Vector3.new(-100, 0, -100))
+			elseif v.Name == "structure.003" then
+				offset = CFrame.new(Vector3.new(-100, 0, 100))
+			else
+				continue
+			end
+			v.C1 *= offset
+			spr.target(v, 1, 2.5, { C1 = oldC1 })
+		elseif v:IsA("BasePart") then
+			local target = v.Transparency
+			v.Transparency = 1
+			task.delay(0.2, function()
+				spr.target(v, 1, 2.5, { Transparency = target })
 			end)
-		else
-			if v:IsA("Texture") then
-				v.Transparency = 1
-				task.delay(0.2, function()
-					spr.target(v, 0.8, 2.5, { Transparency = 0 })
-				end)
-			elseif v:IsA("BasePart") then
-				v.Transparency = 1
-				task.delay(0.2, function()
-					spr.target(v, 0.8, 2.5, { Transparency = 0 })
-				end)
+			for _, z in pairs(v:GetChildren()) do
+				if z:IsA("Texture") then
+					z.Transparency = 1
+					task.delay(0.2, function()
+						spr.target(z, 1, 2.5, { Transparency = 0 })
+					end)
+				end
 			end
 		end
 	end
@@ -127,16 +119,27 @@ function castleController.setupPlatform(targetPlatform, callbackSignal, modelUse
 	))
 end
 
-function castleController.updateSpot(spot, newValue, override)
-	if math.floor(newValue / 20) == 0 then
-		return
+function castleController.updateSpot(spot, newValue)
+	local currentValue = 0
+	for _, v in pairs(spot:FindFirstChildWhichIsA("Model"):GetChildren()) do
+		if v:IsA("Model") and tonumber(v.Name) then
+			currentValue += 1
+		end
 	end
-	for i = 1, math.floor(newValue / 20) do
-		if not spot:FindFirstChildWhichIsA("Model"):FindFirstChild(i) or override then
-			local newMiniFloor = ReplicatedStorage.assets.miniFloor:Clone()
-			newMiniFloor:PivotTo(spot.CFrame * CFrame.new(0, ((i - 1) * floorHeight * 0.025), 0))
-			newMiniFloor.Name = tostring(i)
-			newMiniFloor.Parent = spot:FindFirstChildWhichIsA("Model")
+	if newValue > currentValue then
+		for i = currentValue, newValue do
+			if not spot:FindFirstChildWhichIsA("Model"):FindFirstChild(i) then
+				local newMiniFloor = miniFloorCache:Get(spot.CFrame * CFrame.new(0, ((i - 1) * floorHeight * 0.025), 0))
+				--newMiniFloor:PivotTo(spot.CFrame * CFrame.new(0, ((i - 1) * floorHeight * 0.025), 0))
+				newMiniFloor.Name = tostring(i)
+				newMiniFloor.Parent = spot:FindFirstChildWhichIsA("Model")
+			end
+		end
+	else
+		for i = newValue, currentValue do
+			if spot:FindFirstChildWhichIsA("Model"):FindFirstChild(i) then
+				miniFloorCache:Return(spot:FindFirstChildWhichIsA("Model"):FindFirstChild(i))
+			end
 		end
 	end
 end
@@ -188,6 +191,72 @@ function castleController.updateZone(zoneName, targetPart, platform, callbackSig
 	end)
 end
 
+local playerTroves = {}
+
+function castleController.updatePlayer(player)
+	playerTroves[player.Name] = Trove.new()
+	local playerSpot = castleController.findSpot()
+	playerSpot.Name = player.Name
+
+	local towerModel = Instance.new("Model")
+	towerModel.Name = player.Name
+
+	ReplicatedStorage.assets.towerHighlight:Clone().Parent = towerModel
+
+	towerModel.Parent = playerSpot
+
+	local towerPrompt = ReplicatedStorage.assets.towerPrompt:Clone()
+
+	local playerCastle = castleFolder:WaitForChild(player.Name):FindFirstChildWhichIsA("Model")
+
+	towerPrompt.Parent = playerSpot
+
+	playerTroves[player.Name]:Add(playerCastle:GetAttributeChangedSignal("status"):Connect(function()
+		castleController.updatePrompt(towerPrompt, playerCastle:GetAttribute("status"))
+	end))
+
+	castleController.updatePrompt(towerPrompt, playerCastle:GetAttribute("status"))
+
+	towerPrompt.PromptShown:Connect(function()
+		spr.target(towerModel.towerHighlight, 0.9, 3, { OutlineTransparency = 0 })
+	end)
+
+	towerPrompt.PromptHidden:Connect(function()
+		spr.target(towerModel.towerHighlight, 0.9, 3, { OutlineTransparency = 1 })
+	end)
+
+	towerPrompt.Triggered:Connect(function()
+		local success = zap.selectPlatform.Call(player)
+
+		if success then
+			spr.target(towerModel.towerHighlight, 0.9, 3, { OutlineColor = Color3.new(0.580392, 1, 0.768627) })
+		else
+			spr.target(towerModel.towerHighlight, 0.9, 3, { OutlineColor = Color3.new(1, 0, 0) })
+		end
+
+		task.delay(1, function()
+			spr.target(towerModel.towerHighlight, 0.9, 3, { OutlineColor = Color3.new(1, 1, 1) })
+		end)
+	end)
+
+	local oldSpotCFrame = playerSpot.CFrame
+
+	playerTroves[player.Name]:Add(playerSpot:GetPropertyChangedSignal("CFrame"):Connect(function()
+		local parts = {}
+		local cframes = {}
+		local delta = playerSpot.Position - oldSpotCFrame.Position
+		for _, v in pairs(towerModel:GetChildren()) do
+			if not tonumber(v.Name) then
+				continue
+			end
+			table.insert(parts, v.PrimaryPart)
+			table.insert(cframes, (v.PrimaryPart.CFrame * CFrame.new(delta)))
+		end
+		workspace:BulkMoveTo(parts, cframes, Enum.BulkMoveMode.FireAllEvents)
+		oldSpotCFrame = playerSpot.CFrame
+	end))
+end
+
 function castleController.start()
 	local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
 
@@ -203,9 +272,10 @@ function castleController.start()
 
 		task.defer(function()
 			local modelFolder = Instance.new("Folder")
+			newPurchase:PivotTo(playerPlatform.platforms:WaitForChild(platformName).CFrame)
 			newPurchase.Parent = playerPlatform.platforms:WaitForChild(platformName)
 
-			local w = Instance.new("Weld")
+			local w = Instance.new("WeldConstraint")
 			w.Part0 = newPurchase.Parent
 			w.Part1 = newPurchase.PrimaryPart
 			w.Parent = newPurchase
@@ -255,6 +325,7 @@ function castleController.start()
 					:FindFirstChild(platformName)
 					:GetPropertyChangedSignal("CFrame")
 					:Connect(function()
+						newPurchase:PivotTo(playerPlatform.platforms:FindFirstChild(platformName).CFrame)
 						castleController.updateZone(
 							platformName,
 							playerPlatform.platforms:FindFirstChild(platformName),
@@ -334,81 +405,61 @@ function castleController.start()
 
 	local playerLeaderboard = playerPlatform:FindFirstChild("teleports")
 
-	local playerTroves = {}
-
-	local function playerAdded(player)
-		playerTroves[player.Name] = Trove.new()
-		local playerSpot = castleController.findSpot()
-		playerSpot.Name = player.Name
-
-		local towerModel = Instance.new("Model")
-		towerModel.Name = player.Name
-
-		ReplicatedStorage.assets.towerHighlight:Clone().Parent = towerModel
-
-		towerModel.Parent = playerSpot
-
-		for _, v in pairs(player:WaitForChild("leaderstats"):GetChildren()) do
-			if v:GetAttribute("statName") == "floors" then
-				playerTroves[player.Name]:Add(function()
-					v:GetPropertyChangedSignal("Value"):Connect(function()
-						castleController.updateSpot(playerSpot, v.Value)
-					end)
-				end)
-				castleController.updateSpot(playerSpot, v.Value)
+	local function updateTowers()
+		local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
+		local teleports = playerPlatform.teleports
+		local totalFloors = 0
+		local playerStats = {}
+		for _, v in pairs(Players:GetPlayers()) do
+			local floorCount
+			for e, z in pairs(v:WaitForChild("leaderstats"):GetChildren()) do
+				if z:GetAttribute("statName") == "floors" then
+					floorCount = z.Value
+					break
+				end
 			end
+			playerStats[v.Name] = floorCount
+			totalFloors += floorCount
 		end
 
-		local towerPrompt = ReplicatedStorage.assets.towerPrompt:Clone()
-
-		local playerCastle = castleFolder:WaitForChild(player.Name):FindFirstChildWhichIsA("Model")
-
-		towerPrompt.Parent = playerSpot
-
-		playerTroves[player.Name]:Add(playerCastle:GetAttributeChangedSignal("status"):Connect(function()
-			castleController.updatePrompt(towerPrompt, playerCastle:GetAttribute("status"))
-		end))
-		--TODO: Fix prompt updating
-		castleController.updatePrompt(towerPrompt, playerCastle:GetAttribute("status"))
-
-		towerPrompt.PromptShown:Connect(function()
-			spr.target(towerModel.towerHighlight, 0.9, 3, { OutlineTransparency = 0 })
-		end)
-
-		towerPrompt.PromptHidden:Connect(function()
-			spr.target(towerModel.towerHighlight, 0.9, 3, { OutlineTransparency = 1 })
-		end)
-
-		towerPrompt.Triggered:Connect(function()
-			local success = zap.selectPlatform.Call(player)
-
-			if success then
-				spr.target(towerModel.towerHighlight, 0.9, 3, { OutlineColor = Color3.new(0.580392, 1, 0.768627) })
-			else
-				spr.target(towerModel.towerHighlight, 0.9, 3, { OutlineColor = Color3.new(1, 0, 0) })
-			end
-
-			task.delay(1, function()
-				spr.target(towerModel.towerHighlight, 0.9, 3, { OutlineColor = Color3.new(1, 1, 1) })
-			end)
-		end)
+		for _, v in pairs(Players:GetPlayers()) do
+			local totalProportion = playerStats[v.Name] / totalFloors
+			local playerSpot = teleports:WaitForChild(v.Name)
+			castleController.updateSpot(playerSpot, math.round(totalProportion * 48) + 1)
+		end
 	end
 
-	Players.PlayerAdded:Connect(playerAdded)
+	--Teleports Service
+
+	Players.PlayerAdded:Connect(function(player)
+		castleController.updatePlayer(player)
+		updateTowers()
+	end)
 
 	Players.PlayerRemoving:Connect(function(player)
 		playerTroves[player.Name]:Destroy()
 		for i, v in pairs(playerPlatform.teleports:GetChildren()) do
 			if v.Name == player.Name then
 				v.Name = "spot"
-				v:ClearAllChildren()
+				for _, v in pairs(v:GetChildren()) do
+					if not v:IsA("Model") then
+						v:Destroy()
+						continue
+					end
+					pcall(function()
+						miniFloorCache:Return(v)
+					end)
+				end
 			end
 		end
+		updateTowers()
 	end)
 
-	for i, v in pairs(Players:GetPlayers()) do
-		playerAdded(v)
-	end
+	castleController.updatePlayer(Players.LocalPlayer)
+
+	updateTowers()
+
+	--Teleports
 
 	-- Cannon Selection
 	local cannonSpots = playerPlatform:WaitForChild("cannons")
@@ -474,6 +525,7 @@ function castleController.start()
 
 			touchTrove:Add(
 				playerPlatform.cannons:FindFirstChild(counter):GetPropertyChangedSignal("CFrame"):Connect(function()
+					newPurchase:PivotTo(playerPlatform.cannons:FindFirstChild(counter).CFrame)
 					castleController.updateZone(
 						counter,
 						playerPlatform.cannons:FindFirstChild(counter),
