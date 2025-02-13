@@ -29,13 +29,6 @@ local reactComponents = ReplicatedStorage.client.reactComponents
 
 local platformUI = require(reactComponents.platform)
 
-local miniFloorFolder = Instance.new("Folder")
-miniFloorFolder.Name = "miniFloors"
-miniFloorFolder.Parent = ReplicatedFirst
-
-local miniFloorCache =
-	ObjectCache.new({ InitialSize = 72, Template = ReplicatedStorage.assets.miniFloor, CacheParent = miniFloorFolder })
-
 function castleController.animateFloor(floor)
 	task.wait(0.4)
 	for _, v in pairs(floor.PrimaryPart:GetChildren()) do
@@ -127,18 +120,22 @@ function castleController.updateSpot(spot, newValue)
 		end
 	end
 	if newValue > currentValue then
+		local parts = {}
+		local cframes = {}
 		for i = currentValue, newValue do
 			if not spot:FindFirstChildWhichIsA("Model"):FindFirstChild(i) then
-				local newMiniFloor = miniFloorCache:Get(spot.CFrame * CFrame.new(0, ((i - 1) * floorHeight * 0.025), 0))
-				--newMiniFloor:PivotTo(spot.CFrame * CFrame.new(0, ((i - 1) * floorHeight * 0.025), 0))
+				local newMiniFloor = ReplicatedStorage.assets.miniFloor:Clone()
+				table.insert(parts, newMiniFloor.PrimaryPart)
+				table.insert(cframes, spot.CFrame * CFrame.new(0, ((i - 1) * floorHeight * 0.025), 0))
 				newMiniFloor.Name = tostring(i)
 				newMiniFloor.Parent = spot:FindFirstChildWhichIsA("Model")
 			end
 		end
+		workspace:BulkMoveTo(parts, cframes, Enum.BulkMoveMode.FireCFrameChanged)
 	else
 		for i = newValue, currentValue do
 			if spot:FindFirstChildWhichIsA("Model"):FindFirstChild(i) then
-				miniFloorCache:Return(spot:FindFirstChildWhichIsA("Model"):FindFirstChild(i))
+				spot:FindFirstChildWhichIsA("Model"):FindFirstChild(i):Destroy()
 			end
 		end
 	end
@@ -194,6 +191,7 @@ end
 local playerTroves = {}
 
 function castleController.updatePlayer(player)
+	print(player.Name)
 	playerTroves[player.Name] = Trove.new()
 	local playerSpot = castleController.findSpot()
 	playerSpot.Name = player.Name
@@ -252,9 +250,11 @@ function castleController.updatePlayer(player)
 			table.insert(parts, v.PrimaryPart)
 			table.insert(cframes, (v.PrimaryPart.CFrame * CFrame.new(delta)))
 		end
-		workspace:BulkMoveTo(parts, cframes, Enum.BulkMoveMode.FireAllEvents)
+		workspace:BulkMoveTo(parts, cframes, Enum.BulkMoveMode.FireCFrameChanged)
 		oldSpotCFrame = playerSpot.CFrame
 	end))
+
+	playerTroves[player.Name]:Add(towerPrompt)
 end
 
 function castleController.start()
@@ -431,31 +431,23 @@ function castleController.start()
 
 	--Teleports Service
 
-	Players.PlayerAdded:Connect(function(player)
-		castleController.updatePlayer(player)
+	Players.PlayerAdded:Connect(function(newPlayer)
+		print("Update")
+		castleController.updatePlayer(newPlayer)
 		updateTowers()
 	end)
 
-	Players.PlayerRemoving:Connect(function(player)
-		playerTroves[player.Name]:Destroy()
-		for i, v in pairs(playerPlatform.teleports:GetChildren()) do
-			if v.Name == player.Name then
-				v.Name = "spot"
-				for _, v in pairs(v:GetChildren()) do
-					if not v:IsA("Model") then
-						v:Destroy()
-						continue
-					end
-					pcall(function()
-						miniFloorCache:Return(v)
-					end)
-				end
-			end
-		end
+	Players.PlayerRemoving:Connect(function(playerWhoLeft)
+		playerTroves[playerWhoLeft.Name]:Destroy()
+		local leftPlayerSpot = playerPlatform.teleports:FindFirstChild(playerWhoLeft.Name)
+		leftPlayerSpot.Name = "spot"
+		leftPlayerSpot:FindFirstChildWhichIsA("Model"):ClearAllChildren()
 		updateTowers()
 	end)
 
-	castleController.updatePlayer(Players.LocalPlayer)
+	for i, v in pairs(Players:GetPlayers()) do
+		castleController.updatePlayer(v)
+	end
 
 	updateTowers()
 

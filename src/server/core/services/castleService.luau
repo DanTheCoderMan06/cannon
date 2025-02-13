@@ -152,14 +152,16 @@ function castleService.start()
 		newCastle.Parent = newSpot
 		castleService.updateTower(player)
 		local newplatform = ReplicatedStorage.assets.playerPlatform:Clone()
+		newplatform:AddPersistentPlayer(player)
 		newplatform.Name = player.Name
 		newplatform.Parent = playerPlatforms
 		castleService.updatePlatform(player, newSpot)
 		local playerData = dataService.getPlayerData(player)
 		newCastle:SetAttribute("status", playerData.towerStatus)
 	end)
+
 	Players.PlayerRemoving:Connect(function(player)
-		playerPlatforms:FindFirstChild(player.Name):Destroy()
+		playerPlatforms:WaitForChild(player.Name):Destroy()
 		for i, v in pairs(castleFolder:GetChildren()) do
 			if v:FindFirstChildWhichIsA("Model") and v.Name == player.Name then
 				for countItem, floorItem in pairs(v:GetChildren()) do
@@ -188,6 +190,7 @@ function castleService.start()
 			end
 		end
 	end)
+
 	zap.changePrivacy.SetCallback(function(player, newState)
 		local playerData = dataService.getPlayerData(player)
 		playerData.towerStatus += 1
