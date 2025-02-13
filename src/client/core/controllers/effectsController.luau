@@ -55,7 +55,6 @@ function effectsController.start()
 	local clouds = Instance.new("Clouds")
 	clouds.Parent = workspace.Terrain
 	clouds.Cover = 0
-	--[[ Fix this lata.
 	RunService:BindToRenderStep("effectsHandler", Enum.RenderPriority.Last.Value, function()
 		local character = localPlayer.Character
 		if not character then
@@ -92,15 +91,13 @@ function effectsController.start()
 			})
 		end
 	end)
-	--]]
 end
 
 function effectsController.finishedPath(results)
 	local character = Players.LocalPlayer.Character
 	local finishedPathEffects = ReplicatedStorage.assets.finishedPath:Clone()
-	finishedPathEffects:PivotTo(
-		CFrame.new(character.PrimaryPart.Position * Vector3.new(1, 0, 1)) * CFrame.new(0, 0, math.rad(90))
-	)
+	workspace.CurrentCamera.CameraType = Enum.CameraType.Scriptable
+	finishedPathEffects:PivotTo(CFrame.new(character.PrimaryPart.Position * Vector3.new(1, 0, 1)))
 	finishedPathEffects:FindFirstChild("finishedGUI", true).content.distance.Text = math.round(results.distance) .. "m"
 	finishedPathEffects:FindFirstChild("finishedGUI", true).content.money.Text = math.round(
 		cannonConfig.rewardFormula(results.distance)
@@ -112,9 +109,25 @@ function effectsController.finishedPath(results)
 		workspace:FindFirstChild("finishedPlace"):Destroy()
 	end
 	finishedPathEffects.Parent = workspace
-	task.delay(6, function()
-		finishedPathEffects:FindFirstChild("finishedGUI", true):Destroy()
-		finishedPathEffects:FindFirstChild("lastPlaceGUI", true).Enabled = true
+	spr.target(workspace.CurrentCamera, 1, 2.5, {
+		CFrame = CFrame.new(character.PrimaryPart.Position * Vector3.new(1, 15, 1), character.PrimaryPart.Position),
+	})
+	task.delay(2, function()
+		finishedPathEffects:Destroy()
+		spr.stop(workspace.CurrentCamera, "CFrame")
+		local newCharacter = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
+		task.wait()
+		spr.target(workspace.CurrentCamera, 1, 2, {
+			CFrame = CFrame.new(
+				newCharacter:WaitForChild("Head").Position + Vector3.new(0, 10, 0),
+				newCharacter:WaitForChild("Head").Position
+			),
+		})
+		task.delay(2, function()
+			spr.stop(workspace.CurrentCamera, "CFrame")
+			workspace.CurrentCamera.CameraSubject = newCharacter
+			workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
+		end)
 	end)
 end
 

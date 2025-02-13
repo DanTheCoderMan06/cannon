@@ -125,8 +125,6 @@ function cannonService.start()
 		end
 		local path = Sift.Dictionary.copyDeep(simulatedPaths[player.Name])
 		simulatedPaths[player.Name] = nil
-		print("Finished Path!")
-		print(path)
 		cannonService.awardPlayer(player, path)
 		task.delay(1, function()
 			player:LoadCharacter()

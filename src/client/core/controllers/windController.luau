@@ -47,6 +47,7 @@ end
 
 -- METHODS
 function WindService:Start()
+	self.enabled = true
 	self.viewportRef = React.createRef()
 	local cameraRef = React.createRef()
 	local container = ReactRoblox.createRoot(Instance.new("Folder"))
@@ -99,6 +100,7 @@ function WindService:Start()
 end
 
 function WindService:Stop()
+	self.enabled = false
 	self.Trove:Destroy()
 end
 
@@ -154,6 +156,9 @@ function WindService:CreateWind()
 	-- START ENDING:
 	task.delay(self.Lifetime, function()
 		Render:Disconnect()
+		if not self.enabled then
+			return
+		end
 		self.windParts:ReturnPart(Part)
 		self.Current -= 1
 	end)

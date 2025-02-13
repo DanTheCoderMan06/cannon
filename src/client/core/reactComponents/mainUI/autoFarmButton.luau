@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local SoundService = game:GetService("SoundService")
 local TeleportService = game:GetService("TeleportService")
 
 local shared = ReplicatedStorage.shared
@@ -43,6 +44,7 @@ return function(props)
 		TextSize = 14,
 		TextWrapped = true,
 		[React.Event.Activated] = function()
+			SoundService.effects.click:Play()
 			local success = zap.toggleAutoFarm.Call()
 			if success then
 				api.start({ toggle = not enabled:getValue() and 0 or 1 })

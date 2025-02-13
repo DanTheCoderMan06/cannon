@@ -36,6 +36,7 @@ local function LocalRagdoll(bool)
 	print("GO")
 
 	local State = Humanoid:GetState()
+	Humanoid.AutoRotate = not bool
 	if bool then
 		if State ~= Enum.HumanoidStateType.Physics then
 			zap.editRagdollState.Call(true)

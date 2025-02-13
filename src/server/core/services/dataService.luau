@@ -83,7 +83,7 @@ function dataService.start()
 				print(`Profile loaded for {player.DisplayName}!`)
 
 				profile.Data.lastEntered = os.time()
-				profile.Data.daysClaimed = {}
+				profile.Data.floors = 1
 
 				local leaderstats = ReplicatedStorage.assets.statsFolder:Clone()
 				leaderstats.Name = "leaderstats"

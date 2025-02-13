@@ -2,6 +2,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CAS = game:GetService("ContextActionService")
 local RunService = game:GetService("RunService")
+local SoundService = game:GetService("SoundService")
 
 local castleController = {}
 local Trove = require(game.ReplicatedStorage.sharedPackages.Trove)
@@ -181,6 +182,7 @@ function castleController.updateZone(zoneName, targetPart, platform, callbackSig
 		if tick() - lastTriggered < 1 then
 			return
 		end
+		SoundService.effects.click:Play()
 		lastTriggered = tick()
 		platform.callback(callbackSignal)
 	end)

@@ -3,6 +3,7 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CAS = game:GetService("ContextActionService")
 local RunService = game:GetService("RunService")
+local SoundService = game:GetService("SoundService")
 
 local cannonController = {}
 local Trove = require(game.ReplicatedStorage.sharedPackages.Trove)
@@ -24,6 +25,7 @@ local floorHeight = 22 -- castleFloor:FindFirstChild("ceiling", true).Position.Y
 local forceUtil = require(ReplicatedStorage.shared.utilities.forceUtil)
 
 local cannonConfig = require(ReplicatedStorage.shared.config.cannonConfig)
+local effectsConfig = require(ReplicatedStorage.shared.config.effectsConfig)
 
 local reactComponents = ReplicatedStorage.client.reactComponents
 
@@ -32,6 +34,18 @@ local cannonChangedSignal = Signal.new()
 local stateController = require(ReplicatedStorage.client.controllers.stateController)
 local windController = require(ReplicatedStorage.client.controllers.windController)
 local effectsController = require(ReplicatedStorage.client.controllers.effectsController)
+local cameraController = require(ReplicatedStorage.client.controllers.cameraController)
+
+function cannonController.playLaunchSound()
+	SoundService.effects.explosion:Play()
+	local launchSound = SoundService.launch:GetChildren()[math.random(1, #SoundService.launch:GetChildren())]
+	launchSound:Play()
+	task.delay(1, function()
+		local fallingSound = SoundService.effects.falling
+		fallingSound.PlaybackSpeed = fallingSound.TimeLength / 10
+		fallingSound:Play()
+	end)
+end
 
 function cannonController.start()
 	local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
@@ -81,7 +95,22 @@ function cannonController.start()
 		w.Parent = movePart
 		w.C0 = CFrame.Angles(0, math.rad(90), 0)
 
+		for _, v in pairs(character:GetDescendants()) do
+			if v:IsA("BasePart") then
+				v:SetAttribute("oldTransparency", v.Transparency)
+				v.Transparency = 1
+			end
+		end
+
+		SoundService.effects.getIn:Play()
+
 		task.wait(cannonConfig.cannonFirePeriod)
+
+		for _, v in pairs(character:GetDescendants()) do
+			if v:IsA("BasePart") then
+				v.Transparency = v:GetAttribute("oldTransparency") or 0
+			end
+		end
 
 		local startPosition = CFrame.new(
 			cannonPosition:FindFirstChild("characterPosition", true).WorldPosition
@@ -101,7 +130,6 @@ function cannonController.start()
 		targetParams.FilterType = Enum.RaycastFilterType.Exclude
 		targetParams.FilterDescendantsInstances = { character }
 		windController.toggle(true)
-		movePart:Destroy()
 
 		local multiplier = 1
 		if physics.time > 10 then
@@ -110,25 +138,84 @@ function cannonController.start()
 			multiplier = physics.time / 2
 		end
 
-		pTrove:BindToRenderStep("physics_" .. os.time(), Enum.RenderPriority.First.Value, function()
+		local trailEffects = ReplicatedStorage.assets.trailEffects
+		local characterTrails = {}
+
+		for _, attachmentName in pairs(effectsConfig.attachToAttachments) do
+			local start = character:FindFirstChild(attachmentName, true)
+			local newAtt = start:Clone()
+			newAtt.CFrame *= CFrame.new(0, 0, -0.2)
+			newAtt.Parent = start.Parent
+			newAtt.Name = attachmentName .. "Trail"
+			local trail = trailEffects.Trail:Clone()
+			trail.Attachment0 = start
+			trail.Attachment1 = newAtt
+			trail.Parent = start.Parent
+			table.insert(characterTrails, trail)
+		end
+
+		cameraController.startShake()
+
+		cannonController.playLaunchSound()
+
+		--[[
+		local playedFallYet = false
+		RunService:BindToRenderStep("fallSound", Enum.RenderPriority.Character.Value + 1, function(dt)
+			local currentPos = Players.LocalPlayer.Character.PrimaryPart.Position
+			if currentPos.Y < 5 and not playedFallYet then
+				playedFallYet = true
+				SoundService.effects.hitFloor:Play()
+				RunService:UnbindFromRenderStep("fallSound")
+			end
+		end)
+
+		--]]
+
+		pTrove:BindToRenderStep("pathPhysics", Enum.RenderPriority.First.Value, function()
 			timeElapsed = (tick() - startTime) * multiplier
 			local actualHorizontal = timeElapsed * physics.horizontalVelocity
 			local fixedHorizontal = math.fmod(actualHorizontal, cannonConfig.maxDistance)
+			local verticalComponent = (
+				timeElapsed * physics.verticalVelocity + 0.5 * -workspace.Gravity * math.pow(timeElapsed, 2)
+			)
 			local calculatedPosition = startPosition
-				* CFrame.new(
-					0,
-					(timeElapsed * physics.verticalVelocity + 0.5 * -workspace.Gravity * math.pow(timeElapsed, 2)),
-					-fixedHorizontal
-				)
+				* CFrame.new(0, verticalComponent, -fixedHorizontal)
 				* CFrame.Angles(-math.rad(math.fmod(timeElapsed * 180 / multiplier, 360)), 0, 0)
+
+			local timeElapsed = tick() - startTime
+			local progress = math.clamp(timeElapsed / 10, 0, 1)
+			local greenBlue = math.floor(255 * (1 - progress))
+
+			for _, v in pairs(characterTrails) do
+				v.Color = ColorSequence.new(
+					Color3.fromRGB(255, math.clamp(greenBlue, 135, 255), math.clamp(greenBlue, 135, 255))
+				)
+				v.Transparency = NumberSequence.new(1 - math.clamp(progress + 0.3, 0, 1))
+			end
+
+			Color3.fromRGB(255, 199, 199)
+
+			for _, v in pairs(character.PrimaryPart:GetDescendants()) do
+				if not v:GetAttribute("targetDistance") then
+					continue
+				end
+				if verticalComponent > v:GetAttribute("targetDistance") then
+					v.Enabled = true
+					v:SetAttribute("targetDistance", nil)
+				end
+			end
+
 			if not character.PrimaryPart then
 				pTrove:Destroy()
 				finishedSignal:Fire()
 				return
 			end
+
 			if
-				math.abs(calculatedPosition.Position.Y) <= math.max(physics.verticalVelocity * 0.1, 10)
-				and timeElapsed > physics.time / multiplier
+				(
+					math.abs(calculatedPosition.Position.Y) <= math.max(physics.verticalVelocity * 0.1, 10)
+					and timeElapsed > physics.time / multiplier
+				) or calculatedPosition.Position.Y < 20
 			then
 				print("destroy")
 				pTrove:Destroy()
@@ -143,6 +230,8 @@ function cannonController.start()
 		end)
 
 		finishedSignal:Connect(function() --TODO: Use raycast + spr to  finish up dummy falling
+			cameraController.removeTracker()
+
 			local mapParams = RaycastParams.new()
 			mapParams.FilterDescendantsInstances = { workspace.Map }
 			mapParams.FilterType = Enum.RaycastFilterType.Include
@@ -170,6 +259,8 @@ function cannonController.start()
 				end
 			end
 
+			SoundService.effects.hitFloor:Play()
+
 			character.PrimaryPart.Anchored = false
 
 			RunService:BindToRenderStep("noFallThrough", Enum.RenderPriority.Character.Value + 1, function(dt)
@@ -182,15 +273,19 @@ function cannonController.start()
 				)
 			end)
 
+			for _, v in pairs(characterTrails) do
+				v:Destroy()
+			end
+
 			task.delay(3, function()
 				repeat
 					task.wait()
 				until not character or character.PrimaryPart.AssemblyLinearVelocity.Magnitude < 2
 				RunService:UnbindFromRenderStep("noFallThrough")
+				RunService:UnbindFromRenderStep("fallSound")
 				finishedSignal:Destroy()
 				windController.toggle(false)
 				effectsController.finishedPath(physics)
-
 				zap.finishedPath.Fire()
 			end)
 		end)

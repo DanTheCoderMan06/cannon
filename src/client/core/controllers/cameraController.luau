@@ -6,18 +6,27 @@ local RunService = game:GetService("RunService")
 local cameraController = {}
 local Trove = require(game.ReplicatedStorage.sharedPackages.Trove)
 local spr = require(game.ReplicatedStorage.sharedPackages.spr)
+local camerashaker = require(game.ReplicatedStorage.sharedPackages.camerashaker)
+
+local camShake = camerashaker.new(Enum.RenderPriority.Camera.Value + 1, function(cf)
+	local camera = workspace.CurrentCamera
+	camera.CFrame = camera.CFrame * cf
+end)
+
 local camTrove
-function cameraController.trackObject(target, offset)
-	workspace.CurrentCamera.CameraType = "Scriptable"
-	spr.target(workspace.CurrentCamera, 0.25, 2.5, { FieldOfView = 120 })
+
+function cameraController.startShake()
+	camShake:Start()
 	camTrove = Trove.new()
-	camTrove:BindToRenderStep("trackObject", Enum.RenderPriority.Camera.Value, function(dt)
-		workspace.CurrentCamera.CFrame = CFrame.new(target.CFrame.Position + offset, target.CFrame.Position)
-	end)
+	camShake:Shake(camerashaker.Presets.Explosion)
 end
 
 function cameraController.removeTracker()
+	camShake:Stop()
 	camTrove:Destroy()
+	task.delay(0.3, function()
+		spr.target(workspace.CurrentCamera, 1, 5, { FieldOfView = 70 })
+	end)
 end
 
 return cameraController
