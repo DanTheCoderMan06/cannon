@@ -71,9 +71,9 @@ return {
 					}
 				end
 			end,
-			title = "CIRCUS CANNON",
+			title = "ARMY CANNON",
 			description = '100 <font color="#008000">\u{E002}</font>',
-			initModel = ReplicatedStorage.assets.minicannons.armyCannon,
+			initModel = ReplicatedStorage.assets.cannons.armyCannon,
 			callbackFunction = function(success, states)
 				if success then
 					spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(0.992156, 1, 0.580392) })
@@ -139,7 +139,7 @@ return {
 			end,
 			title = "CIRCUS CANNON",
 			description = '100 <font color="#008000">\u{E002}</font>',
-			initModel = ReplicatedStorage.assets.minicannons.miniCircusCannon,
+			initModel = ReplicatedStorage.assets.cannons.circusCannon,
 			callbackFunction = function(success, states)
 				if success then
 					spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(0.992156, 1, 0.580392) })
@@ -202,7 +202,7 @@ return {
 			end,
 			title = "ARTILLERY",
 			description = '100 <font color="#008000">\u{E002}</font>',
-			initModel = ReplicatedStorage.assets.minicannons.miniArtillery,
+			initModel = ReplicatedStorage.assets.cannons.artillery,
 			callbackFunction = function(success, states)
 				if success then
 					spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(0.992156, 1, 0.580392) })
@@ -265,7 +265,7 @@ return {
 			end,
 			title = "RAILGUN",
 			description = '100 <font color="#008000">\u{E002}</font>',
-			initModel = ReplicatedStorage.assets.minicannons.railgun,
+			initModel = ReplicatedStorage.assets.cannons.railgun,
 			callbackFunction = function(success, states)
 				if success then
 					spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(0.992156, 1, 0.580392) })
@@ -313,7 +313,7 @@ return {
 					description = "UNTIL REWARD",
 				}
 			end,
-			initModel = ReplicatedStorage.assets.minicannons:FindFirstChild("cannon1"),
+			initModel = ReplicatedStorage.assets.cannons:WaitForChild("cannon1"),
 			callbackFunction = function(success, states)
 				if success then
 					spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(0.992156, 1, 0.580392) })
@@ -360,7 +360,7 @@ return {
 					description = canPromptIn and "ENABLE NOTIFICATIONS" or "INVITE A NEW PLAYER",
 				}
 			end,
-			initModel = ReplicatedStorage.assets.minicannons:FindFirstChild("cannon1"),
+			initModel = ReplicatedStorage.assets.cannons:FindFirstChild("cannon1"),
 			callbackFunction = function(success, states)
 				if success then
 					spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(0.992156, 1, 0.580392) })
@@ -426,8 +426,7 @@ return {
 				local Players = game:GetService("Players")
 				local leaderstatsstats = Players.LocalPlayer:WaitForChild("leaderstats")
 				local function updateModel(value)
-					local newModel =
-						ReplicatedStorage.assets.minicannons:FindFirstChild(cannonConfig.getCannon(value + 1)):Clone()
+					local newModel = ReplicatedStorage.assets.cannons:FindFirstChild(cannonConfig.getCannon(value + 1))
 					print(newModel.Name)
 					updateModelEvent:Fire(newModel)
 				end

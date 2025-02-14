@@ -34,13 +34,14 @@ local function viewportFrame(props)
 		targetFrame.CurrentCamera = camera
 		uiTrove:Add(camera)
 
-		local newModel = props.targetModel:Clone()
+		local newModel = props.targetModel:FindFirstChildWhichIsA("Model"):Clone()
+		newModel:ScaleTo(props.targetModel:GetAttribute("miniSize"))
 		newModel:PivotTo(CFrame.new())
 		newModel.Parent = targetFrame
 		uiTrove:Add(newModel)
 
 		local offsetAngle = 0
-		camera.CFrame = CFrame.new() * CFrame.Angles(0, math.rad(-180), 0) * CFrame.new(0, 0, 5)
+		camera.CFrame = CFrame.new() * CFrame.Angles(0, math.rad(-180), 0) * CFrame.new(0, 0, 10)
 
 		uiTrove:BindToRenderStep("rotateViewport" .. tick(), Enum.RenderPriority.Last.Value + 1, function()
 			offsetAngle += 0.5

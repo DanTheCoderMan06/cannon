@@ -104,7 +104,7 @@ local module = {
 				table.insert(playerData.cannons, "circusCannon")
 			end,
 			type = "viewport",
-			model = ReplicatedStorage.assets.minicannons:FindFirstChild("circusCannon"),
+			model = ReplicatedStorage.assets.cannons:FindFirstChild("circusCannon"),
 			name = "Circus Cannon",
 		},
 		{
@@ -284,7 +284,7 @@ local module = {
 				table.insert(playerData.cannons, "armyCannon")
 			end,
 			type = "viewport",
-			model = ReplicatedStorage.assets.minicannons:FindFirstChild("armyCannon"),
+			model = ReplicatedStorage.assets.cannons:FindFirstChild("armyCannon"),
 			name = "Army Cannon",
 		},
 	},

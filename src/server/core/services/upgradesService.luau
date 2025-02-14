@@ -25,25 +25,40 @@ local rewardsConfig = require(ReplicatedStorage.shared.config.rewardsConfig)
 local castleService = require(ServerStorage.server.services.castleService)
 local cannonService = require(ServerStorage.server.services.cannonService)
 
-function upgradesService.start()
-	MarketplaceService.ProcessReceipt = function(recieptInfo)
-		local player = Players:GetPlayerByUserId(recieptInfo.PlayerId)
+function upgradesService.handlePurchase(recieptInfo)
+	local player = Players:GetPlayerByUserId(recieptInfo.PlayerId)
 
-		if not player then
-			return Enum.ProductPurchaseDecision.NotProcessedYet
-		end
-
-		print(recieptInfo)
-
-		for name, info in pairs(gamepassConfig) do
-			if info.id == recieptInfo.ProductId then
-				info.callback(player)
-				return Enum.ProductPurchaseDecision.PurchaseGranted
-			end
-		end
-
+	if not player then
 		return Enum.ProductPurchaseDecision.NotProcessedYet
 	end
+
+	print(recieptInfo)
+
+	for name, info in pairs(gamepassConfig) do
+		if info.id == recieptInfo.ProductId then
+			info.callback(player)
+			print("Foujnd")
+			return Enum.ProductPurchaseDecision.PurchaseGranted
+		end
+	end
+
+	return Enum.ProductPurchaseDecision.NotProcessedYet
+end
+
+function upgradesService.start()
+	MarketplaceService.ProcessReceipt = function(recieptInfo)
+		upgradesService.handlePurchase(recieptInfo)
+	end
+
+	MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player, gamePassId, wasPurchased)
+		if not wasPurchased then
+			return
+		end
+		upgradesService.handlePurchase({
+			PlayerId = player.UserId,
+			ProductId = gamePassId,
+		})
+	end)
 
 	zap.purchaseUpgrade.SetCallback(function(player, purchaseType)
 		local playerData = dataService.getPlayerData(player)

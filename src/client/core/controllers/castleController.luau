@@ -286,9 +286,16 @@ function castleController.start()
 				modelFolder.Parent = newPurchase
 				updateTrove:AttachToInstance(modelFolder)
 
-				local newModel = platform.initModel:Clone()
-				newModel:PivotTo(newPurchase:FindFirstChild("modelPlatform", true).WorldCFrame)
-				newModel.Parent = modelFolder
+				if platform.initModel:IsA("Folder") then
+					local newModel = platform.initModel:FindFirstChildWhichIsA("Model"):Clone()
+					newModel:ScaleTo(platform.initModel:GetAttribute("miniSize"))
+					newModel:PivotTo(newPurchase:FindFirstChild("modelPlatform", true).WorldCFrame)
+					newModel.Parent = modelFolder
+				else
+					local newModel = platform.initModel:Clone()
+					newModel:PivotTo(newPurchase:FindFirstChild("modelPlatform", true).WorldCFrame)
+					newModel.Parent = modelFolder
+				end
 			--Causing Crash
 			elseif typeof(platform.initModel) == "function" then
 				local updateTrove = Trove.new()
@@ -298,7 +305,15 @@ function castleController.start()
 				updateTrove:AttachToInstance(modelFolder)
 
 				updateTrove:Add(
-					updateSignal:Connect(function(newModel)
+					updateSignal:Connect(function(recievedModel)
+						local newModel
+						if recievedModel:IsA("Model") then
+							newModel = recievedModel
+						else
+							newModel = recievedModel:FindFirstChildWhichIsA("Model"):Clone()
+							newModel:ScaleTo(recievedModel:GetAttribute("miniSize"))
+							modelFolder:ClearAllChildren()
+						end
 						modelFolder:ClearAllChildren()
 						newModel:PivotTo(newPurchase:FindFirstChild("modelPlatform", true).WorldCFrame)
 						newModel.Parent = modelFolder
@@ -441,7 +456,8 @@ function castleController.start()
 		playerTroves[playerWhoLeft.Name]:Destroy()
 		local leftPlayerSpot = playerPlatform.teleports:FindFirstChild(playerWhoLeft.Name)
 		leftPlayerSpot.Name = "spot"
-		leftPlayerSpot:FindFirstChildWhichIsA("Model"):ClearAllChildren()
+		spr.stop(leftPlayerSpot:FindFirstChildWhichIsA("Highlight", true), "OutlineTransparency")
+		leftPlayerSpot:ClearAllChildren()
 		updateTowers()
 	end)
 
@@ -479,7 +495,8 @@ function castleController.start()
 				modelFolder.Parent = newPurchase
 				updateTrove:AttachToInstance(modelFolder)
 
-				local newModel = cannon.initModel:Clone()
+				local newModel = cannon.initModel:FindFirstChildWhichIsA("Model"):Clone()
+				newModel:ScaleTo(cannon.initModel:GetAttribute("miniSize"))
 				newModel:PivotTo(newPurchase:FindFirstChild("modelPlatform", true).WorldCFrame)
 				newModel.Parent = modelFolder
 			--Causing Crash
@@ -492,9 +509,11 @@ function castleController.start()
 
 				updateTrove:Add(
 					updateSignal:Connect(function(newModel)
+						local newCannonModel = newModel:FindFirstChildWhichIsA("Model"):Clone()
+						newCannonModel:ScaleTo(newModel:GetAttribute("miniSize"))
 						modelFolder:ClearAllChildren()
-						newModel:PivotTo(newPurchase:FindFirstChild("modelPlatform", true).WorldCFrame)
-						newModel.Parent = modelFolder
+						newCannonModel:PivotTo(newPurchase:FindFirstChild("modelPlatform", true).WorldCFrame)
+						newCannonModel.Parent = modelFolder
 					end),
 					"Disconnect"
 				)
