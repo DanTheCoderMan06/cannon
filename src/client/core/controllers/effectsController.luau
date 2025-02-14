@@ -3,25 +3,107 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CAS = game:GetService("ContextActionService")
 local RunService = game:GetService("RunService")
+local SoundService = game:GetService("SoundService")
 
 local effectsController = {}
 local Trove = require(game.ReplicatedStorage.sharedPackages.Trove)
 local React = require(game.ReplicatedStorage.sharedPackages.React)
+local ReactSpring = require(game.ReplicatedStorage.sharedPackages.ReactSpring)
 local ReactRoblox = require(game.ReplicatedStorage.sharedPackages.ReactRoblox)
 local spr = require(game.ReplicatedStorage.sharedPackages.spr)
-local camTrove
+local zap = require(ReplicatedStorage.zap)
 
 local config = require(ReplicatedStorage.shared.config.effectsConfig)
 local cannonConfig = require(ReplicatedStorage.shared.config.cannonConfig)
 
 local effectsUi = require(ReplicatedStorage.client.reactComponents.generics.effectText)
+local finishedPath = require(ReplicatedStorage.client.reactComponents.generics.finishedPath)
+
+local currentHighScore = 0
 
 function effectsController.getHighScore()
 	for _, v in pairs(Players.LocalPlayer:WaitForChild("leaderstats"):GetChildren()) do
 		if v:GetAttribute("statName") == "highscore" then
-			return v.Value
+			return v
 		end
 	end
+end
+
+function app(props)
+	local styles, api = ReactSpring.useSpring(function()
+		return { transparency = 1 }
+	end)
+
+	React.useEffect(function()
+		print("start")
+		api.start({
+			transparency = 0,
+			config = {
+				tension = 300,
+				friction = 30,
+			},
+		})
+		task.delay(1, function()
+			if props.callback then
+				props.callback()
+			end
+		end)
+		task.wait(props.duration + 1.5)
+		api.start({
+			transparency = 1,
+			config = {
+				tension = 300,
+				friction = 30,
+			},
+		})
+	end, {})
+
+	return React.createElement("Frame", {
+		AnchorPoint = Vector2.new(0, 0.0),
+		BackgroundColor3 = Color3.fromRGB(0, 0, 0),
+		BackgroundTransparency = styles.transparency,
+		BorderColor3 = Color3.fromRGB(0, 0, 0),
+		BorderSizePixel = 0,
+		Position = UDim2.fromScale(0, 0.),
+		Size = UDim2.fromScale(1, 1),
+	})
+end
+
+function effectsController.blackScreen(duration, callback)
+	local newBlackScreen = ReactRoblox.createRoot(Instance.new("Folder"))
+	newBlackScreen:render(ReactRoblox.createPortal(
+		React.createElement("ScreenGui", {
+			ResetOnSpawn = false,
+			Enabled = true,
+			IgnoreGuiInset = true,
+			DisplayOrder = 10000,
+		}, {
+			main = React.createElement(app, { duration = duration, callback = callback }),
+		}),
+		Players.LocalPlayer.PlayerGui,
+		"blackScreen"
+	))
+
+	task.delay(duration + 6, function()
+		newBlackScreen:unmount()
+	end)
+end
+
+function effectsController.updateHighscore()
+	local newHighScore = effectsController.getHighScore().Value
+	if newHighScore <= currentHighScore then
+		return
+	end
+	currentHighScore = newHighScore
+	local hsArea = workspace:FindFirstChild("highscorePlate")
+	if not hsArea then
+		hsArea = ReplicatedStorage.assets:WaitForChild("highscorePlate")
+		hsArea.Parent = workspace
+	end
+	hsArea:FindFirstChild("record", true).Text = newHighScore .. " studs"
+	local calculatedPosition = CFrame.new(workspace.castles:WaitForChild(Players.LocalPlayer.Name).Position)
+		* CFrame.new(0, 0, -math.fmod(newHighScore, cannonConfig.maxDistance))
+	hsArea:PivotTo(calculatedPosition)
 end
 
 function effectsController.rewardPopup(location: Vector3, text: string)
@@ -91,33 +173,54 @@ function effectsController.start()
 			})
 		end
 	end)
+
+	effectsController.updateHighscore()
 end
 
 function effectsController.finishedPath(results)
 	local character = Players.LocalPlayer.Character
 	local finishedPathEffects = ReplicatedStorage.assets.finishedPath:Clone()
-	workspace.CurrentCamera.CameraType = Enum.CameraType.Scriptable
+	local container = ReactRoblox.createRoot(Instance.new("Folder"))
+	local isHighscore = effectsController.getHighScore().Value < math.round(results.distance)
+
+	container:render(ReactRoblox.createPortal(
+		React.createElement("BillboardGui", {
+			ResetOnSpawn = false,
+			AlwaysOnTop = true,
+			StudsOffset = Vector3.new(0, 5, 0),
+			Size = UDim2.fromScale(6, 7.5),
+			Adornee = finishedPathEffects,
+		}, {
+			main = React.createElement(finishedPath, {
+				isHighscore = isHighscore,
+				distance = math.round(results.distance),
+				reward = math.round(cannonConfig.rewardFormula(results.distance)),
+			}),
+		}),
+		Players.LocalPlayer.PlayerGui,
+		"finishedGUI"
+	))
+
 	finishedPathEffects:PivotTo(CFrame.new(character.PrimaryPart.Position * Vector3.new(1, 0, 1)))
-	finishedPathEffects:FindFirstChild("finishedGUI", true).content.distance.Text = math.round(results.distance) .. "m"
-	finishedPathEffects:FindFirstChild("finishedGUI", true).content.money.Text = math.round(
-		cannonConfig.rewardFormula(results.distance)
-	) .. "$"
-	finishedPathEffects:FindFirstChild("finishedGUI", true).content.record.Visible = effectsController.getHighScore()
-		< results.distance
-	finishedPathEffects.Name = "finishedPlace"
-	if workspace:FindFirstChild("finishedPlace") then
-		workspace:FindFirstChild("finishedPlace"):Destroy()
-	end
 	finishedPathEffects.Parent = workspace
+
 	spr.target(workspace.CurrentCamera, 1, 2.5, {
 		CFrame = CFrame.new(character.PrimaryPart.Position * Vector3.new(1, 15, 1), character.PrimaryPart.Position),
 	})
-	task.delay(2, function()
-		finishedPathEffects:Destroy()
-		spr.stop(workspace.CurrentCamera, "CFrame")
-		local newCharacter = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
-		workspace.CurrentCamera.CameraSubject = newCharacter
-		workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
+
+	SoundService.effects.victory:Play()
+
+	task.delay(1, function()
+		effectsController.blackScreen(1, function()
+			spr.stop(workspace.CurrentCamera, "CFrame")
+			container:unmount()
+			finishedPathEffects:Destroy()
+			zap.requestLoad.Fire()
+			local newCharacter = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
+			workspace.CurrentCamera.CameraSubject = newCharacter
+			workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
+			effectsController.updateHighscore()
+		end)
 	end)
 end
 

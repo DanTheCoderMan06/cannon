@@ -96,13 +96,14 @@ function upgradesService.start()
 			print(playerData.daysPlayed)
 			return
 		end
-		print(playerData.daysClaimed)
 		if table.find(playerData.daysClaimed, rewardDay) then
 			return
 		end
 		info.callback(playerData, player)
 		table.insert(playerData.daysClaimed, rewardDay)
-		dataService.updatePlayerData(player, playerData)
+		task.defer(function()
+			dataService.updatePlayerData(player, playerData)
+		end)
 	end)
 end
 

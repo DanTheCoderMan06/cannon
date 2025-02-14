@@ -126,9 +126,6 @@ function cannonService.start()
 		local path = Sift.Dictionary.copyDeep(simulatedPaths[player.Name])
 		simulatedPaths[player.Name] = nil
 		cannonService.awardPlayer(player, path)
-		task.delay(1, function()
-			player:LoadCharacter()
-		end)
 	end)
 
 	zap.toggleCannon.SetCallback(function(player, target)
@@ -147,6 +144,18 @@ function cannonService.start()
 			cannonService.addCannon(player, cannonConfig.getCannon(playerData.cannon))
 		end
 		return true
+	end)
+
+	zap.requestLoad.SetCallback(function(player)
+		local character = player.Character
+		if not character then
+			return
+		end
+		if not character:GetAttribute("inCannon") then
+			return
+		end
+		print("load")
+		player:LoadCharacter()
 	end)
 end
 

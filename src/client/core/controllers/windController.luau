@@ -29,7 +29,7 @@ function WindService.new(setting)
 	Object.Location = game.Workspace.Camera
 	Object.Randomized = setting.Randomized or false
 	Object.Velocity = setting.Velocity or Vector3.new(0.45, 0, 0)
-	Object.Amount = math.huge
+	Object.Amount = 50
 	Object.Current = 0
 	Object.Frequency = setting.Frequency or 0.5
 	Object.Lifetime = 0.05
@@ -152,7 +152,7 @@ function WindService:CreateWind()
 	local Render = RunService.RenderStepped:Connect(function()
 		Part.CFrame = Part.CFrame * CFrame.new(0, 0, -3)
 	end)
-
+	self.Trove:Add(Render)
 	-- START ENDING:
 	task.delay(self.Lifetime, function()
 		Render:Disconnect()

@@ -22,30 +22,35 @@ return function(props)
 		return { cannons = 0, floors = 1, gamepasses = 1 }
 	end)
 
-	local sections = {}
-
-	for name, info in pairs(gamepassConfig) do
-		if not info.id then
-			continue
-		end
-		local gamepassInfo = marketplaceUtil.getProductInfo(info.id, info.infoType)
-		table.insert(
-			sections,
-			React.createElement(
-				product,
-				Sift.Dictionary.merge(props, {
-					price = gamepassInfo.PriceInRobux,
-					name = gamepassInfo.Name,
-					image = gamepassInfo.IconImageAssetId,
-					transparency = styles[info.type],
-					id = info.id,
-					onActivated = function()
-						MarketplaceService:PromptPurchase(Players.LocalPlayer, info.id)
-					end,
-				})
+	local sections = React.useMemo(function()
+		local _sections = {}
+		for name, info in pairs(gamepassConfig) do
+			if not info.id then
+				continue
+			end
+			local gamepassInfo = marketplaceUtil.getProductInfo(info.id, info.infoType)
+			table.insert(
+				_sections,
+				React.createElement(
+					product,
+					Sift.Dictionary.merge(props, {
+						price = gamepassInfo.PriceInRobux,
+						name = gamepassInfo.Name,
+						image = gamepassInfo.IconImageAssetId,
+						transparency = styles[info.type],
+						id = info.id,
+						onActivated = function()
+							MarketplaceService:PromptPurchase(Players.LocalPlayer, info.id)
+						end,
+					})
+				)
 			)
-		)
-	end
+		end
+		return _sections
+	end, {
+		props,
+		styles,
+	})
 
 	React.useEffect(function()
 		local uiTrove = Trove.new()

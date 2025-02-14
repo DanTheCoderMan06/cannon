@@ -77,16 +77,8 @@ end
 local rewardsLoaded = false
 
 return function(props)
-	local rewards, setRewards = React.useState({})
-
 	local currentData = dataController.getData()
-
-	React.useEffect(function()
-		if rewardsLoaded then
-			return
-		end
-		print("effect")
-		rewardsLoaded = true
+	local rewards = React.useMemo(function()
 		local newRewards = {}
 		for i, v in pairs(rewardConfig.rewards) do
 			local children = {}
@@ -129,8 +121,8 @@ return function(props)
 				)
 			)
 		end
-		setRewards(newRewards)
-	end, { rewards })
+		return newRewards
+	end, { props, currentData }) -- list dependencies that, when changed, should re-run the computation
 
 	return React.createElement("ScrollingFrame", {
 		AnchorPoint = Vector2.new(0.5, 0.5),

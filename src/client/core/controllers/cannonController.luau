@@ -179,19 +179,6 @@ function cannonController.start()
 
 		cannonController.playLaunchSound(multiplier, physics.time)
 
-		--[[
-		local playedFallYet = false
-		RunService:BindToRenderStep("fallSound", Enum.RenderPriority.Character.Value + 1, function(dt)
-			local currentPos = Players.LocalPlayer.Character.PrimaryPart.Position
-			if currentPos.Y < 5 and not playedFallYet then
-				playedFallYet = true
-				SoundService.effects.hitFloor:Play()
-				RunService:UnbindFromRenderStep("fallSound")
-			end
-		end)
-
-		--]]
-
 		pTrove:BindToRenderStep("pathPhysics", Enum.RenderPriority.First.Value, function()
 			timeElapsed = (tick() - startTime) * multiplier
 			local actualHorizontal = timeElapsed * physics.horizontalVelocity

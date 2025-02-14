@@ -83,6 +83,13 @@ event finishedPath = {
     data: unknown
 }
 
+event requestLoad = {
+	from: Client,
+    type: Reliable,
+    call: SingleAsync,
+    data: unknown
+}
+
 event simulatePhysics = {
 	from: Server,
     type: Reliable,
