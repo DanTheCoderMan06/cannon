@@ -38,8 +38,11 @@ local function productsGroup(props)
 			ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0),
 			Selectable = false,
 			Size = UDim2.fromScale(1, 1),
-			Active = props.transparency:map(function(val)
+			ScrollingEnabled = props.transparency:map(function(val)
 				return val == 0
+			end),
+			ScrollBarThickness = props.transparency:map(function(val)
+				return val < 1 and 10 or 0
 			end),
 			ZIndex = 9,
 		}, {

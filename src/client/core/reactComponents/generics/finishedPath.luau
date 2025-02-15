@@ -90,7 +90,7 @@ return function(props)
 			TextSize = 14,
 			TextWrapped = true,
 			TextXAlignment = Enum.TextXAlignment.Left,
-			Visible = props.isRecord,
+			Visible = props.isHighscore,
 		}, {
 			iStroke2 = React.createElement("UIStroke"),
 		}),

@@ -112,7 +112,7 @@ function castleController.setupPlatform(targetPlatform, callbackSignal, modelUse
 	))
 end
 
-function castleController.updateSpot(spot, newValue)
+function castleController.updateSpot(spot, newValue, places, playerFloors)
 	local currentValue = 0
 	for _, v in pairs(spot:FindFirstChildWhichIsA("Model"):GetChildren()) do
 		if v:IsA("Model") and tonumber(v.Name) then
@@ -138,6 +138,18 @@ function castleController.updateSpot(spot, newValue)
 				spot:FindFirstChildWhichIsA("Model"):FindFirstChild(i):Destroy()
 			end
 		end
+	end
+	spot:FindFirstChild("characterModel", true)
+		:PivotTo(spot.CFrame * CFrame.new(0, (newValue * floorHeight * 0.025) + 1, 0))
+	spot:FindFirstChild("characterModel", true):FindFirstChild("floors", true).Text = playerFloors .. " Floors!"
+	if places[1] == spot.Name then
+		spot:FindFirstChild("characterModel", true):FindFirstChild("record", true).Text = "🥇1st Place!"
+	elseif places[2] == spot.Name then
+		spot:FindFirstChild("characterModel", true):FindFirstChild("record", true).Text = "🥈2nd Place!"
+	elseif places[3] == spot.Name then
+		spot:FindFirstChild("characterModel", true):FindFirstChild("record", true).Text = "🥉3rd Place!"
+	else
+		spot:FindFirstChild("characterModel", true):FindFirstChild("record", true).Text = ""
 	end
 end
 
@@ -255,6 +267,36 @@ function castleController.updatePlayer(player)
 	end))
 
 	playerTroves[player.Name]:Add(towerPrompt)
+
+	local newRig = ReplicatedStorage.assets.Rig:Clone()
+	local newAnim = ReplicatedStorage.assets.animations.dance
+		:GetChildren()[math.random(1, #ReplicatedStorage.assets.animations.dance:GetChildren())]
+		:Clone()
+	newRig.Name = "characterModel"
+	newRig.Parent = towerModel
+
+	local s, r = pcall(function()
+		local playerHumDescription = Players:GetHumanoidDescriptionFromUserId(player.UserId)
+		newRig:WaitForChild("Humanoid"):ApplyDescription(playerHumDescription)
+	end)
+
+	local tries = 0
+	while not s and tries < 3 do
+		task.wait(1)
+		tries += 1
+		s, r = pcall(function()
+			local playerHumDescription = Players:GetHumanoidDescriptionFromUserId(player.UserId)
+			newRig:WaitForChild("Humanoid"):ApplyDescription(playerHumDescription)
+		end)
+	end
+
+	task.delay(1, function()
+		newRig:ScaleTo(0.01)
+	end)
+
+	local track = newRig.Humanoid.Animator:LoadAnimation(newAnim)
+	track.Looped = true
+	track:Play()
 end
 
 function castleController.start()
@@ -425,6 +467,7 @@ function castleController.start()
 		local teleports = playerPlatform.teleports
 		local totalFloors = 0
 		local playerStats = {}
+		local players = {}
 		for _, v in pairs(Players:GetPlayers()) do
 			local floorCount
 			for e, z in pairs(v:WaitForChild("leaderstats"):GetChildren()) do
@@ -434,13 +477,18 @@ function castleController.start()
 				end
 			end
 			playerStats[v.Name] = floorCount
+			table.insert(players, v.Name)
 			totalFloors += floorCount
 		end
+
+		players = Sift.Array.sort(players, function(a, b)
+			return playerStats[b] > playerStats[a]
+		end)
 
 		for _, v in pairs(Players:GetPlayers()) do
 			local totalProportion = playerStats[v.Name] / totalFloors
 			local playerSpot = teleports:WaitForChild(v.Name)
-			castleController.updateSpot(playerSpot, math.round(totalProportion * 48) + 1)
+			castleController.updateSpot(playerSpot, math.round(totalProportion * 48) + 1, players, playerStats[v.Name])
 		end
 	end
 
