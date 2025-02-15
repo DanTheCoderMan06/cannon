@@ -16,6 +16,7 @@ local Signal = require(sharedPackages.Signal)
 local Trove = require(sharedPackages.Trove)
 local Sift = require(sharedPackages.Sift)
 local menuUi = require(ReplicatedStorage.client.reactComponents.mainUI)
+local loadUI = require(ReplicatedStorage.client.reactComponents.loadingScreen)
 
 local zap = require(ReplicatedStorage.zap)
 
@@ -24,6 +25,7 @@ local selectSectionEvent = Signal.new()
 local unlockedItemEvent = Signal.new()
 local claimedItemEvent = Signal.new()
 
+local effectsController = require(ReplicatedStorage.client.controllers.effectsController)
 local dataController = require(ReplicatedStorage.client.controllers.dataController)
 local musicController = require(ReplicatedStorage.client.controllers.musicController)
 local rewardsConfig = require(ReplicatedStorage.shared.config.rewardsConfig)

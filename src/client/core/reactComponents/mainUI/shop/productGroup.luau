@@ -39,6 +39,7 @@ return function(props)
 						image = gamepassInfo.IconImageAssetId,
 						transparency = styles[info.type],
 						id = info.id,
+						playerEvent = marketplaceUtil.getPlayerEvent(Players.LocalPlayer),
 						onActivated = function()
 							MarketplaceService:PromptPurchase(Players.LocalPlayer, info.id)
 						end,

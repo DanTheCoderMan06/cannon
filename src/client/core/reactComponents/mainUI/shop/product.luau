@@ -70,6 +70,12 @@ return function(props)
 			"Disconnect"
 		)
 
+		uiTrove:Add(props.playerEvent:Connect(function(data)
+			if props.id == data then
+				setIsOwned(true)
+			end
+		end))
+
 		return function()
 			uiTrove:Destroy()
 		end
