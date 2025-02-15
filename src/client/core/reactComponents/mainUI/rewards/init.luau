@@ -52,6 +52,9 @@ return function(props)
 		Position = UDim2.fromScale(0.5, 0.5),
 		GroupTransparency = styles.transparency,
 		Size = UDim2.fromScale(1, 1),
+		Rotation = styles.transparency:map(function(val)
+			return 0 * val
+		end),
 	}, {
 		content = React.createElement("ImageLabel", {
 			AnchorPoint = Vector2.new(0.5, 0.5),
@@ -64,9 +67,6 @@ return function(props)
 			ScaleType = Enum.ScaleType.Fit,
 			Size = styles.transparency:map(function(val)
 				return UDim2.fromScale(0.638 * math.max(0.2, 1 - val), 0.318 * math.max(0.2, 1 - val))
-			end),
-			Rotation = styles.transparency:map(function(val)
-				return 8 * val
 			end),
 		}, {
 			rewardsFrame = React.createElement(rewardsFrame, props),

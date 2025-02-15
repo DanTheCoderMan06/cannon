@@ -43,14 +43,6 @@ return function(props)
 		TextScaled = true,
 		TextSize = 14,
 		TextWrapped = true,
-		[React.Event.Activated] = function()
-			SoundService.effects.click:Play()
-			local success = zap.toggleAutoFarm.Call()
-			if success then
-				api.start({ toggle = not enabled:getValue() and 0 or 1 })
-				setEnabled(not enabled:getValue())
-			end
-		end,
 		[React.Event.MouseEnter] = function()
 			api.start({
 				hover = 1,
@@ -113,5 +105,29 @@ return function(props)
 				Thickness = 2.5,
 			}),
 		}),
+		clicker = React.createElement("TextButton", {
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+			BackgroundTransparency = 1,
+			BorderColor3 = Color3.fromRGB(0, 0, 0),
+			BorderSizePixel = 0,
+			FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
+			Position = UDim2.fromScale(0.5, 0.5),
+			Size = UDim2.fromScale(1, 1),
+			Text = "",
+			TextColor3 = Color3.fromRGB(21, 208, 11),
+			TextScaled = true,
+			TextSize = 14,
+			TextWrapped = true,
+			ZIndex = 100,
+			[React.Event.Activated] = function()
+				SoundService.effects.click:Play()
+				local success = zap.toggleAutoFarm.Call()
+				if success then
+					api.start({ toggle = not enabled:getValue() and 0 or 1 })
+					setEnabled(not enabled:getValue())
+				end
+			end,
+		}, {}),
 	})
 end

@@ -204,6 +204,7 @@ function effectsController.finishedPath(results)
 	finishedPathEffects:PivotTo(CFrame.new(character.PrimaryPart.Position * Vector3.new(1, 0, 1)))
 	finishedPathEffects.Parent = workspace
 
+	workspace.CurrentCamera.CameraType = Enum.CameraType.Scriptable
 	spr.target(workspace.CurrentCamera, 1, 2.5, {
 		CFrame = CFrame.new(character.PrimaryPart.Position * Vector3.new(1, 15, 1), character.PrimaryPart.Position),
 	})

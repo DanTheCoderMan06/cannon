@@ -67,9 +67,6 @@ return function(props)
 			Size = styles.transparency:map(function(val)
 				return UDim2.fromScale(0.346 * math.max(0.2, 1 - val), 0.765 * math.max(0.2, 1 - val))
 			end),
-			Rotation = styles.transparency:map(function(val)
-				return 8 * val
-			end),
 		}, {
 			uIScale = React.createElement("UIScale"),
 

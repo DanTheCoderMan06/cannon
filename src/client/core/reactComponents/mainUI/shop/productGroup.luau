@@ -17,6 +17,43 @@ local gamepassConfig = require(ReplicatedStorage.shared.config.gamepassConfig)
 
 local marketplaceUtil = require(ReplicatedStorage.shared.utilities.marketplaceUtil)
 
+local function productsGroup(props)
+	return React.createElement("CanvasGroup", {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+		BackgroundTransparency = 1,
+		BorderSizePixel = 0,
+		Position = UDim2.fromScale(0.5, 0.5),
+		Selectable = false,
+		Size = UDim2.fromScale(1, 1),
+		ZIndex = 9,
+	}, {
+		groupOne = React.createElement("ScrollingFrame", {
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+			BackgroundTransparency = 1,
+			BorderColor3 = Color3.fromRGB(0, 0, 0),
+			BorderSizePixel = 0,
+			Position = UDim2.fromScale(0.5, 0.5),
+			ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0),
+			Selectable = false,
+			Size = UDim2.fromScale(1, 1),
+			Active = props.transparency:map(function(val)
+				return val == 0
+			end),
+			ZIndex = 9,
+		}, {
+			uIListLayout = React.createElement("UIListLayout", {
+				FillDirection = Enum.FillDirection.Horizontal,
+				HorizontalAlignment = Enum.HorizontalAlignment.Center,
+				SortOrder = Enum.SortOrder.LayoutOrder,
+				Wraps = true,
+			}),
+			React.createElement(React.Fragment, nil, props.products),
+		}),
+	})
+end
+
 return function(props)
 	local styles, api = ReactSpring.useSpring(function()
 		return { cannons = 0, floors = 1, gamepasses = 1 }
@@ -28,9 +65,12 @@ return function(props)
 			if not info.id then
 				continue
 			end
+			if not _sections[info.type] then
+				_sections[info.type] = {}
+			end
 			local gamepassInfo = marketplaceUtil.getProductInfo(info.id, info.infoType)
 			table.insert(
-				_sections,
+				_sections[info.type],
 				React.createElement(
 					product,
 					Sift.Dictionary.merge(props, {
@@ -73,24 +113,21 @@ return function(props)
 		end
 	end, {})
 
-	return React.createElement("ScrollingFrame", {
+	return React.createElement("Frame", {
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 		BackgroundTransparency = 1,
-		BorderColor3 = Color3.fromRGB(0, 0, 0),
 		BorderSizePixel = 0,
 		Position = UDim2.fromScale(0.5, 0.554),
-		ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0),
 		Selectable = false,
 		Size = UDim2.fromScale(0.956, 0.873),
 		ZIndex = 9,
 	}, {
-		uIListLayout = React.createElement("UIListLayout", {
-			FillDirection = Enum.FillDirection.Horizontal,
-			HorizontalAlignment = Enum.HorizontalAlignment.Center,
-			SortOrder = Enum.SortOrder.LayoutOrder,
-			Wraps = true,
-		}),
-		React.createElement(React.Fragment, nil, sections),
+		cannons = React.createElement(productsGroup, { products = sections["cannons"], transparency = styles.cannons }),
+		floors = React.createElement(productsGroup, { products = sections["floors"], transparency = styles.floors }),
+		gamepasses = React.createElement(
+			productsGroup,
+			{ products = sections["gamepasses"], transparency = styles.gamepasses }
+		),
 	})
 end

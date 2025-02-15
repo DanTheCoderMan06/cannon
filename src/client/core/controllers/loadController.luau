@@ -37,9 +37,8 @@ function uiController.start()
 		Players.LocalPlayer.PlayerGui,
 		"loadingContainer"
 	))
-	Players.LocalPlayer.PlayerGui:WaitForChild("remove"):Destroy()
-	task.wait(10)
-	effectsController.blackScreen(4, function()
+	task.wait(6)
+	effectsController.blackScreen(1, function()
 		lContainer:unmount()
 	end)
 end

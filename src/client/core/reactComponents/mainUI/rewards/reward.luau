@@ -47,7 +47,7 @@ return function(props)
 		LayoutOrder = props.index,
 		Position = UDim2.fromScale(0.101, 0.714),
 		ScaleType = Enum.ScaleType.Fit,
-		Size = UDim2.fromScale(0.0641, 1.1),
+		Size = UDim2.fromScale(0.0641 / 2, 1.1),
 	}, {
 		day = React.createElement("TextLabel", {
 			AnchorPoint = Vector2.new(0.5, 0.5),

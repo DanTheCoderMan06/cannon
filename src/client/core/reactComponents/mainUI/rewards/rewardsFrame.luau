@@ -130,7 +130,7 @@ return function(props)
 		BackgroundTransparency = 1,
 		BorderColor3 = Color3.fromRGB(0, 0, 0),
 		BorderSizePixel = 0,
-		CanvasSize = UDim2.fromScale(3, 0),
+		CanvasSize = UDim2.fromScale(6, 0),
 		Position = UDim2.fromScale(0.5, 0.5),
 		ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0),
 		Selectable = false,
@@ -138,7 +138,7 @@ return function(props)
 	}, {
 		uIListLayout = React.createElement("UIListLayout", {
 			FillDirection = Enum.FillDirection.Horizontal,
-			Padding = UDim.new(0.01, 0),
+			Padding = UDim.new(0, 0),
 			SortOrder = Enum.SortOrder.LayoutOrder,
 			VerticalAlignment = Enum.VerticalAlignment.Center,
 		}),
