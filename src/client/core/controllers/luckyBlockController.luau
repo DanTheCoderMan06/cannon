@@ -16,8 +16,7 @@ function luckyBlockController.start()
 			:WaitForChild("playerPlatforms")
 			:WaitForChild(Players.LocalPlayer.Name)
 			:FindFirstChildWhichIsA("SpawnLocation", true).CFrame
-		newLuckyBlock.PrimaryPart.CFrame = targetCFrame
-			* CFrame.new(math.random() * 10 - 20, 0, math.random() * 10 - 20)
+		newLuckyBlock:PivotTo(targetCFrame * CFrame.new(math.random() * 10 - 20, 20, math.random() * 10 - 20))
 
 		local blockTrove = Trove.new()
 		local timeStarted = tick()
@@ -28,14 +27,19 @@ function luckyBlockController.start()
 		blockTrove:BindToRenderStep("renderLuckyBlock" .. data.id, Enum.RenderPriority.Last.Value, function(dt)
 			local currentScale = (tick() - timeStarted) * scaleUp / 6
 			newLuckyBlock:ScaleTo(currentScale)
+			--[[
 			spr.target(newLuckyBlock.PrimaryPart, 0.4, 9, {
 				Color = Color3.fromHSV(tick() % 1, 1, 1),
 				CFrame = startCFrame
 					* CFrame.new(0, currentScale * 10.926 * 0.87 - 2, 0)
 					* CFrame.new(math.random() * 2 - 2, 0, math.random() * 2 - 2),
 			})
+			--]]
 		end)
 		newLuckyBlock.Parent = workspace
+		task.delay(0.2, function()
+			newLuckyBlock.PrimaryPart.Anchored = false
+		end)
 
 		task.delay(5, function()
 			blockTrove:Destroy()

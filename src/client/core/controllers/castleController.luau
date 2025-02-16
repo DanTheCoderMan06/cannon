@@ -149,6 +149,7 @@ function castleController.updateSpot(spot, newValue, places, playerFloors)
 	elseif places[3] == spot.Name then
 		spot:FindFirstChild("characterModel", true):FindFirstChild("record", true).Text = "🥉3rd Place!"
 	else
+		spot:FindFirstChild("characterModel", true):FindFirstChild("floors", true).Text = ""
 		spot:FindFirstChild("characterModel", true):FindFirstChild("record", true).Text = ""
 	end
 end
