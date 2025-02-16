@@ -1,9 +1,12 @@
 local MarketplaceService = game:GetService("MarketplaceService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local ExperienceNotificationService = game:GetService("ExperienceNotificationService")
 
 local sharedPackages = ReplicatedStorage.sharedPackages
 local Signal = require(sharedPackages.Signal)
+
+local gamepassConfig = require(ReplicatedStorage.shared.config.gamepasses)
 
 local marketplaceUtil = {}
 local playerCache = {}
@@ -17,6 +20,21 @@ local function safeCall(callback)
 		warn("SAFECALL FAILED: " .. r)
 		s, r = pcall(callback)
 	end
+end
+
+function marketplaceUtil.canPromptIn()
+	local success, canPrompt = pcall(function()
+		return ExperienceNotificationService:CanPromptOptInAsync()
+	end)
+
+	return success and canPrompt
+end
+
+function marketplaceUtil.promptOptIn()
+	local success, errorMessage = pcall(function()
+		ExperienceNotificationService:PromptOptIn()
+	end)
+	return success, errorMessage
 end
 
 function marketplaceUtil.getProductInfo(gamepassId, infoType)
@@ -63,6 +81,19 @@ if RunService:IsClient() then
 		playerCache[player.UserId][gamePassId] = true
 		if playerEvents[player.UserId] then
 			playerEvents[player.UserId]:Fire(gamePassId)
+		end
+
+		local amountBought = 0
+		for _, v in pairs(gamepassConfig) do
+			if v.infoType == Enum.InfoType.GamePass and v.id ~= gamePassId then
+				amountBought += 1
+			end
+		end
+
+		if amountBought then
+			if marketplaceUtil.canPromptIn() then
+				marketplaceUtil.promptOptIn()
+			end
 		end
 	end)
 end

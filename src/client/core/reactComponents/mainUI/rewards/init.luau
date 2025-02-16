@@ -13,6 +13,8 @@ local rewards = ReplicatedStorage.client.reactComponents.mainUI.rewards
 local rewardsFrame = require(rewards.rewardsFrame)
 local closeButton = require(rewards.closeButton)
 
+local firstClaim = false
+
 return function(props)
 	local styles, api = ReactSpring.useSpring(function()
 		return { transparency = 1 }
@@ -36,6 +38,12 @@ return function(props)
 					friction = 20,
 				},
 			})
+		end))
+
+		uiTrove:Add(props.claimedItemEvent:Connect(function(itemDay)
+			if itemDay == 1 then
+				firstClaim = true
+			end
 		end))
 
 		return function()
@@ -74,6 +82,10 @@ return function(props)
 				styles = styles,
 				onActivated = function()
 					props.selectedUIEvent:Fire("")
+					if firstClaim then
+						firstClaim = false
+						props.promptIn()
+					end
 				end,
 			}),
 			uIScale = React.createElement("UIScale", {

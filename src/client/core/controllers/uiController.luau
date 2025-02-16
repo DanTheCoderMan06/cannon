@@ -1,5 +1,6 @@
 local uiController = {}
 
+local MarketplaceService = game:GetService("MarketplaceService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterGui = game:GetService("StarterGui")
 local ExperienceNotificationService = game:GetService("ExperienceNotificationService")
@@ -70,6 +71,11 @@ function uiController.start()
 				unlockedItemEvent = unlockedItemEvent,
 				dataChanged = dataController.dataChanged,
 				toggleMusicEvent = musicController.toggleMusicEvent,
+				promptIn = function()
+					if uiController.canPromptIn() then
+						uiController.promptOptIn()
+					end
+				end,
 			}),
 		}),
 		Players.LocalPlayer.PlayerGui,

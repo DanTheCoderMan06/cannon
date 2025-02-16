@@ -206,7 +206,7 @@ function effectsController.finishedPath(results)
 
 	workspace.CurrentCamera.CameraType = Enum.CameraType.Scriptable
 	spr.target(workspace.CurrentCamera, 1, 2.5, {
-		CFrame = CFrame.new(character.PrimaryPart.Position * Vector3.new(1, 15, 1), character.PrimaryPart.Position),
+		CFrame = CFrame.new(character.PrimaryPart.Position * Vector3.new(1, 20, 1), character.PrimaryPart.Position),
 	})
 
 	SoundService.effects.victory:Play()

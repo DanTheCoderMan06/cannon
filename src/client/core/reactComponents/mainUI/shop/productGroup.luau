@@ -84,7 +84,11 @@ return function(props)
 						id = info.id,
 						playerEvent = marketplaceUtil.getPlayerEvent(Players.LocalPlayer),
 						onActivated = function()
-							MarketplaceService:PromptPurchase(Players.LocalPlayer, info.id)
+							if info.infoType == Enum.InfoType.GamePass then
+								MarketplaceService:PromptGamePassPurchase(Players.LocalPlayer, info.id)
+							else
+								MarketplaceService:PromptProductPurchase(Players.LocalPlayer, info.id)
+							end
 						end,
 					})
 				)

@@ -20,6 +20,7 @@ function physicsUtil.getVariables(initialHeight, initialVelocity)
 		verticalVelocity = verticalVelocity,
 		distance = horizontalDistanceTraveled,
 		time = timeElapsed,
+		timeCreated = tick(),
 	}
 end
 

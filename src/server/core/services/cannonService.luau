@@ -123,6 +123,10 @@ function cannonService.start()
 		if not simulatedPaths[player.Name] then
 			return
 		end
+		if tick() - simulatedPaths[player.Name].timeCreated < math.min(8, simulatedPaths[player.Name].time) then
+			print("Anti Exploit")
+			return
+		end
 		local path = Sift.Dictionary.copyDeep(simulatedPaths[player.Name])
 		simulatedPaths[player.Name] = nil
 		cannonService.awardPlayer(player, path)

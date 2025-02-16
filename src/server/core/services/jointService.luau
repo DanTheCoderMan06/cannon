@@ -26,10 +26,10 @@ local UpperLegPhysics = PhysicalProperties.new(1, 0.3, 0.5)
 local LowerLegPhysics = PhysicalProperties.new(1, 0.3, 0.5)
 local FootPhysics = PhysicalProperties.new(1.5, 0.6, 0.5)
 
-local playerCollisionGroupName = "Players"
+local playerCollisionGroupName = "players"
 
 PhysicsService:RegisterCollisionGroup(playerCollisionGroupName)
-PhysicsService:CollisionGroupSetCollidable(playerCollisionGroupName, playerCollisionGroupName, true)
+PhysicsService:CollisionGroupSetCollidable(playerCollisionGroupName, playerCollisionGroupName, false)
 
 local previousCollisionGroups = {}
 
