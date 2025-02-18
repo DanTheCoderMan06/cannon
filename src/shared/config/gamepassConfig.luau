@@ -46,6 +46,7 @@ return {
 		end,
 		type = "cannons",
 		infoType = Enum.InfoType.GamePass,
+		cannonName = "circusCannon",
 	},
 	buyArmyCannon = {
 		id = 1051600321,
@@ -54,6 +55,7 @@ return {
 		end,
 		type = "cannons",
 		infoType = Enum.InfoType.GamePass,
+		cannonName = "armyCannon",
 	},
 	buyArtillery = {
 		id = 1028783141,
@@ -62,6 +64,7 @@ return {
 		end,
 		type = "cannons",
 		infoType = Enum.InfoType.GamePass,
+		cannonName = "artillery",
 	},
 	buyRailgun = {
 		id = 1035960145,
@@ -70,6 +73,7 @@ return {
 		end,
 		type = "cannons",
 		infoType = Enum.InfoType.GamePass,
+		cannonName = "railgun",
 	},
 	buyVIP = {
 		id = 1060138098,

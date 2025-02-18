@@ -1,3 +1,4 @@
+local PhysicsService = game:GetService("PhysicsService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -11,7 +12,8 @@ local luckyBlockController = {}
 
 function luckyBlockController.start()
 	zap.spawnLuckyBlock.On(function(data)
-		local newLuckyBlock = ReplicatedStorage.assets.luckyBlock:Clone()
+		local playerCastle = workspace.castles:WaitForChild(Players.LocalPlayer.Name):FindFirstChildWhichIsA("Model")
+		local newLuckyBlock = playerCastle:WaitForChild("luckyBlock"):Clone()
 		local targetCFrame = workspace
 			:WaitForChild("playerPlatforms")
 			:WaitForChild(Players.LocalPlayer.Name)

@@ -26,6 +26,7 @@ local module = {
 			image = "",
 			name = "VIP",
 		},
+		--[[
 		{
 			day = 2,
 			callback = function(playerData)
@@ -34,6 +35,16 @@ local module = {
 			type = "image",
 			image = "",
 			name = "+10 Floors",
+		},
+		--]]
+		{
+			day = 2,
+			callback = function(playerData)
+				table.insert(playerData.cannons, "armyCannon")
+			end,
+			type = "viewport",
+			model = ReplicatedStorage.assets.cannons:FindFirstChild("armyCannon"),
+			name = "Army Cannon",
 		},
 		{
 			day = 3,

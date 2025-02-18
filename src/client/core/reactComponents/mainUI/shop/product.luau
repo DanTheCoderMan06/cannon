@@ -66,6 +66,9 @@ return function(props)
 				if props.id == rewardsConfig.vipGamepass then
 					setIsOwned(newData.hasVIPOn)
 				end
+				if props.type == "cannons" then
+					setIsOwned(table.find(newData.cannons, props.cannonName) ~= nil)
+				end
 			end),
 			"Disconnect"
 		)

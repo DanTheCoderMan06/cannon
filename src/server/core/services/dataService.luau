@@ -83,7 +83,10 @@ function dataService.start()
 				print(`Profile loaded for {player.DisplayName}!`)
 
 				profile.Data.lastEntered = os.time()
-				profile.Data.daysClaimed = {}
+				if RunService:IsStudio() then
+					profile.Data.daysClaimed = {}
+					profile.Data.cannons = {}
+				end
 
 				local leaderstats = ReplicatedStorage.assets.statsFolder:Clone()
 				leaderstats.Name = "leaderstats"

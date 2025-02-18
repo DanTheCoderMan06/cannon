@@ -1,4 +1,5 @@
 local HttpService = game:GetService("HttpService")
+local PhysicsService = game:GetService("PhysicsService")
 local Players = game:GetService("Players")
 local DataStoreService = game:GetService("DataStoreService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -14,11 +15,16 @@ local luckyBlockService = {}
 
 local playerBlocks = {}
 
+PhysicsService:RegisterCollisionGroup("luckyBlock")
+PhysicsService:CollisionGroupSetCollidable("players", "luckyBlock", false)
+
 function luckyBlockService.spawnLuckyBlock(player)
 	local newBlock = {}
 	local playerData = dataService.getPlayerData(player)
 	newBlock.id = HttpService:GenerateGUID()
 	newBlock.reward = rewardsConfig.luckyBlockFormula(playerData.cannon)
+	newBlock.model = ReplicatedStorage.assets.luckyBlock:Clone()
+	newBlock.model.Parent = workspace.castles:WaitForChild(player.Name):FindFirstChildWhichIsA("Model")
 	playerBlocks[tostring(player.UserId)][newBlock.id] = newBlock
 	zap.spawnLuckyBlock.Fire(player, newBlock)
 end
@@ -43,6 +49,7 @@ function luckyBlockService.start()
 			return
 		end
 		local newBlock = playerBlocks[tostring(player.UserId)][data.id]
+		newBlock.model:Destroy()
 		local playerData = dataService.getPlayerData(player)
 		playerData.money += newBlock.reward
 		dataService.updatePlayerData(player, playerData)

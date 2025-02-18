@@ -24,6 +24,32 @@ local startTimeLuckyBlock = tick()
 return {
 	cannons = {
 		armyCannon = {
+			handleLoad = function(loadEvent, loadTrove)
+				if
+					marketplaceUtil.userOwnsGamepass(Players.LocalPlayer, gamepassConfig.buyArmyCannon.id)
+					or table.find(dataController.currentData.cannons, "armyCannon")
+				then
+					loadEvent:Fire(true)
+					return
+				end
+				loadTrove:Add(
+					dataController.dataChanged:Connect(function(newData)
+						if table.find(dataController.currentData.cannons, "armyCannon") == nil then
+							return
+						end
+						loadEvent:Fire()
+					end),
+					"Disconnect"
+				)
+				loadTrove:Add(
+					marketplaceUtil.getPlayerEvent(Players.LocalPlayer):Connect(function(boughtId)
+						if boughtId == gamepassConfig.buyArtillery.id then
+							loadEvent:Fire(true)
+						end
+					end),
+					"Disconnect"
+				)
+			end,
 			callback = function(callbackEvent)
 				if not marketplaceUtil.userOwnsGamepass(Players.LocalPlayer, gamepassConfig.buyArmyCannon.id) then
 					MarketplaceService:PromptGamePassPurchase(Players.LocalPlayer, gamepassConfig.buyArmyCannon.id)
@@ -87,6 +113,32 @@ return {
 			end,
 		},
 		circusCannon = {
+			handleLoad = function(loadEvent, loadTrove)
+				if
+					marketplaceUtil.userOwnsGamepass(Players.LocalPlayer, gamepassConfig.buyCircusCannon.id)
+					or table.find(dataController.currentData.cannons, "circusCannon")
+				then
+					loadEvent:Fire(true)
+					return
+				end
+				loadTrove:Add(
+					dataController.dataChanged:Connect(function(newData)
+						if table.find(dataController.currentData.cannons, "circusCannon") == nil then
+							return
+						end
+						loadEvent:Fire()
+					end),
+					"Disconnect"
+				)
+				loadTrove:Add(
+					marketplaceUtil.getPlayerEvent(Players.LocalPlayer):Connect(function(boughtId)
+						if boughtId == gamepassConfig.buyCircusCannon.id then
+							loadEvent:Fire(true)
+						end
+					end),
+					"Disconnect"
+				)
+			end,
 			callback = function(callbackEvent)
 				if not marketplaceUtil.userOwnsGamepass(Players.LocalPlayer, gamepassConfig.buyCircusCannon.id) then
 					MarketplaceService:PromptGamePassPurchase(Players.LocalPlayer, gamepassConfig.buyCircusCannon.id)
@@ -153,6 +205,32 @@ return {
 			end,
 		},
 		artillery = {
+			handleLoad = function(loadEvent, loadTrove)
+				if
+					marketplaceUtil.userOwnsGamepass(Players.LocalPlayer, gamepassConfig.buyArtillery.id)
+					or table.find(dataController.currentData.cannons, "artillery")
+				then
+					loadEvent:Fire(true)
+					return
+				end
+				loadTrove:Add(
+					dataController.dataChanged:Connect(function(newData)
+						if table.find(dataController.currentData.cannons, "artillery") == nil then
+							return
+						end
+						loadEvent:Fire()
+					end),
+					"Disconnect"
+				)
+				loadTrove:Add(
+					marketplaceUtil.getPlayerEvent(Players.LocalPlayer):Connect(function(boughtId)
+						if boughtId == gamepassConfig.buyArtillery.id then
+							loadEvent:Fire(true)
+						end
+					end),
+					"Disconnect"
+				)
+			end,
 			callback = function(callbackEvent)
 				if not marketplaceUtil.userOwnsGamepass(Players.LocalPlayer, gamepassConfig.buyArtillery.id) then
 					MarketplaceService:PromptGamePassPurchase(Players.LocalPlayer, gamepassConfig.buyArtillery.id)
@@ -216,6 +294,32 @@ return {
 			end,
 		},
 		railgun = {
+			handleLoad = function(loadEvent, loadTrove)
+				if
+					marketplaceUtil.userOwnsGamepass(Players.LocalPlayer, gamepassConfig.buyRailgun.id)
+					or table.find(dataController.currentData.cannons, "railgun")
+				then
+					loadEvent:Fire(true)
+					return
+				end
+				loadTrove:Add(
+					dataController.dataChanged:Connect(function(newData)
+						if table.find(dataController.currentData.cannons, "railgun") == nil then
+							return
+						end
+						loadEvent:Fire()
+					end),
+					"Disconnect"
+				)
+				loadTrove:Add(
+					marketplaceUtil.getPlayerEvent(Players.LocalPlayer):Connect(function(boughtId)
+						if boughtId == gamepassConfig.buyRailgun.id then
+							loadEvent:Fire(true)
+						end
+					end),
+					"Disconnect"
+				)
+			end,
 			callback = function(callbackEvent)
 				if not marketplaceUtil.userOwnsGamepass(Players.LocalPlayer, gamepassConfig.buyRailgun.id) then
 					MarketplaceService:PromptGamePassPurchase(Players.LocalPlayer, gamepassConfig.buyRailgun.id)
@@ -560,6 +664,85 @@ return {
 				}
 			end,
 			callbackFunction = function(success, states) -- callBackFunction is just a function to change the staes if needed
+				if success then
+					spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(0.992156, 1, 0.580392) })
+				else
+					spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(1, 0, 0) })
+				end
+
+				task.delay(1, function()
+					spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(0, 1, 81 / 255) })
+				end)
+			end,
+		},
+		upgradeCannon = {
+			callback = function(callbackEvent)
+				local success = zap.purchaseUpgrade.Call("cannon")
+				callbackEvent:Fire(success)
+			end,
+			title = "UPGRADE CANNON TIER",
+			description = '100 <font color="#008000">\u{E002}</font>',
+			updateValues = function(trove, updateEvent)
+				local Players = game:GetService("Players")
+				local stats = Players.LocalPlayer:WaitForChild("leaderstats")
+				local playerData = dataController.currentData
+				local cannonValue
+				for _, v in pairs(stats:GetChildren()) do
+					if v:GetAttribute("statName") ~= "cannon" then
+						continue
+					end
+					cannonValue = v
+					trove:Add(v:GetPropertyChangedSignal("Value"):Connect(function()
+						updateEvent:Fire({
+							title = "LEVEL " .. tostring(v.Value),
+							description = tostring(cannonConfig.costFormula(v.Value + 1, playerData.boughtLevels))
+								.. "$",
+						})
+					end))
+				end
+				trove:Add(dataController.dataChanged:Connect(function(newdata)
+					playerData = newdata
+					updateEvent:Fire({
+						title = "LEVEL " .. tostring(cannonValue.Value),
+						description = tostring(
+							cannonConfig.costFormula(cannonValue.Value + 1, playerData.boughtLevels)
+						) .. "$",
+					})
+				end))
+			end,
+			init = function()
+				local Players = game:GetService("Players")
+				local stats = Players.LocalPlayer:WaitForChild("leaderstats")
+				local playerData = dataController.currentData
+				return {
+					title = "TIER " .. playerData.cannonTier,
+					description = '100 <font color="#008000">\u{E002}</font>',
+				}
+			end,
+			initModel = function(modelTrove, updateModelEvent)
+				local Players = game:GetService("Players")
+				local leaderstatsstats = Players.LocalPlayer:WaitForChild("leaderstats")
+				local function updateModel(value)
+					local targetColor
+					if value == 1 then
+						targetColor = Color3.new(0.0509804, 0.411765, 0.67451)
+					elseif value == 2 then
+						targetColor = Color3.new(0.050980, 0.549019, 0.674509)
+					end
+					local newModel = ReplicatedStorage.assets.cannons:FindFirstChild(cannonConfig.getCannon(value))
+					updateModelEvent:Fire(newModel, targetColor)
+				end
+				for _, v in pairs(leaderstatsstats:GetChildren()) do
+					if v:GetAttribute("statName") ~= "cannon" then
+						continue
+					end
+					modelTrove:Add(v:GetPropertyChangedSignal("Value"):Connect(function()
+						updateModel(v.Value)
+					end))
+					updateModel(v.Value)
+				end
+			end,
+			callbackFunction = function(success, states)
 				if success then
 					spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(0.992156, 1, 0.580392) })
 				else

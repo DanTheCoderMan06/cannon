@@ -22,4 +22,7 @@ return {
 
 	hasVIPOn = false,
 	vipTimeStart = 0,
+
+	--For Tiers
+	cannonTier = 0,
 }

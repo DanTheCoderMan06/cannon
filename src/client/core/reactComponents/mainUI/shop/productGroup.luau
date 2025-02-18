@@ -81,6 +81,8 @@ return function(props)
 						name = gamepassInfo.Name,
 						image = gamepassInfo.IconImageAssetId,
 						transparency = styles[info.type],
+						type = info.type,
+						cannonName = info.cannonName,
 						id = info.id,
 						playerEvent = marketplaceUtil.getPlayerEvent(Players.LocalPlayer),
 						onActivated = function()

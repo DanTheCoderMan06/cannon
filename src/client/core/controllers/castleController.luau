@@ -522,78 +522,89 @@ function castleController.start()
 	local cannonSpots = playerPlatform:WaitForChild("cannons")
 	local globalCounter = 0
 	for cannonName, cannon in pairs(platformConfig.cannons) do
-		globalCounter += 1
-		local counter = globalCounter
+		task.spawn(function()
+			globalCounter += 1
+			local counter = globalCounter
 
-		local callbackSignal = Signal.new()
-		local newPurchase = ReplicatedStorage.assets.purchasePlatform:Clone()
-		castleController.setupPlatform(cannonSpots:WaitForChild(counter), callbackSignal, newPurchase, cannon)
-
-		task.defer(function()
-			local modelFolder = Instance.new("Folder")
-			newPurchase.Parent = cannonSpots:WaitForChild(counter)
-
-			local w = Instance.new("Weld")
-			w.Part0 = newPurchase.Parent
-			w.Part1 = newPurchase.PrimaryPart
-			w.Parent = newPurchase
-
-			if typeof(cannon.initModel) == "Instance" then
-				local updateTrove = Trove.new()
-				modelFolder.Name = cannonName .. "_Model"
-				modelFolder.Parent = newPurchase
-				updateTrove:AttachToInstance(modelFolder)
-
-				local newModel = cannon.initModel:FindFirstChildWhichIsA("Model"):Clone()
-				newModel:ScaleTo(cannon.initModel:GetAttribute("miniSize"))
-				newModel:PivotTo(newPurchase:FindFirstChild("modelPlatform", true).WorldCFrame)
-				newModel.Parent = modelFolder
-			--Causing Crash
-			elseif typeof(cannon.initModel) == "function" then
-				local updateTrove = Trove.new()
-				local updateSignal = Signal.new()
-				modelFolder.Name = cannonName .. "_Model"
-				modelFolder.Parent = newPurchase
-				updateTrove:AttachToInstance(modelFolder)
-
-				updateTrove:Add(
-					updateSignal:Connect(function(newModel)
-						local newCannonModel = newModel:FindFirstChildWhichIsA("Model"):Clone()
-						newCannonModel:ScaleTo(newModel:GetAttribute("miniSize"))
-						modelFolder:ClearAllChildren()
-						newCannonModel:PivotTo(newPurchase:FindFirstChild("modelPlatform", true).WorldCFrame)
-						newCannonModel.Parent = modelFolder
-					end),
-					"Disconnect"
-				)
-
-				updateTrove:Add(updateSignal, "Destroy")
-
-				task.defer(function()
-					cannon.initModel(updateTrove, updateSignal)
-				end)
+			if cannon.handleLoad then
+				local waitSignal = Signal.new()
+				local waitTrove = Trove.new()
+				waitTrove:Add(waitSignal)
+				cannon.handleLoad(waitSignal, waitTrove)
+				waitSignal:Wait()
+				waitTrove:Destroy()
 			end
 
-			local touchTrove = Trove.new()
-			touchTrove:AttachToInstance(playerPlatform)
+			local callbackSignal = Signal.new()
+			local newPurchase = ReplicatedStorage.assets.purchasePlatform:Clone()
+			castleController.setupPlatform(cannonSpots:WaitForChild(counter), callbackSignal, newPurchase, cannon)
 
-			task.delay(3, function()
-				newPurchase:PivotTo(cannonSpots:WaitForChild(counter).CFrame)
-			end)
+			task.defer(function()
+				local modelFolder = Instance.new("Folder")
+				newPurchase.Parent = cannonSpots:WaitForChild(counter)
 
-			castleController.updateZone(counter, cannonSpots:FindFirstChild(counter), cannon, callbackSignal)
+				local w = Instance.new("Weld")
+				w.Part0 = newPurchase.Parent
+				w.Part1 = newPurchase.PrimaryPart
+				w.Parent = newPurchase
 
-			touchTrove:Add(
-				playerPlatform.cannons:FindFirstChild(counter):GetPropertyChangedSignal("CFrame"):Connect(function()
-					newPurchase:PivotTo(playerPlatform.cannons:FindFirstChild(counter).CFrame)
-					castleController.updateZone(
-						counter,
-						playerPlatform.cannons:FindFirstChild(counter),
-						cannon,
-						callbackSignal
+				if typeof(cannon.initModel) == "Instance" then
+					local updateTrove = Trove.new()
+					modelFolder.Name = cannonName .. "_Model"
+					modelFolder.Parent = newPurchase
+					updateTrove:AttachToInstance(modelFolder)
+
+					local newModel = cannon.initModel:FindFirstChildWhichIsA("Model"):Clone()
+					newModel:ScaleTo(cannon.initModel:GetAttribute("miniSize"))
+					newModel:PivotTo(newPurchase:FindFirstChild("modelPlatform", true).WorldCFrame)
+					newModel.Parent = modelFolder
+				--Causing Crash
+				elseif typeof(cannon.initModel) == "function" then
+					local updateTrove = Trove.new()
+					local updateSignal = Signal.new()
+					modelFolder.Name = cannonName .. "_Model"
+					modelFolder.Parent = newPurchase
+					updateTrove:AttachToInstance(modelFolder)
+
+					updateTrove:Add(
+						updateSignal:Connect(function(newModel)
+							local newCannonModel = newModel:FindFirstChildWhichIsA("Model"):Clone()
+							newCannonModel:ScaleTo(newModel:GetAttribute("miniSize"))
+							modelFolder:ClearAllChildren()
+							newCannonModel:PivotTo(newPurchase:FindFirstChild("modelPlatform", true).WorldCFrame)
+							newCannonModel.Parent = modelFolder
+						end),
+						"Disconnect"
 					)
+
+					updateTrove:Add(updateSignal, "Destroy")
+
+					task.defer(function()
+						cannon.initModel(updateTrove, updateSignal)
+					end)
+				end
+
+				local touchTrove = Trove.new()
+				touchTrove:AttachToInstance(playerPlatform)
+
+				task.delay(3, function()
+					newPurchase:PivotTo(cannonSpots:WaitForChild(counter).CFrame)
 				end)
-			)
+
+				castleController.updateZone(counter, cannonSpots:FindFirstChild(counter), cannon, callbackSignal)
+
+				touchTrove:Add(
+					playerPlatform.cannons:FindFirstChild(counter):GetPropertyChangedSignal("CFrame"):Connect(function()
+						newPurchase:PivotTo(playerPlatform.cannons:FindFirstChild(counter).CFrame)
+						castleController.updateZone(
+							counter,
+							playerPlatform.cannons:FindFirstChild(counter),
+							cannon,
+							callbackSignal
+						)
+					end)
+				)
+			end)
 		end)
 	end
 end

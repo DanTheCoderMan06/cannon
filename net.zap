@@ -152,3 +152,11 @@ funct toggleAutoFarm = {
     rets: boolean 
 }
 --
+
+--Admin
+event watchTarget = {
+	from: Server,
+    type: Reliable,
+    call: SingleAsync,
+    data: unknown
+}
