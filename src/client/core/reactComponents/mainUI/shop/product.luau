@@ -13,6 +13,7 @@ local components = ReplicatedStorage.client.reactComponents
 local marketplaceUtil = require(ReplicatedStorage.shared.utilities.marketplaceUtil)
 
 local rewardsConfig = require(ReplicatedStorage.shared.config.rewardsConfig)
+local gamepassConfig = require(ReplicatedStorage.shared.config.gamepassConfig)
 
 local function lockedFrame(props)
 	return React.createElement("ImageLabel", {
@@ -55,8 +56,34 @@ local function lockedFrame(props)
 	})
 end
 
+local function tierFrame(props)
+	return React.createElement("TextLabel", {
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+		BackgroundTransparency = 1,
+		BorderColor3 = Color3.fromRGB(0, 0, 0),
+		BorderSizePixel = 0,
+		FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
+		Position = UDim2.fromScale(0.61, 0.112),
+		RichText = true,
+		Size = UDim2.fromScale(0.582, 0.171),
+		Text = "Tier II",
+		TextColor3 = Color3.fromRGB(255, 255, 255),
+		TextScaled = true,
+		TextSize = 14,
+		TextWrapped = true,
+		TextXAlignment = Enum.TextXAlignment.Right,
+		Visible = props.visible,
+		ZIndex = 100,
+	}, {
+		uIStroke = React.createElement("UIStroke"),
+	})
+end
+
 return function(props)
 	local owned, setIsOwned = React.useBinding(marketplaceUtil.userOwnsGamepass(Players.LocalPlayer, props.id))
+	local tierFrameVisible, setTierFrameVisible = React.useBinding(false)
+	local currentPrice, setCurrentPrice = React.useBinding(props.price)
 
 	React.useEffect(function()
 		local uiTrove = Trove.new()
@@ -68,6 +95,16 @@ return function(props)
 				end
 				if props.type == "cannons" then
 					setIsOwned(table.find(newData.cannons, props.cannonName) ~= nil)
+				end
+				if props.tiers then
+					if newData.productTiers.products[props.productKey] then
+						setTierFrameVisible(newData.productTiers.products[props.productKey] >= 5)
+						if newData.productTiers.products[props.productKey] >= 5 then
+							local tier2Info = gamepassConfig[props.tier2Name]
+							local newInfo = marketplaceUtil.getProductInfo(tier2Info.id, Enum.InfoType.Product)
+							setCurrentPrice(newInfo.PriceInRobux)
+						end
+					end
 				end
 			end),
 			"Disconnect"
@@ -116,6 +153,7 @@ return function(props)
 			Size = UDim2.fromScale(1, 1),
 			ZIndex = 0,
 		}, {
+			tierFrame = React.createElement(tierFrame, { visible = tierFrameVisible }),
 			imageHolder = React.createElement("ImageLabel", {
 				AnchorPoint = Vector2.new(0.5, 0.5),
 				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
@@ -225,7 +263,9 @@ return function(props)
 					FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
 					Position = UDim2.fromScale(0.5, 0.5),
 					Size = UDim2.fromScale(1.19, 0.893),
-					Text = "" .. props.price,
+					Text = currentPrice:map(function(val)
+						return "" .. val
+					end),
 					TextColor3 = styles.clicked:map(function(val)
 						return Color3.fromRGB(255, 255, 255):Lerp(Color3.fromRGB(89, 160, 136), val)
 					end),

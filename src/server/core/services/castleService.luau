@@ -40,11 +40,11 @@ function castleService.updateTower(player)
 
 	local totalFloors = playerData.floors
 
-	-- Run the creation in the background so it doesn't block instantly
+	print(totalFloors)
+
 	task.spawn(function()
 		local currentFloor = 0
 		while currentFloor <= totalFloors - 1 do
-			-- Create a small batch each frame to avoid a huge spike
 			for i = 1, CHUNK_SIZE do
 				if currentFloor > totalFloors - 1 then
 					break

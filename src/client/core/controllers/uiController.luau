@@ -70,6 +70,7 @@ function uiController.start()
 				claimedItemEvent = claimedItemEvent,
 				unlockedItemEvent = unlockedItemEvent,
 				dataChanged = dataController.dataChanged,
+				getData = dataController.getData,
 				toggleMusicEvent = musicController.toggleMusicEvent,
 				promptIn = function()
 					if uiController.canPromptIn() then

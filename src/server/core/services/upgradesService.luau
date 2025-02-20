@@ -55,7 +55,9 @@ function upgradesService.handlePurchase(recieptInfo)
 
 	for name, cannonTier in pairs(tierConfig.cannonTiers) do
 		if cannonTier.id == recieptInfo.ProductId then
-			upgradesService.upgradeTier(player, "cannonTier", cannonTier.tier)
+			task.defer(function()
+				upgradesService.upgradeTier(player, "cannonTier", cannonTier.tier)
+			end)
 			return Enum.ProductPurchaseDecision.PurchaseGranted
 		end
 	end
@@ -65,7 +67,7 @@ end
 
 function upgradesService.start()
 	MarketplaceService.ProcessReceipt = function(recieptInfo)
-		upgradesService.handlePurchase(recieptInfo)
+		return upgradesService.handlePurchase(recieptInfo)
 	end
 
 	MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player, gamePassId, wasPurchased)

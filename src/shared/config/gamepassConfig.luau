@@ -26,7 +26,7 @@ return {
 		end,
 		type = "floors",
 		infoType = Enum.InfoType.Product,
-		tiers = true,
+		shouldAppear = false,
 	},
 	fiftyFloorsTier2 = {
 		id = 3218172192,
@@ -40,7 +40,7 @@ return {
 		end,
 		type = "floors",
 		infoType = Enum.InfoType.Product,
-		tiers = true,
+		shouldAppear = false,
 	},
 	tenFloors = {
 		id = 2697043460,
@@ -61,6 +61,7 @@ return {
 		type = "floors",
 		infoType = Enum.InfoType.Product,
 		tiers = true,
+		tier2Name = "tenFloorsTier2",
 	},
 	fiftyFloors = {
 		id = 2697043455,
@@ -81,6 +82,43 @@ return {
 		type = "floors",
 		infoType = Enum.InfoType.Product,
 		tiers = true,
+		tier2Name = "fiftyFloorsTier2",
+	},
+	twoHundredFiftyFloors = {
+		id = 3220619326,
+		callback = function(player)
+			local playerData = dataService.getPlayerData(player)
+			if playerData.productTiers.products["twoHundredFiftyFloors"] then
+				if playerData.productTiers.products["twoHundredFiftyFloors"] >= 5 then
+					return
+				end
+			end
+			playerData.floors += 250
+			playerData.boughtFloors += 250
+			playerData.productTiers.products["twoHundredFiftyFloors"] = playerData.productTiers.products["twoHundredFiftyFloors"]
+				or 0
+			playerData.productTiers.products["twoHundredFiftyFloors"] += 1
+			dataService.updatePlayerData(player, playerData)
+			castleService.updateTower(player)
+		end,
+		type = "floors",
+		infoType = Enum.InfoType.Product,
+		tiers = true,
+		tier2Name = "twoHundredFiftyFloorsTier2",
+	},
+	twoHundredFiftyFloorsTier2 = {
+		id = 3220619459,
+		callback = function(player)
+			local playerData = dataService.getPlayerData(player)
+			playerData.floors += 250
+			playerData.boughtFloors += 250
+			playerData.productTiers.products["twoHundredFiftyFloors"] += 1
+			dataService.updatePlayerData(player, playerData)
+			castleService.updateTower(player)
+		end,
+		type = "floors",
+		infoType = Enum.InfoType.Product,
+		shouldAppear = false,
 	},
 	buyCircusCannon = {
 		id = 1051314279,

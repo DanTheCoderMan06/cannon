@@ -64,7 +64,10 @@ return function(props)
 
 	local sections = React.useMemo(function()
 		local _sections = {}
-		for name, info in pairs(gamepassConfig) do
+		for gamepassName, info in pairs(gamepassConfig) do
+			if info.shouldAppear == false then
+				continue
+			end
 			if not info.id then
 				continue
 			end
@@ -77,6 +80,7 @@ return function(props)
 				React.createElement(
 					product,
 					Sift.Dictionary.merge(props, {
+						productKey = gamepassName,
 						price = gamepassInfo.PriceInRobux,
 						name = gamepassInfo.Name,
 						image = gamepassInfo.IconImageAssetId,
@@ -84,14 +88,30 @@ return function(props)
 						type = info.type,
 						cannonName = info.cannonName,
 						id = info.id,
+						tier2Name = info.tier2Name,
 						playerEvent = marketplaceUtil.getPlayerEvent(Players.LocalPlayer),
 						onActivated = function()
-							if info.infoType == Enum.InfoType.GamePass then
-								MarketplaceService:PromptGamePassPurchase(Players.LocalPlayer, info.id)
+							if info.tiers then
+								local currentData = props.getData()
+								if currentData.productTiers.products[gamepassName] then
+									if currentData.productTiers.products[gamepassName] >= 5 then
+										local tier2Info = gamepassConfig[info.tier2Name]
+										MarketplaceService:PromptProductPurchase(Players.LocalPlayer, tier2Info.id)
+									else
+										MarketplaceService:PromptProductPurchase(Players.LocalPlayer, info.id)
+									end
+								else
+									MarketplaceService:PromptProductPurchase(Players.LocalPlayer, info.id)
+								end
 							else
-								MarketplaceService:PromptProductPurchase(Players.LocalPlayer, info.id)
+								if info.infoType == Enum.InfoType.GamePass then
+									MarketplaceService:PromptGamePassPurchase(Players.LocalPlayer, info.id)
+								else
+									MarketplaceService:PromptProductPurchase(Players.LocalPlayer, info.id)
+								end
 							end
 						end,
+						tiers = info.tiers == true,
 					})
 				)
 			)
