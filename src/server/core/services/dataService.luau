@@ -86,6 +86,7 @@ function dataService.start()
 				if RunService:IsStudio() then
 					profile.Data.daysClaimed = {}
 					profile.Data.cannons = {}
+					profile.Data.cannonTier = 0
 				end
 
 				local leaderstats = ReplicatedStorage.assets.statsFolder:Clone()

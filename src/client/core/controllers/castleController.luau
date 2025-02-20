@@ -348,7 +348,7 @@ function castleController.start()
 				updateTrove:AttachToInstance(modelFolder)
 
 				updateTrove:Add(
-					updateSignal:Connect(function(recievedModel)
+					updateSignal:Connect(function(recievedModel, newColor, targetScaleUp)
 						local newModel
 						if recievedModel:IsA("Model") then
 							newModel = recievedModel
@@ -356,6 +356,21 @@ function castleController.start()
 							newModel = recievedModel:FindFirstChildWhichIsA("Model"):Clone()
 							newModel:ScaleTo(recievedModel:GetAttribute("miniSize"))
 							modelFolder:ClearAllChildren()
+						end
+						if newColor ~= nil then
+							for _, v in pairs(newModel:GetDescendants()) do
+								if v:IsA("BasePart") then
+									v.Color = v.Color:Lerp(newColor, 0.9)
+									if v:IsA("MeshPart") then
+										v.TextureID = ""
+									end
+								elseif v:IsA("Texture") then
+									v.Color3 = v.Color3:Lerp(newColor, 0.9)
+								end
+							end
+						end
+						if targetScaleUp then
+							newModel:ScaleTo(recievedModel:GetAttribute("miniSize") * targetScaleUp)
 						end
 						modelFolder:ClearAllChildren()
 						newModel:PivotTo(newPurchase:FindFirstChild("modelPlatform", true).WorldCFrame)
@@ -567,11 +582,22 @@ function castleController.start()
 					updateTrove:AttachToInstance(modelFolder)
 
 					updateTrove:Add(
-						updateSignal:Connect(function(newModel)
+						updateSignal:Connect(function(newModel, newColor)
 							local newCannonModel = newModel:FindFirstChildWhichIsA("Model"):Clone()
 							newCannonModel:ScaleTo(newModel:GetAttribute("miniSize"))
 							modelFolder:ClearAllChildren()
 							newCannonModel:PivotTo(newPurchase:FindFirstChild("modelPlatform", true).WorldCFrame)
+
+							if newColor then
+								for _, v in pairs(newCannonModel:GetDescendants()) do
+									if v:IsA("BasePart") then
+										v.Color = v.Color:Lerp(newColor, 0.2)
+									elseif v:IsA("Texture") then
+										v.Color3 = v.Color3:Lerp(newColor, 0.2)
+									end
+								end
+							end
+
 							newCannonModel.Parent = modelFolder
 						end),
 						"Disconnect"

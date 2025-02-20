@@ -21,9 +21,23 @@ local cannonConfig = require(ReplicatedStorage.shared.config.cannonConfig)
 local floorConfig = require(ReplicatedStorage.shared.config.floorConfig)
 local gamepassConfig = require(ReplicatedStorage.shared.config.gamepassConfig)
 local rewardsConfig = require(ReplicatedStorage.shared.config.rewardsConfig)
+local tierConfig = require(ReplicatedStorage.shared.config.tierConfig)
 
 local castleService = require(ServerStorage.server.services.castleService)
 local cannonService = require(ServerStorage.server.services.cannonService)
+
+function upgradesService.upgradeTier(player, tierName, target)
+	local playerData = dataService.getPlayerData(player)
+	if playerData[tierName] < target - 1 then
+		player:Kick("Anti-Exploit: You were kicked for buying a dev product you weren't meant to buy.")
+		return
+	end
+	playerData[tierName] = target
+	dataService.updatePlayerData(player, playerData)
+	task.defer(function()
+		cannonService.addCannon(player, cannonConfig.getCannon(playerData.cannon))
+	end)
+end
 
 function upgradesService.handlePurchase(recieptInfo)
 	local player = Players:GetPlayerByUserId(recieptInfo.PlayerId)
@@ -32,12 +46,16 @@ function upgradesService.handlePurchase(recieptInfo)
 		return Enum.ProductPurchaseDecision.NotProcessedYet
 	end
 
-	print(recieptInfo)
-
 	for name, info in pairs(gamepassConfig) do
 		if info.id == recieptInfo.ProductId then
 			info.callback(player)
-			print("Foujnd")
+			return Enum.ProductPurchaseDecision.PurchaseGranted
+		end
+	end
+
+	for name, cannonTier in pairs(tierConfig.cannonTiers) do
+		if cannonTier.id == recieptInfo.ProductId then
+			upgradesService.upgradeTier(player, "cannonTier", cannonTier.tier)
 			return Enum.ProductPurchaseDecision.PurchaseGranted
 		end
 	end

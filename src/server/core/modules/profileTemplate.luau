@@ -25,4 +25,10 @@ return {
 
 	--For Tiers
 	cannonTier = 0,
+
+	--For Gift / Dev Product Tiers
+	productTiers = {
+		gifts = {},
+		products = {},
+	},
 }

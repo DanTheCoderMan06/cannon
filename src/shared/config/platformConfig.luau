@@ -15,6 +15,7 @@ local spr = require(ReplicatedStorage.sharedPackages.spr)
 local gamepassConfig = require(ReplicatedStorage.shared.config.gamepassConfig)
 local floorConfig = require(ReplicatedStorage.shared.config.floorConfig)
 local rewardsConfig = require(ReplicatedStorage.shared.config.rewardsConfig)
+local tierConfig = require(ReplicatedStorage.shared.config.tierConfig)
 
 local marketplaceUtil = require(ReplicatedStorage.shared.utilities.marketplaceUtil)
 local reactUtil = require(ReplicatedStorage.shared.utilities.reactUtil)
@@ -621,6 +622,14 @@ return {
 		},
 		tenFloors = {
 			callback = function()
+				local playerData = dataController.getData()
+				if playerData.productTiers.products["tenFloors"] then
+					if playerData.productTiers.products["tenFloors"] >= 5 then
+						MarketplaceService:PromptProductPurchase(Players.LocalPlayer, gamepassConfig.tenFloorsTier2.id)
+					else
+						MarketplaceService:PromptProductPurchase(Players.LocalPlayer, gamepassConfig.tenFloors.id)
+					end
+				end
 				MarketplaceService:PromptProductPurchase(Players.LocalPlayer, gamepassConfig.tenFloors.id)
 			end,
 			title = "+10 FLOORS",
@@ -629,6 +638,17 @@ return {
 		},
 		fiftyFloors = {
 			callback = function()
+				local playerData = dataController.getData()
+				if playerData.productTiers.products["fiftyFloors"] then
+					if playerData.productTiers.products["fiftyFloors"] >= 5 then
+						MarketplaceService:PromptProductPurchase(
+							Players.LocalPlayer,
+							gamepassConfig.fiftyFloorsTier2.id
+						)
+					else
+						MarketplaceService:PromptProductPurchase(Players.LocalPlayer, gamepassConfig.fiftyFloors.id)
+					end
+				end
 				MarketplaceService:PromptProductPurchase(Players.LocalPlayer, gamepassConfig.fiftyFloors.id)
 			end,
 			title = "+40 FLOORS",
@@ -677,8 +697,17 @@ return {
 		},
 		upgradeCannon = {
 			callback = function(callbackEvent)
-				local success = zap.purchaseUpgrade.Call("cannon")
-				callbackEvent:Fire(success)
+				local Players = game:GetService("Players")
+				local stats = Players.LocalPlayer:WaitForChild("leaderstats")
+				local playerData = dataController.currentData
+
+				if playerData.cannonTier >= #tierConfig.cannonTiers then
+					return
+				end
+
+				local tierInfo = tierConfig.cannonTiers[playerData.cannonTier + 1]
+
+				MarketplaceService:PromptProductPurchase(Players.LocalPlayer, tierInfo.id)
 			end,
 			title = "UPGRADE CANNON TIER",
 			description = '100 <font color="#008000">\u{E002}</font>',
@@ -687,26 +716,20 @@ return {
 				local stats = Players.LocalPlayer:WaitForChild("leaderstats")
 				local playerData = dataController.currentData
 				local cannonValue
-				for _, v in pairs(stats:GetChildren()) do
-					if v:GetAttribute("statName") ~= "cannon" then
-						continue
-					end
-					cannonValue = v
-					trove:Add(v:GetPropertyChangedSignal("Value"):Connect(function()
-						updateEvent:Fire({
-							title = "LEVEL " .. tostring(v.Value),
-							description = tostring(cannonConfig.costFormula(v.Value + 1, playerData.boughtLevels))
-								.. "$",
-						})
-					end))
-				end
+
 				trove:Add(dataController.dataChanged:Connect(function(newdata)
+					if newdata.cannonTier == playerData.cannonTier then
+						return
+					end
 					playerData = newdata
+					local tierInfo =
+						tierConfig.cannonTiers[math.clamp(playerData.cannonTier + 1, 1, #tierConfig.cannonTiers)]
+
+					local itemInfo = marketplaceUtil.getProductInfo(tierInfo.id, Enum.InfoType.Product)
+
 					updateEvent:Fire({
-						title = "LEVEL " .. tostring(cannonValue.Value),
-						description = tostring(
-							cannonConfig.costFormula(cannonValue.Value + 1, playerData.boughtLevels)
-						) .. "$",
+						title = "TIER " .. playerData.cannonTier,
+						description = itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>',
 					})
 				end))
 			end,
@@ -714,29 +737,55 @@ return {
 				local Players = game:GetService("Players")
 				local stats = Players.LocalPlayer:WaitForChild("leaderstats")
 				local playerData = dataController.currentData
+
+				local tierInfo =
+					tierConfig.cannonTiers[math.clamp(playerData.cannonTier + 1, 1, #tierConfig.cannonTiers)]
+
+				local itemInfo = marketplaceUtil.getProductInfo(tierInfo.id, Enum.InfoType.Product)
+
 				return {
 					title = "TIER " .. playerData.cannonTier,
-					description = '100 <font color="#008000">\u{E002}</font>',
+					description = itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>',
 				}
 			end,
 			initModel = function(modelTrove, updateModelEvent)
 				local Players = game:GetService("Players")
 				local leaderstatsstats = Players.LocalPlayer:WaitForChild("leaderstats")
-				local function updateModel(value)
-					local targetColor
-					if value == 1 then
-						targetColor = Color3.new(0.0509804, 0.411765, 0.67451)
-					elseif value == 2 then
-						targetColor = Color3.new(0.050980, 0.549019, 0.674509)
-					end
+				local playerData = dataController.getData()
+				local function updateModel(value, cannonTier)
 					local newModel = ReplicatedStorage.assets.cannons:FindFirstChild(cannonConfig.getCannon(value))
-					updateModelEvent:Fire(newModel, targetColor)
+					local targetColor
+					local targetScaleUp
+					if playerData.cannonTier == 0 then
+						targetColor = Color3.new(0.0509804, 0.411765, 0.67451)
+						targetScaleUp = 1.1
+					elseif playerData.cannonTier == 1 then
+						targetColor = Color3.new(0.050980, 0.674509, 0.050980)
+						targetScaleUp = 1.2
+					elseif playerData.cannonTier == 2 then
+						targetColor = Color3.new(0.752941, 0.729411, 0.4)
+						targetScaleUp = 1.3
+					elseif playerData.cannonTier == 3 then
+						targetColor = Color3.new(0.713725, 0.301960, 0.301960)
+						targetScaleUp = 1.4
+					elseif playerData.cannonTier == 4 then
+						targetColor = Color3.new(0.713725, 0.301960, 0.301960)
+						targetScaleUp = 1.5
+					end
+					updateModelEvent:Fire(newModel, targetColor, targetScaleUp)
 				end
 				for _, v in pairs(leaderstatsstats:GetChildren()) do
 					if v:GetAttribute("statName") ~= "cannon" then
 						continue
 					end
 					modelTrove:Add(v:GetPropertyChangedSignal("Value"):Connect(function()
+						updateModel(v.Value)
+					end))
+					modelTrove:Add(dataController.dataChanged:Connect(function(newData)
+						if newData.cannonTier == playerData.cannonTier then
+							return
+						end
+						playerData = newData
 						updateModel(v.Value)
 					end))
 					updateModel(v.Value)

@@ -3,7 +3,6 @@ local RunService = game:GetService("RunService")
 local ServerStorage
 local dataService
 local castleService
-local cannonService
 
 local cannonConfig = require(ReplicatedStorage.shared.config.cannonConfig)
 local marketplaceUtil = require(ReplicatedStorage.shared.utilities.marketplaceUtil)
@@ -15,29 +14,73 @@ if RunService:IsServer() then
 end
 
 return {
-	tenFloors = {
-		id = 2697043460,
+	tenFloorsTier2 = {
+		id = 3218172172,
 		callback = function(player)
 			local playerData = dataService.getPlayerData(player)
 			playerData.floors += 10
 			playerData.boughtFloors += 10
+			playerData.productTiers.products["tenFloors"] += 1
 			dataService.updatePlayerData(player, playerData)
 			castleService.updateTower(player)
 		end,
 		type = "floors",
 		infoType = Enum.InfoType.Product,
+		tiers = true,
+	},
+	fiftyFloorsTier2 = {
+		id = 3218172192,
+		callback = function(player)
+			local playerData = dataService.getPlayerData(player)
+			playerData.floors += 50
+			playerData.boughtFloors += 50
+			playerData.productTiers.products["fiftyFloors"] += 1
+			dataService.updatePlayerData(player, playerData)
+			castleService.updateTower(player)
+		end,
+		type = "floors",
+		infoType = Enum.InfoType.Product,
+		tiers = true,
+	},
+	tenFloors = {
+		id = 2697043460,
+		callback = function(player)
+			local playerData = dataService.getPlayerData(player)
+			if playerData.productTiers.products["tenFloors"] then
+				if playerData.productTiers.products["tenFloors"] >= 5 then
+					return
+				end
+			end
+			playerData.floors += 10
+			playerData.boughtFloors += 10
+			playerData.productTiers.products["tenFloors"] = playerData.productTiers.products["tenFloors"] or 0
+			playerData.productTiers.products["tenFloors"] += 1
+			dataService.updatePlayerData(player, playerData)
+			castleService.updateTower(player)
+		end,
+		type = "floors",
+		infoType = Enum.InfoType.Product,
+		tiers = true,
 	},
 	fiftyFloors = {
 		id = 2697043455,
 		callback = function(player)
 			local playerData = dataService.getPlayerData(player)
+			if playerData.productTiers.products["fiftyFloors"] then
+				if playerData.productTiers.products["fiftyFloors"] >= 5 then
+					return
+				end
+			end
 			playerData.floors += 50
 			playerData.boughtFloors += 50
+			playerData.productTiers.products["fiftyFloors"] = playerData.productTiers.products["fiftyFloors"] or 0
+			playerData.productTiers.products["fiftyFloors"] += 1
 			dataService.updatePlayerData(player, playerData)
 			castleService.updateTower(player)
 		end,
 		type = "floors",
 		infoType = Enum.InfoType.Product,
+		tiers = true,
 	},
 	buyCircusCannon = {
 		id = 1051314279,

@@ -2,6 +2,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 local zap = require(ReplicatedStorage.zap)
 local Signal = require(ReplicatedStorage.sharedPackages.Signal)
+local Sift = require(ReplicatedStorage.sharedPackages.Sift)
 
 local dataChangedEvent = Signal.new()
 local dataLoadedEvent = Signal.new()
@@ -17,7 +18,7 @@ function dataController.getData()
 	if not loadedData then
 		dataLoadedEvent:Wait()
 	end
-	return dataController.currentData
+	return Sift.Dictionary.copyDeep(dataController.currentData)
 end
 
 function dataController.start()

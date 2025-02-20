@@ -21,6 +21,7 @@ local playerCannons = workspace:WaitForChild("playerCannons")
 
 local cannonConfig = require(ReplicatedStorage.shared.config.cannonConfig)
 local gamepassConfig = require(ReplicatedStorage.shared.config.gamepassConfig)
+local tierConfig = require(ReplicatedStorage.shared.config.tierConfig)
 
 local physicsUtil = require(ReplicatedStorage.shared.utilities.physicsUtil)
 local marketplaceUtil = require(ReplicatedStorage.shared.utilities.marketplaceUtil)
@@ -36,6 +37,7 @@ function cannonService.addCannon(player, cannonName)
 		warn("[CannonService]: Attempted to give null player cannon!")
 		return
 	end
+	local playerData = dataService.getPlayerData(player)
 	playerPlatforms:WaitForChild(player.Name):FindFirstChild("cannonPosition"):ClearAllChildren()
 	local targetCannon = ReplicatedStorage.assets.cannons:FindFirstChild(cannonName):Clone()
 	local cTrove = Trove.new()
@@ -43,6 +45,9 @@ function cannonService.addCannon(player, cannonName)
 		:FindFirstChildWhichIsA("Model")
 		:PivotTo(playerPlatforms:WaitForChild(player.Name):FindFirstChild("cannonPosition").CFrame)
 	targetCannon:SetAttribute("cannonName", cannonName)
+	targetCannon
+		:FindFirstChildWhichIsA("Model")
+		:ScaleTo(targetCannon:FindFirstChildWhichIsA("Model"):GetScale() * (playerData.cannonTier * 0.1 + 1))
 	targetCannon.Parent = playerPlatforms:WaitForChild(player.Name):FindFirstChild("cannonPosition")
 
 	cTrove:AttachToInstance(targetCannon)
@@ -65,8 +70,18 @@ function cannonService.launchPlayer(player)
 		playerPlatforms:WaitForChild(player.Name):FindFirstChild("cannonPosition").Position.Y
 			- castleFolder:FindFirstChild(player.Name).Position.Y
 	)
-	local simulatedPhysics =
-		physicsUtil.getVariables(playerHeight, cannonPower * (player:GetAttribute("isVIP") and 1.5 or 1))
+
+	if player:GetAttribute("isVIP") then
+		cannonPower *= 1.5
+	end
+
+	for _, v in pairs(tierConfig.cannonTiers) do
+		if v.tier == playerData.cannonTier then
+			cannonPower *= v.power
+		end
+	end
+
+	local simulatedPhysics = physicsUtil.getVariables(playerHeight, cannonPower)
 
 	print("Player Fired ")
 	print(simulatedPhysics)
@@ -87,7 +102,7 @@ end
 function cannonService.start()
 	Players.PlayerAdded:Connect(function(player)
 		local playerData = dataService.getPlayerData(player)
-		cannonService.addCannon(player, cannonConfig.getCannon(playerData.cannon))
+		cannonService.addCannon(player, cannonConfig.getCannon(playerData.cannon), true)
 	end)
 	Players.PlayerRemoving:Connect(function(player)
 		if playerCannons:FindFirstChild(player.Name) then
@@ -145,7 +160,7 @@ function cannonService.start()
 			end
 			cannonService.addCannon(player, targetCannon)
 		else
-			cannonService.addCannon(player, cannonConfig.getCannon(playerData.cannon))
+			cannonService.addCannon(player, cannonConfig.getCannon(playerData.cannon), true)
 		end
 		return true
 	end)
