@@ -17,7 +17,7 @@ return function(props)
 		BackgroundTransparency = 1,
 		BorderColor3 = Color3.fromRGB(0, 0, 0),
 		BorderSizePixel = 0,
-		Position = UDim2.fromScale(0.0, 0.55),
+		Position = UDim2.fromScale(0.0, 0.45),
 		Size = UDim2.fromScale(0.0521, 0.0926),
 	}, {
 		uIAspectRatioConstraint = React.createElement("UIAspectRatioConstraint"),
@@ -28,7 +28,7 @@ return function(props)
 			VerticalAlignment = Enum.VerticalAlignment.Center,
 		}),
 
-		shop = React.createElement("ImageButton", {
+		rewards = React.createElement("ImageButton", {
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 			BackgroundTransparency = 1,
@@ -39,11 +39,11 @@ return function(props)
 			Size = UDim2.fromScale(6.51, 1.43),
 		}, {
 			content = React.createElement(button, {
-				overlayImage = "rbxassetid://102670220460799",
-				buttonText = "Shop",
-				image = "rbxassetid://134400435773268",
+				overlayImage = "rbxassetid://116797538593247",
+				buttonText = "Rewards",
+				image = "rbxassetid://109156736467684",
 				onActivated = function()
-					props.selectedUIEvent:Fire("shop")
+					props.selectedUIEvent:Fire("gifts")
 				end,
 			}),
 		}),

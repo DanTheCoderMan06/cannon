@@ -15,6 +15,8 @@ local rewards = require(components.mainUI.rewards)
 local autoFarmButton = require(components.mainUI.autoFarmButton)
 local statsFrame = require(components.mainUI.statsFrame)
 local musicButton = require(components.mainUI.musicButton)
+local giftsButton = require(components.mainUI.giftsButton)
+local giftFrame = require(components.mainUI.gifts)
 
 return function(props)
 	print("Go")
@@ -33,6 +35,8 @@ return function(props)
 		shop = React.createElement(shop, props),
 		rewards = React.createElement(rewards, props),
 		statsFrame = React.createElement(statsFrame, props),
+		giftFrame = React.createElement(giftFrame, props),
 		musicButton = React.createElement(musicButton, props),
+		giftsButton = React.createElement(giftsButton, props),
 	})
 end

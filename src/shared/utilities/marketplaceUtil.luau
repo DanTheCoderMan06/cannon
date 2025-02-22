@@ -1,4 +1,5 @@
 local MarketplaceService = game:GetService("MarketplaceService")
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local ExperienceNotificationService = game:GetService("ExperienceNotificationService")
@@ -57,6 +58,22 @@ function marketplaceUtil.userOwnsGamepass(player, gamepassId)
 		end)
 	end
 	return playerCache[player.UserId][gamepassId]
+end
+
+function marketplaceUtil.getPlayerImage(player)
+	if not playerCache[player.UserId] then
+		playerCache[player.UserId] = {}
+	end
+	if not playerCache[player.UserId]["image"] then
+		safeCall(function()
+			playerCache[player.UserId]["image"] = Players:GetUserThumbnailAsync(
+				player.UserId,
+				Enum.ThumbnailType.HeadShot,
+				Enum.ThumbnailSize.Size100x100
+			)
+		end)
+	end
+	return playerCache[player.UserId]["image"]
 end
 
 function marketplaceUtil.getPlayerEvent(player)
