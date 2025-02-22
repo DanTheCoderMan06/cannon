@@ -17,5 +17,13 @@ return {
 	tenFloors = {
 		id = 3221610346,
 		callback = "tenFloors",
+		shouldAppear = true,
+		tiers = true,
+		tier2 = "tenFloorsTier2",
+	},
+	tenFloorsTier2 = {
+		id = 3221610346,
+		callback = "tenFloorsTier2",
+		shouldAppear = false,
 	},
 }

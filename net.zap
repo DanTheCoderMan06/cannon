@@ -160,3 +160,12 @@ event watchTarget = {
     call: SingleAsync,
     data: unknown
 }
+
+--Gifts
+
+funct checkRecipient = {
+    call: Async,
+    args: unknown,
+    rets: boolean 
+}
+

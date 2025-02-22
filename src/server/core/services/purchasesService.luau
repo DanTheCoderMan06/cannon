@@ -9,7 +9,7 @@ local serverPackages = ServerStorage.serverPackages
 local Players = game:GetService("Players")
 local FriendService = game:GetService("FriendService")
 
-local upgradesService = {}
+local purchaseService = {}
 
 local Sift = require(sharedPackages.Sift)
 
@@ -26,7 +26,9 @@ local tierConfig = require(ReplicatedStorage.shared.config.tierConfig)
 local castleService = require(ServerStorage.server.services.castleService)
 local cannonService = require(ServerStorage.server.services.cannonService)
 
-function upgradesService.upgradeTier(player, tierName, target)
+local targets = {}
+
+function purchaseService.upgradeTier(player, tierName, target)
 	local playerData = dataService.getPlayerData(player)
 	if playerData[tierName] < target - 1 then
 		player:Kick("Anti-Exploit: You were kicked for buying a dev product you weren't meant to buy.")
@@ -39,7 +41,7 @@ function upgradesService.upgradeTier(player, tierName, target)
 	end)
 end
 
-function upgradesService.handlePurchase(recieptInfo)
+function purchaseService.handlePurchase(recieptInfo)
 	local player = Players:GetPlayerByUserId(recieptInfo.PlayerId)
 
 	if not player then
@@ -56,7 +58,7 @@ function upgradesService.handlePurchase(recieptInfo)
 	for name, cannonTier in pairs(tierConfig.cannonTiers) do
 		if cannonTier.id == recieptInfo.ProductId then
 			task.defer(function()
-				upgradesService.upgradeTier(player, "cannonTier", cannonTier.tier)
+				purchaseService.upgradeTier(player, "cannonTier", cannonTier.tier)
 			end)
 			return Enum.ProductPurchaseDecision.PurchaseGranted
 		end
@@ -65,16 +67,16 @@ function upgradesService.handlePurchase(recieptInfo)
 	return Enum.ProductPurchaseDecision.NotProcessedYet
 end
 
-function upgradesService.start()
+function purchaseService.start()
 	MarketplaceService.ProcessReceipt = function(recieptInfo)
-		return upgradesService.handlePurchase(recieptInfo)
+		return purchaseService.handlePurchase(recieptInfo)
 	end
 
 	MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player, gamePassId, wasPurchased)
 		if not wasPurchased then
 			return
 		end
-		upgradesService.handlePurchase({
+		purchaseService.handlePurchase({
 			PlayerId = player.UserId,
 			ProductId = gamePassId,
 		})
@@ -125,6 +127,14 @@ function upgradesService.start()
 			dataService.updatePlayerData(player, playerData)
 		end)
 	end)
+
+	zap.checkRecipient.SetCallback(function(player, target)
+		targets[player.Name] = target
+	end)
+
+	Players.PlayerRemoving:Connect(function(player)
+		targets[player.Name] = nil
+	end)
 end
 
-return upgradesService
+return purchaseService

@@ -17,7 +17,7 @@ return function(props)
 		BorderColor3 = Color3.fromRGB(0, 0, 0),
 		BorderSizePixel = 0,
 		CanvasSize = UDim2.fromScale(5, 0),
-		Position = UDim2.fromScale(0.0397, 0.17),
+		Position = props.Position,
 		ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0),
 		ScrollBarThickness = 0,
 		Size = UDim2.fromScale(0.918, 0.13),

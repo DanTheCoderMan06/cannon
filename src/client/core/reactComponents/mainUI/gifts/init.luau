@@ -1,3 +1,4 @@
+local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SoundService = game:GetService("SoundService")
@@ -8,6 +9,7 @@ local sharedPackages = ReplicatedStorage.sharedPackages
 local React = require(sharedPackages.React)
 local Trove = require(sharedPackages.Trove)
 local ReactSpring = require(sharedPackages.ReactSpring)
+local zap = require(ReplicatedStorage.zap)
 local Sift = require(sharedPackages.Sift)
 local components = ReplicatedStorage.client.reactComponents
 
@@ -22,15 +24,14 @@ local marketplaceUtil = require(shared.utilities.marketplaceUtil)
 local selectedPlayer
 local selectedGift
 
-local allPlayers = {}
-
 return function(props)
 	local styles, api = ReactSpring.useSpring(function()
-		return { transparency = 1 }
+		return { transparency = 1, selected = 0 }
 	end)
 
 	local selectedPlayer, setSelectedPlayer = React.useState("")
 	local selectedGift, setSelectedGift = React.useState(0)
+	local allPlayers, setAllPlayers = React.useState({})
 
 	React.useEffect(function()
 		local uiTrove = Trove.new()
@@ -64,38 +65,55 @@ return function(props)
 			table.insert(
 				_gifts,
 				React.createElement(optionsFrame, {
-					Sift.Dictionary.merge(props, {
-						image = "rbxassetid://" .. productInfo.IconImageAssetId,
-						selectedObject = selectedGift,
-						setSelectedObject = setSelectedGift,
-						id = giftInfo.id,
-					}),
+					image = "rbxassetid://" .. productInfo.IconImageAssetId,
+					selectedObject = selectedGift,
+					setSelectedObject = setSelectedGift,
+					id = giftInfo.id,
 				})
 			)
 		end
 
 		return _gifts
-	end, {})
+	end, { selectedGift })
 
 	local players = React.useMemo(function()
 		local _players = {}
 
 		for i, player in pairs(allPlayers) do
-			local userThumbnail = marketplaceUtil.getPlayerImage(Players.LocalPlayer)
+			print(player.Name)
+			local userThumbnail = marketplaceUtil.getPlayerImage(player)
 			table.insert(
 				_players,
 				React.createElement(optionsFrame, {
-					Sift.Dictionary.merge(props, {
-						image = userThumbnail,
-						selectedObject = selectedPlayer,
-						setSelectedObject = setSelectedPlayer,
-						id = player.Name,
-					}),
+					image = userThumbnail,
+					selectedObject = selectedPlayer,
+					setSelectedObject = setSelectedPlayer,
+					id = player.Name,
 				})
 			)
 		end
 
 		return _players
+	end, { allPlayers, selectedPlayer })
+
+	React.useEffect(function()
+		local uiTrove = Trove.new()
+
+		uiTrove:Add(Players.PlayerAdded:Connect(function()
+			setAllPlayers(Players:GetPlayers())
+		end))
+
+		uiTrove:Add(Players.PlayerRemoving:Connect(function()
+			setAllPlayers(Players:GetPlayers())
+		end))
+
+		if #players == 0 then
+			setAllPlayers(Players:GetPlayers())
+		end
+
+		return function()
+			uiTrove:Destroy()
+		end
 	end, { allPlayers })
 
 	return React.createElement("CanvasGroup", {
@@ -115,7 +133,9 @@ return function(props)
 			Image = "rbxassetid://93180824709042",
 			Position = UDim2.fromScale(0.5, 0.5),
 			ScaleType = Enum.ScaleType.Fit,
-			Size = UDim2.fromScale(0.346, 0.765),
+			Size = styles.transparency:map(function(val)
+				return UDim2.fromScale(0.346 * math.max(0.2, 1 - val), 0.765 * math.max(0.2, 1 - val))
+			end),
 		}, {
 			uIScale = React.createElement("UIScale"),
 
@@ -218,13 +238,10 @@ return function(props)
 				}),
 			}),
 
-			players = React.createElement(
-				optionsGroup,
-				Sift.Dictionary.merge(props, {
-					Position = UDim2.fromScale(0.0397, 0.17),
-					elements = players,
-				})
-			),
+			players = React.createElement(optionsGroup, {
+				Position = UDim2.fromScale(0.0397, 0.17),
+				elements = players,
+			}),
 
 			text4 = React.createElement("TextLabel", {
 				AnchorPoint = Vector2.new(0.5, 0.5),
@@ -246,13 +263,10 @@ return function(props)
 				}),
 			}),
 
-			gifts = React.createElement(
-				optionsGroup,
-				Sift.Dictionary.merge(props, {
-					Position = UDim2.fromScale(0.0371, 0.35),
-					elements = gifts,
-				})
-			),
+			gifts = React.createElement(optionsGroup, {
+				Position = UDim2.fromScale(0.0371, 0.35),
+				elements = gifts,
+			}),
 
 			buy = React.createElement("ImageButton", {
 				AnchorPoint = Vector2.new(0.5, 0.5),
@@ -264,13 +278,36 @@ return function(props)
 				LayoutOrder = 3,
 				Position = UDim2.fromScale(0.495, 0.946),
 				ScaleType = Enum.ScaleType.Fit,
-				Size = UDim2.fromScale(0.608, 0.0582),
+				Size = styles.selected:map(function(val)
+					return UDim2.fromScale(0.608, 0.0582):Lerp(UDim2.fromScale(0.608 * 1.1, 0.0582 * 1.1), val)
+				end),
+				Rotation = styles.selected:map(function(val)
+					return val * 5
+				end),
+				[React.Event.MouseEnter] = function()
+					api.start({
+						selected = 1,
+						config = {
+							tension = 300,
+							friction = 30,
+						},
+					})
+				end,
+				[React.Event.MouseLeave] = function()
+					api.start({
+						selected = 0,
+						config = {
+							tension = 300,
+							friction = 30,
+						},
+					})
+				end,
 			}, {
 				uIAspectRatioConstraint5 = React.createElement("UIAspectRatioConstraint", {
 					AspectRatio = 2.77,
 				}),
 
-				price = React.createElement("TextLabel", {
+				price = React.createElement("TextButton", {
 					AnchorPoint = Vector2.new(0.5, 0.5),
 					BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 					BackgroundTransparency = 1,
@@ -278,12 +315,23 @@ return function(props)
 					BorderSizePixel = 0,
 					FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
 					Position = UDim2.fromScale(0.5, 0.5),
+
 					Size = UDim2.fromScale(1.19, 0.893),
 					Text = "BUY",
 					TextColor3 = Color3.fromRGB(255, 255, 255),
 					TextScaled = true,
 					TextSize = 14,
 					TextWrapped = true,
+					[React.Event.Activated] = function()
+						if not Players:FindFirstChild(selectedPlayer) or not giftConfig[selectedGift] then
+							return
+						end
+						local valid = zap.checkRecipient.Call(selectedPlayer)
+						if not valid then
+							return
+						end
+						MarketplaceService:PromptGamePassPurchase(Players.LocalPlayer, giftConfig[selectedGift].id)
+					end,
 				}, {
 					uIAspectRatioConstraint6 = React.createElement("UIAspectRatioConstraint", {
 						AspectRatio = 4.38,

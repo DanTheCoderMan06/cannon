@@ -52,7 +52,7 @@ return function(props)
 				LayoutOrder = 1,
 				Position = UDim2.fromScale(0.498, 0.34),
 				ScaleType = Enum.ScaleType.Fit,
-				Size = UDim2.fromScale(0.53, 0.6),
+				Size = UDim2.fromScale(0.53 * 1.21, 0.6 * 1.21),
 			}, {
 				uIAspectRatioConstraint = React.createElement("UIAspectRatioConstraint", {
 					AspectRatio = 1.07,
@@ -100,7 +100,7 @@ return function(props)
 					FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
 					Position = UDim2.fromScale(0.5, 0.5),
 					Size = UDim2.fromScale(1.19, 0.893),
-					Text = (props.id == props.selectedObject) and "UNSELECT" or "SELECT",
+					Text = (props.id == props.selectedObject) and "CANCEL" or "SELECT",
 					TextColor3 = Color3.fromRGB(255, 255, 255),
 					TextScaled = true,
 					TextSize = 14,
