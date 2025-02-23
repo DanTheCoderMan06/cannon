@@ -26,12 +26,32 @@ local selectedGift
 
 return function(props)
 	local styles, api = ReactSpring.useSpring(function()
-		return { transparency = 1, selected = 0 }
+		return { transparency = 1, selected = 0, valid = 0 }
 	end)
 
 	local selectedPlayer, setSelectedPlayer = React.useState("")
-	local selectedGift, setSelectedGift = React.useState(0)
+	local selectedGift, setSelectedGift = React.useState("")
 	local allPlayers, setAllPlayers = React.useState({})
+
+	local valid, setValid = React.useState(false)
+
+	React.useEffect(function()
+		local newValid = false
+		if not Players:FindFirstChild(selectedPlayer) or not giftConfig[selectedGift] then
+			newValid = false
+		else
+			local check = zap.checkRecipient.Call({ selectedPlayer = selectedPlayer, selectedGift = selectedGift })
+			newValid = check
+		end
+		api.start({
+			valid = newValid and 1 or 0,
+			config = {
+				friction = 30,
+				tension = 300,
+			},
+		})
+		setValid(newValid)
+	end, { selectedGift, selectedPlayer, allPlayers })
 
 	React.useEffect(function()
 		local uiTrove = Trove.new()
@@ -52,6 +72,16 @@ return function(props)
 			})
 		end))
 
+		local marketEvent = marketplaceUtil.getPlayerEvent(Players.LocalPlayer)
+
+		uiTrove:Add(
+			marketEvent:Connect(function(id)
+				print("Reset")
+				setSelectedGift("")
+			end),
+			"Disconnect"
+		)
+
 		return function()
 			uiTrove:Destroy()
 		end
@@ -61,14 +91,23 @@ return function(props)
 		local _gifts = {}
 
 		for giftName, giftInfo in pairs(giftConfig) do
+			if not giftInfo.shouldAppear then
+				continue
+			end
 			local productInfo = marketplaceUtil.getProductInfo(giftInfo.id, Enum.InfoType.Product)
 			table.insert(
 				_gifts,
 				React.createElement(optionsFrame, {
 					image = "rbxassetid://" .. productInfo.IconImageAssetId,
 					selectedObject = selectedGift,
-					setSelectedObject = setSelectedGift,
-					id = giftInfo.id,
+					setSelectedObject = function(input)
+						print("UPDATE GIFT " .. input)
+						setSelectedGift(input)
+					end,
+					id = giftName,
+					dataChanged = props.dataChanged,
+					tier2Name = giftInfo.tier2,
+					tiers = giftInfo.tiers,
 				})
 			)
 		end
@@ -80,15 +119,19 @@ return function(props)
 		local _players = {}
 
 		for i, player in pairs(allPlayers) do
-			print(player.Name)
 			local userThumbnail = marketplaceUtil.getPlayerImage(player)
 			table.insert(
 				_players,
 				React.createElement(optionsFrame, {
 					image = userThumbnail,
 					selectedObject = selectedPlayer,
-					setSelectedObject = setSelectedPlayer,
+					setSelectedObject = function(input)
+						print("UPDATE GIFT " .. input)
+						setSelectedPlayer(input)
+					end,
+
 					id = player.Name,
+					dataChanged = props.dataChanged,
 				})
 			)
 		end
@@ -317,20 +360,20 @@ return function(props)
 					Position = UDim2.fromScale(0.5, 0.5),
 
 					Size = UDim2.fromScale(1.19, 0.893),
-					Text = "BUY",
-					TextColor3 = Color3.fromRGB(255, 255, 255),
+					Text = valid and "BUY" or "ERROR",
+					TextColor3 = styles.valid:map(function(val)
+						return Color3.fromRGB(255, 255, 255):Lerp(Color3.fromRGB(255, 158, 158), 1 - val)
+					end),
 					TextScaled = true,
 					TextSize = 14,
 					TextWrapped = true,
 					[React.Event.Activated] = function()
-						if not Players:FindFirstChild(selectedPlayer) or not giftConfig[selectedGift] then
-							return
-						end
-						local valid = zap.checkRecipient.Call(selectedPlayer)
 						if not valid then
 							return
 						end
-						MarketplaceService:PromptGamePassPurchase(Players.LocalPlayer, giftConfig[selectedGift].id)
+						local productId = giftConfig[selectedGift].id
+						print(productId)
+						MarketplaceService:PromptProductPurchase(Players.LocalPlayer, productId)
 					end,
 				}, {
 					uIAspectRatioConstraint6 = React.createElement("UIAspectRatioConstraint", {

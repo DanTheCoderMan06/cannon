@@ -20,9 +20,6 @@ return {
 	invitedPlayers = {},
 	notificationsOn = false,
 
-	hasVIPOn = false,
-	vipTimeStart = 0,
-
 	--For Tiers
 	cannonTier = 0,
 
@@ -31,4 +28,10 @@ return {
 		gifts = {},
 		products = {},
 	},
+
+	--Upgrades
+	hasVIPOn = false,
+	vipTimeStart = 0,
+	doubleDistance = false,
+	doubleMoney = false,
 }

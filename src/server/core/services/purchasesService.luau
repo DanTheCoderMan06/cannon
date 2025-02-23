@@ -22,6 +22,7 @@ local floorConfig = require(ReplicatedStorage.shared.config.floorConfig)
 local gamepassConfig = require(ReplicatedStorage.shared.config.gamepassConfig)
 local rewardsConfig = require(ReplicatedStorage.shared.config.rewardsConfig)
 local tierConfig = require(ReplicatedStorage.shared.config.tierConfig)
+local giftConfig = require(ReplicatedStorage.shared.config.giftConfig)
 
 local castleService = require(ServerStorage.server.services.castleService)
 local cannonService = require(ServerStorage.server.services.cannonService)
@@ -60,6 +61,18 @@ function purchaseService.handlePurchase(recieptInfo)
 			task.defer(function()
 				purchaseService.upgradeTier(player, "cannonTier", cannonTier.tier)
 			end)
+			return Enum.ProductPurchaseDecision.PurchaseGranted
+		end
+	end
+
+	for name, info in pairs(giftConfig) do
+		if info.id == recieptInfo.ProductId then
+			print("FOUND GIFT")
+			if not targets[player.Name] then
+				return Enum.ProductPurchaseDecision.NotProcessedYet
+			end
+			info.callback(player, targets[player.Name])
+
 			return Enum.ProductPurchaseDecision.PurchaseGranted
 		end
 	end
@@ -128,8 +141,16 @@ function purchaseService.start()
 		end)
 	end)
 
-	zap.checkRecipient.SetCallback(function(player, target)
-		targets[player.Name] = target
+	zap.checkRecipient.SetCallback(function(player, data)
+		local targetPlayer = Players:FindFirstChild(data.selectedPlayer)
+		if not targetPlayer then
+			return false
+		end
+		if not giftConfig[data.selectedGift].check(targetPlayer) then
+			return
+		end
+		targets[player.Name] = targetPlayer
+		return true
 	end)
 
 	Players.PlayerRemoving:Connect(function(player)

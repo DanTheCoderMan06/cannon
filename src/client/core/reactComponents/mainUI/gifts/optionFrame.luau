@@ -7,12 +7,38 @@ local sharedPackages = ReplicatedStorage.sharedPackages
 local React = require(sharedPackages.React)
 local ReactSpring = require(sharedPackages.ReactSpring)
 local Sift = require(sharedPackages.Sift)
+local Trove = require(sharedPackages.Trove)
 local components = ReplicatedStorage.client.reactComponents
+
+local tierConfig = require(ReplicatedStorage.shared.config.tierConfig)
 
 return function(props)
 	local styles, api = ReactSpring.useSpring(function()
 		return { selected = 0 }
 	end)
+
+	local tierFrameVisible, setTierFrameVisible = React.useState(false)
+
+	React.useEffect(function()
+		local uiTrove = Trove.new()
+
+		uiTrove:Add(
+			props.dataChanged:Connect(function(newData)
+				if props.tiers then
+					if newData.productTiers.gifts[props.productKey] then
+						setTierFrameVisible(newData.productTiers.products[props.productKey] >= 5)
+					else
+						setTierFrameVisible(false)
+					end
+				end
+			end),
+			"Disconnect"
+		)
+
+		return function()
+			uiTrove:Destroy()
+		end
+	end, {})
 
 	return React.createElement("CanvasGroup", {
 		BackgroundTransparency = 1,
@@ -42,6 +68,27 @@ return function(props)
 				return UDim2.fromScale(0.9, 0.9):Lerp(UDim2.fromScale(1, 1), value)
 			end),
 		}, {
+			tierFrameItem = React.createElement("TextLabel", {
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+				BackgroundTransparency = 1,
+				BorderColor3 = Color3.fromRGB(0, 0, 0),
+				BorderSizePixel = 0,
+				FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
+				Position = UDim2.fromScale(0.61, 0.112),
+				RichText = true,
+				Size = UDim2.fromScale(0.582, 0.171),
+				Text = "Tier II",
+				TextColor3 = Color3.fromRGB(255, 255, 255),
+				TextScaled = true,
+				TextSize = 14,
+				TextWrapped = true,
+				TextXAlignment = Enum.TextXAlignment.Right,
+				Visible = tierFrameVisible,
+				ZIndex = 100,
+			}, {
+				uIStroke = React.createElement("UIStroke"),
+			}),
 			imageHolder = React.createElement("ImageLabel", {
 				AnchorPoint = Vector2.new(0.5, 0.5),
 				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
@@ -105,11 +152,20 @@ return function(props)
 					TextScaled = true,
 					TextSize = 14,
 					TextWrapped = true,
+					ZIndex = 10000,
 					[React.Event.Activated] = function()
-						if props.selectedObject == props.id then
-							props.setSelectedObject(0)
+						if tierFrameVisible then
+							if props.selectedObject == props.tier2Name then
+								props.setSelectedObject("")
+							else
+								props.setSelectedObject(props.tier2Name)
+							end
 						else
-							props.setSelectedObject(props.id)
+							if props.selectedObject == props.id then
+								props.setSelectedObject("")
+							else
+								props.setSelectedObject(props.id)
+							end
 						end
 					end,
 				}, {
