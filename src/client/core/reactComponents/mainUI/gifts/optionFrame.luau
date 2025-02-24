@@ -17,7 +17,7 @@ return function(props)
 		return { selected = 0 }
 	end)
 
-	local tierFrameVisible, setTierFrameVisible = React.useState(false)
+	local tierFrameVisible, setTierFrameVisible = React.useBinding(false)
 
 	React.useEffect(function()
 		local uiTrove = Trove.new()
@@ -26,7 +26,7 @@ return function(props)
 			props.dataChanged:Connect(function(newData)
 				if props.tiers then
 					if newData.productTiers.gifts[props.productKey] then
-						setTierFrameVisible(newData.productTiers.products[props.productKey] >= 5)
+						setTierFrameVisible(newData.productTiers.gifts[props.productKey] >= 5)
 					else
 						setTierFrameVisible(false)
 					end
@@ -147,14 +147,15 @@ return function(props)
 					FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
 					Position = UDim2.fromScale(0.5, 0.5),
 					Size = UDim2.fromScale(1.19, 0.893),
-					Text = (props.id == props.selectedObject) and "CANCEL" or "SELECT",
+					Text = (props.id == props.selectedObject or props.tier2Name == props.selectedObject) and "CANCEL"
+						or "SELECT",
 					TextColor3 = Color3.fromRGB(255, 255, 255),
 					TextScaled = true,
 					TextSize = 14,
 					TextWrapped = true,
 					ZIndex = 10000,
 					[React.Event.Activated] = function()
-						if tierFrameVisible then
+						if tierFrameVisible:getValue() then
 							if props.selectedObject == props.tier2Name then
 								props.setSelectedObject("")
 							else

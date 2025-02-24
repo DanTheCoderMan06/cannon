@@ -143,11 +143,14 @@ function purchaseService.start()
 
 	zap.checkRecipient.SetCallback(function(player, data)
 		local targetPlayer = Players:FindFirstChild(data.selectedPlayer)
+		if targetPlayer == player and not RunService:IsStudio() then
+			return false
+		end
 		if not targetPlayer then
 			return false
 		end
 		if not giftConfig[data.selectedGift].check(targetPlayer) then
-			return
+			return false
 		end
 		targets[player.Name] = targetPlayer
 		return true

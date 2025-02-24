@@ -101,13 +101,14 @@ return function(props)
 					image = "rbxassetid://" .. productInfo.IconImageAssetId,
 					selectedObject = selectedGift,
 					setSelectedObject = function(input)
-						print("UPDATE GIFT " .. input)
+						print("UPDATE GIFT " .. tostring(input))
 						setSelectedGift(input)
 					end,
 					id = giftName,
 					dataChanged = props.dataChanged,
-					tier2Name = giftInfo.tier2,
+					tier2Name = giftInfo.tier2Name,
 					tiers = giftInfo.tiers,
+					productKey = giftName,
 				})
 			)
 		end
@@ -126,7 +127,7 @@ return function(props)
 					image = userThumbnail,
 					selectedObject = selectedPlayer,
 					setSelectedObject = function(input)
-						print("UPDATE GIFT " .. input)
+						print("UPDATE GIFT " .. tostring(input))
 						setSelectedPlayer(input)
 					end,
 
