@@ -34,4 +34,5 @@ return {
 	vipTimeStart = 0,
 	doubleDistance = false,
 	doubleMoney = false,
+	infiniteVIP = false,
 }

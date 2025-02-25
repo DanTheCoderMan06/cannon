@@ -19,6 +19,8 @@ local cannonConfig = require(ReplicatedStorage.shared.config.cannonConfig)
 local effectsUi = require(ReplicatedStorage.client.reactComponents.generics.effectText)
 local finishedPath = require(ReplicatedStorage.client.reactComponents.generics.finishedPath)
 
+local dataController = require(ReplicatedStorage.client.controllers.dataController)
+
 local currentHighScore = 0
 
 function effectsController.getHighScore()
@@ -182,6 +184,11 @@ function effectsController.finishedPath(results)
 	local finishedPathEffects = ReplicatedStorage.assets.finishedPath:Clone()
 	local container = ReactRoblox.createRoot(Instance.new("Folder"))
 	local isHighscore = effectsController.getHighScore().Value < math.round(results.distance)
+	local reward = cannonConfig.rewardFormula(results.distance)
+
+	if dataController.currentData.doubleMoney then
+		reward *= 2
+	end
 
 	container:render(ReactRoblox.createPortal(
 		React.createElement("BillboardGui", {
@@ -194,7 +201,7 @@ function effectsController.finishedPath(results)
 			main = React.createElement(finishedPath, {
 				isHighscore = isHighscore,
 				distance = math.round(results.distance),
-				reward = math.round(cannonConfig.rewardFormula(results.distance)),
+				reward = math.round(reward),
 			}),
 		}),
 		Players.LocalPlayer.PlayerGui,

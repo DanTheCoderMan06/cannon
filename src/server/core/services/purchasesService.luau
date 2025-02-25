@@ -149,7 +149,7 @@ function purchaseService.start()
 		if not targetPlayer then
 			return false
 		end
-		if not giftConfig[data.selectedGift].check(targetPlayer) then
+		if giftConfig[data.selectedGift].check(targetPlayer) == false then
 			return false
 		end
 		targets[player.Name] = targetPlayer

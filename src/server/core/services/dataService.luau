@@ -87,6 +87,7 @@ function dataService.start()
 					profile.Data.daysClaimed = {}
 					profile.Data.cannons = {}
 					profile.Data.cannonTier = 0
+					profile.Data.doubleMoney = false
 				end
 
 				local leaderstats = ReplicatedStorage.assets.statsFolder:Clone()

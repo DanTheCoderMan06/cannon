@@ -30,6 +30,7 @@ function vipService.start()
 				if
 					marketplaceUtil.userOwnsGamepass(player, rewardsConfig.vipGamepass)
 					or os.time() - playerData.vipTimeStart < rewardsConfig.vipRewardDuration
+					or playerData.infiniteVIP
 				then
 					player:SetAttribute("isVIP", true)
 					playerData.hasVIPOn = true

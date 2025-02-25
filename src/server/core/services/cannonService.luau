@@ -75,6 +75,10 @@ function cannonService.launchPlayer(player)
 		cannonPower *= 1.5
 	end
 
+	if playerData.doubleDistance then
+		cannonPower *= 2
+	end
+
 	for _, v in pairs(tierConfig.cannonTiers) do
 		if v.tier == playerData.cannonTier then
 			cannonPower *= v.power
@@ -94,6 +98,9 @@ end
 function cannonService.awardPlayer(player, playerPath)
 	local playerData = dataService.getPlayerData(player)
 	local award = cannonConfig.rewardFormula(playerPath.horizontalVelocity)
+	if playerData.doubleMoney then
+		award *= 2
+	end
 	playerData.money += award
 	playerData.highscore = math.max(playerData.highscore, math.round(playerPath.distance))
 	dataService.updatePlayerData(player, playerData)

@@ -36,21 +36,35 @@ return function(props)
 	local valid, setValid = React.useState(false)
 
 	React.useEffect(function()
-		local newValid = false
-		if not Players:FindFirstChild(selectedPlayer) or not giftConfig[selectedGift] then
-			newValid = false
-		else
-			local check = zap.checkRecipient.Call({ selectedPlayer = selectedPlayer, selectedGift = selectedGift })
-			newValid = check
+		local function update()
+			local newValid = false
+			if not Players:FindFirstChild(selectedPlayer) or not giftConfig[selectedGift] then
+				newValid = false
+			else
+				local check = zap.checkRecipient.Call({ selectedPlayer = selectedPlayer, selectedGift = selectedGift })
+				newValid = check
+			end
+			api.start({
+				valid = newValid and 1 or 0,
+				config = {
+					friction = 30,
+					tension = 300,
+				},
+			})
+			setValid(newValid)
 		end
-		api.start({
-			valid = newValid and 1 or 0,
-			config = {
-				friction = 30,
-				tension = 300,
-			},
-		})
-		setValid(newValid)
+		update()
+
+		local uiTrove = Trove.new()
+
+		uiTrove:Add(MarketplaceService.PromptProductPurchaseFinished:Connect(function()
+			print("Go")
+			update()
+		end))
+
+		return function()
+			uiTrove:Destroy()
+		end
 	end, { selectedGift, selectedPlayer, allPlayers })
 
 	React.useEffect(function()
