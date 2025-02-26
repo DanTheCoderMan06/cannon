@@ -123,6 +123,7 @@ return function(props)
 					tier2Name = giftInfo.tier2Name,
 					tiers = giftInfo.tiers,
 					productKey = giftName,
+					type = giftInfo.type,
 				})
 			)
 		end

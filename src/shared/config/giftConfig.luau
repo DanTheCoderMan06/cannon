@@ -20,13 +20,14 @@ return {
 		shouldAppear = true,
 		tiers = true,
 		tier2Name = "tenFloorsTier2",
+		type = "floors",
 		callback = function(player, target)
 			local playerData = dataService.getPlayerData(player)
-			if playerData.productTiers.gifts["tenFloors"] and playerData.productTiers.gifts["tenFloors"] >= 5 then
+			if playerData.productTiers.gifts["floors"] and playerData.productTiers.gifts["floors"] >= 5 then
 				return
 			end
-			playerData.productTiers.gifts["tenFloors"] = playerData.productTiers.gifts["tenFloors"] or 0
-			playerData.productTiers.gifts["tenFloors"] += 1
+			playerData.productTiers.gifts["floors"] = playerData.productTiers.gifts["floors"] or 0
+			playerData.productTiers.gifts["floors"] += 1
 			local targetPlayerData = dataService.getPlayerData(target)
 			targetPlayerData.floors += 10
 			targetPlayerData.boughtFloors += 10
@@ -45,10 +46,12 @@ return {
 		end,
 	},
 	tenFloorsTier2 = {
+		type = "floors",
+
 		id = 3223017209,
 		callback = function(player, target)
 			local playerData = dataService.getPlayerData(player)
-			playerData.productTiers.gifts["tenFloors"] += 1
+			playerData.productTiers.gifts["floors"] += 1
 			local targetPlayerData = dataService.getPlayerData(target)
 			targetPlayerData.floors += 10
 			targetPlayerData.boughtFloors += 10
@@ -69,16 +72,18 @@ return {
 	},
 	fiftyFloors = {
 		id = 3224502320,
+		type = "floors",
+
 		shouldAppear = true,
 		tiers = true,
 		tier2Name = "fiftyFloorsTier2",
 		callback = function(player, target)
 			local playerData = dataService.getPlayerData(player)
-			if playerData.productTiers.gifts["fiftyFloors"] and playerData.productTiers.gifts["fiftyFloors"] >= 5 then
+			if playerData.productTiers.gifts["floors"] and playerData.productTiers.gifts["floors"] >= 5 then
 				return
 			end
-			playerData.productTiers.gifts["fiftyFloors"] = playerData.productTiers.gifts["fiftyFloors"] or 0
-			playerData.productTiers.gifts["fiftyFloors"] += 1
+			playerData.productTiers.gifts["floors"] = playerData.productTiers.gifts["floors"] or 0
+			playerData.productTiers.gifts["floors"] += 1
 			local targetPlayerData = dataService.getPlayerData(target)
 			targetPlayerData.floors += 50
 			targetPlayerData.boughtFloors += 50
@@ -98,9 +103,11 @@ return {
 	},
 	fiftyFloorsTier2 = {
 		id = 3224502578,
+		type = "floors",
+
 		callback = function(player, target)
 			local playerData = dataService.getPlayerData(player)
-			playerData.productTiers.gifts["fiftyFloors"] += 1
+			playerData.productTiers.gifts["floors"] += 1
 			local targetPlayerData = dataService.getPlayerData(target)
 			targetPlayerData.floors += 50
 			targetPlayerData.boughtFloors += 50
@@ -123,17 +130,16 @@ return {
 		id = 3224504001,
 		shouldAppear = true,
 		tiers = true,
+		type = "floors",
+
 		tier2Name = "twoHundredFiftyTier2",
 		callback = function(player, target)
 			local playerData = dataService.getPlayerData(player)
-			if
-				playerData.productTiers.gifts["twoHundredFifty"]
-				and playerData.productTiers.gifts["twoHundredFifty"] >= 5
-			then
+			if playerData.productTiers.gifts["floors"] and playerData.productTiers.gifts["floors"] >= 5 then
 				return
 			end
-			playerData.productTiers.gifts["twoHundredFifty"] = playerData.productTiers.gifts["twoHundredFifty"] or 0
-			playerData.productTiers.gifts["twoHundredFifty"] += 1
+			playerData.productTiers.gifts["floors"] = playerData.productTiers.gifts["floors"] or 0
+			playerData.productTiers.gifts["floors"] += 1
 			local targetPlayerData = dataService.getPlayerData(target)
 			targetPlayerData.floors += 250
 			targetPlayerData.boughtFloors += 250
@@ -153,9 +159,11 @@ return {
 	},
 	twoHundredFiftyTier2 = {
 		id = 3224504000,
+		type = "floors",
+
 		callback = function(player, target)
 			local playerData = dataService.getPlayerData(player)
-			playerData.productTiers.gifts["twoHundredFifty"] += 1
+			playerData.productTiers.gifts["floors"] += 1
 			local targetPlayerData = dataService.getPlayerData(target)
 			targetPlayerData.floors += 250
 			targetPlayerData.boughtFloors += 250
@@ -178,6 +186,8 @@ return {
 		id = 3224600930,
 		shouldAppear = true,
 		tiers = true,
+		type = "gamepasses",
+
 		tier2Name = "doubleDistanceTier2",
 		callback = function(player, target)
 			local playerData = dataService.getPlayerData(player)
@@ -193,7 +203,6 @@ return {
 			targetPlayerData.doubleDistance = true
 			task.defer(function()
 				dataService.updatePlayerData(player, targetPlayerData)
-				castleService.updateTower(target)
 				if player ~= target then
 					task.defer(function()
 						dataService.updatePlayerData(player, playerData)
@@ -211,6 +220,8 @@ return {
 	},
 	doubleDistanceTier2 = {
 		id = 3224600931,
+		type = "gamepasses",
+
 		shouldAppear = false,
 		callback = function(player, target)
 			local playerData = dataService.getPlayerData(player)
@@ -219,7 +230,6 @@ return {
 			targetPlayerData.doubleDistance = true
 			task.defer(function()
 				dataService.updatePlayerData(player, targetPlayerData)
-				castleService.updateTower(target)
 				if player ~= target then
 					task.defer(function()
 						dataService.updatePlayerData(player, playerData)
@@ -239,6 +249,7 @@ return {
 		id = 3224601898,
 		shouldAppear = true,
 		tiers = true,
+		type = "gamepasses",
 		tier2Name = "doubleMoneyTier2",
 		callback = function(player, target)
 			local playerData = dataService.getPlayerData(player)
@@ -251,7 +262,6 @@ return {
 			targetPlayerData.doubleMoney = true
 			task.defer(function()
 				dataService.updatePlayerData(player, targetPlayerData)
-				castleService.updateTower(target)
 				if player ~= target then
 					task.defer(function()
 						dataService.updatePlayerData(player, playerData)
@@ -270,6 +280,7 @@ return {
 	doubleMoneyTier2 = {
 		id = 3224601897,
 		shouldAppear = false,
+		type = "gamepasses",
 		callback = function(player, target)
 			local playerData = dataService.getPlayerData(player)
 			playerData.productTiers.gifts["doubleMoney"] += 1
@@ -277,7 +288,6 @@ return {
 			targetPlayerData.doubleMoney = true
 			task.defer(function()
 				dataService.updatePlayerData(player, targetPlayerData)
-				castleService.updateTower(target)
 				if player ~= target then
 					task.defer(function()
 						dataService.updatePlayerData(player, playerData)
@@ -297,6 +307,7 @@ return {
 		id = 3224616084,
 		shouldAppear = true,
 		tiers = true,
+		type = "gamepasses",
 		tier2Name = "giveVIPTier2",
 		callback = function(player, target)
 			local playerData = dataService.getPlayerData(player)
@@ -309,7 +320,6 @@ return {
 			targetPlayerData.infiniteVIP = true
 			task.defer(function()
 				dataService.updatePlayerData(player, targetPlayerData)
-				castleService.updateTower(target)
 				if player ~= target then
 					task.defer(function()
 						dataService.updatePlayerData(player, playerData)
@@ -327,6 +337,7 @@ return {
 	},
 	giveVIPTier2 = {
 		id = 3224616147,
+		type = "gamepasses",
 		shouldAppear = false,
 		callback = function(player, target)
 			local playerData = dataService.getPlayerData(player)
@@ -335,7 +346,6 @@ return {
 			targetPlayerData.infiniteVIP = true
 			task.defer(function()
 				dataService.updatePlayerData(player, targetPlayerData)
-				castleService.updateTower(target)
 				if player ~= target then
 					task.defer(function()
 						dataService.updatePlayerData(player, playerData)
@@ -346,6 +356,123 @@ return {
 		check = function(targetPlayer)
 			local playerData = dataService.getPlayerData(targetPlayer)
 			if playerData.infiniteVIP or marketplaceUtil.userOwnsGamepass(targetPlayer, rewardsConfig.vipGamepass) then
+				return false
+			end
+			return true
+		end,
+	},
+	giftArtillery = {
+		id = 3224676081,
+		shouldAppear = true,
+		tiers = true,
+		type = "cannons",
+		tier2Name = "giftArtilleryTier2",
+		callback = function(player, target)
+			local playerData = dataService.getPlayerData(player)
+			if playerData.productTiers.gifts["cannons"] and playerData.productTiers.gifts["cannons"] >= 5 then
+				return
+			end
+			playerData.productTiers.gifts["cannons"] = playerData.productTiers.gifts["cannons"] or 0
+			playerData.productTiers.gifts["cannons"] += 1
+			local targetPlayerData = dataService.getPlayerData(target)
+			table.insert(targetPlayerData.cannons, "artillery")
+			print(targetPlayerData)
+			task.defer(function()
+				dataService.updatePlayerData(player, targetPlayerData)
+				if player ~= target then
+					task.defer(function()
+						dataService.updatePlayerData(player, playerData)
+					end)
+				end
+			end)
+		end,
+		check = function(targetPlayer)
+			local playerData = dataService.getPlayerData(targetPlayer)
+			if table.find(playerData.cannons, "artillery") then
+				return false
+			end
+			return true
+		end,
+	},
+	giftArtilleryTier2 = {
+		id = 3224676143,
+		type = "cannons",
+		shouldAppear = false,
+		callback = function(player, target)
+			local playerData = dataService.getPlayerData(player)
+			playerData.productTiers.gifts["cannons"] += 1
+			local targetPlayerData = dataService.getPlayerData(target)
+			table.insert(targetPlayerData.cannons, "artillery")
+			task.defer(function()
+				dataService.updatePlayerData(player, targetPlayerData)
+				if player ~= target then
+					task.defer(function()
+						dataService.updatePlayerData(player, playerData)
+					end)
+				end
+			end)
+		end,
+		check = function(targetPlayer)
+			local playerData = dataService.getPlayerData(targetPlayer)
+			if table.find(playerData.cannons, "artillery") then
+				return false
+			end
+			return true
+		end,
+	},
+	giftRailgun = {
+		id = 3225217016,
+		shouldAppear = true,
+		tiers = true,
+		type = "cannons",
+		tier2Name = "giftRailgunTier2",
+		callback = function(player, target)
+			local playerData = dataService.getPlayerData(player)
+			if playerData.productTiers.gifts["cannons"] and playerData.productTiers.gifts["cannons"] >= 5 then
+				return
+			end
+			playerData.productTiers.gifts["cannons"] = playerData.productTiers.gifts["cannons"] or 0
+			playerData.productTiers.gifts["cannons"] += 1
+			local targetPlayerData = dataService.getPlayerData(target)
+			table.insert(targetPlayerData.cannons, "railgun")
+			task.defer(function()
+				dataService.updatePlayerData(player, targetPlayerData)
+				if player ~= target then
+					task.defer(function()
+						dataService.updatePlayerData(player, playerData)
+					end)
+				end
+			end)
+		end,
+		check = function(targetPlayer)
+			local playerData = dataService.getPlayerData(targetPlayer)
+			if table.find(playerData.cannons, "railgun") then
+				return false
+			end
+			return true
+		end,
+	},
+	giftRailgunTier2 = {
+		id = 3225217064,
+		type = "cannons",
+		shouldAppear = false,
+		callback = function(player, target)
+			local playerData = dataService.getPlayerData(player)
+			playerData.productTiers.gifts["cannons"] += 1
+			local targetPlayerData = dataService.getPlayerData(target)
+			table.insert(targetPlayerData.cannons, "railgun")
+			task.defer(function()
+				dataService.updatePlayerData(target, targetPlayerData)
+				if player ~= target then
+					task.defer(function()
+						dataService.updatePlayerData(player, playerData)
+					end)
+				end
+			end)
+		end,
+		check = function(targetPlayer)
+			local playerData = dataService.getPlayerData(targetPlayer)
+			if table.find(playerData.cannons, "railgun") then
 				return false
 			end
 			return true

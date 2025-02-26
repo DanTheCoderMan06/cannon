@@ -155,20 +155,21 @@ function cannonService.start()
 	end)
 
 	zap.toggleCannon.SetCallback(function(player, target)
-		local targetCannon = gamepassConfig.artilleryGamepasses[tostring(target)]
 		local playerData = dataService.getPlayerData(player)
 		print(target)
-		if tonumber(target) then
-			if
-				not marketplaceUtil.userOwnsGamepass(player, tonumber(target))
-				and not table.find(playerData.cannons, target)
-			then
+		if target ~= "default" then
+			if not table.find(playerData.cannons, target) then
 				return
 			end
-			cannonService.addCannon(player, targetCannon)
+			local cannonFolder = ReplicatedStorage.assets.cannons:FindFirstChild(target)
+			if not cannonFolder then
+				return
+			end
+			cannonService.addCannon(player, target, true)
 		else
 			cannonService.addCannon(player, cannonConfig.getCannon(playerData.cannon), true)
 		end
+
 		return true
 	end)
 

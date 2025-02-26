@@ -97,9 +97,9 @@ return function(props)
 					setIsOwned(table.find(newData.cannons, props.cannonName) ~= nil)
 				end
 				if props.tiers then
-					if newData.productTiers.products[props.productKey] then
-						setTierFrameVisible(newData.productTiers.products[props.productKey] >= 5)
-						if newData.productTiers.products[props.productKey] >= 5 then
+					if newData.productTiers.products[props.type] then
+						setTierFrameVisible(newData.productTiers.products[props.type] >= 5)
+						if newData.productTiers.products[props.type] >= 5 then
 							local tier2Info = gamepassConfig[props.tier2Name]
 							local newInfo = marketplaceUtil.getProductInfo(tier2Info.id, Enum.InfoType.Product)
 							setCurrentPrice(newInfo.PriceInRobux)

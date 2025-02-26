@@ -25,8 +25,8 @@ return function(props)
 		uiTrove:Add(
 			props.dataChanged:Connect(function(newData)
 				if props.tiers then
-					if newData.productTiers.gifts[props.productKey] then
-						setTierFrameVisible(newData.productTiers.gifts[props.productKey] >= 5)
+					if newData.productTiers.gifts[props.type] then
+						setTierFrameVisible(newData.productTiers.gifts[props.type] >= 5)
 					else
 						setTierFrameVisible(false)
 					end

@@ -1,5 +1,5 @@
 {
-    "name": "universal-systems",
+    "name": "cannon-game",
     "tree": {
         "$className": "DataModel",
         "ReplicatedStorage": {

@@ -93,8 +93,8 @@ return function(props)
 						onActivated = function()
 							if info.tiers then
 								local currentData = props.getData()
-								if currentData.productTiers.products[gamepassName] then
-									if currentData.productTiers.products[gamepassName] >= 5 then
+								if currentData.productTiers.products[info.type] then
+									if currentData.productTiers.products[info.type] >= 5 then
 										local tier2Info = gamepassConfig[info.tier2Name]
 										MarketplaceService:PromptProductPurchase(Players.LocalPlayer, tier2Info.id)
 									else
