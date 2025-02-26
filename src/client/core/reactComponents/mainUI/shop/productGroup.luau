@@ -89,9 +89,14 @@ return function(props)
 						cannonName = info.cannonName,
 						id = info.id,
 						tier2Name = info.tier2Name,
+						specialFloorTiers = info.specialFloorTiers,
 						playerEvent = marketplaceUtil.getPlayerEvent(Players.LocalPlayer),
 						onActivated = function()
-							if info.tiers then
+							if info.floorTiers then
+								local playerData = props.getData()
+								local tierIndex = info.getId(playerData)
+								MarketplaceService:PromptProductPurchase(Players.LocalPlayer, info.id[tierIndex])
+							elseif info.tiers then
 								local currentData = props.getData()
 								if currentData.productTiers.products[info.type] then
 									if currentData.productTiers.products[info.type] >= 5 then

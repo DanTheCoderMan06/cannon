@@ -32,6 +32,11 @@ return function(props)
 			end
 		end))
 
+		uiTrove:Add(props.resetEvent:Connect(function()
+			setIsClaimed(true)
+			setIsLocked(true)
+		end))
+
 		return function()
 			uiTrove:Destroy()
 		end

@@ -40,11 +40,13 @@ local module = {
 		{
 			day = 2,
 			callback = function(playerData)
-				table.insert(playerData.cannons, "armyCannon")
+				if not table.find(playerData.cannons, "artillery") then
+					table.insert(playerData.cannons, "artillery")
+				end
 			end,
 			type = "viewport",
-			model = ReplicatedStorage.assets.cannons:FindFirstChild("armyCannon"),
-			name = "Army Cannon",
+			model = ReplicatedStorage.assets.cannons:FindFirstChild("artillery"),
+			name = "Artillery",
 		},
 		{
 			day = 3,
@@ -112,11 +114,13 @@ local module = {
 		{
 			day = 10,
 			callback = function(playerData)
-				table.insert(playerData.cannons, "circusCannon")
+				if not table.find(playerData.cannons, "railgun") then
+					table.insert(playerData.cannons, "railgun")
+				end
 			end,
 			type = "viewport",
-			model = ReplicatedStorage.assets.cannons:FindFirstChild("circusCannon"),
-			name = "Circus Cannon",
+			model = ReplicatedStorage.assets.cannons:FindFirstChild("railgun"),
+			name = "Railgun",
 		},
 		{
 			day = 11,

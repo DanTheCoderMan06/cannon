@@ -25,6 +25,7 @@ local selectedUIEvent = Signal.new()
 local selectSectionEvent = Signal.new()
 local unlockedItemEvent = Signal.new()
 local claimedItemEvent = Signal.new()
+local resetEvent = Signal.new()
 
 local effectsController = require(ReplicatedStorage.client.controllers.effectsController)
 local dataController = require(ReplicatedStorage.client.controllers.dataController)
@@ -71,6 +72,7 @@ function uiController.start()
 				unlockedItemEvent = unlockedItemEvent,
 				dataChanged = dataController.dataChanged,
 				getData = dataController.getData,
+				resetEvent = resetEvent,
 				toggleMusicEvent = musicController.toggleMusicEvent,
 				promptIn = function()
 					if uiController.canPromptIn() then
@@ -89,11 +91,13 @@ function uiController.start()
 			currentData = newData
 			return
 		end
+		if newData.daysPlayed == 0 and currentData.daysPlayed ~= 0 then
+			resetEvent:Fire()
+			currentData = newData
+		end
 		if not Sift.Array.equalsDeep(newData.daysClaimed, currentData.daysClaimed) then
 			local newDays = Sift.Array.difference(newData.daysClaimed, currentData.daysClaimed)
-			print(newDays)
 			for _, v in pairs(newDays) do
-				print(uiController.getNameFromDay(v))
 				claimedItemEvent:Fire(v)
 			end
 		end
@@ -107,7 +111,6 @@ function uiController.start()
 
 	ExperienceNotificationService.OptInPromptClosed:Connect(function()
 		local canSend = zap.hasNotificationsEnabled.Call()
-		print(canSend)
 		uiController.promptInEvent:Fire(canSend)
 	end)
 end
