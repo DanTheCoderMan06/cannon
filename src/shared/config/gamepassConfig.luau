@@ -98,12 +98,98 @@ return {
 
 			luckyBlockService.resetPlayerTimer(player)
 		end,
-		speicalFloorTiers = true,
+		changeOnData = "floors",
 		type = "gamepasses",
 		infoType = Enum.InfoType.Product,
-		shouldAppear = false,
+		shouldAppear = true,
+		speicalTiers = true,
 	},
+	upgradeCannon = {
+		id = {
+			3226268798, -- Tier 1: Floors 1-49
+			3226268869, -- Tier 2: Floors 50-99
+			3226268926, -- Tier 3: Floors 100-149
+			3226269002, -- Tier 4: Floors 150-199
+			3226269059, -- Tier 5: Floors 200+
+		},
+		getId = function(playerData)
+			local tierRanges = {
+				{ min = 1, max = 19 }, -- Tier 1
+				{ min = 20, max = 39 }, -- Tier 2
+				{ min = 40, max = 59 }, -- Tier 3
+				{ min = 60, max = 79 }, -- Tier 4
+				{ min = 80, max = math.huge }, -- Tier 5
+			}
 
+			local ids = {
+				3226268798, -- Tier 1: Floors 1-49
+				3226268869, -- Tier 2: Floors 50-99
+				3226268926, -- Tier 3: Floors 100-149
+				3226269002, -- Tier 4: Floors 150-199
+				3226269059, -- Tier 5: Floors 200+
+			}
+
+			for i, range in ipairs(tierRanges) do
+				if playerData.cannon >= range.min and playerData.cannon <= range.max then
+					return ids[i]
+				end
+			end
+
+			return 0
+		end,
+		callback = function(player, productId)
+			local tierRanges = {
+				{ min = 1, max = 49 }, -- Tier 1
+				{ min = 50, max = 99 }, -- Tier 2
+				{ min = 100, max = 149 }, -- Tier 3
+				{ min = 150, max = 199 }, -- Tier 4
+				{ min = 200, max = math.huge }, -- Tier 5
+			}
+
+			local ids = {
+				3226268798, -- Tier 1: Floors 1-49
+				3226268869, -- Tier 2: Floors 50-99
+				3226268926, -- Tier 3: Floors 100-149
+				3226269002, -- Tier 4: Floors 150-199
+				3226269059, -- Tier 5: Floors 200+
+			}
+
+			local playerData = dataService.getPlayerData(player)
+
+			local playerTier = 1
+			for i, range in ipairs(tierRanges) do
+				if playerData.floors >= range.min and playerData.floors <= range.max then
+					playerTier = i
+					break
+				end
+			end
+
+			local purchasedTier = nil
+			for i, id in ipairs(ids) do
+				if id == productId then
+					purchasedTier = i
+					break
+				end
+			end
+
+			if purchasedTier ~= playerTier then
+				print(
+					"[PurchasesService]: Player tried to use incorrect tier product. Expected tier: "
+						.. playerTier
+						.. ", got tier: "
+						.. tostring(purchasedTier)
+				)
+				return
+			end
+
+			luckyBlockService.resetPlayerTimer(player)
+		end,
+		changeOnData = "cannon",
+		type = "gamepasses",
+		infoType = Enum.InfoType.Product,
+		shouldAppear = true,
+		speicalTiers = true,
+	},
 	allRewardsWhale = {
 		id = 3225912732,
 		callback = function(player)

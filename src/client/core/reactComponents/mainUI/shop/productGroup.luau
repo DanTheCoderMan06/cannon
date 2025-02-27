@@ -74,8 +74,9 @@ return function(props)
 			if not _sections[info.type] then
 				_sections[info.type] = {}
 			end
-			local gamepassInfo = type(info.id) == "number" and marketplaceUtil.getProductInfo(info.id, info.infoType)
-				or marketplaceUtil.getProductInfo(info.id[1], info.infoType)
+			local gamepassInfo = typeof(info.id) == "table"
+					and marketplaceUtil.getProductInfo(info.id[1], Enum.InfoType.Product)
+				or marketplaceUtil.getProductInfo(info.id, info.infoType)
 			table.insert(
 				_sections[info.type],
 				React.createElement(
@@ -90,10 +91,10 @@ return function(props)
 						cannonName = info.cannonName,
 						id = info.id,
 						tier2Name = info.tier2Name,
-						specialFloorTiers = info.specialFloorTiers,
+						specialTiers = info.specialTiers,
 						playerEvent = marketplaceUtil.getPlayerEvent(Players.LocalPlayer),
 						onActivated = function()
-							if info.floorTiers then
+							if info.speicalTiers then
 								local playerData = props.getData()
 								local tierIndex = info.getId(playerData)
 								MarketplaceService:PromptProductPurchase(Players.LocalPlayer, info.id[tierIndex])
@@ -118,15 +119,16 @@ return function(props)
 							end
 						end,
 						tiers = info.tiers == true,
+						changeOnData = info.changeOnData,
+						speicalTiers = info.speicalTiers,
+						getId = info.getId,
+						specialTierAmount = info.speicalTiers and #info.id,
 					})
 				)
 			)
 		end
 		return _sections
-	end, {
-		props,
-		styles,
-	})
+	end, {})
 
 	React.useEffect(function()
 		local uiTrove = Trove.new()

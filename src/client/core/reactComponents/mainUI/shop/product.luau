@@ -15,6 +15,21 @@ local marketplaceUtil = require(ReplicatedStorage.shared.utilities.marketplaceUt
 local rewardsConfig = require(ReplicatedStorage.shared.config.rewardsConfig)
 local gamepassConfig = require(ReplicatedStorage.shared.config.gamepassConfig)
 
+local function convertToNumeral(number)
+	local result = ""
+	if number <= 3 then
+		for i = 1, number do
+			result = result .. "I"
+		end
+		return result
+	elseif number == 4 then
+		return "IV"
+	elseif number == 5 then
+		return "V"
+	end
+	return ""
+end
+
 local function lockedFrame(props)
 	return React.createElement("ImageLabel", {
 		AnchorPoint = Vector2.new(0.5, 0.5),
@@ -67,7 +82,9 @@ local function tierFrame(props)
 		Position = UDim2.fromScale(0.61, 0.112),
 		RichText = true,
 		Size = UDim2.fromScale(0.582, 0.171),
-		Text = "Tier II",
+		Text = props.tierName:map(function(val)
+			return "Tier " .. val
+		end),
 		TextColor3 = Color3.fromRGB(255, 255, 255),
 		TextScaled = true,
 		TextSize = 14,
@@ -81,10 +98,12 @@ local function tierFrame(props)
 end
 
 return function(props)
-	local owned, setIsOwned = React.useBinding(marketplaceUtil.userOwnsGamepass(Players.LocalPlayer, props.id))
+	local owned, setIsOwned = React.useBinding(
+		if typeof(props.id) == "number" then marketplaceUtil.userOwnsGamepass(Players.LocalPlayer, props.id) else false
+	)
 	local tierFrameVisible, setTierFrameVisible = React.useBinding(false)
 	local currentPrice, setCurrentPrice = React.useBinding(props.price)
-
+	local tierName, setTierName = React.useBinding("II")
 	React.useEffect(function()
 		local uiTrove = Trove.new()
 
@@ -104,6 +123,14 @@ return function(props)
 							local newInfo = marketplaceUtil.getProductInfo(tier2Info.id, Enum.InfoType.Product)
 							setCurrentPrice(newInfo.PriceInRobux)
 						end
+					end
+				end
+
+				if props.changeOnData then
+					local currentTier = table.find(props.id, props.getId(newData))
+					if currentTier > 1 then
+						setTierName(convertToNumeral(currentTier))
+						setTierFrameVisible(true)
 					end
 				end
 			end),
@@ -153,7 +180,7 @@ return function(props)
 			Size = UDim2.fromScale(1, 1),
 			ZIndex = 0,
 		}, {
-			tierFrame = React.createElement(tierFrame, { visible = tierFrameVisible }),
+			tierFrame = React.createElement(tierFrame, { visible = tierFrameVisible, tierName = tierName }),
 			imageHolder = React.createElement("ImageLabel", {
 				AnchorPoint = Vector2.new(0.5, 0.5),
 				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
