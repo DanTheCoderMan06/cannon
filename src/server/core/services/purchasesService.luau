@@ -54,6 +54,10 @@ function purchaseService.handlePurchase(recieptInfo)
 			info.callback(player)
 			return Enum.ProductPurchaseDecision.PurchaseGranted
 		end
+		if type(info.id) ~= "number" and table.find(info.id, recieptInfo.ProductId) then
+			info.callback(player, recieptInfo.ProductId)
+			return Enum.ProductPurchaseDecision.PurchaseGranted
+		end
 	end
 
 	for name, cannonTier in pairs(tierConfig.cannonTiers) do

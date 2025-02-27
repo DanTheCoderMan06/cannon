@@ -9,7 +9,7 @@ local function randomRewardLog(playerLevel)
 end
 
 local module = {
-	luckyBlockWaitTime = 10,
+	luckyBlockWaitTime = 100,
 	playerJoinReward = 1000000,
 	luckyBlockFormula = randomRewardLog,
 	vipRewardDuration = 10000,

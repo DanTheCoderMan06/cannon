@@ -20,11 +20,11 @@ return {
 	luckyBlockSkip = {
 		floorTiers = true,
 		id = {
-			3225913162, -- Tier 1: Floors 1-49
-			3225913163, -- Tier 2: Floors 50-99
-			3225913164, -- Tier 3: Floors 100-149
-			3225913165, -- Tier 4: Floors 150-199
-			3225913166, -- Tier 5: Floors 200+
+			3226268798, -- Tier 1: Floors 1-49
+			3226268869, -- Tier 2: Floors 50-99
+			3226268926, -- Tier 3: Floors 100-149
+			3226269002, -- Tier 4: Floors 150-199
+			3226269059, -- Tier 5: Floors 200+
 		},
 		getId = function(playerData)
 			local tierRanges = {
@@ -36,14 +36,13 @@ return {
 			}
 
 			local ids = {
-				3225913162, -- Tier 1: Floors 1-49
-				3225913163, -- Tier 2: Floors 50-99
-				3225913164, -- Tier 3: Floors 100-149
-				3225913165, -- Tier 4: Floors 150-199
-				3225913166, -- Tier 5: Floors 200+
+				3226268798, -- Tier 1: Floors 1-49
+				3226268869, -- Tier 2: Floors 50-99
+				3226268926, -- Tier 3: Floors 100-149
+				3226269002, -- Tier 4: Floors 150-199
+				3226269059, -- Tier 5: Floors 200+
 			}
 
-			local playerTier = 1
 			for i, range in ipairs(tierRanges) do
 				if playerData.floors >= range.min and playerData.floors <= range.max then
 					return ids[i]
@@ -62,11 +61,11 @@ return {
 			}
 
 			local ids = {
-				3225913162, -- Tier 1: Floors 1-49
-				3225913163, -- Tier 2: Floors 50-99
-				3225913164, -- Tier 3: Floors 100-149
-				3225913165, -- Tier 4: Floors 150-199
-				3225913166, -- Tier 5: Floors 200+
+				3226268798, -- Tier 1: Floors 1-49
+				3226268869, -- Tier 2: Floors 50-99
+				3226268926, -- Tier 3: Floors 100-149
+				3226269002, -- Tier 4: Floors 150-199
+				3226269059, -- Tier 5: Floors 200+
 			}
 
 			local playerData = dataService.getPlayerData(player)
@@ -102,8 +101,9 @@ return {
 		speicalFloorTiers = true,
 		type = "gamepasses",
 		infoType = Enum.InfoType.Product,
-		shouldAppear = true,
+		shouldAppear = false,
 	},
+
 	allRewardsWhale = {
 		id = 3225912732,
 		callback = function(player)

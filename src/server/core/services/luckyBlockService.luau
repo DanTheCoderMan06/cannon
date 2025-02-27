@@ -35,6 +35,7 @@ function luckyBlockService.resetPlayerTimer(player)
 	end
 
 	playerBlocks[tostring(player.UserId)].lastClaimed = 0
+	zap.resetPlayerTimer.Fire(player)
 	return true
 end
 

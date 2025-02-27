@@ -30,7 +30,6 @@ return {
 	platforms = {
 		luckyBlock = {
 			callback = function(callbackEvent)
-				print("Start Lucky block")
 				local success = zap.requestLuckyBlock.Call()
 				callbackEvent:Fire(success)
 			end,
@@ -39,6 +38,9 @@ return {
 			updateValues = function(trove, updateEvent)
 				zap.spawnLuckyBlock.On(function()
 					startTimeLuckyBlock = tick()
+				end)
+				zap.resetPlayerTimer.SetCallback(function()
+					startTimeLuckyBlock = 0
 				end)
 				trove:BindToRenderStep("renderTimeLuckyBlock", Enum.RenderPriority.Last.Value + 1, function()
 					local timeLeft = math.floor(
@@ -66,6 +68,8 @@ return {
 				if success then
 					spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(0.992156, 1, 0.580392) })
 				else
+					local luckyBlockId = gamepassConfig.luckyBlockSkip.getId(dataController.getData())
+					MarketplaceService:PromptProductPurchase(Players.LocalPlayer, luckyBlockId)
 					spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(1, 0, 0) })
 				end
 

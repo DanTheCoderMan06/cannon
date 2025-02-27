@@ -74,7 +74,8 @@ return function(props)
 			if not _sections[info.type] then
 				_sections[info.type] = {}
 			end
-			local gamepassInfo = marketplaceUtil.getProductInfo(info.id, info.infoType)
+			local gamepassInfo = type(info.id) == "number" and marketplaceUtil.getProductInfo(info.id, info.infoType)
+				or marketplaceUtil.getProductInfo(info.id[1], info.infoType)
 			table.insert(
 				_sections[info.type],
 				React.createElement(

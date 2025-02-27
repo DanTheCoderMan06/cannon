@@ -134,6 +134,13 @@ funct requestLuckyBlock =  {
     args: unknown,
     rets: boolean
 }
+
+event resetPlayerTimer = {
+    from: Server,
+    type: Reliable,
+    call: SingleAsync,
+    data: unknown
+}
 --
 
 --Rewards 
