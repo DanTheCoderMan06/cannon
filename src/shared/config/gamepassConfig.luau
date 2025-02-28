@@ -4,6 +4,7 @@ local ServerStorage
 local dataService
 local castleService
 local luckyBlockService
+local cannonService
 
 local cannonConfig = require(ReplicatedStorage.shared.config.cannonConfig)
 local marketplaceUtil = require(ReplicatedStorage.shared.utilities.marketplaceUtil)
@@ -14,6 +15,7 @@ if RunService:IsServer() then
 	luckyBlockService = require(ServerStorage.server.services.luckyBlockService)
 	dataService = require(ServerStorage.server.services.dataService)
 	castleService = require(ServerStorage.server.services.castleService)
+	cannonService = require(ServerStorage.server.services.cannonService)
 end
 
 return {
@@ -106,11 +108,11 @@ return {
 	},
 	upgradeCannon = {
 		id = {
-			3226268798, -- Tier 1: Floors 1-49
-			3226268869, -- Tier 2: Floors 50-99
-			3226268926, -- Tier 3: Floors 100-149
-			3226269002, -- Tier 4: Floors 150-199
-			3226269059, -- Tier 5: Floors 200+
+			3226816503, -- Tier 1: Floors 1-49
+			3226816511, -- Tier 2: Floors 50-99
+			3226816524, -- Tier 3: Floors 100-149
+			3226816531, -- Tier 4: Floors 150-199
+			3226816536, -- Tier 5: Floors 200+
 		},
 		getId = function(playerData)
 			local tierRanges = {
@@ -122,13 +124,12 @@ return {
 			}
 
 			local ids = {
-				3226268798, -- Tier 1: Floors 1-49
-				3226268869, -- Tier 2: Floors 50-99
-				3226268926, -- Tier 3: Floors 100-149
-				3226269002, -- Tier 4: Floors 150-199
-				3226269059, -- Tier 5: Floors 200+
+				3226816503, -- Tier 1: Floors 1-49
+				3226816511, -- Tier 2: Floors 50-99
+				3226816524, -- Tier 3: Floors 100-149
+				3226816531, -- Tier 4: Floors 150-199
+				3226816536, -- Tier 5: Floors 200+
 			}
-
 			for i, range in ipairs(tierRanges) do
 				if playerData.cannon >= range.min and playerData.cannon <= range.max then
 					return ids[i]
@@ -139,26 +140,26 @@ return {
 		end,
 		callback = function(player, productId)
 			local tierRanges = {
-				{ min = 1, max = 49 }, -- Tier 1
-				{ min = 50, max = 99 }, -- Tier 2
-				{ min = 100, max = 149 }, -- Tier 3
-				{ min = 150, max = 199 }, -- Tier 4
-				{ min = 200, max = math.huge }, -- Tier 5
+				{ min = 1, max = 19 }, -- Tier 1
+				{ min = 20, max = 39 }, -- Tier 2
+				{ min = 40, max = 59 }, -- Tier 3
+				{ min = 60, max = 79 }, -- Tier 4
+				{ min = 80, max = math.huge }, -- Tier 5
 			}
 
 			local ids = {
-				3226268798, -- Tier 1: Floors 1-49
-				3226268869, -- Tier 2: Floors 50-99
-				3226268926, -- Tier 3: Floors 100-149
-				3226269002, -- Tier 4: Floors 150-199
-				3226269059, -- Tier 5: Floors 200+
+				3226816503, -- Tier 1: Floors 1-49
+				3226816511, -- Tier 2: Floors 50-99
+				3226816524, -- Tier 3: Floors 100-149
+				3226816531, -- Tier 4: Floors 150-199
+				3226816536, -- Tier 5: Floors 200+
 			}
 
 			local playerData = dataService.getPlayerData(player)
 
 			local playerTier = 1
 			for i, range in ipairs(tierRanges) do
-				if playerData.floors >= range.min and playerData.floors <= range.max then
+				if playerData.cannon >= range.min and playerData.cannon <= range.max then
 					playerTier = i
 					break
 				end
@@ -182,10 +183,15 @@ return {
 				return
 			end
 
-			luckyBlockService.resetPlayerTimer(player)
+			playerData.cannon += 10
+
+			task.defer(function()
+				dataService.updatePlayerData(player, playerData)
+				cannonService.addCannon(player, cannonConfig.getCannon(playerData.cannon))
+			end)
 		end,
 		changeOnData = "cannon",
-		type = "gamepasses",
+		type = "cannons",
 		infoType = Enum.InfoType.Product,
 		shouldAppear = true,
 		speicalTiers = true,
@@ -396,17 +402,6 @@ return {
 		end,
 		type = "gamepasses",
 		infoType = Enum.InfoType.GamePass,
-	},
-	newCannon = {
-		id = 2697043453,
-		callback = function(player)
-			local playerData = dataService.getPlayerData(player)
-			local newCannon = cannonConfig.getNextCannon(player.cannon)
-			playerData.cannon = newCannon.max
-			dataService.updatePlayerData(player, playerData)
-		end,
-		type = "cannons",
-		infoType = Enum.InfoType.Product,
 	},
 	artilleryGamepasses = {
 		["1028783141"] = "artillery",

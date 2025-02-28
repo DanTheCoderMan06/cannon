@@ -20,7 +20,6 @@ local playerPlatforms = workspace:WaitForChild("playerPlatforms")
 local playerCannons = workspace:WaitForChild("playerCannons")
 
 local cannonConfig = require(ReplicatedStorage.shared.config.cannonConfig)
-local gamepassConfig = require(ReplicatedStorage.shared.config.gamepassConfig)
 local tierConfig = require(ReplicatedStorage.shared.config.tierConfig)
 
 local physicsUtil = require(ReplicatedStorage.shared.utilities.physicsUtil)

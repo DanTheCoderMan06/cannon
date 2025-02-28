@@ -96,8 +96,7 @@ return function(props)
 						onActivated = function()
 							if info.speicalTiers then
 								local playerData = props.getData()
-								local tierIndex = info.getId(playerData)
-								MarketplaceService:PromptProductPurchase(Players.LocalPlayer, info.id[tierIndex])
+								MarketplaceService:PromptProductPurchase(Players.LocalPlayer, info.getId(playerData))
 							elseif info.tiers then
 								local currentData = props.getData()
 								if currentData.productTiers.products[info.type] then

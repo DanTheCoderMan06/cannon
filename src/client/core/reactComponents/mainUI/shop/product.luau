@@ -128,6 +128,7 @@ return function(props)
 
 				if props.changeOnData then
 					local currentTier = table.find(props.id, props.getId(newData))
+					print(currentTier)
 					if currentTier > 1 then
 						setTierName(convertToNumeral(currentTier))
 						setTierFrameVisible(true)

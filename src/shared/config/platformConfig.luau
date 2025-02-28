@@ -196,6 +196,8 @@ return {
 				if success then
 					spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(0.992156, 1, 0.580392) })
 				else
+					local id = gamepassConfig.upgradeCannon.getId(dataController.getData())
+					MarketplaceService:PromptProductPurchase(Players.LocalPlayer, id)
 					spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(1, 0, 0) })
 				end
 
