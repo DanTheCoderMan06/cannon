@@ -170,6 +170,9 @@ return function(props)
 				end)
 			end,
 		}, {
+			uIScale = React.createElement("UIScale", {
+				Scale = _G.isMobile and 1.2 or 1,
+			}),
 			text = React.createElement("TextLabel", {
 				AnchorPoint = Vector2.new(0.5, 0.5),
 				BackgroundColor3 = Color3.fromRGB(255, 255, 255),

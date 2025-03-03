@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
 
 local shared = ReplicatedStorage.shared
 local sharedPackages = ReplicatedStorage.sharedPackages
@@ -10,6 +11,8 @@ local generics = ReplicatedStorage.client.reactComponents.generics
 
 local button = require(generics.genericButton)
 
+local isMobile = UserInputService.TouchEnabled
+
 return function(props)
 	return React.createElement("Frame", {
 		AnchorPoint = Vector2.new(0, 0.5),
@@ -17,7 +20,7 @@ return function(props)
 		BackgroundTransparency = 1,
 		BorderColor3 = Color3.fromRGB(0, 0, 0),
 		BorderSizePixel = 0,
-		Position = UDim2.fromScale(0.0, 0.45),
+		Position = UDim2.fromScale(0.0, 0.4),
 		Size = UDim2.fromScale(0.0521, 0.0926),
 	}, {
 		uIAspectRatioConstraint = React.createElement("UIAspectRatioConstraint"),
@@ -53,7 +56,7 @@ return function(props)
 		}),
 
 		uIScale = React.createElement("UIScale", {
-			Scale = 1.1,
+			Scale = isMobile and 1.5 or 1.1,
 		}),
 	})
 end

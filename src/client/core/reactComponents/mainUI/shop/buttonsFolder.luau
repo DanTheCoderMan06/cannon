@@ -24,6 +24,9 @@ return function(props)
 		ScaleType = Enum.ScaleType.Fit,
 		Size = UDim2.fromScale(1.01, 0.0998),
 	}, {
+		uIScale = React.createElement("UIScale", {
+			Scale = _G.isMobile and 1.2 or 1,
+		}),
 		content = React.createElement("Frame", {
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 			BackgroundTransparency = 1,

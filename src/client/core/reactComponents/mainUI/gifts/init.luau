@@ -182,7 +182,13 @@ return function(props)
 		BorderSizePixel = 0,
 		Size = UDim2.fromScale(1, 1),
 		GroupTransparency = styles.transparency,
+		ZIndex = 10,
+		AnchorPoint = Vector2.new(0.5, 0.5),
+		Position = UDim2.fromScale(0.5, 0.5),
 	}, {
+		uIScale = React.createElement("UIScale", {
+			Scale = _G.isMobile and 1.12 or 1,
+		}),
 		content = React.createElement("ImageLabel", {
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),

@@ -59,8 +59,9 @@ return function(props)
 			ZIndex = 3,
 		}),
 
-		uIScale = React.createElement("UIScale"),
-
+		uIScale = React.createElement("UIScale", {
+			Scale = _G.isMobile and 1.1 or 1,
+		}),
 		label = React.createElement("TextLabel", {
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),

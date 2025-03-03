@@ -1,6 +1,7 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SoundService = game:GetService("SoundService")
 local TeleportService = game:GetService("TeleportService")
+local UserInputService = game:GetService("UserInputService")
 
 local shared = ReplicatedStorage.shared
 local sharedPackages = ReplicatedStorage.sharedPackages
@@ -10,6 +11,8 @@ local ReactSpring = require(sharedPackages.ReactSpring)
 local components = ReplicatedStorage.client.reactComponents
 
 local zap = require(ReplicatedStorage.zap)
+
+local isMobile = UserInputService.TouchEnabled
 
 return function(props)
 	local styles, api = ReactSpring.useSpring(function()
@@ -32,7 +35,7 @@ return function(props)
 		BorderColor3 = Color3.fromRGB(0, 0, 0),
 		BorderSizePixel = 0,
 		FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
-		Position = UDim2.fromScale(0.918, 0.597),
+		Position = UDim2.fromScale(0.918, 0.697),
 		Size = styles.hover:map(function(val)
 			return UDim2.fromScale(0.135, 0.0499):Lerp(UDim2.fromScale(0.135 * 1.1, 0.0499 * 1.1), val)
 		end),
@@ -83,6 +86,10 @@ return function(props)
 		uIStroke1 = React.createElement("UIStroke", {
 			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
 			Thickness = 2,
+		}),
+
+		uIScale = React.createElement("UIScale", {
+			Scale = isMobile and 1.5 or 1.1,
 		}),
 
 		textLabel = React.createElement("TextLabel", {

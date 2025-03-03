@@ -24,6 +24,7 @@ return function(props)
 		BorderSizePixel = 0,
 		Position = UDim2.fromScale(0.5, 0.0),
 		Size = UDim2.fromScale(1, 1),
+		ZIndex = 0,
 	}, {
 		uIAspectRatioConstraint = React.createElement("UIAspectRatioConstraint", {
 			AspectRatio = 1.78,

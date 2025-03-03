@@ -21,6 +21,10 @@ return function(props)
 		Position = UDim2.fromScale(0.963, 0.949),
 		Size = UDim2.fromScale(0.072, 0.105),
 	}, {
+		uIScale = React.createElement("UIScale", {
+			Scale = _G.isMobile and 1.5 or 1.1,
+		}),
+
 		musicOff = React.createElement("ImageButton", {
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),

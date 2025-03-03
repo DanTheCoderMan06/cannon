@@ -63,7 +63,11 @@ return function(props)
 		Rotation = styles.transparency:map(function(val)
 			return 0 * val
 		end),
+		ZIndex = 10,
 	}, {
+		uIScale = React.createElement("UIScale", {
+			Scale = _G.isMobile and 1.12 or 1,
+		}),
 		content = React.createElement("ImageLabel", {
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),

@@ -50,6 +50,9 @@ function purchaseService.handlePurchase(recieptInfo)
 	end
 
 	for name, info in pairs(gamepassConfig) do
+		if not info.id then
+			continue
+		end
 		if info.id == recieptInfo.ProductId then
 			info.callback(player)
 			return Enum.ProductPurchaseDecision.PurchaseGranted

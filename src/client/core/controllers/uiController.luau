@@ -7,6 +7,7 @@ local ExperienceNotificationService = game:GetService("ExperienceNotificationSer
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TeleportService = game:GetService("TeleportService")
+local UserInputService = game:GetService("UserInputService")
 
 local sharedPackages = ReplicatedStorage.sharedPackages
 local React = require(sharedPackages.React)
@@ -57,6 +58,8 @@ function uiController.promptOptIn()
 end
 
 function uiController.start()
+	_G.isMobile = UserInputService.TouchEnabled
+
 	local container = ReactRoblox.createRoot(Instance.new("Folder"))
 	container:render(ReactRoblox.createPortal(
 		React.createElement("ScreenGui", {

@@ -1,6 +1,7 @@
 local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local SocialService = game:GetService("SocialService")
 local cannonConfig = require(ReplicatedStorage.shared.config.cannonConfig)
 local boughtLevels = 0
@@ -193,7 +194,7 @@ return {
 				end
 			end,
 			callbackFunction = function(success, states)
-				if success then
+				if success and not RunService:IsStudio() then
 					spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(0.992156, 1, 0.580392) })
 				else
 					local id = gamepassConfig.upgradeCannon.getId(dataController.getData())

@@ -90,7 +90,9 @@ local function tierFrame(props)
 		TextSize = 14,
 		TextWrapped = true,
 		TextXAlignment = Enum.TextXAlignment.Right,
-		Visible = props.visible,
+		Visible = props.visible:map(function(val)
+			return val
+		end),
 		ZIndex = 100,
 	}, {
 		uIStroke = React.createElement("UIStroke"),
@@ -103,7 +105,7 @@ return function(props)
 	)
 	local tierFrameVisible, setTierFrameVisible = React.useBinding(false)
 	local currentPrice, setCurrentPrice = React.useBinding(props.price)
-	local tierName, setTierName = React.useBinding("II")
+	local tierName, setTierName = React.useBinding("2")
 	React.useEffect(function()
 		local uiTrove = Trove.new()
 
@@ -128,9 +130,8 @@ return function(props)
 
 				if props.changeOnData then
 					local currentTier = table.find(props.id, props.getId(newData))
-					print(currentTier)
 					if currentTier > 1 then
-						setTierName(convertToNumeral(currentTier))
+						setTierName(currentTier)
 						setTierFrameVisible(true)
 					end
 				end
@@ -147,7 +148,7 @@ return function(props)
 		return function()
 			uiTrove:Destroy()
 		end
-	end)
+	end, { tierFrameVisible })
 
 	local styles, api = ReactSpring.useSpring(function()
 		return { hover = 0, clicked = 0 }
@@ -280,6 +281,10 @@ return function(props)
 			}, {
 				uIAspectRatioConstraint2 = React.createElement("UIAspectRatioConstraint", {
 					AspectRatio = 2.77,
+				}),
+
+				uIScale = React.createElement("UIScale", {
+					Scale = _G.isMobile and 1.35 or 1,
 				}),
 
 				price = React.createElement("TextLabel", {

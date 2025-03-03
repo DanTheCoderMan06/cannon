@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
 
 local shared = ReplicatedStorage.shared
 local sharedPackages = ReplicatedStorage.sharedPackages
@@ -9,6 +10,8 @@ local ReactSpring = require(sharedPackages.ReactSpring)
 local generics = ReplicatedStorage.client.reactComponents.generics
 
 local button = require(generics.genericButton)
+
+local isMobile = UserInputService.TouchEnabled
 
 return function(props)
 	return React.createElement("Frame", {
@@ -53,7 +56,7 @@ return function(props)
 		}),
 
 		uIScale = React.createElement("UIScale", {
-			Scale = 1.1,
+			Scale = isMobile and 1.5 or 1.1,
 		}),
 	})
 end
