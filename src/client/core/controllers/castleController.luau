@@ -15,6 +15,8 @@ local Signal = require(game.ReplicatedStorage.sharedPackages.Signal)
 local Zone = require(game.ReplicatedStorage.sharedPackages.Zone)
 local ObjectCache = require(game.ReplicatedStorage.sharedPackages.objectcache)
 
+local enabledPlatforms = {}
+
 local zap = require(ReplicatedStorage.zap)
 
 local Player = Players.LocalPlayer
@@ -28,6 +30,16 @@ local platformConfig = require(ReplicatedStorage.shared.config.platformConfig)
 local reactComponents = ReplicatedStorage.client.reactComponents
 
 local platformUI = require(reactComponents.platform)
+
+function castleController.togglePlatform(platformName, toggle)
+	enabledPlatforms[platformName] = toggle
+end
+
+function castleController.toggleAllPlatforms(toggle)
+	for platformName, val in pairs(enabledPlatforms) do
+		enabledPlatforms[platformName] = toggle
+	end
+end
 
 function castleController.animateFloor(floor)
 	task.wait(0.4)
@@ -186,6 +198,9 @@ function castleController.updateZone(zoneName, targetPart, platform, callbackSig
 	touchZone = Zone.new(targetPart)
 	local lastTriggered = 0
 	touchZone.partEntered:Connect(function(part)
+		if not enabledPlatforms[zoneName] then
+			return
+		end
 		if not Players.LocalPlayer.Character then
 			return
 		end
@@ -313,6 +328,8 @@ function castleController.start()
 			newPurchase,
 			platform
 		)
+
+		enabledPlatforms[platformName] = true
 
 		task.defer(function()
 			local modelFolder = Instance.new("Folder")

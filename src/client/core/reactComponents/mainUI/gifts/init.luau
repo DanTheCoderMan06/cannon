@@ -219,7 +219,7 @@ return function(props)
 				FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
 				Position = UDim2.fromScale(0.0, -0.00543),
 				Rotation = -12,
-				Size = UDim2.fromScale(0.494, 0.0911),
+				Size = UDim2.fromScale(0.694, 0.0911),
 				Text = "Gifts",
 				TextColor3 = Color3.fromRGB(255, 255, 255),
 				TextScaled = true,
@@ -315,7 +315,7 @@ return function(props)
 				BorderColor3 = Color3.fromRGB(0, 0, 0),
 				BorderSizePixel = 0,
 				FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
-				Position = UDim2.fromScale(0.496, 0.308),
+				Position = UDim2.fromScale(0.496, 0.45),
 				Size = UDim2.fromScale(0.8, 0.0567),
 				Text = "Gift",
 				TextColor3 = Color3.fromRGB(255, 255, 255),
@@ -329,7 +329,7 @@ return function(props)
 			}),
 
 			gifts = React.createElement(optionsGroup, {
-				Position = UDim2.fromScale(0.0371, 0.35),
+				Position = UDim2.fromScale(0.0371, 0.5),
 				elements = gifts,
 			}),
 

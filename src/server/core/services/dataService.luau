@@ -98,8 +98,8 @@ function dataService.start()
 				dataService.giveRewards(player)
 				zap.dataChanged.Fire(player, profile.Data)
 
-				print(profile.Data)
 				profile.Data.firstTimeRewards = false
+				profile.Data.firstTime = false
 			else
 				profile:EndSession()
 			end

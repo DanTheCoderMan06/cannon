@@ -35,4 +35,7 @@ return {
 	doubleDistance = false,
 	doubleMoney = false,
 	infiniteVIP = false,
+
+	--Tutorial
+	firstTime = true,
 }

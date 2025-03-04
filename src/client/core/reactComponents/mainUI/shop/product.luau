@@ -43,7 +43,7 @@ local function lockedFrame(props)
 		ScaleType = Enum.ScaleType.Fit,
 		Size = UDim2.fromScale(1, 1),
 		Visible = props.owned,
-		ZIndex = 0,
+		ZIndex = 10,
 	}, {
 		text = React.createElement("TextLabel", {
 			AnchorPoint = Vector2.new(0.5, 0.5),
@@ -170,6 +170,61 @@ return function(props)
 	}, {
 		lockedFrame = React.createElement(lockedFrame, { owned = owned }),
 
+		clicker = React.createElement("ImageButton", {
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+			BackgroundTransparency = 1,
+			BorderColor3 = Color3.fromRGB(0, 0, 0),
+			BorderSizePixel = 0,
+			Image = "",
+			Position = UDim2.fromScale(0.5, 0.5),
+			ScaleType = Enum.ScaleType.Fit,
+			Size = UDim2.fromScale(1, 1),
+			ZIndex = 10,
+			ImageTransparency = 1,
+			[React.Event.MouseEnter] = function()
+				api.start({
+					hover = 1,
+					config = {
+						tension = 900,
+						friction = 15,
+					},
+				})
+			end,
+			[React.Event.MouseLeave] = function()
+				api.start({
+					hover = 0,
+					config = {
+						tension = 900,
+						friction = 15,
+					},
+				})
+			end,
+			[React.Event.Activated] = function()
+				SoundService.effects.click:Play()
+				task.spawn(function()
+					api.start({
+						clicked = 1,
+						config = {
+							tension = 700,
+							friction = 30,
+						},
+					})
+					if not owned:getValue() then
+						props.onActivated()
+					end
+					task.delay(0.05, function()
+						api.start({
+							clicked = 0,
+							config = {
+								tension = 700,
+								friction = 30,
+							},
+						})
+					end)
+				end)
+			end,
+		}),
 		content = React.createElement("ImageLabel", {
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
@@ -236,48 +291,6 @@ return function(props)
 					return val * 4
 				end),
 				ZIndex = 0,
-				[React.Event.MouseEnter] = function()
-					api.start({
-						hover = 1,
-						config = {
-							tension = 900,
-							friction = 15,
-						},
-					})
-				end,
-				[React.Event.MouseLeave] = function()
-					api.start({
-						hover = 0,
-						config = {
-							tension = 900,
-							friction = 15,
-						},
-					})
-				end,
-				[React.Event.Activated] = function()
-					SoundService.effects.click:Play()
-					task.spawn(function()
-						api.start({
-							clicked = 1,
-							config = {
-								tension = 700,
-								friction = 30,
-							},
-						})
-						if not owned:getValue() then
-							props.onActivated()
-						end
-						task.delay(0.05, function()
-							api.start({
-								clicked = 0,
-								config = {
-									tension = 700,
-									friction = 30,
-								},
-							})
-						end)
-					end)
-				end,
 			}, {
 				uIAspectRatioConstraint2 = React.createElement("UIAspectRatioConstraint", {
 					AspectRatio = 2.77,

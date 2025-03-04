@@ -16,11 +16,11 @@ return function(props)
 		BackgroundTransparency = 1,
 		BorderColor3 = Color3.fromRGB(0, 0, 0),
 		BorderSizePixel = 0,
-		CanvasSize = UDim2.fromScale(5 * (_G.isMobile and 1.3 or 1), 0),
+		CanvasSize = UDim2.fromScale(5 * (_G.isMobile and 1.7 or 1), 0),
 		Position = props.Position,
 		ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0),
 		ScrollBarThickness = 0,
-		Size = UDim2.fromScale(0.918, 0.13 * (_G.isMobile and 1.3 or 1)),
+		Size = UDim2.fromScale(0.918, 0.13 * (_G.isMobile and 1.7 or 1)),
 	}, {
 		uIGridLayout = React.createElement("UIGridLayout", {
 			CellPadding = UDim2.fromScale(0, 0.1),

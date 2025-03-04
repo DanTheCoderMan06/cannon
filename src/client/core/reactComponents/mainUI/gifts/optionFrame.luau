@@ -46,6 +46,34 @@ return function(props)
 			return (1 - val) * 0.1
 		end),
 	}, {
+		clicker = React.createElement("ImageButton", {
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+			BackgroundTransparency = 1,
+			BorderColor3 = Color3.fromRGB(0, 0, 0),
+			BorderSizePixel = 0,
+			Image = "",
+			LayoutOrder = 3,
+			Position = UDim2.fromScale(0.5, 0.5),
+			ScaleType = Enum.ScaleType.Fit,
+			Size = UDim2.fromScale(1, 1),
+			ZIndex = 100000,
+			[React.Event.Activated] = function()
+				if tierFrameVisible:getValue() then
+					if props.selectedObject == props.tier2Name then
+						props.setSelectedObject("")
+					else
+						props.setSelectedObject(props.tier2Name)
+					end
+				else
+					if props.selectedObject == props.id then
+						props.setSelectedObject("")
+					else
+						props.setSelectedObject(props.id)
+					end
+				end
+			end,
+		}),
 		content = React.createElement("ImageLabel", {
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
@@ -139,34 +167,6 @@ return function(props)
 				}),
 				uIScale = React.createElement("UIScale", {
 					Scale = _G.isMobile and 1.3 or 1,
-				}),
-				clicker = React.createElement("ImageButton", {
-					AnchorPoint = Vector2.new(0.5, 0.5),
-					BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-					BackgroundTransparency = 1,
-					BorderColor3 = Color3.fromRGB(0, 0, 0),
-					BorderSizePixel = 0,
-					Image = "",
-					LayoutOrder = 3,
-					Position = UDim2.fromScale(0.5, 0.5),
-					ScaleType = Enum.ScaleType.Fit,
-					Size = UDim2.fromScale(1, 1),
-					ZIndex = 100000,
-					[React.Event.Activated] = function()
-						if tierFrameVisible:getValue() then
-							if props.selectedObject == props.tier2Name then
-								props.setSelectedObject("")
-							else
-								props.setSelectedObject(props.tier2Name)
-							end
-						else
-							if props.selectedObject == props.id then
-								props.setSelectedObject("")
-							else
-								props.setSelectedObject(props.id)
-							end
-						end
-					end,
 				}),
 
 				price = React.createElement("TextButton", {

@@ -30,11 +30,16 @@ local effectsConfig = require(ReplicatedStorage.shared.config.effectsConfig)
 local reactComponents = ReplicatedStorage.client.reactComponents
 
 local cannonChangedSignal = Signal.new()
+local canLaunchPlayer = true
 
 local stateController = require(ReplicatedStorage.client.controllers.stateController)
 local windController = require(ReplicatedStorage.client.controllers.windController)
 local effectsController = require(ReplicatedStorage.client.controllers.effectsController)
 local cameraController = require(ReplicatedStorage.client.controllers.cameraController)
+
+function cannonController.toggleEntrance(toggle)
+	canLaunchPlayer = toggle
+end
 
 function cannonController.playLaunchSound(multiplier, physicsTime)
 	SoundService.effects.explosion:Play()
@@ -64,6 +69,9 @@ function cannonController.start()
 				return
 			end
 			if tick() - lastTriggered < 1 then
+				return
+			end
+			if not canLaunchPlayer then
 				return
 			end
 			lastTriggered = tick()
