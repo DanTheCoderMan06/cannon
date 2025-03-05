@@ -10,6 +10,7 @@ local UserInputService = game:GetService("UserInputService")
 local sharedPackages = ReplicatedStorage.sharedPackages
 local React = require(sharedPackages.React)
 local ReactRoblox = require(sharedPackages.ReactRoblox)
+local ReactSpring = require(sharedPackages.ReactSpring)
 
 local sharedPackages = ReplicatedStorage.sharedPackages
 local Signal = require(sharedPackages.Signal)
@@ -22,6 +23,7 @@ local zap = require(ReplicatedStorage.zap)
 local toggleEvent
 local setText
 local endTutorial
+local loadedSignal
 
 local effectsController = require(ReplicatedStorage.client.controllers.effectsController)
 local dataController = require(ReplicatedStorage.client.controllers.dataController)
@@ -34,14 +36,71 @@ local nextPageSignal = Signal.new()
 
 local tutorialItems
 
+local function app()
+	local styles, api = ReactSpring.useSpring(function()
+		return { transparency = 1 }
+	end)
+
+	local tutorialText, setTutorialText = React.useBinding("")
+
+	toggleEvent = Signal.new()
+	setText = Signal.new()
+	endTutorial = Signal.new()
+
+	React.useEffect(function()
+		local uiTrove = Trove.new()
+
+		uiTrove:Add(
+			toggleEvent:Connect(function(toggle)
+				print("Toggle event received:", toggle)
+				api.start({
+					transparency = toggle and 0 or 1,
+					config = {
+						tension = 300,
+						friction = 30,
+					},
+				})
+			end),
+			"Disconnect"
+		)
+
+		uiTrove:Add(
+			setText:Connect(function(text)
+				setTutorialText(text)
+			end),
+			"Disconnect"
+		)
+
+		loadedSignal:Fire()
+
+		return function()
+			uiTrove:Destroy()
+		end
+	end, {})
+
+	return React.createElement("ScreenGui", {
+		ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+		ResetOnSpawn = false,
+		DisplayOrder = 1,
+		IgnoreGuiInset = true,
+	}, {
+		content = React.createElement(tutorialUI, {
+			styles = styles,
+			text = tutorialText,
+			endTutorial = endTutorial,
+			toggleEvent = toggleEvent,
+		}),
+	})
+end
+
 function tutorialController.loadPage(index)
 	local pageInfo = tutorialConfig.steps[index]
-	setText:Fire(pageInfo.text)
 	if not pageInfo then
 		tutorialController.endTutorial()
 		return
 	end
 
+	setText:Fire(pageInfo.text)
 	pageInfo.action(tutorialItems, nextPageSignal, {
 		getData = dataController.getData,
 		dataChanged = dataController.dataChanged,
@@ -75,28 +134,13 @@ function tutorialController.startTutorial()
 end
 
 function tutorialController.start()
-	toggleEvent = Signal.new()
-	setText = Signal.new()
-	endTutorial = Signal.new()
+	loadedSignal = Signal.new()
 
 	task.delay(0.25, function()
 		local container = ReactRoblox.createRoot(Instance.new("Folder"))
-		container:render(ReactRoblox.createPortal(
-			React.createElement("ScreenGui", {
-				ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
-				ResetOnSpawn = false,
-				DisplayOrder = 1,
-				IgnoreGuiInset = true,
-			}, {
-				content = React.createElement(tutorialUI, {
-					toggleEvent = toggleEvent,
-					setText = setText,
-					endTutorial = endTutorial,
-				}),
-			}),
-			Players.LocalPlayer.PlayerGui,
-			"tutorialUI"
-		))
+		container:render(
+			ReactRoblox.createPortal(React.createElement(app), Players.LocalPlayer.PlayerGui, "tutorialUI")
+		)
 
 		local connection
 
@@ -106,6 +150,8 @@ function tutorialController.start()
 				tutorialController.startTutorial()
 			end
 		end)
+
+		loadedSignal:Wait()
 
 		if RunService:IsStudio() then
 			connection:Disconnect()
