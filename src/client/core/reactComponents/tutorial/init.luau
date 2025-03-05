@@ -22,6 +22,7 @@ return function(props)
 		local uiTrove = Trove.new()
 		uiTrove:Add(
 			props.toggleEvent:Connect(function(toggle)
+				print(toggle)
 				api.start({
 					transparency = toggle and 0 or 1,
 					config = {
@@ -53,6 +54,9 @@ return function(props)
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		GroupTransparency = styles.transparency,
 		ZIndex = 10,
+		Visible = styles.transparency:map(function(val)
+			return val < 0.99
+		end),
 	}, {
 		React.createElement("Frame", {
 			AnchorPoint = Vector2.new(0.5, 1),

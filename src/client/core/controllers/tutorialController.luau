@@ -15,13 +15,13 @@ local sharedPackages = ReplicatedStorage.sharedPackages
 local Signal = require(sharedPackages.Signal)
 local Trove = require(sharedPackages.Trove)
 local Sift = require(sharedPackages.Sift)
-local tutorial = require(ReplicatedStorage.client.reactComponents.tutorial)
+local tutorialUI = require(ReplicatedStorage.client.reactComponents.tutorial)
 
 local zap = require(ReplicatedStorage.zap)
 
-local toggleEvent = Signal.new()
-local setText = Signal.new()
-local endTutorial = Signal.new()
+local toggleEvent
+local setText
+local endTutorial
 
 local effectsController = require(ReplicatedStorage.client.controllers.effectsController)
 local dataController = require(ReplicatedStorage.client.controllers.dataController)
@@ -36,6 +36,7 @@ local tutorialItems
 
 function tutorialController.loadPage(index)
 	local pageInfo = tutorialConfig.steps[index]
+	setText:Fire(pageInfo.text)
 	if not pageInfo then
 		tutorialController.endTutorial()
 		return
@@ -46,7 +47,7 @@ function tutorialController.loadPage(index)
 		dataChanged = dataController.dataChanged,
 		togglePlatform = castleController.togglePlatform,
 		toggleAllPlatforms = castleController.toggleAllPlatforms,
-		toggleEntrence = cannonController.toggleEntrance,
+		toggleEntrance = cannonController.toggleEntrance,
 	})
 end
 
@@ -74,34 +75,47 @@ function tutorialController.startTutorial()
 end
 
 function tutorialController.start()
-	local container = ReactRoblox.createRoot(Instance.new("Folder"))
-	container:render(ReactRoblox.createPortal(
-		React.createElement("ScreenGui", {
-			ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
-			ResetOnSpawn = false,
-			DisplayOrder = 1,
-			IgnoreGuiInset = true,
-		}, {
-			content = React.createElement(tutorial, {
-				toggleEvent = toggleEvent,
-				setText = setText,
-				endTutorial = endTutorial,
-			}),
-		}),
-		Players.LocalPlayer.PlayerGui,
-		"tutorialUI"
-	))
-	local connection
+	toggleEvent = Signal.new()
+	setText = Signal.new()
+	endTutorial = Signal.new()
 
-	connection = dataController.dataChanged:Connect(function(newData)
-		if newData.firstTime or RunService:IsStudio() then
+	task.delay(0.25, function()
+		local container = ReactRoblox.createRoot(Instance.new("Folder"))
+		container:render(ReactRoblox.createPortal(
+			React.createElement("ScreenGui", {
+				ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+				ResetOnSpawn = false,
+				DisplayOrder = 1,
+				IgnoreGuiInset = true,
+			}, {
+				content = React.createElement(tutorialUI, {
+					toggleEvent = toggleEvent,
+					setText = setText,
+					endTutorial = endTutorial,
+				}),
+			}),
+			Players.LocalPlayer.PlayerGui,
+			"tutorialUI"
+		))
+
+		local connection
+
+		connection = dataController.dataChanged:Connect(function(newData)
+			if newData.firstTime then
+				connection:Disconnect()
+				tutorialController.startTutorial()
+			end
+		end)
+
+		if RunService:IsStudio() then
 			connection:Disconnect()
+			task.wait(1)
 			tutorialController.startTutorial()
 		end
-	end)
 
-	endTutorial:Connect(function()
-		tutorialController.endTutorial()
+		endTutorial:Connect(function()
+			tutorialController.endTutorial()
+		end)
 	end)
 end
 
