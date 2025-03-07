@@ -185,6 +185,7 @@ function effectsController.finishedPath(results)
 	local container = ReactRoblox.createRoot(Instance.new("Folder"))
 	local isHighscore = effectsController.getHighScore().Value < math.round(results.distance)
 	local reward = cannonConfig.rewardFormula(results.distance)
+	local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
 
 	if dataController.currentData.doubleMoney then
 		reward *= 2
@@ -227,6 +228,10 @@ function effectsController.finishedPath(results)
 			local newCharacter = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
 			workspace.CurrentCamera.CameraSubject = newCharacter
 			workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
+			workspace.CurrentCamera.CFrame = CFrame.new(
+				workspace.CurrentCamera.CFrame.Position,
+				playerPlatform:FindFirstChild("cannonPart", true).Position
+			)
 			effectsController.updateHighscore()
 		end)
 	end)

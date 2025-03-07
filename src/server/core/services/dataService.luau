@@ -10,7 +10,7 @@ local profileStore = require(serverPackages.ProfileStore)
 local Players = game:GetService("Players")
 
 local profileTemplate = require(ServerStorage.server.modules.profileTemplate)
-local PlayerStore = profileStore.New("PlayerDataStoreDEV2", profileTemplate)
+local PlayerStore = profileStore.New("PlayerDataStoreDEV3", profileTemplate)
 local Profiles = {}
 
 local dataService = {}

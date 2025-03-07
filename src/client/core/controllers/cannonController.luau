@@ -285,7 +285,7 @@ function cannonController.start()
 					return
 				end
 				Players.LocalPlayer.Character:PivotTo(
-					CFrame.new(currentPos * Vector3.new(1, 0, 1) + Vector3.new(0, 5, 0))
+					CFrame.new(currentPos * Vector3.new(1, 0, 1) + Vector3.new(0, 20, 0))
 				)
 			end)
 

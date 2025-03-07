@@ -30,7 +30,7 @@ return {
 		},
 		getId = function(playerData)
 			local tierRanges = {
-				{ min = 1, max = 49 }, -- Tier 1
+				{ min = 0, max = 49 }, -- Tier 1
 				{ min = 50, max = 99 }, -- Tier 2
 				{ min = 100, max = 149 }, -- Tier 3
 				{ min = 150, max = 199 }, -- Tier 4
@@ -55,7 +55,7 @@ return {
 		end,
 		callback = function(player, productId)
 			local tierRanges = {
-				{ min = 1, max = 49 }, -- Tier 1
+				{ min = 0, max = 49 }, -- Tier 1
 				{ min = 50, max = 99 }, -- Tier 2
 				{ min = 100, max = 149 }, -- Tier 3
 				{ min = 150, max = 199 }, -- Tier 4
@@ -116,7 +116,7 @@ return {
 		},
 		getId = function(playerData)
 			local tierRanges = {
-				{ min = 1, max = 19 }, -- Tier 1
+				{ min = 0, max = 19 }, -- Tier 1
 				{ min = 20, max = 39 }, -- Tier 2
 				{ min = 40, max = 59 }, -- Tier 3
 				{ min = 60, max = 79 }, -- Tier 4
@@ -140,7 +140,7 @@ return {
 		end,
 		callback = function(player, productId)
 			local tierRanges = {
-				{ min = 1, max = 19 }, -- Tier 1
+				{ min = 0, max = 19 }, -- Tier 1
 				{ min = 20, max = 39 }, -- Tier 2
 				{ min = 40, max = 59 }, -- Tier 3
 				{ min = 60, max = 79 }, -- Tier 4
