@@ -20,6 +20,7 @@ local effectsUi = require(ReplicatedStorage.client.reactComponents.generics.effe
 local finishedPath = require(ReplicatedStorage.client.reactComponents.generics.finishedPath)
 
 local dataController = require(ReplicatedStorage.client.controllers.dataController)
+local stateController = require(ReplicatedStorage.client.controllers.stateController)
 
 local currentHighScore = 0
 
@@ -154,22 +155,31 @@ function effectsController.start()
 				ClockTime = if currentAltitude > config.nightSky then 23.9 else 12,
 			})
 		end
-		local adjustedAltitude = math.fmod(currentAltitude, config.cloudSky)
 
-		if math.round(clouds.Cover * 100) / 100 == 1 or math.round(clouds.Cover * 100) / 100 == 0 then
-			local cloudTarget = 0
-			if adjustedAltitude == currentAltitude then
-				if currentAltitude > config.cloudSky - config.cloudSkyLerp then
-					cloudTarget = 1
-				end
-			else
-				if adjustedAltitude < config.cloudSkyLerp then
-					cloudTarget = 1
-				end
-				if currentAltitude > config.cloudSky - config.cloudSkyLerp then
-					cloudTarget = 1
-				end
-			end
+		-- Cloud logic to match the step pattern: 0 -> 100% -> 0 for each interval
+		local cloudBand = math.floor(currentAltitude / config.cloudSky)
+		local adjustedAltitude = currentAltitude - (cloudBand * config.cloudSky)
+		local cloudTarget = 0
+
+		-- Divide the interval into 4 equal parts
+		local segmentSize = config.cloudSky / 4
+
+		if adjustedAltitude < segmentSize then
+			-- First segment - starts at 0, transitions to 100%
+			cloudTarget = (adjustedAltitude / segmentSize)
+		elseif adjustedAltitude < segmentSize * 3 then
+			-- Middle segments - maintain 100% cloud cover
+			cloudTarget = 1.0
+		else
+			-- Final segment - transitions from 100% back to 0
+			cloudTarget = 1.0 - ((adjustedAltitude - segmentSize * 3) / segmentSize)
+		end
+
+		-- Clamp values between 0 and 1 to handle any edge cases
+		cloudTarget = math.clamp(cloudTarget, 0, 1)
+
+		-- Only update cloud cover if it needs to change significantly
+		if math.abs(clouds.Cover - cloudTarget) > 0.01 then
 			spr.target(clouds, 1, 0.25, {
 				Cover = cloudTarget,
 			})
@@ -212,29 +222,21 @@ function effectsController.finishedPath(results)
 	finishedPathEffects:PivotTo(CFrame.new(character.PrimaryPart.Position * Vector3.new(1, 0, 1)))
 	finishedPathEffects.Parent = workspace
 
-	workspace.CurrentCamera.CameraType = Enum.CameraType.Scriptable
-	spr.target(workspace.CurrentCamera, 1, 2.5, {
-		CFrame = CFrame.new(character.PrimaryPart.Position * Vector3.new(1, 20, 1), character.PrimaryPart.Position),
-	})
-
 	SoundService.effects.victory:Play()
+	character.HumanoidRootPart.Anchored = true
 
-	task.delay(1, function()
-		effectsController.blackScreen(1, function()
-			spr.stop(workspace.CurrentCamera, "CFrame")
-			container:unmount()
-			finishedPathEffects:Destroy()
-			zap.requestLoad.Fire()
-			local newCharacter = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
-			workspace.CurrentCamera.CameraSubject = newCharacter
-			workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
-			workspace.CurrentCamera.CFrame = CFrame.new(
-				workspace.CurrentCamera.CFrame.Position,
-				playerPlatform:FindFirstChild("cannonPart", true).Position
-			)
-			effectsController.updateHighscore()
-		end)
-	end)
+	task.wait(2)
+
+	container:unmount()
+	finishedPathEffects:Destroy()
+
+	stateController.getEvents().radgollEvent:Fire(false)
+	character.HumanoidRootPart.Anchored = false
+	task.wait()
+	zap.requestLoad.Fire()
+	workspace.CurrentCamera.Focus = CFrame.new(playerPlatform:FindFirstChild("cannonPart").Position)
+	task.wait(1)
+	effectsController.updateHighscore()
 end
 
 return effectsController

@@ -23,6 +23,7 @@ local zap = require(ReplicatedStorage.zap)
 local effectsController = require(ReplicatedStorage.client.controllers.effectsController)
 
 function uiController.start()
+	--[[
 	local lContainer = ReactRoblox.createRoot(Instance.new("Folder"))
 	lContainer:render(ReactRoblox.createPortal(
 		React.createElement("ScreenGui", {
@@ -41,6 +42,7 @@ function uiController.start()
 	effectsController.blackScreen(1, function()
 		lContainer:unmount()
 	end)
+	--]]
 end
 
 return uiController

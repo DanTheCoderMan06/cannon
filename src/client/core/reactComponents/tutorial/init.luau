@@ -60,7 +60,7 @@ return function(props)
 
 			closeButton = React.createElement(closeButton, {
 				onActivated = function()
-					props.endTutorial:Fire()
+					props.endTutorial()
 					props.toggleEvent:Fire(false)
 				end,
 			}),

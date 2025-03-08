@@ -113,7 +113,12 @@ return function(props)
 			props.dataChanged:Connect(function(newData)
 				if props.id == rewardsConfig.vipGamepass then
 					setIsOwned(newData.hasVIPOn)
+				elseif props.id == gamepassConfig.buyDoubleDistance then
+					setIsOwned(newData.doubleDistance)
+				elseif props.id == gamepassConfig.buyDoubleMoney then
+					setIsOwned(newData.doubleMoney)
 				end
+
 				if props.type == "cannons" then
 					setIsOwned(table.find(newData.cannons, props.cannonName) ~= nil)
 				end

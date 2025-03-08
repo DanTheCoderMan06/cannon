@@ -29,16 +29,6 @@ function luckyBlockService.spawnLuckyBlock(player)
 	zap.spawnLuckyBlock.Fire(player, newBlock)
 end
 
-function luckyBlockService.resetPlayerTimer(player)
-	if not playerBlocks[tostring(player.UserId)] then
-		return false
-	end
-
-	playerBlocks[tostring(player.UserId)].lastClaimed = 0
-	zap.resetPlayerTimer.Fire(player)
-	return true
-end
-
 function luckyBlockService.start()
 	Players.PlayerAdded:Connect(function(player)
 		playerBlocks[tostring(player.UserId)] = {}

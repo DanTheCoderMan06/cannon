@@ -46,7 +46,7 @@ function stateService.start()
 				end
 			else
 				if Root then
-					--Root.CanCollide = true
+					Root.CanCollide = true
 				end
 
 				local function returnMotor(joint, part)

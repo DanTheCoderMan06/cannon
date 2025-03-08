@@ -36,6 +36,10 @@ local stateController = require(ReplicatedStorage.client.controllers.stateContro
 local windController = require(ReplicatedStorage.client.controllers.windController)
 local effectsController = require(ReplicatedStorage.client.controllers.effectsController)
 local cameraController = require(ReplicatedStorage.client.controllers.cameraController)
+local dataController = require(ReplicatedStorage.client.controllers.dataController)
+
+local MAX_TIME = 3.7
+local MAX_IMPACT = 200
 
 function cannonController.toggleEntrance(toggle)
 	canLaunchPlayer = toggle
@@ -141,10 +145,8 @@ function cannonController.start()
 			end
 		end
 
-		local startPosition = CFrame.new(
-			cannonPosition:FindFirstChild("characterPosition", true).WorldPosition
-			--cannonPosition:FindFirstChild("fireDirection", true).WorldPosition
-		) * CFrame.Angles(0, math.rad(-90), 0)
+		local startPosition = CFrame.new(cannonPosition:FindFirstChild("characterPosition", true).WorldPosition)
+			* CFrame.Angles(0, math.rad(-90), 0)
 		local startTime = tick()
 
 		local events = stateController.getEvents()
@@ -161,8 +163,8 @@ function cannonController.start()
 		windController.toggle(true)
 
 		local multiplier = 1
-		if physics.time > 10 then
-			multiplier = physics.time / 10
+		if physics.time > MAX_TIME then
+			multiplier = physics.time / MAX_TIME
 		elseif physics.time < 2 then
 			multiplier = physics.time / 2
 		end
@@ -173,7 +175,7 @@ function cannonController.start()
 		for _, attachmentName in pairs(effectsConfig.attachToAttachments) do
 			local start = character:FindFirstChild(attachmentName, true)
 			local newAtt = start:Clone()
-			newAtt.CFrame *= CFrame.new(0, 0, -0.2)
+			newAtt.CFrame *= CFrame.new(0, 0, 2)
 			newAtt.Parent = start.Parent
 			newAtt.Name = attachmentName .. "Trail"
 			local trail = trailEffects.Trail:Clone()
@@ -199,17 +201,17 @@ function cannonController.start()
 				* CFrame.Angles(-math.rad(math.fmod(timeElapsed * 180 / multiplier, 360)), 0, 0)
 
 			local timeElapsed = tick() - startTime
-			local progress = math.clamp(timeElapsed / 10, 0, 1)
+			local progress = math.clamp(timeElapsed / MAX_TIME, 0, 1)
 			local greenBlue = math.floor(255 * (1 - progress))
 
+			--[[
 			for _, v in pairs(characterTrails) do
 				v.Color = ColorSequence.new(
 					Color3.fromRGB(255, math.clamp(greenBlue, 135, 255), math.clamp(greenBlue, 135, 255))
 				)
 				v.Transparency = NumberSequence.new(1 - math.clamp(progress + 0.3, 0, 1))
 			end
-
-			Color3.fromRGB(255, 199, 199)
+			--]]
 
 			for _, v in pairs(character.PrimaryPart:GetDescendants()) do
 				if not v:GetAttribute("targetDistance") then
@@ -229,7 +231,7 @@ function cannonController.start()
 
 			if
 				(
-					math.abs(calculatedPosition.Position.Y) <= math.max(physics.verticalVelocity * 0.1, 10)
+					math.abs(calculatedPosition.Position.Y) <= math.max(physics.verticalVelocity * 0.1, MAX_TIME)
 					and timeElapsed > physics.time / multiplier
 				) or calculatedPosition.Position.Y < 20
 			then
@@ -267,11 +269,15 @@ function cannonController.start()
 			for _, v in pairs(character:GetDescendants()) do
 				if v:IsA("BasePart") then
 					v.AssemblyLinearVelocity = (endPosition.Position - newPosition.Position).Unit
-							* math.min((endPosition.Position - newPosition.Position).Magnitude, 200)
-						+ Vector3.new(40, 0, 0) --(endPosition.Position - newPosition.Position) * multiplier * 0.5
-					v.AssemblyLinearVelocity = v.AssemblyLinearVelocity * Vector3.new(1, 0, 1)
+							* math.clamp(
+								(endPosition.Position - newPosition.Position).Magnitude,
+								MAX_IMPACT / 2,
+								MAX_IMPACT
+							)
+						+ Vector3.new(40, 0, 0)
+					v.AssemblyLinearVelocity = v.AssemblyLinearVelocity * Vector3.new(2, 0, 2) --TODO: Edit variables here to make character bounce forward
 						+ Vector3.new(0, -math.min(70, v.AssemblyLinearVelocity.Y), 0)
-					v.AssemblyAngularVelocity = Vector3.new(1, 0, 1)
+					v.AssemblyAngularVelocity = Vector3.new(1, 1, 1) * MAX_IMPACT
 				end
 			end
 
@@ -288,20 +294,20 @@ function cannonController.start()
 					CFrame.new(currentPos * Vector3.new(1, 0, 1) + Vector3.new(0, 20, 0))
 				)
 			end)
-
-			for _, v in pairs(characterTrails) do
-				v:Destroy()
-			end
-
 			task.delay(3, function()
 				repeat
 					task.wait()
-				until not character or character.PrimaryPart.AssemblyLinearVelocity.Magnitude < 2
+				until not character or character.PrimaryPart.AssemblyLinearVelocity.Magnitude < 1
 				RunService:UnbindFromRenderStep("noFallThrough")
 				RunService:UnbindFromRenderStep("fallSound")
 				finishedSignal:Destroy()
+				for _, v in pairs(characterTrails) do
+					v:Destroy()
+				end
 				windController.toggle(false)
+
 				effectsController.finishedPath(physics)
+
 				zap.finishedPath.Fire()
 			end)
 		end)

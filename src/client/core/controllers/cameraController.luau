@@ -29,4 +29,8 @@ function cameraController.removeTracker()
 	end)
 end
 
+function cameraController.start()
+	workspace.CurrentCamera.CameraType = Enum.CameraType.Track
+end
+
 return cameraController

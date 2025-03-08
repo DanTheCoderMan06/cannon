@@ -28,6 +28,8 @@ local startTimeLuckyBlock = tick()
 local changedCannonSignal = Signal.new()
 
 return {
+	cannonIndex = 1,
+	changedCannonSignal = changedCannonSignal,
 	platforms = {
 		luckyBlock = {
 			callback = function(callbackEvent)
@@ -39,9 +41,6 @@ return {
 			updateValues = function(trove, updateEvent)
 				zap.spawnLuckyBlock.On(function()
 					startTimeLuckyBlock = tick()
-				end)
-				zap.resetPlayerTimer.SetCallback(function()
-					startTimeLuckyBlock = 0
 				end)
 				trove:BindToRenderStep("renderTimeLuckyBlock", Enum.RenderPriority.Last.Value + 1, function()
 					local timeLeft = math.floor(
@@ -454,6 +453,23 @@ return {
 			end,
 		},
 		switchCannon = {
+			checkToLoad = function(loadEvent)
+				local playerData = dataController.getData()
+
+				if #playerData.cannons > 0 then
+					loadEvent:Fire()
+					return
+				end
+
+				local connection
+
+				connection = dataController.dataChanged:Connect(function(newData)
+					if #newData.cannons > 0 then
+						loadEvent:Fire()
+						connection:Disconnect()
+					end
+				end)
+			end,
 			callback = function(callbackEvent)
 				local playerData = dataController.getData()
 				cannonIndex += 1
@@ -473,6 +489,7 @@ return {
 			updateValues = function(trove, updateEvent)
 				trove:Add(changedCannonSignal:Connect(function(newIndex)
 					if newIndex > 0 then
+						print("Update")
 						local playerData = dataController.getData()
 						local newCannon = playerData.cannons[newIndex]
 						updateEvent:Fire({
@@ -518,8 +535,9 @@ return {
 							if newIndex == 0 then
 								updateDefaultModel(v.Value)
 							else
-								updateModel(playerData.cannons[cannonIndex])
+								updateModel(playerData.cannons[newIndex])
 							end
+							cannonIndex = newIndex
 						end),
 						"Disconnect"
 					)

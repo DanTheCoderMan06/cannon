@@ -1,11 +1,11 @@
 local function cost(l1, l2)
 	local la = l1 - l2
-	local m = math.floor(la / 5) * 5
-	return math.round(math.pow(m, 1.2)) + 100
+	local m = math.floor(la / 5) * 300
+	return math.round(math.pow(m, 1.2)) + 500
 end
 
 local function power(playerLevel)
-	return math.log(1 + 190 * (playerLevel + 1), 1.01) * 50 - 26000
+	return math.log(1 + 25 * (playerLevel + 1), 1.01) * 40 - 15000
 end
 
 local module = {
@@ -14,7 +14,7 @@ local module = {
 	costFormula = function(level, boughtLevels)
 		return cost(level, boughtLevels)
 	end,
-	maxDistance = 55000,
+	maxDistance = 30000,
 	specialCannons = {
 		["artillery"] = {
 			power = power(70),
@@ -267,7 +267,7 @@ function module.getNextCannon(playerLevel)
 end
 
 function module.getPower(playerLevel)
-	return math.log(1 + 190 * (playerLevel + 1), 1.01) * 50 - 26000
+	return power(playerLevel)
 end
 
 return module

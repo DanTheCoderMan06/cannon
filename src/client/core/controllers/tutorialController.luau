@@ -22,7 +22,6 @@ local zap = require(ReplicatedStorage.zap)
 
 local toggleEvent
 local setText
-local endTutorial
 local loadedSignal
 
 local effectsController = require(ReplicatedStorage.client.controllers.effectsController)
@@ -36,6 +35,8 @@ local nextPageSignal = Signal.new()
 
 local tutorialItems
 
+local RAN_TUTORIAL = false
+
 local function app()
 	local styles, api = ReactSpring.useSpring(function()
 		return { transparency = 1 }
@@ -45,7 +46,6 @@ local function app()
 
 	toggleEvent = Signal.new()
 	setText = Signal.new()
-	endTutorial = Signal.new()
 
 	React.useEffect(function()
 		local uiTrove = Trove.new()
@@ -87,7 +87,7 @@ local function app()
 		content = React.createElement(tutorialUI, {
 			styles = styles,
 			text = tutorialText,
-			endTutorial = endTutorial,
+			endTutorial = tutorialController.endTutorial,
 			toggleEvent = toggleEvent,
 		}),
 	})
@@ -111,21 +111,29 @@ function tutorialController.loadPage(index)
 end
 
 function tutorialController.endTutorial()
-	nextPageSignal:DisconnectAll()
+	castleController.toggleAllPlatforms(true)
+	cannonController.toggleEntrance(true)
+
+	nextPageSignal:Destroy()
 	toggleEvent:Fire(false)
 	if tutorialItems then
 		tutorialItems:Destroy()
 	end
-	castleController.toggleAllPlatforms(true)
-	cannonController.toggleEntrance(true)
 end
 
 function tutorialController.startTutorial()
+	if RAN_TUTORIAL then
+		return
+	end
+	RAN_TUTORIAL = true
 	toggleEvent:Fire(true)
 	local currentIndex = 1
 	tutorialItems = ReplicatedStorage.assets.tutorial:Clone()
 	tutorialItems.Parent = workspace
 	nextPageSignal:Connect(function()
+		if RAN_TUTORIAL then
+			return
+		end
 		currentIndex += 1
 		tutorialController.loadPage(currentIndex)
 	end)
@@ -158,10 +166,6 @@ function tutorialController.start()
 			task.wait(1)
 			tutorialController.startTutorial()
 		end
-
-		endTutorial:Connect(function()
-			tutorialController.endTutorial()
-		end)
 	end)
 end
 

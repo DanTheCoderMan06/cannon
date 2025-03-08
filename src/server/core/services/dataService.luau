@@ -10,7 +10,7 @@ local profileStore = require(serverPackages.ProfileStore)
 local Players = game:GetService("Players")
 
 local profileTemplate = require(ServerStorage.server.modules.profileTemplate)
-local PlayerStore = profileStore.New("PlayerDataStoreDEV3", profileTemplate)
+local PlayerStore = profileStore.New("PlayerDataStoreDEV5", profileTemplate)
 local Profiles = {}
 
 local dataService = {}
@@ -52,7 +52,7 @@ end
 
 function dataService.start()
 	local function PlayerAdded(player)
-		task.wait(5)
+		task.wait(0)
 		local profile = PlayerStore:StartSessionAsync(`Player_{player.UserId}`, {
 			Cancel = function()
 				return player.Parent ~= Players

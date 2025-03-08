@@ -98,7 +98,7 @@ return {
 				return
 			end
 
-			luckyBlockService.resetPlayerTimer(player)
+			luckyBlockService.spawnLuckyBlock(player)
 		end,
 		changeOnData = "floors",
 		type = "gamepasses",
@@ -395,10 +395,37 @@ return {
 		infoType = Enum.InfoType.GamePass,
 		cannonName = "railgun",
 	},
-	buyVIP = {
+	buyDoubleDistance = {
+		id = 1092466385,
+		callback = function(player)
+			local playerData = dataService.getPlayerData(player)
+			marketplaceUtil.updatePlayerCache(player, 1092466385)
+			playerData.doubleDistance = true
+			dataService.updatePlayerData(player, playerData)
+		end,
+		type = "gamepasses",
+		infoType = Enum.InfoType.GamePass,
+	},
+
+	buyDoubleMoney = {
+		id = 1094774976,
+		callback = function(player)
+			local playerData = dataService.getPlayerData(player)
+			marketplaceUtil.updatePlayerCache(player, 1094774976)
+			playerData.doubleMoney = true
+			dataService.updatePlayerData(player, playerData)
+		end,
+		type = "gamepasses",
+		infoType = Enum.InfoType.GamePass,
+	},
+
+	buyInfiniteVIP = {
 		id = 1060138098,
 		callback = function(player)
+			local playerData = dataService.getPlayerData(player)
 			marketplaceUtil.updatePlayerCache(player, 1060138098)
+			playerData.infiniteVIP = true
+			dataService.updatePlayerData(player, playerData)
 		end,
 		type = "gamepasses",
 		infoType = Enum.InfoType.GamePass,

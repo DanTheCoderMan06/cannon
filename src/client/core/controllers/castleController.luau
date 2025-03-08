@@ -29,6 +29,8 @@ local platformConfig = require(ReplicatedStorage.shared.config.platformConfig)
 
 local reactComponents = ReplicatedStorage.client.reactComponents
 
+local dataController = require(ReplicatedStorage.client.controllers.dataController)
+
 local platformUI = require(reactComponents.platform)
 
 function castleController.togglePlatform(platformName, toggle)
@@ -36,6 +38,7 @@ function castleController.togglePlatform(platformName, toggle)
 end
 
 function castleController.toggleAllPlatforms(toggle)
+	print("[CastleController]: Toggled All Platforms to " .. tostring(toggle))
 	for platformName, val in pairs(enabledPlatforms) do
 		enabledPlatforms[platformName] = toggle
 	end
@@ -319,19 +322,24 @@ function castleController.start()
 	local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
 
 	for platformName, platform in pairs(platformConfig.platforms) do
-		print(platformName)
-		local callbackSignal = Signal.new()
-		local newPurchase = ReplicatedStorage.assets.purchasePlatform:Clone()
-		castleController.setupPlatform(
-			playerPlatform:WaitForChild("platforms"):WaitForChild(platformName),
-			callbackSignal,
-			newPurchase,
-			platform
-		)
-
 		enabledPlatforms[platformName] = true
 
 		task.defer(function()
+			if platform.checkToLoad then
+				local loadEvent = Signal.new()
+				platform.checkToLoad(loadEvent)
+				loadEvent:Wait()
+			end
+
+			local callbackSignal = Signal.new()
+			local newPurchase = ReplicatedStorage.assets.purchasePlatform:Clone()
+			castleController.setupPlatform(
+				playerPlatform:WaitForChild("platforms"):WaitForChild(platformName),
+				callbackSignal,
+				newPurchase,
+				platform
+			)
+
 			local modelFolder = Instance.new("Folder")
 			newPurchase:PivotTo(playerPlatform.platforms:WaitForChild(platformName).CFrame)
 			newPurchase.Parent = playerPlatform.platforms:WaitForChild(platformName)
@@ -534,6 +542,19 @@ function castleController.start()
 	updateTowers()
 
 	--Teleports
+
+	--Auto Claim Cannon
+	local playerData = dataController.currentData
+	dataController.dataChanged:Connect(function(newData)
+		local cannons = Sift.Array.difference(newData.cannons, playerData.cannons)
+		print(cannons)
+		if #cannons > 0 then
+			task.wait()
+			platformConfig.changedCannonSignal:Fire(#newData.cannons)
+			zap.toggleCannon.Call(newData.cannons[#newData.cannons])
+		end
+		playerData = newData
+	end)
 end
 
 return castleController

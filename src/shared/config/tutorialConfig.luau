@@ -49,13 +49,12 @@ local config = {
 					if Players.LocalPlayer.Character:GetAttribute("inCannon") then
 						con:Disconnect()
 						items.beam.Attachment0 = target
+						Players.LocalPlayer.Character:GetAttributeChangedSignal("inCannon"):Wait()
+						nextSignal:Fire()
 					end
 				end)
 
 				states.toggleEntrance(true)
-
-				Players.LocalPlayer.CharacterRemoving:Wait()
-				nextSignal:Fire()
 			end,
 		},
 		{
@@ -103,6 +102,8 @@ local config = {
 					if Players.LocalPlayer.Character:GetAttribute("inCannon") then
 						con:Disconnect()
 						items.beam.Attachment0 = target
+						Players.LocalPlayer.Character:GetAttributeChangedSignal("inCannon"):Wait()
+						nextSignal:Fire()
 					end
 				end)
 

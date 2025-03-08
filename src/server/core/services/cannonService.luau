@@ -138,13 +138,10 @@ function cannonService.start()
 		if not character then
 			return
 		end
-		if not character:GetAttribute("inCannon") then
-			return
-		end
 		if not simulatedPaths[player.Name] then
 			return
 		end
-		if tick() - simulatedPaths[player.Name].timeCreated < math.min(8, simulatedPaths[player.Name].time) then
+		if tick() - simulatedPaths[player.Name].timeCreated < 3 then
 			print("Anti Exploit")
 			return
 		end
@@ -177,11 +174,17 @@ function cannonService.start()
 		if not character then
 			return
 		end
+
 		if not character:GetAttribute("inCannon") then
 			return
 		end
-		print("load")
-		player:LoadCharacter()
+
+		character:SetAttribute("inCannon", nil)
+
+		character:MoveTo(
+			playerPlatforms:WaitForChild(player.Name):FindFirstChildWhichIsA("SpawnLocation", true).Position
+				+ Vector3.new(0, 5, 0)
+		)
 	end)
 end
 

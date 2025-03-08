@@ -33,10 +33,13 @@ local function LocalRagdoll(bool)
 		return
 	end
 
-	print("GO")
+	print("[RagdollController]: Ragdoll Toggled " .. tostring(bool))
 
+	Character = Players.LocalPlayer.Character
+	Humanoid = Character:WaitForChild("Humanoid")
 	local State = Humanoid:GetState()
 	Humanoid.AutoRotate = not bool
+
 	if bool then
 		if State ~= Enum.HumanoidStateType.Physics then
 			zap.editRagdollState.Call(true)
@@ -59,53 +62,55 @@ local function LocalRagdoll(bool)
 			end
 		end
 	else
-		if State == Enum.HumanoidStateType.Physics then
-			zap.editRagdollState.Call(false)
-			DelayValue = DelayValue + 3
+		zap.editRagdollState.Call(false)
+		DelayValue = DelayValue + 3
 
-			local function returnMotor(joint, part)
-				local Joint = Sift.Array.at(
-					motorController.getMotors(),
-					Sift.Array.findWhere(motorController.getMotors(), function(value)
-						return value.Name == joint
-					end)
-				)
-				if Joint then
-					if part then
-						Joint.Enabled = false
-					end
+		local function returnMotor(joint, part)
+			local Joint = Sift.Array.at(
+				motorController.getMotors(),
+				Sift.Array.findWhere(motorController.getMotors(), function(value)
+					print(value.Name)
+					print(joint)
+					return value.Name == joint
+				end)
+			)
+			if Joint then
+				if part then
+					Joint.Enabled = false
 				end
 			end
-
-			if Humanoid.RigType == Enum.HumanoidRigType.R15 then
-				returnMotor("Neck", Character:FindFirstChild("Head"))
-				returnMotor("Waist", Character:FindFirstChild("UpperTorso"))
-				returnMotor("Root", Character:FindFirstChild("LowerTorso"))
-				returnMotor("LeftShoulder", Character:FindFirstChild("LeftUpperArm"))
-				returnMotor("LeftElbow", Character:FindFirstChild("LeftLowerArm"))
-				returnMotor("LeftWrist", Character:FindFirstChild("LeftHand"))
-				returnMotor("RightShoulder", Character:FindFirstChild("RightUpperArm"))
-				returnMotor("RightElbow", Character:FindFirstChild("RightLowerArm"))
-				returnMotor("RightWrist", Character:FindFirstChild("RightHand"))
-				returnMotor("LeftHip", Character:FindFirstChild("LeftUpperLeg"))
-				returnMotor("LeftKnee", Character:FindFirstChild("LeftLowerLeg"))
-				returnMotor("LeftAnkle", Character:FindFirstChild("LeftFoot"))
-				returnMotor("RightHip", Character:FindFirstChild("RightUpperLeg"))
-				returnMotor("RightKnee", Character:FindFirstChild("RightLowerLeg"))
-				returnMotor("RightAnkle", Character:FindFirstChild("RightFoot"))
-			else
-				returnMotor("Neck", Character:FindFirstChild("Torso"))
-				returnMotor("RootJoint", Character:FindFirstChild("HumanoidRootPart"))
-				returnMotor("Left Shoulder", Character:FindFirstChild("Torso"))
-				returnMotor("Right Shoulder", Character:FindFirstChild("Torso"))
-				returnMotor("Left Hip", Character:FindFirstChild("Torso"))
-				returnMotor("Right Hip", Character:FindFirstChild("Torso"))
-			end
-			motorController.clearLocalMotors()
-			Root.CanCollide = true
-
-			Humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
 		end
+
+		--[[
+		if Humanoid.RigType == Enum.HumanoidRigType.R15 then
+			returnMotor("Neck", Character:FindFirstChild("Head"))
+			returnMotor("Waist", Character:FindFirstChild("UpperTorso"))
+			returnMotor("Root", Character:FindFirstChild("LowerTorso"))
+			returnMotor("LeftShoulder", Character:FindFirstChild("LeftUpperArm"))
+			returnMotor("LeftElbow", Character:FindFirstChild("LeftLowerArm"))
+			returnMotor("LeftWrist", Character:FindFirstChild("LeftHand"))
+			returnMotor("RightShoulder", Character:FindFirstChild("RightUpperArm"))
+			returnMotor("RightElbow", Character:FindFirstChild("RightLowerArm"))
+			returnMotor("RightWrist", Character:FindFirstChild("RightHand"))
+			returnMotor("LeftHip", Character:FindFirstChild("LeftUpperLeg"))
+			returnMotor("LeftKnee", Character:FindFirstChild("LeftLowerLeg"))
+			returnMotor("LeftAnkle", Character:FindFirstChild("LeftFoot"))
+			returnMotor("RightHip", Character:FindFirstChild("RightUpperLeg"))
+			returnMotor("RightKnee", Character:FindFirstChild("RightLowerLeg"))
+			returnMotor("RightAnkle", Character:FindFirstChild("RightFoot"))
+		else
+			returnMotor("Neck", Character:FindFirstChild("Torso"))
+			returnMotor("RootJoint", Character:FindFirstChild("HumanoidRootPart"))
+			returnMotor("Left Shoulder", Character:FindFirstChild("Torso"))
+			returnMotor("Right Shoulder", Character:FindFirstChild("Torso"))
+			returnMotor("Left Hip", Character:FindFirstChild("Torso"))
+			returnMotor("Right Hip", Character:FindFirstChild("Torso"))
+		end
+		--]]
+		motorController.clearLocalMotors()
+		Character:WaitForChild("HumanoidRootPart").CanCollide = true
+
+		Humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
 	end
 end
 
@@ -120,7 +125,9 @@ function ragdollController.start()
 		local events = stateController.getEvents()
 		LocalEvent = events.radgollEvent
 
-		LocalEvent:Connect(LocalRagdoll)
+		LocalEvent:Connect(function(toggle)
+			LocalRagdoll(toggle)
+		end)
 	end)
 
 	local function GetMassOfModel(model)

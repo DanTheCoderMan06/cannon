@@ -1,8 +1,8 @@
 return {
-	cloudSky = 50000,
-	cloudSkyLerp = 10000,
-	nightSky = 250000,
-	nightSkyLerp = 5000,
+	cloudSky = 100000,
+	cloudSkyLerp = 20000,
+	nightSky = 300000,
+	nightSkyLerp = 150000,
 	attachToAttachments = {
 		"HatAttachment",
 		"LeftGripAttachment",

@@ -104,7 +104,11 @@ function castleService.updatePlatform(player, newspot)
 		:SetAttribute("currentTower", newspot:FindFirstChildWhichIsA("Model").Name)
 	if player.Character then
 		if not player.Character:GetAttribute("inCannon") then
-			player:LoadCharacter()
+			task.defer(function()
+				player.Character:MoveTo(
+					playerPlatforms:FindFirstChild(player.Name):FindFirstChildWhichIsA("SpawnLocation").Position
+				)
+			end)
 		end
 	end
 end
@@ -145,6 +149,7 @@ end
 
 function castleService.start()
 	Players.PlayerAdded:Connect(function(player)
+		task.wait()
 		local newCastle = Instance.new("Model")
 		newCastle.Name = player.Name
 		local newSpot = castleService.findSpot()
