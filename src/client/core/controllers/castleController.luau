@@ -329,6 +329,7 @@ function castleController.start()
 				local loadEvent = Signal.new()
 				platform.checkToLoad(loadEvent)
 				loadEvent:Wait()
+				loadEvent:Destroy()
 			end
 
 			local callbackSignal = Signal.new()
@@ -462,7 +463,7 @@ function castleController.start()
 	local timeStart = tick()
 
 	pTrove:BindToRenderStep("rotateModels", Enum.RenderPriority.Last.Value + 1, function(dt)
-		rotateAngle += 1
+		rotateAngle += 0.33
 
 		local targetModels = {}
 		local targetCFrames = {}

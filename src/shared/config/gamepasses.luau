@@ -10,15 +10,19 @@ return {
 	},
 	buyCircusCannon = {
 		id = 1051314279,
+		cannonName = "circusCannon",
 	},
 	buyArmyCannon = {
 		id = 1051600321,
+		cannonName = "armyCannon",
 	},
 	buyArtillery = {
 		id = 1028783141,
+		cannonName = "artillery",
 	},
 	buyRailgun = {
 		id = 1035960145,
+		cannonName = "railgun",
 	},
 	buyVIP = {
 		id = 1060138098,

@@ -21,7 +21,9 @@ local Sift = require(sharedPackages.Sift)
 local Signal = require(sharedPackages.Signal)
 
 local notificationConfig = require(ReplicatedStorage.shared.config.notificationConfig)
+local gamepasses = require(ReplicatedStorage.shared.config.gamepasses)
 
+local marketplaceUtil = require(ReplicatedStorage.shared.utilities.marketplaceUtil)
 dataService.dailyReward = Signal.new()
 
 function dataService.giveRewards(player)
@@ -48,6 +50,20 @@ end
 
 function dataService.overwriteUserData(playerData)
 	playerData:SetAsync()
+end
+
+function dataService.loadGamepasses(player)
+	local playerProfile = Profiles[player]
+
+	for _, v in pairs(gamepasses) do
+		if v.cannonName then
+			if marketplaceUtil.userOwnsGamepass(player, v.id) then
+				if not table.find(playerProfile.Data.cannons, v.cannonName) then
+					table.insert(playerProfile.Data.cannons, v.cannonName)
+				end
+			end
+		end
+	end
 end
 
 function dataService.start()
@@ -85,10 +101,11 @@ function dataService.start()
 				profile.Data.lastEntered = os.time()
 				if RunService:IsStudio() then
 					profile.Data.daysClaimed = {}
-					profile.Data.cannons = {}
 					profile.Data.cannonTier = 0
 					profile.Data.doubleMoney = false
 				end
+
+				dataService.loadGamepasses(player)
 
 				local leaderstats = ReplicatedStorage.assets.statsFolder:Clone()
 				leaderstats.Name = "leaderstats"

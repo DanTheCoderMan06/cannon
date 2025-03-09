@@ -30,7 +30,11 @@ function cameraController.removeTracker()
 end
 
 function cameraController.start()
+	print("[CameraController]: " .. "Track Camera!")
 	workspace.CurrentCamera.CameraType = Enum.CameraType.Track
+	task.delay(2, function()
+		workspace.CurrentCamera.CameraType = Enum.CameraType.Track
+	end)
 end
 
 return cameraController

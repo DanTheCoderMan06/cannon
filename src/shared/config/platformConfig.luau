@@ -63,7 +63,7 @@ return {
 					description = "UNTIL REWARD",
 				}
 			end,
-			initModel = ReplicatedStorage.assets.cannons:WaitForChild("cannon1"),
+			initModel = ReplicatedStorage.assets:WaitForChild("luckyBlock"),
 			callbackFunction = function(success, states)
 				if success then
 					spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(0.992156, 1, 0.580392) })
@@ -457,7 +457,9 @@ return {
 				local playerData = dataController.getData()
 
 				if #playerData.cannons > 0 then
-					loadEvent:Fire()
+					task.delay(1, function()
+						loadEvent:Fire()
+					end)
 					return
 				end
 

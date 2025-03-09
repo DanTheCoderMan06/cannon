@@ -312,6 +312,20 @@ function cannonController.start()
 			end)
 		end)
 	end)
+
+	RunService:BindToRenderStep("teleportBack", Enum.RenderPriority.Last.Value + 1, function()
+		local character = Players.LocalPlayer.Character
+		if not character then
+			return
+		end
+		if character:GetAttribute("inCannon") then
+			return
+		end
+		local spawnPosition = playerPlatform:FindFirstChildWhichIsA("SpawnLocation", true).Position
+		if (character.PrimaryPart.Position - spawnPosition).Magnitude > 40 then
+			character:MoveTo(spawnPosition)
+		end
+	end)
 end
 
 return cannonController
