@@ -6,6 +6,17 @@ local sharedPackages = ReplicatedStorage.sharedPackages
 
 local React = require(sharedPackages.React)
 local ReactSpring = require(sharedPackages.ReactSpring)
+local Trove = require(sharedPackages.Trove)
+
+local function getSmoothColorFromElapsedTime(elapsedTime, speed)
+	speed = speed or 1
+
+	local r = (math.sin(elapsedTime * speed) + 1) / 2
+	local g = (math.sin(elapsedTime * speed + 2) + 1) / 2
+	local b = (math.sin(elapsedTime * speed + 4) + 1) / 2
+
+	return Color3.new(r, g, b)
+end
 
 return function(props)
 	local styles, api = ReactSpring.useSpring(function()
@@ -85,7 +96,7 @@ return function(props)
 			RichText = true,
 			Size = UDim2.fromScale(0.95, 0.25),
 			Text = "NEW RECORD",
-			TextColor3 = Color3.fromRGB(255, 117, 117),
+			TextColor3 = props.targetColor,
 			TextScaled = true,
 			TextSize = 14,
 			TextWrapped = true,

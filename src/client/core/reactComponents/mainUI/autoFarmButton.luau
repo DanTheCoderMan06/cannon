@@ -35,7 +35,7 @@ return function(props)
 		BorderColor3 = Color3.fromRGB(0, 0, 0),
 		BorderSizePixel = 0,
 		FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
-		Position = UDim2.fromScale(0.918, 0.697),
+		Position = UDim2.fromScale(0.868, 0.697),
 		Size = styles.hover:map(function(val)
 			return UDim2.fromScale(0.135, 0.0499):Lerp(UDim2.fromScale(0.135 * 1.1, 0.0499 * 1.1), val)
 		end),

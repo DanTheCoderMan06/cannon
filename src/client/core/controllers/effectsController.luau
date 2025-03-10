@@ -21,6 +21,7 @@ local finishedPath = require(ReplicatedStorage.client.reactComponents.generics.f
 
 local dataController = require(ReplicatedStorage.client.controllers.dataController)
 local stateController = require(ReplicatedStorage.client.controllers.stateController)
+local keysController = require(ReplicatedStorage.client.controllers.keysController)
 
 local currentHighScore = 0
 
@@ -189,6 +190,16 @@ function effectsController.start()
 	effectsController.updateHighscore()
 end
 
+local function getSmoothColorFromElapsedTime(elapsedTime, speed)
+	speed = speed or 1
+
+	local r = (math.sin(elapsedTime * speed) + 1) / 2
+	local g = (math.sin(elapsedTime * speed + 2) + 1) / 2
+	local b = (math.sin(elapsedTime * speed + 4) + 1) / 2
+
+	return Color3.new(r, g, b)
+end
+
 function effectsController.finishedPath(results)
 	local character = Players.LocalPlayer.Character
 	local finishedPathEffects = ReplicatedStorage.assets.finishedPath:Clone()
@@ -196,6 +207,20 @@ function effectsController.finishedPath(results)
 	local isHighscore = effectsController.getHighScore().Value < math.round(results.distance)
 	local reward = cannonConfig.rewardFormula(results.distance)
 	local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
+	local targetColor, setTargetColor = React.createBinding(Color3.new())
+
+	keysController.freezeMovement(true)
+
+	local newAnim = ReplicatedStorage.assets.animations.dance
+		:GetChildren()[math.random(1, #ReplicatedStorage.assets.animations.dance:GetChildren())]
+		:Clone()
+
+	local track = Players.LocalPlayer.Character:FindFirstChildWhichIsA("Animator", true):LoadAnimation(newAnim)
+	track.Priority = Enum.AnimationPriority.Action4
+	track:Play()
+
+	local partTrove = Trove.new()
+	local startTime = tick()
 
 	if dataController.currentData.doubleMoney then
 		reward *= 2
@@ -205,36 +230,52 @@ function effectsController.finishedPath(results)
 		React.createElement("BillboardGui", {
 			ResetOnSpawn = false,
 			AlwaysOnTop = true,
-			StudsOffset = Vector3.new(0, 5, 0),
+			StudsOffset = Vector3.new(0, 8, 0),
 			Size = UDim2.fromScale(6, 7.5),
 			Adornee = finishedPathEffects,
 		}, {
 			main = React.createElement(finishedPath, {
-				isHighscore = isHighscore,
+				isHighscore = isHighscore or true,
 				distance = math.round(results.distance),
 				reward = math.round(reward),
+				targetColor = targetColor,
 			}),
 		}),
 		Players.LocalPlayer.PlayerGui,
 		"finishedGUI"
 	))
 
-	finishedPathEffects:PivotTo(CFrame.new(character.PrimaryPart.Position * Vector3.new(1, 0, 1)))
+	finishedPathEffects:PivotTo(
+		CFrame.new(character.PrimaryPart.Position * Vector3.new(1, 0, 1) + Vector3.new(-1.4, 1.2, 0))
+	)
 	finishedPathEffects.Parent = workspace
 
+	partTrove:BindToRenderStep("moveCircle", Enum.RenderPriority.Last.Value, function(dt)
+		local increaseFactor = math.sin(math.rad((tick() - startTime) * 167)) * 1
+		finishedPathEffects:FindFirstChildWhichIsA("BasePart").CFrame *= CFrame.Angles(math.rad(0.5), 0, 0)
+		finishedPathEffects:FindFirstChildWhichIsA("BasePart").Size =
+			Vector3.new(0.7, 12 + increaseFactor, 12 + increaseFactor)
+		finishedPathEffects:FindFirstChildWhichIsA("BasePart").Color =
+			getSmoothColorFromElapsedTime(tick() - startTime, 2)
+		setTargetColor(getSmoothColorFromElapsedTime(tick() - startTime, 2))
+	end)
+	partTrove:AttachToInstance(finishedPathEffects)
+
 	SoundService.effects.victory:Play()
-	character.HumanoidRootPart.Anchored = true
 
 	task.wait(2)
 
 	container:unmount()
 	finishedPathEffects:Destroy()
 
-	stateController.getEvents().radgollEvent:Fire(false)
-	character.HumanoidRootPart.Anchored = false
 	task.wait()
 	zap.requestLoad.Fire()
-	workspace.CurrentCamera.Focus = CFrame.new(playerPlatform:FindFirstChild("cannonPart").Position)
+
+	keysController.freezeMovement(false)
+	keysController.updateFarming()
+	track:Stop()
+	track:Destroy()
+
 	task.wait(1)
 	effectsController.updateHighscore()
 end

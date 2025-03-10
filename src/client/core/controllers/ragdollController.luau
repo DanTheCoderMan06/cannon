@@ -41,7 +41,7 @@ local function LocalRagdoll(bool)
 	Humanoid.AutoRotate = not bool
 
 	if bool then
-		if State ~= Enum.HumanoidStateType.Physics then
+		if Character:GetAttribute("inCannon") then
 			zap.editRagdollState.Call(true)
 			DelayValue = DelayValue + 3
 

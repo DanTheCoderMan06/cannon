@@ -25,20 +25,31 @@ local function constantMovement(dt)
 	character:WaitForChild("Humanoid"):MoveTo(cannonPart.Position)
 end
 
-function controlsController.updateFarming()
-	local isFarming = Players.LocalPlayer:GetAttribute("autoFarming")
-
+function controlsController.freezeMovement(toggle)
 	local FREEZE_ACTION = "freezeMovement"
-
-	if isFarming then
+	if toggle then
 		ContextActionService:BindAction(FREEZE_ACTION, function()
 			return Enum.ContextActionResult.Sink
 		end, false, unpack(Enum.PlayerActions:GetEnumItems()))
-		RunService:BindToRenderStep("moveCharacter", Enum.RenderPriority.Last.Value, constantMovement)
 	else
 		ContextActionService:UnbindAction(FREEZE_ACTION)
+	end
+end
+
+function controlsController.updateFarming()
+	if Players.LocalPlayer.Character and Players.LocalPlayer.Character:GetAttribute("inCannon") then
+		return
+	end
+
+	local isFarming = Players.LocalPlayer:GetAttribute("autoFarming")
+
+	if isFarming then
+		RunService:BindToRenderStep("moveCharacter", Enum.RenderPriority.Last.Value, constantMovement)
+	else
 		RunService:UnbindFromRenderStep("moveCharacter")
 	end
+
+	controlsController.freezeMovement(isFarming)
 end
 
 function controlsController.start()

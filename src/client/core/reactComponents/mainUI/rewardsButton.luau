@@ -20,7 +20,7 @@ return function(props)
 		BackgroundTransparency = 1,
 		BorderColor3 = Color3.fromRGB(0, 0, 0),
 		BorderSizePixel = 0,
-		Position = UDim2.fromScale(0.9, 0.5),
+		Position = UDim2.fromScale(0.85, 0.5),
 		Size = UDim2.fromScale(0.0521, 0.0926),
 	}, {
 		uIAspectRatioConstraint = React.createElement("UIAspectRatioConstraint"),

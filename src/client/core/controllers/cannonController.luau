@@ -193,9 +193,11 @@ function cannonController.start()
 			timeElapsed = (tick() - startTime) * multiplier
 			local actualHorizontal = timeElapsed * physics.horizontalVelocity
 			local fixedHorizontal = math.fmod(actualHorizontal, cannonConfig.maxDistance)
+
 			local verticalComponent = (
 				timeElapsed * physics.verticalVelocity + 0.5 * -workspace.Gravity * math.pow(timeElapsed, 2)
 			)
+
 			local calculatedPosition = startPosition
 				* CFrame.new(0, verticalComponent, -fixedHorizontal)
 				* CFrame.Angles(-math.rad(math.fmod(timeElapsed * 180 / multiplier, 360)), 0, 0)
@@ -245,10 +247,13 @@ function cannonController.start()
 				newPosition = calculatedPosition
 				character:PivotTo(newPosition)
 			end
+
+			workspace.CurrentCamera.FieldOfView = 70 + timeElapsed * 16
 		end)
 
 		finishedSignal:Connect(function() --TODO: Use raycast + spr to  finish up dummy falling
 			cameraController.removeTracker()
+			spr.target(workspace.CurrentCamera, 1, 0.25, { FieldOfView = 70 })
 
 			local mapParams = RaycastParams.new()
 			mapParams.FilterDescendantsInstances = { workspace.Map }
@@ -294,10 +299,11 @@ function cannonController.start()
 					CFrame.new(currentPos * Vector3.new(1, 0, 1) + Vector3.new(0, 20, 0))
 				)
 			end)
+
 			task.delay(3, function()
 				repeat
 					task.wait()
-				until not character or character.PrimaryPart.AssemblyLinearVelocity.Magnitude < 1
+				until not character or character.PrimaryPart.AssemblyLinearVelocity.Magnitude < 0.1
 				RunService:UnbindFromRenderStep("noFallThrough")
 				RunService:UnbindFromRenderStep("fallSound")
 				finishedSignal:Destroy()
@@ -305,6 +311,14 @@ function cannonController.start()
 					v:Destroy()
 				end
 				windController.toggle(false)
+
+				character:PivotTo(
+					CFrame.new(
+						character.PrimaryPart.Position + Vector3.new(0, 4, 0),
+						character.PrimaryPart.Position + Vector3.new(1, 0, 0)
+					)
+				)
+				stateController.getEvents().radgollEvent:Fire(false)
 
 				effectsController.finishedPath(physics)
 
@@ -322,7 +336,7 @@ function cannonController.start()
 			return
 		end
 		local spawnPosition = playerPlatform:FindFirstChildWhichIsA("SpawnLocation", true).Position
-		if (character.PrimaryPart.Position - spawnPosition).Magnitude > 40 then
+		if (character.PrimaryPart.Position - spawnPosition).Magnitude > 43 then
 			character:MoveTo(spawnPosition)
 		end
 	end)
