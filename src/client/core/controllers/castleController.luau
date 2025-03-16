@@ -1,3 +1,4 @@
+local ContentProvider = game:GetService("ContentProvider")
 local Players = game:GetService("Players")
 local ReplicatedFirst = game:GetService("ReplicatedFirst")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -382,8 +383,10 @@ function castleController.start()
 						else
 							newModel = recievedModel:FindFirstChildWhichIsA("Model"):Clone()
 							newModel:ScaleTo(recievedModel:GetAttribute("miniSize"))
-							modelFolder:ClearAllChildren()
 						end
+						newModel.Parent = workspace
+						ContentProvider:PreloadAsync(newModel:GetDescendants())
+						task.wait(0.2)
 						if newColor ~= nil then
 							for _, v in pairs(newModel:GetDescendants()) do
 								if v:IsA("BasePart") then
@@ -477,7 +480,7 @@ function castleController.start()
 				if not model.PrimaryPart then
 					continue
 				end
-				local targetCFrame = CFrame.new(v.Position + Vector3.new(0, 5, 0))
+				local targetCFrame = CFrame.new(v.Position + Vector3.new(0, 7, 0))
 					* CFrame.Angles(0, math.rad(rotateAngle), 0)
 				table.insert(targetModels, model.PrimaryPart)
 				table.insert(targetCFrames, targetCFrame)

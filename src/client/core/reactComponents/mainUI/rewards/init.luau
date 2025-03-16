@@ -15,6 +15,8 @@ local closeButton = require(rewards.closeButton)
 
 local firstClaim = false
 
+local uiON = false
+
 return function(props)
 	local styles, api = ReactSpring.useSpring(function()
 		return { transparency = 1 }
@@ -24,18 +26,18 @@ return function(props)
 		local uiTrove = Trove.new()
 
 		uiTrove:Add(props.selectedUIEvent:Connect(function(uiName)
-			print(uiName)
 			local target = 1
 			if uiName == "rewards" then
-				if styles.transparency:getValue() == 1 then
+				if not uiON then
 					target = 0
 				end
 			end
+			uiON = not uiON
 			api.start({
 				transparency = target,
 				config = {
 					tension = 400,
-					friction = 20,
+					friction = 25,
 				},
 			})
 		end))
@@ -81,7 +83,18 @@ return function(props)
 				return UDim2.fromScale(0.638 * math.max(0.2, 1 - val), 0.318 * math.max(0.2, 1 - val))
 			end),
 		}, {
-			rewardsFrame = React.createElement(rewardsFrame, props),
+			rewardsFrameContainer = React.createElement("Frame", {
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+				BackgroundTransparency = 1,
+				BorderColor3 = Color3.fromRGB(0, 0, 0),
+				BorderSizePixel = 0,
+				Position = UDim2.fromScale(0.5, 0.5),
+				Size = UDim2.fromScale(1, 1),
+				ClipsDescendants = true,
+			}, {
+				rewardsFrame = React.createElement(rewardsFrame, props),
+			}),
 			closeButton = React.createElement(closeButton, {
 				styles = styles,
 				onActivated = function()

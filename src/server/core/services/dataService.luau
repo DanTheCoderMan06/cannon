@@ -10,7 +10,7 @@ local profileStore = require(serverPackages.ProfileStore)
 local Players = game:GetService("Players")
 
 local profileTemplate = require(ServerStorage.server.modules.profileTemplate)
-local PlayerStore = profileStore.New("PlayerDataStoreDEV5", profileTemplate)
+local PlayerStore = profileStore.New("PlayerDataStoreDEV3", profileTemplate)
 local Profiles = {}
 
 local dataService = {}
@@ -41,10 +41,10 @@ function dataService.giveRewards(player)
 end
 
 function dataService.getGlobalPlayerData(user)
-	if Players:GetPlayerByUserId(user) and RunService:IsStudio() == false then
+	if Players:GetPlayerByUserId(user) then --and RunService:IsStudio() == false then
 		return Profiles[Players:GetPlayerByUserId(user)]
 	end
-	local playerData = PlayerStore:GetAsync("Player_" .. tostring(user))
+	local playerData = PlayerStore:GetAsync(`Player_{user}`)
 	return playerData
 end
 

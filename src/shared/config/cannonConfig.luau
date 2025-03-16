@@ -14,7 +14,7 @@ local module = {
 	costFormula = function(level, boughtLevels)
 		return cost(level, boughtLevels)
 	end,
-	maxDistance = 30000,
+	maxDistance = 20000,
 	specialCannons = {
 		["artillery"] = {
 			power = power(70),

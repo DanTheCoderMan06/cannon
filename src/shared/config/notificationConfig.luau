@@ -46,7 +46,8 @@ return {
 				local params = {}
 				local timePassed = os.time() - playerData.lastClaimed
 				local daysPassed = math.floor(timePassed / (24 * 60 * 60))
-				local rewardName = rewardsConfig.getDailyReward(playerData.daysPlayed + daysPassed).name
+				local rewardName = rewardsConfig.getDailyReward(playerData.daysPlayed + daysPassed)
+				rewardName = rewardName and rewardName.name or "NULL"
 				params["rewardName"] = { stringValue = rewardName }
 				return params
 			end,

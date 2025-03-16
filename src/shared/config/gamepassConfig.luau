@@ -290,6 +290,8 @@ return {
 		infoType = Enum.InfoType.Product,
 		tiers = true,
 		tier2Name = "tenFloorsTier2",
+		--Gift Compatability
+		giftName = "tenFloors",
 	},
 	fiftyFloors = {
 		id = 2697043455,
@@ -311,6 +313,8 @@ return {
 		infoType = Enum.InfoType.Product,
 		tiers = true,
 		tier2Name = "fiftyFloorsTier2",
+		--Gift Compatability
+		giftName = "fiftyFloors",
 	},
 	twoHundredFiftyFloors = {
 		id = 3220619326,
@@ -332,6 +336,8 @@ return {
 		infoType = Enum.InfoType.Product,
 		tiers = true,
 		tier2Name = "twoHundredFiftyFloorsTier2",
+		--Gift Compatability
+		giftName = "twoHundredFiftyFloors",
 	},
 	twoHundredFiftyFloorsTier2 = {
 		id = 3220619459,
@@ -358,6 +364,8 @@ return {
 		type = "cannons",
 		infoType = Enum.InfoType.GamePass,
 		cannonName = "circusCannon",
+		--Gift Compatability
+		giftName = "circusCannon",
 	},
 	buyArmyCannon = {
 		id = 1051600321,
@@ -370,6 +378,8 @@ return {
 		type = "cannons",
 		infoType = Enum.InfoType.GamePass,
 		cannonName = "armyCannon",
+		--Gift Compatability
+		--giftName = "giftArmyCannon",
 	},
 	buyArtillery = {
 		id = 1028783141,
@@ -382,6 +392,8 @@ return {
 		type = "cannons",
 		infoType = Enum.InfoType.GamePass,
 		cannonName = "artillery",
+		--Gift Compatability
+		giftName = "giftArtillery",
 	},
 	buyRailgun = {
 		id = 1035960145,
@@ -394,6 +406,8 @@ return {
 		type = "cannons",
 		infoType = Enum.InfoType.GamePass,
 		cannonName = "railgun",
+		--Gift Compatability
+		giftName = "giftRailgun",
 	},
 	buyDoubleDistance = {
 		id = 1092466385,
@@ -405,6 +419,8 @@ return {
 		end,
 		type = "gamepasses",
 		infoType = Enum.InfoType.GamePass,
+		--Gift Compatability
+		giftName = "doubleDistance",
 	},
 
 	buyDoubleMoney = {
@@ -417,6 +433,8 @@ return {
 		end,
 		type = "gamepasses",
 		infoType = Enum.InfoType.GamePass,
+		--Gift Compatability
+		giftName = "doubleMoney",
 	},
 
 	buyInfiniteVIP = {
@@ -429,6 +447,8 @@ return {
 		end,
 		type = "gamepasses",
 		infoType = Enum.InfoType.GamePass,
+		--Gift Compatability
+		giftName = "giveVIP",
 	},
 	artilleryGamepasses = {
 		["1028783141"] = "artillery",

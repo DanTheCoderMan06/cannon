@@ -20,7 +20,7 @@ return function(props)
 		BackgroundTransparency = 1,
 		BorderColor3 = Color3.fromRGB(0, 0, 0),
 		BorderSizePixel = 0,
-		Position = UDim2.fromScale(0.05, 0.4),
+		Position = UDim2.fromScale(0.01, 0.4),
 		Size = UDim2.fromScale(0.0521, 0.0926),
 	}, {
 		uIAspectRatioConstraint = React.createElement("UIAspectRatioConstraint"),
@@ -43,7 +43,7 @@ return function(props)
 		}, {
 			content = React.createElement(button, {
 				overlayImage = "rbxassetid://116797538593247",
-				buttonText = "Rewards",
+				buttonText = "Gifts",
 				image = "rbxassetid://109156736467684",
 				onActivated = function()
 					props.selectedUIEvent:Fire("gifts")

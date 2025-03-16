@@ -22,12 +22,18 @@ notificationService.currentTasks = {}
 
 notificationService.currentTask = nil
 
-local playerBase = DataStoreService:GetDataStore("playerBase")
-local serverTasks = MemoryStoreService:GetHashMap("serverTasks")
-local lastChecked = MemoryStoreService:GetHashMap("lastChecked")
+local playerBase = DataStoreService:GetDataStore("playerBaseStore")
+local availableServers = MemoryStoreService:GetHashMap("availableServers")
+local currentInfo = MemoryStoreService:GetHashMap("currentInfo")
+
+local TASK_KEY = "tasks"
+local IDS_PER_TASK = 5
+local GAME_JOB_ID = not RunService:IsStudio() and game.JobId or "STUDIO"
+
+print(GAME_JOB_ID)
 
 local currentIndex = 0
-local idsPerTask = 1
+local currentPage = 0
 
 local notificationConfig = require(ReplicatedStorage.shared.config.notificationConfig)
 local rewardsConfig = require(ReplicatedStorage.shared.config.rewardsConfig)
@@ -48,87 +54,6 @@ local function pcallFunction(callback)
 	end
 end
 
-function notificationService.retrieveTask()
-	local currentTasks
-	pcallFunction(function()
-		print("Access")
-		currentTasks = serverTasks:ListItemsAsync(5)
-	end)
-
-	local foundTask
-	local lastTask
-	local foundKey
-
-	while not foundTask do
-		local currentPage = currentTasks:GetCurrentPage()
-		for _, key in pairs(currentPage) do
-			print(key.KeyName)
-			local taskInfo
-			pcallFunction(function()
-				print("Access")
-				taskInfo = serverTasks:GetAsync(key.KeyName)
-			end)
-			if RunService:IsStudio() then
-				print("TASK FOUND: " .. HttpService:JSONEncode(taskInfo))
-			end
-			if not lastTask then
-				lastTask = taskInfo
-			elseif tonumber(lastTask.timeCreated) < tonumber(taskInfo.timeCreated) then
-				lastTask = taskInfo
-			end
-			if taskInfo.occupied then
-				continue
-			end
-			foundTask = taskInfo
-			foundKey = key.KeyName
-		end
-		if currentTasks.IsFinished then
-			break
-		end
-		pcallFunction(function()
-			currentTasks:AdvanceToNextPageAsync()
-		end)
-	end
-	return { found = foundTask, last = lastTask, foundIndex = foundKey }
-end
-
-function notificationService.addTask(endTask)
-	local lastCheckedIndex
-	local startIndex = 0
-
-	if endTask then
-		if endTask.finish < notificationService.totalPlayerBase then
-			startIndex = endTask.finish
-		end
-	else
-		pcallFunction(function()
-			print("Access")
-			lastCheckedIndex = lastChecked:GetAsync("lastChecked")
-		end)
-		if lastCheckedIndex then
-			if lastCheckedIndex < notificationService.totalPlayerBase then
-				startIndex = lastCheckedIndex
-			end
-		end
-	end
-
-	local currentTime = os.time()
-	local uid = HttpService:GenerateGUID(false)
-	local newTask = {
-		start = startIndex,
-		finish = startIndex + idsPerTask,
-		occupied = true,
-		timeCreated = currentTime,
-		id = uid,
-	}
-	pcallFunction(function()
-		print("Access")
-		serverTasks:SetAsync(uid, newTask, 300000)
-	end)
-	return newTask
-end
-
---For simple Notification (So that other services can use)
 function notificationService.sendSimpleNotification(userId, assetId, params)
 	local newParams = {}
 	for key, value in pairs(params) do
@@ -156,27 +81,13 @@ function notificationService.sendSimpleNotification(userId, assetId, params)
 	end
 end
 
-function notificationService.fetchMax()
-	local keysPage
-	local totalMax = 0
-	pcallFunction(function()
-		keysPage = playerBase:ListKeysAsync("", idsPerTask)
-	end)
-	totalMax += idsPerTask
-	while true do
-		if keysPage.IsFinished then
-			break
-		end
-		pcallFunction(function()
-			keysPage:AdvanceToNextPageAsync()
-		end)
-		totalMax += idsPerTask
-	end
-	return totalMax
-end
-
 function notificationService.sendNotification(userId, info, notificationKey, timeElapsed)
 	local savedUserData = dataService.getGlobalPlayerData(userId)
+
+	if not savedUserData then
+		warn("Tried to get data for " .. tostring(userId))
+		return false
+	end
 
 	local amountExisting = 0
 
@@ -239,6 +150,9 @@ function notificationService.sendNotifications(dataEntry)
 
 	pcallFunction(function()
 		lastPlayed = playerBase:GetAsync(dataEntry.KeyName)
+		if not lastPlayed then
+			lastPlayed:SetAsync(dataEntry.KeyName, os.time())
+		end
 	end)
 
 	for i, v in pairs(notificationConfig.notifications) do
@@ -252,38 +166,55 @@ function notificationService.sendNotifications(dataEntry)
 end
 
 function notificationService.completeWork(taskInfo)
+	local keysPage
+
 	pcallFunction(function()
-		lastChecked:SetAsync("lastChecked", taskInfo.finish, 300000)
+		keysPage = playerBase:ListKeysAsync("", IDS_PER_TASK)
 	end)
 
-	local keysPage
-	pcallFunction(function()
-		keysPage = playerBase:ListKeysAsync("", idsPerTask)
-	end)
-	for i = 1, math.floor(taskInfo.start / idsPerTask) do
+	currentPage = 0
+	currentIndex = 0
+
+	local currentPageCounter = 0
+
+	while true do
+		if currentPage < taskInfo.page then
+			if keysPage.IsFinished then
+				return
+			end
+			pcallFunction(function()
+				keysPage:AdvanceToNextPageAsync()
+			end)
+			continue
+		end
+
+		currentPage += 1
+
+		local currentUserPage
+		pcallFunction(function()
+			currentUserPage = keysPage:GetCurrentPage()
+		end)
+
+		for i, v in ipairs(currentUserPage) do
+			print(v)
+			if i < taskInfo.start then
+				continue
+			end
+			currentIndex += 1
+			notificationService.sendNotifications(v)
+		end
+
+		currentIndex = 0
 		if keysPage.IsFinished then
 			return
 		end
 		pcallFunction(function()
 			keysPage:AdvanceToNextPageAsync()
 		end)
+
+		taskInfo.page = currentPage
+		taskInfo.start = 0
 	end
-	local currentPage
-	pcallFunction(function()
-		currentPage = keysPage:GetCurrentPage()
-	end)
-	currentIndex = 0
-	print(currentPage)
-	for i, v in ipairs(currentPage) do
-		currentIndex += 1
-		if taskInfo.stop then
-			if currentIndex < taskInfo.stop then
-				continue
-			end
-		end
-		notificationService.sendNotifications(v)
-	end
-	currentIndex = taskInfo.finish
 end
 
 function notificationService.canSendNotification(player)
@@ -312,81 +243,161 @@ function notificationService.canSendNotification(player)
 	return result.statusCode == 200
 end
 
+function notificationService.updateTaskInfo(newInfo: table)
+	pcallFunction(function()
+		currentInfo:SetAsync(TASK_KEY, newInfo, 7200)
+	end)
+end
+
+function notificationService.fetchServer()
+	local servers
+	local serverIds = {}
+	local targetServer = "NULL"
+
+	pcallFunction(function()
+		servers = availableServers:ListItemsAsync(100)
+	end)
+
+	pcallFunction(function()
+		while not servers.IsFinished do
+			local currentServerPage = servers:GetCurrentPage()
+
+			for _, entry in pairs(currentServerPage) do
+				table.insert(serverIds, entry.value)
+			end
+
+			if not servers.IsFinished then
+				servers:AdvanceToNextPageAsync()
+			end
+		end
+	end)
+
+	if #serverIds > 0 then
+		targetServer = serverIds[math.random(1, #serverIds)]
+	end
+
+	return targetServer
+end
+
 function notificationService.start()
+	if game.PrivateServerId ~= "" then
+		return
+	end
+
+	local startedWork = false
+
+	pcallFunction(function()
+		availableServers:SetAsync(GAME_JOB_ID, "Available", 300000)
+	end)
+
+	local currentTaskInfo
+
+	--[[
 	zap.hasNotificationsEnabled.SetCallback(function(player, data)
 		local result = notificationService.canSendNotification(player)
 		return result
 	end)
+	--]]
 
-	if game.PrivateServerId ~= "" or RunService:IsStudio() then
+	if game.PrivateServerId ~= "" then
 		return
 	end
+
 	local canWork = Signal.new()
+
 	Players.PlayerAdded:Connect(function(player)
-		if #Players:GetPlayers() > 7 then
-			canWork:Fire()
-		end
 		pcallFunction(function()
 			playerBase:SetAsync(player.UserId, os.time())
 		end)
 	end)
+
+	Players.PlayerRemoving:Connect(function(player)
+		pcallFunction(function()
+			playerBase:SetAsync(player.UserId, os.time())
+		end)
+	end)
+
 	for _, v in pairs(Players:GetPlayers()) do
 		pcallFunction(function()
 			playerBase:SetAsync(v.UserId, os.time())
 		end)
 	end
 
-	if RunService:IsStudio() then
-		task.delay(1, function()
-			canWork:Fire()
+	game:BindToClose(function()
+		pcallFunction(function()
+			availableServers:RemoveAsync(GAME_JOB_ID)
 		end)
+		if startedWork then
+			currentTaskInfo.start = currentIndex
+			currentTaskInfo.page = currentPage
+			currentTaskInfo.jobId = notificationService.fetchServer()
+			notificationService.updateTaskInfo(currentTaskInfo)
+		else
+			pcallFunction(function()
+				currentTaskInfo = currentInfo:GetAsync(TASK_KEY)
+			end)
+			--Edge case for if shut down before work even though it was assigned here:
+			if currentTaskInfo.jobId == GAME_JOB_ID then
+				currentTaskInfo.jobId = notificationService.fetchServer()
+				notificationService.updateTaskInfo(currentTaskInfo)
+			end
+		end
+	end)
+
+	task.spawn(function()
+		while true do
+			pcallFunction(function()
+				currentTaskInfo = currentInfo:GetAsync(TASK_KEY)
+			end)
+			if not currentTaskInfo then
+				canWork:Fire()
+				return
+			end
+			if currentTaskInfo.jobId == GAME_JOB_ID or currentTaskInfo.jobId == "NULL" then
+				canWork:Fire()
+			end
+			task.wait(2)
+		end
+	end)
+
+	canWork:Wait()
+
+	startedWork = true
+
+	if not currentTaskInfo then
+		currentTaskInfo = {
+			start = 0,
+			page = 0,
+		}
 	end
 
-	--canWork:Wait()
+	currentTaskInfo.jobId = GAME_JOB_ID
 
-	notificationService.totalPlayerBase = notificationService.fetchMax()
+	notificationService.updateTaskInfo(currentTaskInfo)
 
 	local foundTask
 	task.spawn(function()
 		while true do
-			foundTask = notificationService.retrieveTask()
-			print("Retrieved Info" .. HttpService:JSONEncode(foundTask))
-			local target = foundTask.found
-			local endTask = foundTask.last
+			local taskInfo = {
+				start = currentTaskInfo.start,
+				page = currentTaskInfo.page,
+			}
 
-			if not target then
-				target = notificationService.addTask(endTask)
-			else
-				target.occupied = true
-				pcallFunction(function()
-					print("Access")
-					serverTasks:SetAsync(foundTask.foundIndex, target, 300000)
-				end)
-			end
+			notificationService.completeWork(taskInfo)
+			currentTaskInfo.start = 0
+			currentTaskInfo.page = 0
 
-			foundTask = target
-			print("FOUND TASK: " .. HttpService:JSONEncode(foundTask))
-
-			notificationService.completeWork(foundTask)
 			task.wait(10)
 
-			print("FINISHED TASK: " .. foundTask.id)
+			print("FINISHED TASK: ")
 
-			serverTasks:RemoveAsync(foundTask.id)
-			foundTask = nil
 			task.wait(10)
 		end
 	end)
-
-	game:BindToClose(function()
-		if foundTask then
-			print("Didnt Finish, Saving: " .. foundTask.id)
-			foundTask.occupied = false
-			foundTask.stop = currentIndex
-			pcallFunction(function()
-				serverTasks:SetAsync(foundTask.id, foundTask, 300000)
-				print("Added task!")
-			end)
+	task.spawn(function()
+		while true do
+			task.wait(15)
+			notificationService.updateTaskInfo(currentTaskInfo)
 		end
 	end)
 end

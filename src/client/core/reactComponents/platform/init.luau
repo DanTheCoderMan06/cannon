@@ -75,7 +75,7 @@ return function(props)
 				})
 			end)
 
-			props.updateValues(bTrove, editSignal)
+			props.updateValues(bTrove, editSignal, { model = props.modelUsed })
 
 			bTrove:Add(
 				props.callbackSignal:Connect(function(data)

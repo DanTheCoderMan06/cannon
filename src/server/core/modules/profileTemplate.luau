@@ -38,4 +38,7 @@ return {
 
 	--Tutorial
 	firstTime = true,
+
+	--Invite Rewards
+	invitedPlayers = {},
 }

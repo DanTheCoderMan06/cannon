@@ -17,6 +17,8 @@ local productGroup = require(shopUI.productGroup)
 
 local reactUtil = require(shared.utilities.reactUtil)
 
+local uiON = false
+
 return function(props)
 	local styles, api = ReactSpring.useSpring(function()
 		return { transparency = 1 }
@@ -26,18 +28,18 @@ return function(props)
 		local uiTrove = Trove.new()
 
 		uiTrove:Add(props.selectedUIEvent:Connect(function(uiName)
-			print(uiName)
 			local target = 1
 			if uiName == "shop" then
-				if styles.transparency:getValue() == 1 then
+				if not uiON then
 					target = 0
 				end
 			end
+			uiON = not uiON
 			api.start({
 				transparency = target,
 				config = {
 					tension = 400,
-					friction = 20,
+					friction = 25,
 				},
 			})
 		end))

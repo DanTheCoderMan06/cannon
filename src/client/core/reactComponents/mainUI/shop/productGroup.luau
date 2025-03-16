@@ -93,6 +93,15 @@ return function(props)
 						tier2Name = info.tier2Name,
 						specialTiers = info.specialTiers,
 						playerEvent = marketplaceUtil.getPlayerEvent(Players.LocalPlayer),
+						buyGift = function()
+							local giftName = info.giftName
+							if giftName then
+								props.setSelectedGift(giftName)
+								task.delay(0.2, function()
+									props.selectedUIEvent:Fire("newGifts")
+								end)
+							end
+						end,
 						onActivated = function()
 							if info.speicalTiers then
 								local playerData = props.getData()
@@ -122,6 +131,7 @@ return function(props)
 						speicalTiers = info.speicalTiers,
 						getId = info.getId,
 						specialTierAmount = info.speicalTiers and #info.id,
+						extraInfo = info,
 					})
 				)
 			)

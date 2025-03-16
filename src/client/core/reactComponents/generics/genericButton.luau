@@ -114,9 +114,10 @@ return function(props)
 			Size = styles.rotate:map(function(val)
 				return UDim2.fromScale(0.9, 0.9):Lerp(UDim2.fromScale(1, 1), 1 - val)
 			end),
-			[React.Event.Activated] = function()
+			[React.Event.MouseButton1Down] = function()
 				SoundService.effects.click:Play()
 				task.spawn(function()
+					props.onActivated()
 					api.start({
 						gold = 1,
 						config = {
@@ -124,7 +125,6 @@ return function(props)
 							friction = 30,
 						},
 					})
-					props.onActivated()
 					task.delay(0.05, function()
 						api.start({
 							gold = 0,

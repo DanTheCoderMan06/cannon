@@ -42,6 +42,7 @@ local function lockedFrame(props)
 		Position = UDim2.fromScale(0.5, 0.5),
 		ScaleType = Enum.ScaleType.Fit,
 		Size = UDim2.fromScale(1, 1),
+		ImageTransparency = 0.8,
 		Visible = props.owned,
 		ZIndex = 10,
 	}, {
@@ -156,7 +157,7 @@ return function(props)
 	end, { tierFrameVisible })
 
 	local styles, api = ReactSpring.useSpring(function()
-		return { hover = 0, clicked = 0 }
+		return { hover = 0, clicked = 0, hover2 = 0, clicked2 = 0 }
 	end)
 
 	return React.createElement("CanvasGroup", {
@@ -175,61 +176,6 @@ return function(props)
 	}, {
 		lockedFrame = React.createElement(lockedFrame, { owned = owned }),
 
-		clicker = React.createElement("ImageButton", {
-			AnchorPoint = Vector2.new(0.5, 0.5),
-			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-			BackgroundTransparency = 1,
-			BorderColor3 = Color3.fromRGB(0, 0, 0),
-			BorderSizePixel = 0,
-			Image = "",
-			Position = UDim2.fromScale(0.5, 0.5),
-			ScaleType = Enum.ScaleType.Fit,
-			Size = UDim2.fromScale(1, 1),
-			ZIndex = 10,
-			ImageTransparency = 1,
-			[React.Event.MouseEnter] = function()
-				api.start({
-					hover = 1,
-					config = {
-						tension = 900,
-						friction = 15,
-					},
-				})
-			end,
-			[React.Event.MouseLeave] = function()
-				api.start({
-					hover = 0,
-					config = {
-						tension = 900,
-						friction = 15,
-					},
-				})
-			end,
-			[React.Event.Activated] = function()
-				SoundService.effects.click:Play()
-				task.spawn(function()
-					api.start({
-						clicked = 1,
-						config = {
-							tension = 700,
-							friction = 30,
-						},
-					})
-					if not owned:getValue() then
-						props.onActivated()
-					end
-					task.delay(0.05, function()
-						api.start({
-							clicked = 0,
-							config = {
-								tension = 700,
-								friction = 30,
-							},
-						})
-					end)
-				end)
-			end,
-		}),
 		content = React.createElement("ImageLabel", {
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
@@ -277,6 +223,95 @@ return function(props)
 				}),
 			}),
 
+			gift = React.createElement("ImageButton", {
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+				BackgroundTransparency = 1,
+				BorderColor3 = Color3.fromRGB(0, 0, 0),
+				BorderSizePixel = 0,
+				Image = "rbxassetid://104467331888744",
+				ImageColor3 = Color3.fromRGB(255, 0, 0),
+				LayoutOrder = 3,
+				ZIndex = 5,
+				Position = styles.clicked2:map(function(val)
+					return UDim2.fromScale(0.79, 0.799):Lerp(UDim2.fromScale(0.79, 0.81), val)
+				end),
+				ScaleType = Enum.ScaleType.Fit,
+				Size = styles.hover2:map(function(val)
+					return UDim2.fromScale(0.265, 0.256):Lerp(UDim2.fromScale(0.265 * 1.1, 0.256 * 1.1), val)
+				end),
+				Rotation = styles.hover2:map(function(val)
+					return val * 4
+				end),
+				Visible = props.extraInfo.giftName ~= nil,
+			}, {
+				clicker = React.createElement("ImageButton", {
+					AnchorPoint = Vector2.new(0.5, 0.5),
+					BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+					BackgroundTransparency = 1,
+					BorderColor3 = Color3.fromRGB(0, 0, 0),
+					BorderSizePixel = 0,
+					Image = "",
+					Position = UDim2.fromScale(0.5, 0.5),
+					ScaleType = Enum.ScaleType.Fit,
+					Size = UDim2.fromScale(1, 1),
+					ZIndex = 10,
+					ImageTransparency = 1,
+					[React.Event.MouseEnter] = function()
+						api.start({
+							hover2 = 1,
+							config = {
+								tension = 900,
+								friction = 15,
+							},
+						})
+					end,
+					[React.Event.MouseLeave] = function()
+						api.start({
+							hover2 = 0,
+							config = {
+								tension = 900,
+								friction = 15,
+							},
+						})
+					end,
+					[React.Event.Activated] = function()
+						SoundService.effects.click:Play()
+						task.spawn(function()
+							api.start({
+								clicked2 = 1,
+								config = {
+									tension = 700,
+									friction = 30,
+								},
+							})
+							props.buyGift(props.productKey)
+							task.delay(0.05, function()
+								api.start({
+									clicked2 = 0,
+									config = {
+										tension = 700,
+										friction = 30,
+									},
+								})
+							end)
+						end)
+					end,
+				}),
+				uIAspectRatioConstraint = React.createElement("UIAspectRatioConstraint"),
+
+				imageLabel = React.createElement("ImageLabel", {
+					AnchorPoint = Vector2.new(0.5, 0.5),
+					BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+					BackgroundTransparency = 1,
+					BorderColor3 = Color3.fromRGB(0, 0, 0),
+					BorderSizePixel = 0,
+					Image = "rbxassetid://109156736467684",
+					Position = UDim2.fromScale(0.5, 0.5),
+					Size = UDim2.fromScale(0.6, 0.6),
+				}),
+			}),
+
 			buy = React.createElement("ImageButton", {
 				AnchorPoint = Vector2.new(0.5, 0.5),
 				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
@@ -286,7 +321,8 @@ return function(props)
 				Image = "rbxassetid://85156488647867",
 				LayoutOrder = 3,
 				Position = styles.clicked:map(function(val)
-					return UDim2.fromScale(0.5, 0.805):Lerp(UDim2.fromScale(0.5, 0.82), val)
+					return UDim2.fromScale(props.extraInfo.giftName and 0.387 or 0.5, 0.805)
+						:Lerp(UDim2.fromScale(props.extraInfo.giftName and 0.387 or 0.5, 0.82), val)
 				end),
 				ScaleType = Enum.ScaleType.Fit,
 				Size = styles.hover:map(function(val)
@@ -297,6 +333,61 @@ return function(props)
 				end),
 				ZIndex = 0,
 			}, {
+				clicker = React.createElement("ImageButton", {
+					AnchorPoint = Vector2.new(0.5, 0.5),
+					BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+					BackgroundTransparency = 1,
+					BorderColor3 = Color3.fromRGB(0, 0, 0),
+					BorderSizePixel = 0,
+					Image = "",
+					Position = UDim2.fromScale(0.5, 0.5),
+					ScaleType = Enum.ScaleType.Fit,
+					Size = UDim2.fromScale(1, 1),
+					ZIndex = 10,
+					ImageTransparency = 1,
+					[React.Event.MouseEnter] = function()
+						api.start({
+							hover = 1,
+							config = {
+								tension = 900,
+								friction = 15,
+							},
+						})
+					end,
+					[React.Event.MouseLeave] = function()
+						api.start({
+							hover = 0,
+							config = {
+								tension = 900,
+								friction = 15,
+							},
+						})
+					end,
+					[React.Event.Activated] = function()
+						SoundService.effects.click:Play()
+						task.spawn(function()
+							api.start({
+								clicked = 1,
+								config = {
+									tension = 700,
+									friction = 30,
+								},
+							})
+							if not owned:getValue() then
+								props.onActivated()
+							end
+							task.delay(0.05, function()
+								api.start({
+									clicked = 0,
+									config = {
+										tension = 700,
+										friction = 30,
+									},
+								})
+							end)
+						end)
+					end,
+				}),
 				uIAspectRatioConstraint2 = React.createElement("UIAspectRatioConstraint", {
 					AspectRatio = 2.77,
 				}),

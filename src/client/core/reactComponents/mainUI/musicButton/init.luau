@@ -18,7 +18,7 @@ return function(props)
 		BackgroundTransparency = 1,
 		BorderColor3 = Color3.fromRGB(0, 0, 0),
 		BorderSizePixel = 0,
-		Position = UDim2.fromScale(0.913, 0.949),
+		Position = if _G.isMobile then UDim2.fromScale(0.93, 0.1) else UDim2.fromScale(0.913, 0.85),
 		Size = UDim2.fromScale(0.072, 0.105),
 	}, {
 		uIScale = React.createElement("UIScale", {

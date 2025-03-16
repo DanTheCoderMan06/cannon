@@ -540,6 +540,8 @@ return {
 			end
 			return true
 		end,
+		--Gift Compat
+		giftName = "giftArtillery",
 	},
 	giftArtilleryTier2 = {
 		id = 3224676143,

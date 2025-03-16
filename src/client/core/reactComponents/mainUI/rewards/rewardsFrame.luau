@@ -135,6 +135,7 @@ return function(props)
 		ScrollBarImageColor3 = Color3.fromRGB(0, 0, 0),
 		Selectable = false,
 		Size = UDim2.fromScale(0.963, 0.84),
+		ClipsDescendants = false,
 	}, {
 		uIListLayout = React.createElement("UIListLayout", {
 			FillDirection = Enum.FillDirection.Horizontal,

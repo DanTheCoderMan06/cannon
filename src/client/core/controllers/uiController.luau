@@ -57,6 +57,28 @@ function uiController.promptOptIn()
 	return success, errorMessage
 end
 
+local function app()
+	local selectedGift, setSelectedGift = React.useState("")
+
+	return React.createElement(menuUi, {
+		selectedUIEvent = selectedUIEvent,
+		selectSectionEvent = selectSectionEvent,
+		claimedItemEvent = claimedItemEvent,
+		unlockedItemEvent = unlockedItemEvent,
+		dataChanged = dataController.dataChanged,
+		getData = dataController.getData,
+		resetEvent = resetEvent,
+		toggleMusicEvent = musicController.toggleMusicEvent,
+		promptIn = function()
+			if uiController.canPromptIn() then
+				uiController.promptOptIn()
+			end
+		end,
+		selectedGift = selectedGift,
+		setSelectedGift = setSelectedGift,
+	})
+end
+
 function uiController.start()
 	_G.isMobile = UserInputService.TouchEnabled
 
@@ -68,21 +90,7 @@ function uiController.start()
 			DisplayOrder = 1,
 			IgnoreGuiInset = true,
 		}, {
-			content = React.createElement(menuUi, {
-				selectedUIEvent = selectedUIEvent,
-				selectSectionEvent = selectSectionEvent,
-				claimedItemEvent = claimedItemEvent,
-				unlockedItemEvent = unlockedItemEvent,
-				dataChanged = dataController.dataChanged,
-				getData = dataController.getData,
-				resetEvent = resetEvent,
-				toggleMusicEvent = musicController.toggleMusicEvent,
-				promptIn = function()
-					if uiController.canPromptIn() then
-						uiController.promptOptIn()
-					end
-				end,
-			}),
+			content = React.createElement(app),
 		}),
 		Players.LocalPlayer.PlayerGui,
 		"menuUI"
@@ -113,8 +121,7 @@ function uiController.start()
 	end)
 
 	ExperienceNotificationService.OptInPromptClosed:Connect(function()
-		local canSend = zap.hasNotificationsEnabled.Call()
-		uiController.promptInEvent:Fire(canSend)
+		uiController.promptInEvent:Fire(true)
 	end)
 end
 

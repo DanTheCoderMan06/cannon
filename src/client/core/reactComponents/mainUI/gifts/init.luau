@@ -73,14 +73,12 @@ return function(props)
 		uiTrove:Add(props.selectedUIEvent:Connect(function(uiName)
 			local target = 1
 			if uiName == "gifts" then
-				if styles.transparency:getValue() == 1 then
-					target = 0
-				end
+				target = 0
 			end
 			api.start({
 				transparency = target,
 				config = {
-					tension = 400,
+					tension = 800,
 					friction = 20,
 				},
 			})

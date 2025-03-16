@@ -67,7 +67,7 @@ function marketplaceUtil.getPlayerImage(player)
 	if not playerCache[player.UserId]["image"] then
 		safeCall(function()
 			playerCache[player.UserId]["image"] = Players:GetUserThumbnailAsync(
-				player.UserId,
+				player.UserId > 0 and player.UserId or 1,
 				Enum.ThumbnailType.HeadShot,
 				Enum.ThumbnailSize.Size100x100
 			)

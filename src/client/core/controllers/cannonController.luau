@@ -175,7 +175,7 @@ function cannonController.start()
 		for _, attachmentName in pairs(effectsConfig.attachToAttachments) do
 			local start = character:FindFirstChild(attachmentName, true)
 			local newAtt = start:Clone()
-			newAtt.CFrame *= CFrame.new(0, 0, 2)
+			newAtt.CFrame *= CFrame.new(0, 0, 3)
 			newAtt.Parent = start.Parent
 			newAtt.Name = attachmentName .. "Trail"
 			local trail = trailEffects.Trail:Clone()
@@ -254,7 +254,7 @@ function cannonController.start()
 		finishedSignal:Connect(function() --TODO: Use raycast + spr to  finish up dummy falling
 			cameraController.removeTracker()
 			spr.target(workspace.CurrentCamera, 1, 0.25, { FieldOfView = 70 })
-
+			cameraController.shakeBump()
 			local mapParams = RaycastParams.new()
 			mapParams.FilterDescendantsInstances = { workspace.Map }
 			mapParams.FilterType = Enum.RaycastFilterType.Include
@@ -295,15 +295,24 @@ function cannonController.start()
 				if currentPos.Y > 0 then
 					return
 				end
+				for _, v in pairs(character:GetDescendants()) do
+					if v:IsA("BasePart") then
+						v.AssemblyLinearVelocity = Vector3.new()
+					end
+				end
 				Players.LocalPlayer.Character:PivotTo(
-					CFrame.new(currentPos * Vector3.new(1, 0, 1) + Vector3.new(0, 20, 0))
+					CFrame.new(currentPos * Vector3.new(1, 0, 1) + Vector3.new(0, 20, 0) - Vector3.new(1, 0, 1))
 				)
 			end)
 
+			local startWait = tick()
 			task.delay(3, function()
 				repeat
 					task.wait()
-				until not character or character.PrimaryPart.AssemblyLinearVelocity.Magnitude < 0.1
+				until not character
+					or character.PrimaryPart.AssemblyLinearVelocity.Magnitude < 0.1
+					or tick() - startWait > 5
+				cameraController.endShake()
 				RunService:UnbindFromRenderStep("noFallThrough")
 				RunService:UnbindFromRenderStep("fallSound")
 				finishedSignal:Destroy()

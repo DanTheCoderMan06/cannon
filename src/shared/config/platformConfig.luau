@@ -46,7 +46,7 @@ return {
 					local timeLeft = math.floor(
 						math.clamp(
 							rewardsConfig.luckyBlockWaitTime - (tick() - startTimeLuckyBlock),
-							0,
+							-10,
 							rewardsConfig.luckyBlockWaitTime
 						)
 					)
@@ -55,6 +55,10 @@ return {
 						title = timeLeft > 0 and reactUtil.secondsToMMSS(timeLeft) or "READY!",
 						description = "UNTIL REWARD",
 					})
+
+					if timeLeft == -10 then
+						local success = zap.requestLuckyBlock.Call()
+					end
 				end)
 			end,
 			init = function()
@@ -112,7 +116,7 @@ return {
 					description = canPromptIn and "ENABLE NOTIFICATIONS" or "INVITE A NEW PLAYER",
 				}
 			end,
-			initModel = ReplicatedStorage.assets.cannons:FindFirstChild("cannon1"),
+			initModel = ReplicatedStorage.assets:FindFirstChild("rewardSuitcase"),
 			callbackFunction = function(success, states)
 				if success then
 					spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(0.992156, 1, 0.580392) })
@@ -311,7 +315,15 @@ return {
 			end,
 			title = "SET STATUS",
 			description = "PUBLIC 👥",
-			updateValues = function(trove, updateEvent)
+			updateValues = function(trove, updateEvent, states)
+				local playerData = dataController.currentData
+				if playerData.towerStatus == 0 then
+					spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(0, 1, 81 / 255) })
+				elseif playerData.towerStatus == 1 then
+					spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(0.474509, 0.505882, 0.792156) })
+				else
+					spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(0.788235, 0.474509, 0.933333) })
+				end
 				trove:Add(dataController.dataChanged:Connect(function(newdata)
 					updateEvent:Fire({
 						title = "TOWER STATUS",
@@ -340,7 +352,14 @@ return {
 				end
 
 				task.delay(1, function()
-					spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(0, 1, 81 / 255) })
+					local newData = dataController.getData()
+					if newData.towerStatus == 0 then
+						spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(0, 1, 81 / 255) })
+					elseif newData.towerStatus == 1 then
+						spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(0.474509, 0.505882, 0.792156) })
+					else
+						spr.target(states.model.touch, 0.9, 3, { Color = Color3.new(0.788235, 0.474509, 0.933333) })
+					end
 				end)
 			end,
 		},

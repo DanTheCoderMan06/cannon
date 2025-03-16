@@ -78,13 +78,6 @@ function controlsController.start()
 
 	RagdollEvent = require(ReplicatedStorage.client.controllers.stateController).getEvents().radgollEvent
 
-	if RunService:IsStudio() then
-		print("Ragdoll Support")
-		ContextActionService:BindAction("ragdoll", ActivateRagdoll, true, Enum.KeyCode.F, Enum.KeyCode.ButtonX)
-		ContextActionService:SetTitle("ragdoll", "Doll")
-		ContextActionService:SetPosition("ragdoll", UDim2.new(0.5, 0, 0, 0))
-	end
-
 	Players.LocalPlayer:GetAttributeChangedSignal("autoFarming"):Connect(function()
 		controlsController.updateFarming()
 	end)

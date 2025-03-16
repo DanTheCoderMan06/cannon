@@ -15,12 +15,12 @@ local isMobile = UserInputService.TouchEnabled
 
 return function(props)
 	return React.createElement("Frame", {
-		AnchorPoint = Vector2.new(0, 0.5),
+		AnchorPoint = Vector2.new(1, 0.5),
 		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 		BackgroundTransparency = 1,
 		BorderColor3 = Color3.fromRGB(0, 0, 0),
 		BorderSizePixel = 0,
-		Position = UDim2.fromScale(0.85, 0.5),
+		Position = UDim2.fromScale(if _G.isMobile then 1 - 0.065 else 1 - 0.045, 0.5),
 		Size = UDim2.fromScale(0.0521, 0.0926),
 	}, {
 		uIAspectRatioConstraint = React.createElement("UIAspectRatioConstraint"),
