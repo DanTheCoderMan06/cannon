@@ -4,11 +4,12 @@ return {
 	nightSky = 300000,
 	nightSkyLerp = 150000,
 	attachToAttachments = {
+		--[[
 		"HatAttachment",
 		"LeftGripAttachment",
 		"RightGripAttachment",
 		"RightFootAttachment",
-		"LeftFootAttachment",
+		"LeftFootAttachment",--]]
 		"RootAttachment",
 	},
 }

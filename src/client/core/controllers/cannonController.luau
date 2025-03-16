@@ -173,16 +173,18 @@ function cannonController.start()
 		local characterTrails = {}
 
 		for _, attachmentName in pairs(effectsConfig.attachToAttachments) do
-			local start = character:FindFirstChild(attachmentName, true)
-			local newAtt = start:Clone()
-			newAtt.CFrame *= CFrame.new(0, 0, 3)
-			newAtt.Parent = start.Parent
-			newAtt.Name = attachmentName .. "Trail"
-			local trail = trailEffects.Trail:Clone()
-			trail.Attachment0 = start
-			trail.Attachment1 = newAtt
-			trail.Parent = start.Parent
-			table.insert(characterTrails, trail)
+			for i = 1, 1 do
+				local start = character:FindFirstChild(attachmentName, true)
+				local newAtt = start:Clone()
+				newAtt.CFrame *= CFrame.new(0, 0, 2)
+				newAtt.Parent = start.Parent
+				newAtt.Name = attachmentName .. "Trail"
+				local trail = trailEffects.Trail:Clone()
+				trail.Attachment0 = start
+				trail.Attachment1 = newAtt
+				trail.Parent = start.Parent
+				table.insert(characterTrails, trail)
+			end
 		end
 
 		cameraController.startShake()
@@ -316,9 +318,15 @@ function cannonController.start()
 				RunService:UnbindFromRenderStep("noFallThrough")
 				RunService:UnbindFromRenderStep("fallSound")
 				finishedSignal:Destroy()
+
 				for _, v in pairs(characterTrails) do
-					v:Destroy()
+					v.Enabled = false
 				end
+				task.delay(5, function()
+					for _, v in pairs(characterTrails) do
+						v:Destroy()
+					end
+				end)
 				windController.toggle(false)
 
 				character:PivotTo(
