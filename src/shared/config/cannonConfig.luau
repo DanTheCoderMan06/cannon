@@ -5,7 +5,7 @@ local function cost(l1, l2)
 end
 
 local function power(playerLevel)
-	return math.log(1 + 25 * (playerLevel + 1), 1.01) * 40 - 15000
+	return math.log(1 + 25 * (playerLevel + 1), 1.01) * 40 - 12000
 end
 
 local module = {

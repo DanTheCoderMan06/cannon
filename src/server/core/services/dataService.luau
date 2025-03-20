@@ -100,9 +100,8 @@ function dataService.start()
 
 				profile.Data.lastEntered = os.time()
 				if RunService:IsStudio() then
-					profile.Data.daysClaimed = {}
-					profile.Data.cannonTier = 0
-					profile.Data.doubleMoney = false
+					profile.Data.cannon = 0
+					profile.Data.money = 0
 				end
 
 				dataService.loadGamepasses(player)

@@ -392,7 +392,7 @@ return function(props)
 							return
 						end
 						local productId = giftConfig[selectedGift].id
-						print(productId)
+						
 						MarketplaceService:PromptProductPurchase(Players.LocalPlayer, productId)
 					end,
 				}, {

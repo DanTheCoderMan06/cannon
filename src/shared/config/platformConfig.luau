@@ -19,6 +19,7 @@ local gamepassConfig = require(ReplicatedStorage.shared.config.gamepassConfig)
 local floorConfig = require(ReplicatedStorage.shared.config.floorConfig)
 local rewardsConfig = require(ReplicatedStorage.shared.config.rewardsConfig)
 local tierConfig = require(ReplicatedStorage.shared.config.tierConfig)
+local giftConfig = require(ReplicatedStorage.shared.config.giftConfig)
 
 local marketplaceUtil = require(ReplicatedStorage.shared.utilities.marketplaceUtil)
 local reactUtil = require(ReplicatedStorage.shared.utilities.reactUtil)
@@ -212,8 +213,27 @@ return {
 		},
 		floor = {
 			callback = function(callbackEvent)
-				local success = zap.purchaseUpgrade.Call("floor")
-				callbackEvent:Fire(success)
+				local localPlayer = Players.LocalPlayer
+				local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(localPlayer.Name)
+				if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
+					local success = zap.purchaseUpgrade.Call("floor")
+					callbackEvent:Fire(success)
+				else
+					local playerData = dataController.getData()
+					zap.checkRecipient.Call({
+						selectedPlayer = playerPlatform:GetAttribute("currentTower"),
+						selectedGift = "tenFloors",
+					})
+					if playerData.productTiers.gifts["floors"] then
+						if playerData.productTiers.gifts["floors"] >= 5 then
+							MarketplaceService:PromptProductPurchase(localPlayer, giftConfig.tenFloorsTier2.id)
+							callbackEvent:Fire(true)
+							return
+						end
+					end
+					MarketplaceService:PromptProductPurchase(localPlayer, giftConfig.tenFloors.id)
+					callbackEvent:Fire(true)
+				end
 			end,
 			title = "+1 FLOOR",
 			description = "N/A",
@@ -222,28 +242,52 @@ return {
 				local stats = Players.LocalPlayer:WaitForChild("leaderstats")
 				local playerData = dataController.currentData
 				local floorValue
+				local localPlayer = Players.LocalPlayer
+				local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(localPlayer.Name)
+
 				for _, v in pairs(stats:GetChildren()) do
 					if v:GetAttribute("statName") ~= "floors" then
 						continue
 					end
 					floorValue = v
 					trove:Add(v:GetPropertyChangedSignal("Value"):Connect(function()
-						print(tostring(floorConfig.costFormula(v.Value + 1, playerData.boughtFloors)))
-						updateEvent:Fire({
-							title = "LEVEL " .. tostring(v.Value),
-							description = tostring(floorConfig.costFormula(v.Value + 1, playerData.boughtFloors))
-								.. "$",
-						})
+						if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
+							updateEvent:Fire({
+								title = "LEVEL " .. tostring(v.Value),
+								description = tostring(floorConfig.costFormula(v.Value + 1, playerData.boughtFloors))
+									.. "$",
+							})
+						end
 					end))
 				end
+
 				trove:Add(dataController.dataChanged:Connect(function(newdata)
 					print("go")
 					playerData = newdata
-					updateEvent:Fire({
-						title = "LEVEL " .. tostring(floorValue.Value),
-						description = tostring(floorConfig.costFormula(floorValue.Value + 1, playerData.boughtFloors))
-							.. "$",
-					})
+					if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
+						updateEvent:Fire({
+							title = "LEVEL " .. tostring(floorValue.Value),
+							description = tostring(
+								floorConfig.costFormula(floorValue.Value + 1, playerData.boughtFloors)
+							) .. "$",
+						})
+					end
+				end))
+
+				trove:Add(playerPlatform:GetAttributeChangedSignal("currentTower"):Connect(function()
+					if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
+						updateEvent:Fire({
+							title = "LEVEL " .. tostring(floorValue.Value),
+							description = tostring(
+								floorConfig.costFormula(floorValue.Value + 1, playerData.boughtFloors)
+							) .. "$",
+						})
+					else
+						updateEvent:Fire({
+							title = "GIFT 10 FLOORS",
+							description = '100 <font color="#008000">\u{E002}</font>',
+						})
+					end
 				end))
 			end,
 			init = function()
@@ -274,39 +318,130 @@ return {
 			end,
 		},
 		tenFloors = {
-			callback = function()
+			callback = function(callbackEvent)
 				local playerData = dataController.getData()
-				if playerData.productTiers.products["floors"] then
-					if playerData.productTiers.products["floors"] >= 5 then
-						MarketplaceService:PromptProductPurchase(Players.LocalPlayer, gamepassConfig.tenFloorsTier2.id)
-					else
-						MarketplaceService:PromptProductPurchase(Players.LocalPlayer, gamepassConfig.tenFloors.id)
+				local localPlayer = Players.LocalPlayer
+				local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(localPlayer.Name)
+				if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
+					if playerData.productTiers.products["floors"] then
+						if playerData.productTiers.products["floors"] >= 5 then
+							MarketplaceService:PromptProductPurchase(
+								Players.LocalPlayer,
+								gamepassConfig.tenFloorsTier2.id
+							)
+						else
+							MarketplaceService:PromptProductPurchase(Players.LocalPlayer, gamepassConfig.tenFloors.id)
+						end
 					end
+					MarketplaceService:PromptProductPurchase(Players.LocalPlayer, gamepassConfig.tenFloors.id)
+					callbackEvent:Fire(true)
+				else
+					local playerData = dataController.getData()
+					zap.checkRecipient.Call({
+						selectedPlayer = playerPlatform:GetAttribute("currentTower"),
+						selectedGift = "fiftyFloors",
+					})
+					if playerData.productTiers.gifts["floors"] then
+						if playerData.productTiers.gifts["floors"] >= 5 then
+							MarketplaceService:PromptProductPurchase(localPlayer, giftConfig.fiftyFloorsTier2.id)
+							callbackEvent:Fire(true)
+							return
+						end
+					end
+					MarketplaceService:PromptProductPurchase(localPlayer, giftConfig.fiftyFloors.id)
+					callbackEvent:Fire(true)
 				end
-				MarketplaceService:PromptProductPurchase(Players.LocalPlayer, gamepassConfig.tenFloors.id)
+			end,
+			init = function()
+				return { title = "+10 FLOORS", description = '100 <font color="#008000">\u{E002}</font>' }
 			end,
 			title = "+10 FLOORS",
 			description = '100 <font color="#008000">\u{E002}</font>',
+			updateValues = function(trove, updateEvent)
+				local Players = game:GetService("Players")
+				local stats = Players.LocalPlayer:WaitForChild("leaderstats")
+				local floorValue
+				local localPlayer = Players.LocalPlayer
+				local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(localPlayer.Name)
+
+				trove:Add(playerPlatform:GetAttributeChangedSignal("currentTower"):Connect(function()
+					if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
+						updateEvent:Fire({
+							title = "+10 FLOORS",
+							description = '100 <font color="#008000">\u{E002}</font>',
+						})
+					else
+						updateEvent:Fire({
+							title = "GIFT 50 FLOORS",
+							description = '100 <font color="#008000">\u{E002}</font>',
+						})
+					end
+				end))
+			end,
 			initModel = ReplicatedStorage.assets.twofloors,
 		},
 		fiftyFloors = {
-			callback = function()
+			callback = function(callbackEvent)
 				local playerData = dataController.getData()
-				if playerData.productTiers.products["floors"] then
-					if playerData.productTiers.products["floors"] >= 5 then
-						MarketplaceService:PromptProductPurchase(
-							Players.LocalPlayer,
-							gamepassConfig.fiftyFloorsTier2.id
-						)
-					else
-						MarketplaceService:PromptProductPurchase(Players.LocalPlayer, gamepassConfig.fiftyFloors.id)
+				local localPlayer = Players.LocalPlayer
+				local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(localPlayer.Name)
+				if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
+					if playerData.productTiers.products["floors"] then
+						if playerData.productTiers.products["floors"] >= 5 then
+							MarketplaceService:PromptProductPurchase(
+								Players.LocalPlayer,
+								gamepassConfig.fiftyFloorsTier2.id
+							)
+						else
+							MarketplaceService:PromptProductPurchase(Players.LocalPlayer, gamepassConfig.fiftyFloors.id)
+						end
 					end
+					MarketplaceService:PromptProductPurchase(Players.LocalPlayer, gamepassConfig.fiftyFloors.id)
+					callbackEvent:Fire(true)
+				else
+					local playerData = dataController.getData()
+					zap.checkRecipient.Call({
+						selectedPlayer = playerPlatform:GetAttribute("currentTower"),
+						selectedGift = "twoHundredFifty",
+					})
+					if playerData.productTiers.gifts["floors"] then
+						if playerData.productTiers.gifts["floors"] >= 5 then
+							MarketplaceService:PromptProductPurchase(localPlayer, giftConfig.twoHundredFiftyTier2.id)
+							callbackEvent:Fire(true)
+							return
+						end
+					end
+					MarketplaceService:PromptProductPurchase(localPlayer, giftConfig.twoHundredFifty.id)
+					callbackEvent:Fire(true)
 				end
-				MarketplaceService:PromptProductPurchase(Players.LocalPlayer, gamepassConfig.fiftyFloors.id)
 			end,
-			title = "+40 FLOORS",
+			init = function()
+				return { title = "+50 FLOORS", description = '100 <font color="#008000">\u{E002}</font>' }
+			end,
+			title = "+50 FLOORS",
 			description = '100 <font color="#008000">\u{E002}</font>',
 			initModel = ReplicatedStorage.assets.fivefloors,
+			updateValues = function(trove, updateEvent)
+				local Players = game:GetService("Players")
+				local stats = Players.LocalPlayer:WaitForChild("leaderstats")
+				local floorValue
+				local localPlayer = Players.LocalPlayer
+				local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(localPlayer.Name)
+
+				trove:Add(playerPlatform:GetAttributeChangedSignal("currentTower"):Connect(function()
+					if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
+						updateEvent:Fire({
+							title = "+10 FLOORS",
+							description = '100 <font color="#008000">\u{E002}</font>',
+						})
+					else
+						updateEvent:Fire({
+							title = "GIFT 250 FLOORS",
+							description = '100 <font color="#008000">\u{E002}</font>',
+						})
+					end
+				end))
+			end,
 		},
 		changeTower = {
 			callback = function(callbackEvent)

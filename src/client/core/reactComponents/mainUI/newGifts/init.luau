@@ -66,6 +66,11 @@ return function(props)
 					selectedGift = props.selectedGift,
 					onActivated = function()
 						local productId = giftConfig[props.selectedGift].id
+						if giftConfig[props.selectedGift].tiers then
+							if currentTier:getValue() > 1 then
+								productId = giftConfig[giftConfig[props.selectedGift].tier2Name].id
+							end
+						end
 						MarketplaceService:PromptProductPurchase(Players.LocalPlayer, productId)
 						props.selectedUIEvent:Fire("")
 					end,

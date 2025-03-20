@@ -29,7 +29,6 @@ floorStorage.Name = "floorStorage"
 floorStorage.Parent = ServerStorage
 
 local floors = objectcache.new({ Template = castleFloor, CacheParent = floorStorage })
-local topFloors = objectcache.new({ Template = ReplicatedStorage.assets.topFloor, CacheParent = floorStorage })
 
 local CHUNK_SIZE = 10
 
@@ -43,13 +42,13 @@ function castleService.updateTower(player)
 	print(totalFloors)
 
 	task.spawn(function()
-		local currentFloor = 0
-		while currentFloor <= totalFloors - 1 do
+		local currentFloor = totalFloors - 1
+		while currentFloor >= 0 do
 			for i = 1, CHUNK_SIZE do
-				if currentFloor > totalFloors - 1 then
+				if currentFloor < 0 then
 					break
 				end
-				if not playerCastle:FindFirstChild(currentFloor) then
+				if not playerCastle:FindFirstChild(tostring(currentFloor)) then
 					if #floors._FreeObjects < i then
 						floors:ExpandCache(50)
 					end
@@ -58,7 +57,7 @@ function castleService.updateTower(player)
 					newFloor.Name = tostring(currentFloor)
 					newFloor.Parent = playerCastle
 				end
-				currentFloor += 1
+				currentFloor = currentFloor - 1
 			end
 			task.wait()
 		end
@@ -72,13 +71,14 @@ function castleService.updateTower(player)
 	end
 
 	if not playerCastle:FindFirstChild("topFloor") then
-		local playerTopFloor = topFloors:Get(playerSpot.CFrame * CFrame.new(0, floorHeight * (totalFloors + 0.5), 0))
+		local playerTopFloor = ReplicatedStorage.assets.topFloor:Clone()
+		playerTopFloor:PivotTo(playerSpot.CFrame * CFrame.new(0, floorHeight * (totalFloors + 0.5) + 6, 0))
 		playerTopFloor.Name = "topFloor"
 		playerTopFloor.Parent = playerCastle
 	else
 		playerCastle
-			:FindFirstChild("topFloor")
-			:PivotTo(playerSpot.CFrame * CFrame.new(0, floorHeight * (totalFloors + 0.5), 0))
+			:FindFirstChild("topFloor", true)
+			:PivotTo(playerSpot.CFrame * CFrame.new(0, floorHeight * (totalFloors + 0.5) + 6, 0))
 	end
 end
 
@@ -136,6 +136,9 @@ function castleService.updateTowerPrivacy(player, newStatus)
 			if v.Name == "spot" then
 				continue
 			end
+			if v == player then
+				continue
+			end
 			if v:GetAttribute("currentTower") == player.Name then
 				local platformPlayer = Players:FindFirstChild(v.Name)
 				if platformPlayer == player then
@@ -175,9 +178,6 @@ function castleService.start()
 							task.wait()
 						end
 						floors:Return(floorItem)
-					end
-					if floorItem.Name == "topFloor" then
-						topFloors:Return(floorItem)
 					end
 				end
 				v:ClearAllChildren()

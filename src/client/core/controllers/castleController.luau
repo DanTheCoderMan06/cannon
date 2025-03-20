@@ -1,4 +1,5 @@
 local ContentProvider = game:GetService("ContentProvider")
+local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local ReplicatedFirst = game:GetService("ReplicatedFirst")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -46,39 +47,60 @@ function castleController.toggleAllPlatforms(toggle)
 end
 
 function castleController.animateFloor(floor)
-	task.wait(0.4)
-	for _, v in pairs(floor.PrimaryPart:GetChildren()) do
-		if v:IsA("Weld") then
-			local oldC1 = v.C1
-			local offset
-			if v.Name == "structure" then
-				offset = CFrame.new(Vector3.new(-100, 0, -100))
-			elseif v.Name == "structure.001" then
-				offset = CFrame.new(Vector3.new(100, 0, -100))
-			elseif v.Name == "structure.002" then
-				offset = CFrame.new(Vector3.new(-100, 0, -100))
-			elseif v.Name == "structure.003" then
-				offset = CFrame.new(Vector3.new(-100, 0, 100))
-			else
-				continue
-			end
-			v.C1 *= offset
-			spr.target(v, 1, 2.5, { C1 = oldC1 })
-		elseif v:IsA("BasePart") then
-			local target = v.Transparency
-			v.Transparency = 1
-			task.delay(0.2, function()
-				spr.target(v, 1, 2.5, { Transparency = target })
-			end)
-			for _, z in pairs(v:GetChildren()) do
-				if z:IsA("Texture") then
-					z.Transparency = 1
-					task.delay(0.2, function()
-						spr.target(z, 1, 2.5, { Transparency = 0 })
-					end)
+	local id = HttpService:GenerateGUID()
+
+	print("[castleController]: Animate Floor!")
+	local welds = {}
+
+	for i, v in pairs(floor.PrimaryPart:GetChildren()) do
+		task.spawn(function()
+			if v:IsA("BasePart") then
+				local target = v.Transparency
+
+				v:SetAttribute("animateId", id)
+				v.Transparency = 1
+
+				spr.stop(v, "Transparency")
+				spr.stop(v, "CFrame")
+
+				task.delay(0.2, function()
+					spr.target(v, 1, 1, { Transparency = target })
+				end)
+
+				for _, z in pairs(v:GetChildren()) do
+					if z:IsA("Texture") then
+						local zTarget = z.Transparency
+						z.Transparency = 1
+						spr.stop(z, "Transparency")
+						task.delay(0.2, function()
+							spr.target(z, 1, 1, { Transparency = zTarget })
+						end)
+					end
+				end
+
+				local offset = CFrame.new(
+					Vector3.new(math.random(-100, 100), math.random(-100, 0), math.random(-100, 100))
+				) * CFrame.Angles(
+					math.random() * 2 * math.pi,
+					math.random() * 2 * math.pi,
+					math.random() * 2 * math.pi
+				)
+
+				local targetCFrame = v.CFrame
+
+				v.Anchored = true
+
+				v.CFrame *= offset
+
+				spr.target(v, 1, 1, { CFrame = targetCFrame })
+				task.wait(2)
+				if v:GetAttribute("animateId") == id then
+					spr.stop(v, "Transparency")
+					spr.stop(v, "CFrame")
+					v.Anchored = false
 				end
 			end
-		end
+		end)
 	end
 end
 
@@ -140,14 +162,17 @@ function castleController.updateSpot(spot, newValue, places, playerFloors)
 		local cframes = {}
 		for i = currentValue, newValue do
 			if not spot:FindFirstChildWhichIsA("Model"):FindFirstChild(i) then
-				local newMiniFloor = ReplicatedStorage.assets.miniFloor:Clone()
+				local weld = Instance.new("Weld")
+				local newMiniFloor = ReplicatedStorage.assets.miniFloorTeleport:Clone()
 				table.insert(parts, newMiniFloor.PrimaryPart)
-				table.insert(cframes, spot.CFrame * CFrame.new(0, ((i - 1) * floorHeight * 0.025), 0))
+				weld.C0 = CFrame.new(0, ((i - 1) * floorHeight * 0.025) + 2, 0)
 				newMiniFloor.Name = tostring(i)
 				newMiniFloor.Parent = spot:FindFirstChildWhichIsA("Model")
+				weld.Part0 = spot 
+				weld.Part1 = newMiniFloor.PrimaryPart
+				weld.Parent = newMiniFloor
 			end
 		end
-		workspace:BulkMoveTo(parts, cframes, Enum.BulkMoveMode.FireCFrameChanged)
 	else
 		for i = newValue, currentValue do
 			if spot:FindFirstChildWhichIsA("Model"):FindFirstChild(i) then
@@ -155,8 +180,18 @@ function castleController.updateSpot(spot, newValue, places, playerFloors)
 			end
 		end
 	end
-	spot:FindFirstChild("characterModel", true)
-		:PivotTo(spot.CFrame * CFrame.new(0, (newValue * floorHeight * 0.025) + 1, 0))
+
+	print(spot:FindFirstChild("characterModel", true):FindFirstChild("centerWeld"))
+	if not spot:FindFirstChild("characterModel", true):FindFirstChild("centerWeld") then
+		local weld = Instance.new("Weld")
+		weld.Name = "centerWeld"
+		weld.Part0 = spot 
+		weld.Part1 =  spot:FindFirstChild("characterModel", true).PrimaryPart
+		weld.Parent = spot:FindFirstChild("characterModel",true)
+		print("Create Weld!")
+	end
+
+	spot:FindFirstChild("characterModel", true):FindFirstChild("centerWeld").C0 = CFrame.new(0, (newValue * floorHeight * 0.025) + 3, 0)
 	spot:FindFirstChild("characterModel", true):FindFirstChild("floors", true).Text = playerFloors .. " Floors!"
 	if places[1] == spot.Name then
 		spot:FindFirstChild("characterModel", true):FindFirstChild("record", true).Text = "🥇1st Place!"
@@ -269,26 +304,10 @@ function castleController.updatePlayer(player)
 		end)
 	end)
 
-	local oldSpotCFrame = playerSpot.CFrame
-
-	playerTroves[player.Name]:Add(playerSpot:GetPropertyChangedSignal("CFrame"):Connect(function()
-		local parts = {}
-		local cframes = {}
-		local delta = playerSpot.Position - oldSpotCFrame.Position
-		for _, v in pairs(towerModel:GetChildren()) do
-			if not tonumber(v.Name) then
-				continue
-			end
-			table.insert(parts, v.PrimaryPart)
-			table.insert(cframes, (v.PrimaryPart.CFrame * CFrame.new(delta)))
-		end
-		workspace:BulkMoveTo(parts, cframes, Enum.BulkMoveMode.FireCFrameChanged)
-		oldSpotCFrame = playerSpot.CFrame
-	end))
-
 	playerTroves[player.Name]:Add(towerPrompt)
 
 	local newRig = ReplicatedStorage.assets.Rig:Clone()
+	newRig.PrimaryPart.Anchored = false
 	local newAnim = ReplicatedStorage.assets.animations.dance
 		:GetChildren()[math.random(1, #ReplicatedStorage.assets.animations.dance:GetChildren())]
 		:Clone()
@@ -450,12 +469,17 @@ function castleController.start()
 	local localPlayerCastle = castleFolder:WaitForChild(Player.Name):FindFirstChildWhichIsA("Model")
 
 	local lastAnimated = 0
+	local oldPos = localPlayerCastle:WaitForChild("topFloor").PrimaryPart.Position
 	localPlayerCastle:WaitForChild("topFloor").PrimaryPart:GetPropertyChangedSignal("CFrame"):Connect(function()
 		if tick() - lastAnimated < 2 then
 			return
 		end
+		if (localPlayerCastle:WaitForChild("topFloor").PrimaryPart.Position - oldPos).Magnitude < 16 then
+			return
+		end
 		lastAnimated = tick()
 		castleController.animateFloor(localPlayerCastle:FindFirstChild("topFloor"))
+		oldPos = localPlayerCastle:WaitForChild("topFloor").PrimaryPart.Position
 	end)
 
 	local pTrove = Trove.new()

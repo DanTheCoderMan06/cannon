@@ -19,6 +19,7 @@ local Trove = require(sharedPackages.Trove)
 local Sift = require(sharedPackages.Sift)
 local menuUi = require(ReplicatedStorage.client.reactComponents.mainUI)
 local loadUI = require(ReplicatedStorage.client.reactComponents.loadingScreen)
+local notification = require(ReplicatedStorage.client.reactComponents.notification)
 
 local zap = require(ReplicatedStorage.zap)
 
@@ -33,6 +34,41 @@ local dataController = require(ReplicatedStorage.client.controllers.dataControll
 local musicController = require(ReplicatedStorage.client.controllers.musicController)
 local rewardsConfig = require(ReplicatedStorage.shared.config.rewardsConfig)
 uiController.promptInEvent = Signal.new()
+
+function uiController.getRandomPosition()
+	local x = math.random() * 0.7 + 0.2
+	local y = math.random() * 0.1 + 0.1
+	return UDim2.fromScale(x, y)
+end
+
+function uiController.renderNotification(text: string, color: Color3)
+	local container = ReactRoblox.createRoot(Instance.new("Folder"))
+	local destroyEvent = Signal.new()
+
+	container:render(ReactRoblox.createPortal(
+		React.createElement("ScreenGui", {
+			ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+			ResetOnSpawn = false,
+			DisplayOrder = 1,
+			IgnoreGuiInset = true,
+		}, {
+			content = React.createElement(notification, {
+				text = text,
+				start = uiController.getRandomPosition(),
+				color = color,
+				destroyEvent = destroyEvent,
+			}),
+		}),
+		Players.LocalPlayer.PlayerGui,
+		"notification"
+	))
+
+	task.spawn(function()
+		destroyEvent:Wait()
+		container:unmount()
+		destroyEvent:Destroy()
+	end)
+end
 
 function uiController.canPromptIn()
 	local success, canPrompt = pcall(function()
@@ -116,6 +152,18 @@ function uiController.start()
 			for i = 1, newData.daysPlayed - currentData.daysPlayed do
 				unlockedItemEvent:Fire(currentData.daysPlayed + i)
 			end
+		end
+		if newData.money > currentData.money then
+			uiController.renderNotification(
+				"+ " .. math.round(newData.money - currentData.money) .. "$",
+				Color3.new(0.419607, 0.572549, 0.349019)
+			)
+		end
+		if newData.floors > currentData.floors then
+			uiController.renderNotification(
+				"+ " .. math.round(newData.floors - currentData.floors) .. " Floors",
+				Color3.new(0.333333, 0.392156, 0.592156)
+			)
 		end
 		currentData = newData
 	end)

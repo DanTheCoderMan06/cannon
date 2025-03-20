@@ -17,7 +17,6 @@ return {
 	firstTimeRewards = true,
 	distanceIncreased = false,
 
-	invitedPlayers = {},
 	notificationsOn = false,
 
 	--For Tiers

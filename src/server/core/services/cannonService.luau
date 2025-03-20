@@ -40,9 +40,10 @@ function cannonService.addCannon(player, cannonName)
 	playerPlatforms:WaitForChild(player.Name):FindFirstChild("cannonPosition"):ClearAllChildren()
 	local targetCannon = ReplicatedStorage.assets.cannons:FindFirstChild(cannonName):Clone()
 	local cTrove = Trove.new()
-	targetCannon
-		:FindFirstChildWhichIsA("Model")
-		:PivotTo(playerPlatforms:WaitForChild(player.Name):FindFirstChild("cannonPosition").CFrame)
+	targetCannon:FindFirstChildWhichIsA("Model"):PivotTo(
+		playerPlatforms:WaitForChild(player.Name):FindFirstChild("cannonPosition").CFrame
+			* CFrame.new(targetCannon:GetAttribute("offset") or Vector3.new())
+	)
 	targetCannon:SetAttribute("cannonName", cannonName)
 	targetCannon
 		:FindFirstChildWhichIsA("Model")
@@ -96,7 +97,7 @@ end
 
 function cannonService.awardPlayer(player, playerPath)
 	local playerData = dataService.getPlayerData(player)
-	local award = cannonConfig.rewardFormula(playerPath.horizontalVelocity)
+	local award = cannonConfig.rewardFormula(playerPath.distance)
 	if playerData.doubleMoney then
 		award *= 2
 	end
