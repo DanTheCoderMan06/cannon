@@ -12,11 +12,8 @@ local vipService = {}
 
 function vipService.givePlayerTempVIP(player)
 	local playerData = dataService.getPlayerData(player)
-	if playerData.vipTimeStart == 0 then
-		playerData.floors += 100
-	end
 	playerData.vipTimeStart = os.time()
-	task.defer(function()
+	task.delay(.1,function()
 		dataService.updatePlayerData(player, playerData)
 	end)
 end
@@ -27,6 +24,7 @@ function vipService.start()
 			task.wait(5)
 			for _, player in pairs(Players:GetPlayers()) do
 				local playerData = dataService.getPlayerData(player)
+				print(os.time() - playerData.vipTimeStart)
 				if
 					marketplaceUtil.userOwnsGamepass(player, rewardsConfig.vipGamepass)
 					or os.time() - playerData.vipTimeStart < rewardsConfig.vipRewardDuration
@@ -34,7 +32,14 @@ function vipService.start()
 				then
 					player:SetAttribute("isVIP", true)
 					playerData.hasVIPOn = true
-					dataService.updatePlayerData(player, playerData)
+					if playerData.firstTimeVIP then
+						playerData.floors += 100
+						playerData.firstTimeVIP = false
+						print("Give floors!")
+					end
+					task.delay(.1,function()
+						dataService.updatePlayerData(player, playerData)
+					end)
 				else
 					player:SetAttribute("isVIP", false)
 					playerData.hasVIPOn = false

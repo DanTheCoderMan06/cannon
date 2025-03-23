@@ -234,7 +234,7 @@ return function(props)
 				LayoutOrder = 3,
 				ZIndex = 5,
 				Position = styles.clicked2:map(function(val)
-					return UDim2.fromScale(0.79, 0.799):Lerp(UDim2.fromScale(0.79, 0.81), val)
+					return UDim2.fromScale(if _G.isMobile then 0.85 else .79, 0.799):Lerp(UDim2.fromScale(if _G.isMobile then 0.85 else .79, 0.81), val)
 				end),
 				ScaleType = Enum.ScaleType.Fit,
 				Size = styles.hover2:map(function(val)
@@ -245,6 +245,9 @@ return function(props)
 				end),
 				Visible = props.extraInfo.giftName ~= nil,
 			}, {
+				uIScale = React.createElement("UIScale", {
+					Scale = _G.isMobile and 1.35 or 1,
+				}),
 				clicker = React.createElement("ImageButton", {
 					AnchorPoint = Vector2.new(0.5, 0.5),
 					BackgroundColor3 = Color3.fromRGB(255, 255, 255),

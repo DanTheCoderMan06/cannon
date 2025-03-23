@@ -572,11 +572,12 @@ function castleController.start()
 	--Teleports
 
 	--Auto Claim Cannon
+	local dataStart = tick()
 	local playerData = dataController.currentData
 	dataController.dataChanged:Connect(function(newData)
 		local cannons = Sift.Array.difference(newData.cannons, playerData.cannons)
 		print(cannons)
-		if #cannons > 0 then
+		if #cannons > 0 and tick() - dataStart > 5 then
 			task.wait()
 			platformConfig.changedCannonSignal:Fire(#newData.cannons)
 			zap.toggleCannon.Call(newData.cannons[#newData.cannons])

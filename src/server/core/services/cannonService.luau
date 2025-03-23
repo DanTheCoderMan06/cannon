@@ -36,29 +36,11 @@ function cannonService.addCannon(player, cannonName)
 		warn("[CannonService]: Attempted to give null player cannon!")
 		return
 	end
-	local playerData = dataService.getPlayerData(player)
-	playerPlatforms:WaitForChild(player.Name):FindFirstChild("cannonPosition"):ClearAllChildren()
-	local targetCannon = ReplicatedStorage.assets.cannons:FindFirstChild(cannonName):Clone()
-	local cTrove = Trove.new()
-	targetCannon:FindFirstChildWhichIsA("Model"):PivotTo(
-		playerPlatforms:WaitForChild(player.Name):FindFirstChild("cannonPosition").CFrame
-			* CFrame.new(targetCannon:GetAttribute("offset") or Vector3.new())
-	)
-	targetCannon:SetAttribute("cannonName", cannonName)
-	targetCannon
-		:FindFirstChildWhichIsA("Model")
-		:ScaleTo(targetCannon:FindFirstChildWhichIsA("Model"):GetScale() * (playerData.cannonTier * 0.1 + 1))
-	targetCannon.Parent = playerPlatforms:WaitForChild(player.Name):FindFirstChild("cannonPosition")
-
-	cTrove:AttachToInstance(targetCannon)
+	player:SetAttribute("currentCannon",cannonName)
 end
 
 function cannonService.launchPlayer(player)
-	local playerCannon = playerPlatforms
-		:WaitForChild(player.Name)
-		:FindFirstChild("cannonPosition")
-		:FindFirstChildWhichIsA("Folder", true)
-		:GetAttribute("cannonName")
+	local playerCannon = player:GetAttribute("currentCannon")
 	local cannonPower = cannonConfig.cannons[playerCannon]
 	local playerData = dataService.getPlayerData(player)
 	if cannonPower then
@@ -77,6 +59,10 @@ function cannonService.launchPlayer(player)
 
 	if playerData.doubleDistance then
 		cannonPower *= 2
+	end
+
+	if player.MembershipType == Enum.MembershipType.Premium then
+		cannonPower *= cannonConfig.premiumMultiplier
 	end
 
 	for _, v in pairs(tierConfig.cannonTiers) do

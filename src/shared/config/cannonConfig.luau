@@ -15,6 +15,7 @@ local module = {
 		return cost(level, boughtLevels)
 	end,
 	maxDistance = 20000,
+	premiumMultiplier = 1.5,
 	specialCannons = {
 		["artillery"] = {
 			power = power(70),

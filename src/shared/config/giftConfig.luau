@@ -448,7 +448,7 @@ return {
 
 				local targetPlayerData = dataService.getPlayerData(target)
 				targetPlayerData.infiniteVIP = true
-
+				
 				task.defer(function()
 					dataService.updatePlayerData(target, targetPlayerData)
 					dataService.updatePlayerData(player, playerData)

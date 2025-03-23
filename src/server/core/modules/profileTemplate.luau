@@ -34,7 +34,7 @@ return {
 	doubleDistance = false,
 	doubleMoney = false,
 	infiniteVIP = false,
-
+	firstTimeVIP = true,
 	--Tutorial
 	firstTime = true,
 
