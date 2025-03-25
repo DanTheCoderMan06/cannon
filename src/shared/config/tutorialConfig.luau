@@ -12,16 +12,17 @@ local config = {
 				items.beam.Attachment0 = target
 				items.beam.Attachment1 = target
 				states.toggleEntrance(false)
-
-				Players.LocalPlayer.Character:WaitForChild("Humanoid"):GetPropertyChangedSignal("MoveDirection"):Wait()
-
+				
 				local con
 				task.delay(2.5, function()
 					if con then
 						con:Disconnect()
 					end
+					print("Next Signal")
 					nextSignal:Fire()
 				end)
+
+				Players.LocalPlayer.Character:WaitForChild("Humanoid"):GetPropertyChangedSignal("MoveDirection"):Wait()
 
 				con = Players.LocalPlayer.CharacterRemoving:Connect(function(character)
 					con:Disconnect()

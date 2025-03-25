@@ -100,7 +100,13 @@ function tutorialController.loadPage(index)
 		return
 	end
 
-	setText:Fire(pageInfo.text)
+	task.spawn(function()
+		repeat
+			task.wait()
+		until setText 
+		setText:Fire(pageInfo.text)
+	end)
+	
 	pageInfo.action(tutorialItems, nextPageSignal, {
 		getData = dataController.getData,
 		dataChanged = dataController.dataChanged,
