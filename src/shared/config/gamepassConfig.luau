@@ -183,7 +183,10 @@ return {
 				return
 			end
 
-			playerData.cannon += 10
+			if cannonConfig.maxLevel > playerData.cannon then
+				playerData.cannon += 10
+				playerData.cannon = math.clamp(playerData.cannon,0,cannonConfig.maxLevel)
+			end
 
 			task.defer(function()
 				dataService.updatePlayerData(player, playerData)
@@ -250,7 +253,7 @@ return {
 			playerData.boughtFloors += 10
 			playerData.productTiers.products["floors"] += 1
 			dataService.updatePlayerData(player, playerData)
-			castleService.updateTower(player)
+			 
 		end,
 		type = "floors",
 		infoType = Enum.InfoType.Product,
@@ -264,7 +267,7 @@ return {
 			playerData.boughtFloors += 50
 			playerData.productTiers.products["floors"] += 1
 			dataService.updatePlayerData(player, playerData)
-			castleService.updateTower(player)
+			 
 		end,
 		type = "floors",
 		infoType = Enum.InfoType.Product,
@@ -284,7 +287,7 @@ return {
 			playerData.productTiers.products["floors"] = playerData.productTiers.products["floors"] or 0
 			playerData.productTiers.products["floors"] += 1
 			dataService.updatePlayerData(player, playerData)
-			castleService.updateTower(player)
+			 
 		end,
 		type = "floors",
 		infoType = Enum.InfoType.Product,
@@ -307,7 +310,7 @@ return {
 			playerData.productTiers.products["floors"] = playerData.productTiers.products["floors"] or 0
 			playerData.productTiers.products["floors"] += 1
 			dataService.updatePlayerData(player, playerData)
-			castleService.updateTower(player)
+			 
 		end,
 		type = "floors",
 		infoType = Enum.InfoType.Product,
@@ -330,7 +333,7 @@ return {
 			playerData.productTiers.products["floors"] = playerData.productTiers.products["floors"] or 0
 			playerData.productTiers.products["floors"] += 1
 			dataService.updatePlayerData(player, playerData)
-			castleService.updateTower(player)
+			 
 		end,
 		type = "floors",
 		infoType = Enum.InfoType.Product,
@@ -347,7 +350,7 @@ return {
 			playerData.boughtFloors += 250
 			playerData.productTiers.products["floors"] += 1
 			dataService.updatePlayerData(player, playerData)
-			castleService.updateTower(player)
+			 
 		end,
 		type = "floors",
 		infoType = Enum.InfoType.Product,

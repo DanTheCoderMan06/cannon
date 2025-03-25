@@ -223,6 +223,16 @@ function castleService.start()
 		castleService.updatePlatform(player, castleFolder:FindFirstChild(targetPlayer.Name))
 		return true
 	end)
+
+	local oldTowers = {}
+	dataService.dataChanged:Connect(function(player,data)
+		if oldTowers[player] then
+			if data.floors ~= oldTowers[player] then
+				castleService.updateTower(player)
+			end
+		end
+		oldTowers[player] = data.floors
+	end)
 end
 
 return castleService

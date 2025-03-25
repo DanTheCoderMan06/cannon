@@ -35,7 +35,7 @@ return {
 
 				task.defer(function()
 					dataService.updatePlayerData(player, playerData)
-					castleService.updateTower(player)
+					 
 				end)
 			else
 				-- Traditional flow for gifting another player
@@ -73,7 +73,7 @@ return {
 
 				task.defer(function()
 					dataService.updatePlayerData(player, playerData)
-					castleService.updateTower(player)
+					 
 				end)
 			else
 				local playerData = dataService.getPlayerData(player)
@@ -114,7 +114,7 @@ return {
 
 				task.defer(function()
 					dataService.updatePlayerData(player, playerData)
-					castleService.updateTower(player)
+					 
 				end)
 			else
 				local playerData = dataService.getPlayerData(player)
@@ -151,7 +151,7 @@ return {
 
 				task.defer(function()
 					dataService.updatePlayerData(player, playerData)
-					castleService.updateTower(player)
+					 
 				end)
 			else
 				local playerData = dataService.getPlayerData(player)
@@ -192,7 +192,7 @@ return {
 
 				task.defer(function()
 					dataService.updatePlayerData(player, playerData)
-					castleService.updateTower(player)
+					 
 				end)
 			else
 				local playerData = dataService.getPlayerData(player)
@@ -229,7 +229,7 @@ return {
 
 				task.defer(function()
 					dataService.updatePlayerData(player, playerData)
-					castleService.updateTower(player)
+					 
 				end)
 			else
 				local playerData = dataService.getPlayerData(player)

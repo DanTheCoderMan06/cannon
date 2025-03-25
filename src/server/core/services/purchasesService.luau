@@ -112,16 +112,20 @@ function purchaseService.start()
 			return false
 		end
 
+		if purchaseType == "cannon" and playerData.cannon >= cannonConfig.maxLevel then
+			return false
+		end
+
 		playerData.money -= cost
 
 		if purchaseType == "cannon" then
 			playerData.cannon += 1
+			playerData.cannon = math.clamp(playerData.cannon,0,cannonConfig.maxLevel)
 			dataService.updatePlayerData(player, playerData)
 			cannonService.addCannon(player, cannonConfig.getCannon(playerData.cannon))
 		else
 			playerData.floors += 1
 			dataService.updatePlayerData(player, playerData)
-			castleService.updateTower(player)
 		end
 
 		return true

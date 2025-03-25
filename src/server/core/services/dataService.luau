@@ -25,6 +25,7 @@ local gamepasses = require(ReplicatedStorage.shared.config.gamepasses)
 
 local marketplaceUtil = require(ReplicatedStorage.shared.utilities.marketplaceUtil)
 dataService.dailyReward = Signal.new()
+dataService.dataChanged = Signal.new()
 
 function dataService.giveRewards(player)
 	local profile = Profiles[player]
@@ -158,6 +159,7 @@ function dataService.updatePlayerData(player: Player, newData)
 	Profiles[player].Data = newData
 	zap.dataChanged.Fire(player, newData)
 	dataService.updateLeaderstats(player)
+	dataService.dataChanged:Fire(player,newData)
 end
 
 function dataService.getPlayerData(player: Player)

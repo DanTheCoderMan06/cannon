@@ -280,7 +280,7 @@ function notificationService.fetchServer()
 end
 
 function notificationService.start()
-	if game.PrivateServerId ~= "" then
+	if game.PrivateServerId ~= "" or RunService:IsStudio() then
 		return
 	end
 

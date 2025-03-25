@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local cannonConfig = require(ReplicatedStorage.shared.config.cannonConfig)
 
 local function logFormula(playerLevel: IntValue)
 	return math.round(math.log(playerLevel, 10))
@@ -52,7 +53,10 @@ local module = {
 		{
 			day = 3,
 			callback = function(playerData)
-				playerData.cannon += 5
+				if cannonConfig.maxLevel > playerData.cannon then
+					playerData.cannon += 5
+					playerData.cannon = math.clamp(playerData.cannon,0,cannonConfig.maxLevel)
+				end	
 			end,
 			type = "image",
 			image = "",
@@ -144,8 +148,11 @@ local module = {
 		{
 			day = 13,
 			callback = function(playerData)
-				playerData.cannon += 10
-			end,
+				if cannonConfig.maxLevel > playerData.cannon then
+					playerData.cannon += 10
+					playerData.cannon = math.clamp(playerData.cannon,0,cannonConfig.maxLevel)
+				end
+				end,
 			type = "image",
 			image = "",
 			name = "+10 Levels",
@@ -171,7 +178,10 @@ local module = {
 		{
 			day = 16,
 			callback = function(playerData)
-				playerData.cannon += 10
+				if cannonConfig.maxLevel > playerData.cannon then
+					playerData.cannon += 10
+					playerData.cannon = math.clamp(playerData.cannon,0,cannonConfig.maxLevel)
+				end
 			end,
 			type = "image",
 			image = "",
@@ -234,7 +244,10 @@ local module = {
 		{
 			day = 23,
 			callback = function(playerData)
-				playerData.cannon += 20
+				if cannonConfig.maxLevel > playerData.cannon then
+					playerData.cannon += 20
+					playerData.cannon = math.clamp(playerData.cannon,0,cannonConfig.maxLevel)
+				end	
 			end,
 			type = "image",
 			image = "",

@@ -203,7 +203,7 @@ return {
 				end
 			end,
 			callbackFunction = function(success, states)
-				if success and not RunService:IsStudio() then
+				if success then
 					switchPlatformColor(states.model, Color3.new(0.992156, 1, 0.580392) )
 				else
 					local id = gamepassConfig.upgradeCannon.getId(dataController.getData())
