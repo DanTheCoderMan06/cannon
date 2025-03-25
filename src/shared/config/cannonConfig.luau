@@ -4,7 +4,7 @@ local function cost(l1, l2)
     -- Base cost is lower for first purchases
     local baseValue = 100 + (la * 50)
     -- Power scaling becomes more significant at higher levels
-    local scaleFactor = 1 + (la * 0.05)
+    local scaleFactor = 1 + (la * 0.15)
     return math.round(baseValue * math.pow(l1, scaleFactor)) + 250
 end
 
@@ -244,13 +244,30 @@ local module = {
 	rewardFormula = function(distance)
 		-- More rewarding for shorter distances, maintains logarithmic scaling
 		local baseReward = 500
-		local distanceScale = distance * 0.8
-		-- Quick rewards early, diminishing returns later
-		local logarithmicComponent = math.log(distanceScale + 100, 1.08) * 150
-		-- Linear component ensures rewards always increase
-		local linearComponent = distance * 0.5
+		local threshold = 100000
 		
-		return math.round(baseReward + logarithmicComponent + linearComponent)
+		-- For distances below threshold, use original formula with gentle curve
+		if distance <= threshold then
+			local distanceScale = distance * 0.8
+			-- Quick rewards early, gentle curve
+			local logarithmicComponent = math.log(distanceScale + 100, 1.08) * 150
+			-- Linear component ensures rewards always increase
+			local linearComponent = distance * 0.5
+			
+			return math.round(baseReward + logarithmicComponent + linearComponent)
+		else
+			-- Calculate the reward at threshold point first
+			local thresholdScale = threshold * 0.8
+			local thresholdLogarithmic = math.log(thresholdScale + 100, 1.08) * 150
+			local thresholdLinear = threshold * 0.5
+			local thresholdReward = baseReward + thresholdLogarithmic + thresholdLinear
+			
+			-- After threshold, apply diminishing returns with square root scaling
+			local excessDistance = distance - threshold
+			local diminishingFactor = math.sqrt(excessDistance) * 5
+			
+			return math.round(thresholdReward + diminishingFactor)
+		end
 	end
 }
 

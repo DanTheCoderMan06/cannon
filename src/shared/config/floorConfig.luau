@@ -2,7 +2,7 @@ local function cost(l1, l2)
     local la = math.clamp(l1 - l2, 0, 10000000)
     
     -- Base cost that grows more slowly
-    local baseValue = 20 + (la * 2)
+    local baseValue = 200 + (la * 20)
     
     -- Logarithmic scaling to prevent excessive growth
     local logScale = math.log10(l1 + 10)

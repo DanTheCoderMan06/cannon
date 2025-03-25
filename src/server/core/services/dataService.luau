@@ -10,7 +10,7 @@ local profileStore = require(serverPackages.ProfileStore)
 local Players = game:GetService("Players")
 
 local profileTemplate = require(ServerStorage.server.modules.profileTemplate)
-local PlayerStore = profileStore.New("PlayerDataStoreDEV3", profileTemplate)
+local PlayerStore = profileStore.New("PlayerDataStoreDEV5", profileTemplate)
 local Profiles = {}
 
 local dataService = {}
@@ -100,7 +100,7 @@ function dataService.start()
 				print(`Profile loaded for {player.DisplayName}!`)
 
 				profile.Data.lastEntered = os.time()
-				if RunService:IsStudio() then
+				if RunService:IsStudio() and player.Name == "DanTheCoderMan" then
 					profile.Data.floors = 0
 					profile.Data.firstTimeVIP = true
 					profile.Data.money = 0

@@ -126,6 +126,9 @@ function tutorialController.startTutorial()
 		return
 	end
 	RAN_TUTORIAL = true
+	repeat
+		task.wait() 
+	until toggleEvent
 	toggleEvent:Fire(true)
 	local currentIndex = 1
 	tutorialItems = ReplicatedStorage.assets.tutorial:Clone()
