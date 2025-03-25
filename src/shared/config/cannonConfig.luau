@@ -41,7 +41,7 @@ local function rewardFormula(distance)
         local logarithmicComponent = math.log(distanceScale + 100, 1.08) * 12.5  -- Reduced by 4x from 50
         local linearComponent = distance * 0.0125  -- Reduced by 4x from 0.05
         
-        return math.round(baseReward + logarithmicComponent + linearComponent)
+        return math.round(baseReward + logarithmicComponent + linearComponent) + 2000
     
     -- Late mid-game (transitional scaling)
     elseif distance <= lateThreshold then

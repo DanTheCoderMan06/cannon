@@ -132,7 +132,7 @@ function notificationService.sendNotification(userId, info, notificationKey, tim
     end
     
     -- Check for duplicate notifications or frequency limits
-    local amountExisting = 0
+    local amountExisting = 1
     if info.multiple then
         for _, v in pairs(savedUserData.Data.notificationQueue) do
             if v == notificationKey then
@@ -152,6 +152,7 @@ function notificationService.sendNotification(userId, info, notificationKey, tim
         debugLog("Too frequent, not sending notification. Wait time: " .. (amountExisting * info.waitTime) .. ", time elapsed: " .. timeElapsed)
         return false
     end
+    
     
     -- Prepare notification content
     local userNotification = {

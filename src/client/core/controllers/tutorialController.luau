@@ -21,7 +21,7 @@ local tutorialUI = require(ReplicatedStorage.client.reactComponents.tutorial)
 local zap = require(ReplicatedStorage.zap)
 
 local toggleEvent
-local setText
+local text, setText = React.createBinding()
 local loadedSignal
 
 local effectsController = require(ReplicatedStorage.client.controllers.effectsController)
@@ -42,10 +42,7 @@ local function app()
 		return { transparency = 1 }
 	end)
 
-	local tutorialText, setTutorialText = React.useBinding("")
-
 	toggleEvent = Signal.new()
-	setText = Signal.new()
 
 	React.useEffect(function()
 		local uiTrove = Trove.new()
@@ -60,13 +57,6 @@ local function app()
 						friction = 30,
 					},
 				})
-			end),
-			"Disconnect"
-		)
-
-		uiTrove:Add(
-			setText:Connect(function(text)
-				setTutorialText(text)
 			end),
 			"Disconnect"
 		)
@@ -86,7 +76,7 @@ local function app()
 	}, {
 		content = React.createElement(tutorialUI, {
 			styles = styles,
-			text = tutorialText,
+			text = text,
 			endTutorial = tutorialController.endTutorial,
 			toggleEvent = toggleEvent,
 		}),
@@ -100,13 +90,7 @@ function tutorialController.loadPage(index)
 		return
 	end
 
-	task.spawn(function()
-		repeat
-			task.wait()
-		until setText 
-		setText:Fire(pageInfo.text)
-	end)
-	
+	setText(pageInfo.text)
 	pageInfo.action(tutorialItems, nextPageSignal, {
 		getData = dataController.getData,
 		dataChanged = dataController.dataChanged,
@@ -143,9 +127,6 @@ function tutorialController.startTutorial()
 	tutorialItems = ReplicatedStorage.assets.tutorial:Clone()
 	tutorialItems.Parent = workspace
 	nextPageSignal:Connect(function()
-		if RAN_TUTORIAL then
-			return
-		end
 		currentIndex += 1
 		tutorialController.loadPage(currentIndex)
 	end)
