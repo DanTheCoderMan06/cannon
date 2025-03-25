@@ -217,6 +217,7 @@ function effectsController.finishedPath(results)
 
 	local track = Players.LocalPlayer.Character:FindFirstChildWhichIsA("Animator", true):LoadAnimation(newAnim)
 	track.Priority = Enum.AnimationPriority.Action4
+	track.Looped = true
 	track:Play()
 
 	local partTrove = Trove.new()

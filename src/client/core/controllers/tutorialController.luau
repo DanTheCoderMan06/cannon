@@ -126,10 +126,13 @@ function tutorialController.startTutorial()
 		return
 	end
 	RAN_TUTORIAL = true
-	repeat
-		task.wait() 
-	until toggleEvent
-	toggleEvent:Fire(true)
+	if toggleEvent then
+		toggleEvent:Fire(true)
+	else
+		loadedSignal:Connect(function()
+			toggleEvent:Fire(true)
+		end)
+	end
 	local currentIndex = 1
 	tutorialItems = ReplicatedStorage.assets.tutorial:Clone()
 	tutorialItems.Parent = workspace

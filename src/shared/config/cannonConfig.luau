@@ -1,11 +1,89 @@
-local function cost(l1, l2)
-    local la = l1 - l2
-    -- Smoother early progression with more aggressive scaling later
-    -- Base cost is lower for first purchases
-    local baseValue = 100 + (la * 50)
-    -- Power scaling becomes more significant at higher levels
-    local scaleFactor = 1 + (la * 0.15)
-    return math.round(baseValue * math.pow(l1, scaleFactor)) + 250
+local function cost(level, boughtLevels)
+    -- Ensure we're working with a valid level difference
+    local levelDiff = math.max(0, level - boughtLevels)
+    
+    -- Base cost with more reasonable scaling
+    local baseValue = 100 + (levelDiff * 50)
+    
+    -- Control the exponential growth with a much gentler curve
+    -- Starting with linear growth, transitioning to gentle logarithmic
+    if level <= 5 then
+        -- Very early game - 4x more expensive than before
+        return math.round(baseValue * level * 1.2 * 4) + 1000  -- 4x multiplier and increased base
+    elseif level <= 10 then
+        -- Early game - 4x more expensive
+        return math.round(baseValue * level * 1.5 * 4) + 2000  -- 4x multiplier and increased base
+    elseif level <= 30 then
+        -- Mid game - 10x more expensive to reach ~20M at level 20
+        local scaleFactor = 1 + (level * 0.03)
+        return math.round(baseValue * math.pow(level, scaleFactor) * 10) + 10000  -- 10x multiplier and increased base
+    else
+        -- Late game - logarithmic dampening but with higher base to maintain progression
+        local logScale = math.log10(level)
+        local expScale = math.exp((level - 20) * 0.4 + 1)  -- Keeping your exponential scaling
+        -- Combined approach with 10x scaling
+        return math.round((baseValue * level * level * logScale * 10) / 2) + 50000  -- 10x multiplier and increased base
+    end
+end
+
+local function rewardFormula(distance)
+    -- Further reduced base reward (40x less than original version)
+    local baseReward = 37  -- Reduced by 4x from 150
+    
+    -- Thresholds for scaling transitions
+    local midThreshold = 100000
+    local lateThreshold = 500000
+    
+    -- Early to mid game rewards (reduced by ~40x from original version)
+    if distance <= midThreshold then
+        -- Further scaled-down values for early game
+        local distanceScale = distance * 0.037  -- Reduced by 4x from 0.15
+        local logarithmicComponent = math.log(distanceScale + 100, 1.08) * 12.5  -- Reduced by 4x from 50
+        local linearComponent = distance * 0.0125  -- Reduced by 4x from 0.05
+        
+        return math.round(baseReward + logarithmicComponent + linearComponent)
+    
+    -- Late mid-game (transitional scaling)
+    elseif distance <= lateThreshold then
+        -- Get the reward at threshold point
+        local midReward = baseReward + 
+                         (math.log(midThreshold * 0.15 + 100, 1.08) * 50) + 
+                         (midThreshold * 0.05)
+        
+        -- Additional distance beyond threshold
+        local excessDistance = distance - midThreshold
+        
+        -- More aggressive scaling for this range with polynomial growth
+        local bonusFactor = math.pow(excessDistance, 1.1) / 1000 + excessDistance * 0.1
+        
+        return math.round(midReward + bonusFactor)
+    
+    -- Late game rewards (significantly increased - ~2x+ previous version)
+    else
+        -- Calculate the reward at late threshold point for continuity
+        local midReward = baseReward + 
+                         (math.log(midThreshold * 0.15 + 100, 1.08) * 50) + 
+                         (midThreshold * 0.05)
+                         
+        local lateThresholdExcess = lateThreshold - midThreshold
+        local lateMidReward = midReward + 
+                             (math.pow(lateThresholdExcess, 1.1) / 1000 + 
+                              lateThresholdExcess * 0.1)
+        
+        -- Additional distance beyond late threshold
+        local ultraLateExcess = distance - lateThreshold
+        
+        -- Much more aggressive scaling with combined approaches for late game:
+        -- 1. Strong polynomial component (grows faster than linear)
+        -- 2. Square root component for large numbers
+        -- 3. Logarithmic boost to ensure meaningful jumps
+        local ultraLateBonus = 
+            (math.pow(ultraLateExcess, 1.2) / 500) +  -- Stronger polynomial growth
+            (math.sqrt(ultraLateExcess) * 30) +       -- Square root scaling
+            (math.log(ultraLateExcess + 1000, 1.5) * 2000)  -- Logarithmic component
+        
+        return math.round(lateMidReward + ultraLateBonus)
+    end
 end
 
 local function power(playerLevel)
@@ -241,35 +319,10 @@ local module = {
 			["min"] = 16,
 		},
 	},
-	rewardFormula = function(distance)
-		-- More rewarding for shorter distances, maintains logarithmic scaling
-		local baseReward = 500
-		local threshold = 100000
-		
-		-- For distances below threshold, use original formula with gentle curve
-		if distance <= threshold then
-			local distanceScale = distance * 0.8
-			-- Quick rewards early, gentle curve
-			local logarithmicComponent = math.log(distanceScale + 100, 1.08) * 150
-			-- Linear component ensures rewards always increase
-			local linearComponent = distance * 0.5
-			
-			return math.round(baseReward + logarithmicComponent + linearComponent)
-		else
-			-- Calculate the reward at threshold point first
-			local thresholdScale = threshold * 0.8
-			local thresholdLogarithmic = math.log(thresholdScale + 100, 1.08) * 150
-			local thresholdLinear = threshold * 0.5
-			local thresholdReward = baseReward + thresholdLogarithmic + thresholdLinear
-			
-			-- After threshold, apply diminishing returns with square root scaling
-			local excessDistance = distance - threshold
-			local diminishingFactor = math.sqrt(excessDistance) * 5
-			
-			return math.round(thresholdReward + diminishingFactor)
-		end
-	end
+	rewardFormula = rewardFormula
 }
+
+
 
 function module.getCannon(playerLevel)
 	local maxLevel = -1

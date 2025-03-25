@@ -6,59 +6,90 @@ local function logFormula(playerLevel: IntValue)
 end
 
 local function luckyBlockReward(playerLevel)
-    -- Base component that scales with player level
-    local baseReward = 1000 + (playerLevel * 200)
+    -- Base reward that scales with player level
+    local baseReward = 1000 + (playerLevel * 150) * 25
     
-    -- Logarithmic component for diminishing returns
-    local logComponent = math.log(playerLevel + 20, 2) * 500
+    -- Logarithmic component for diminishing returns at higher levels
+    local logScale = math.log10(playerLevel + 10)
     
-    -- Random multiplier between 0.8 and 1.5 for variability
-    local randomMultiplier = 0.8 + (math.random() * 0.7)
+    -- Progressive reward scaling for different level ranges
+    local scaledReward
+    if playerLevel < 20 then
+        -- Early game (generous rewards to help players progress)
+        scaledReward = baseReward * (1 + logScale * 0.5)
+    elseif playerLevel < 50 then
+        -- Mid game (moderate logarithmic scaling)
+        scaledReward = baseReward * (1 + logScale * 0.4)
+    else
+        -- Late game (stronger logarithmic dampening)
+        scaledReward = baseReward * (1 + logScale * 0.3)
+    end
     
-    -- Scale based on cannon level (more powerful cannons = better rewards)
-    local cannonBonus = math.sqrt(playerLevel) * 300
-    
-    -- Combine components
-    local reward = (baseReward + logComponent + cannonBonus) * randomMultiplier
+    -- Add variability with controlled randomness (80-120% of calculated value)
+    local randomFactor = 0.8 + (math.random() * 0.4)
     
     -- Round to nearest 100 for clean numbers
-    return math.floor(reward / 100) * 100
+    return math.floor((scaledReward * randomFactor) / 100) * 100
 end
 
-local function getDailyReward(day, playerData)
-    -- Base rewards that increase with consecutive days
-    local baseReward = math.min(day * 500, 10000)
+local function getDailyReward(day, playerLevel)
+    -- Base component scaling with consecutive days
+    local baseReward = math.min(day * 300, 6000)
+    
+    -- Logarithmic scaling based on cannon level
+    local progressBonus = math.log10(playerLevel + 10) * 500
     
     -- Special milestone rewards
     local milestoneMultiplier = 1
-    if day % 5 == 0 then -- every 5 days
+    if day % 7 == 0 then -- weekly bonus
+        milestoneMultiplier = 2
+    elseif day % 3 == 0 then -- smaller bonus every 3 days
         milestoneMultiplier = 1.5
     end
-    if day % 10 == 0 then -- every 10 days
-        milestoneMultiplier = 2
+    
+    -- Scale rewards differently for early, mid, and late game
+    local scaledReward
+    if day < 10 then
+        -- Early rewards
+        scaledReward = (baseReward + progressBonus) * milestoneMultiplier
+    elseif day < 20 then
+        -- Mid game rewards
+        scaledReward = (baseReward + progressBonus * 1.2) * milestoneMultiplier
+    else
+        -- Late game rewards with higher floor but slower growth
+        scaledReward = (baseReward + progressBonus * 1.5) * milestoneMultiplier
     end
     
-    -- Scale with player progress
-    local progressScaling = 1 + (math.log(playerData.cannon + 10, 10) * 0.2)
-    
-    -- Calculate final reward
-    local reward = baseReward * milestoneMultiplier * progressScaling
-    
-    -- For money rewards
-    return math.floor(reward / 100) * 100
+    -- Round to nearest 100 for clean numbers
+    return math.floor(scaledReward / 100) * 100
 end
 
 local function referralReward(referrerLevel)
-    -- Base reward that's meaningful even for new players
+    -- Base reward meaningful even for new players
     local baseReward = 5000
     
-    -- Scaling component based on referrer's progress
-    local progressBonus = referrerLevel * 200
+    -- Logarithmic scaling with referrer's progress
+    local logScale = math.log10(referrerLevel + 10)
     
-    -- Cap the maximum reward
+    -- Scale rewards differently based on referrer's progress
+    local progressBonus
+    if referrerLevel < 30 then
+        -- Early game referrers
+        progressBonus = referrerLevel * 100
+    elseif referrerLevel < 70 then
+        -- Mid game referrers - use logarithmic scaling
+        progressBonus = referrerLevel * 50 * logScale
+    else
+        -- Late game referrers - more logarithmic dampening
+        progressBonus = referrerLevel * 30 * logScale
+    end
+    
+    -- Cap maximum reward
     local maxReward = 25000
+    local reward = math.min(baseReward + progressBonus, maxReward)
     
-    return math.min(baseReward + progressBonus, maxReward)
+    -- Round to nearest 500 for clean numbers
+    return math.floor(reward / 500) * 500
 end
 
 local module = {
