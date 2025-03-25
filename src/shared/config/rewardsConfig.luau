@@ -5,14 +5,66 @@ local function logFormula(playerLevel: IntValue)
 	return math.round(math.log(playerLevel, 10))
 end
 
-local function randomRewardLog(playerLevel)
-	return math.round(math.log(playerLevel + 100, 10) * math.pow(playerLevel + 100, 2.3) * (math.random() + 0.5))
+local function luckyBlockReward(playerLevel)
+    -- Base component that scales with player level
+    local baseReward = 1000 + (playerLevel * 200)
+    
+    -- Logarithmic component for diminishing returns
+    local logComponent = math.log(playerLevel + 20, 2) * 500
+    
+    -- Random multiplier between 0.8 and 1.5 for variability
+    local randomMultiplier = 0.8 + (math.random() * 0.7)
+    
+    -- Scale based on cannon level (more powerful cannons = better rewards)
+    local cannonBonus = math.sqrt(playerLevel) * 300
+    
+    -- Combine components
+    local reward = (baseReward + logComponent + cannonBonus) * randomMultiplier
+    
+    -- Round to nearest 100 for clean numbers
+    return math.floor(reward / 100) * 100
+end
+
+local function getDailyReward(day, playerData)
+    -- Base rewards that increase with consecutive days
+    local baseReward = math.min(day * 500, 10000)
+    
+    -- Special milestone rewards
+    local milestoneMultiplier = 1
+    if day % 5 == 0 then -- every 5 days
+        milestoneMultiplier = 1.5
+    end
+    if day % 10 == 0 then -- every 10 days
+        milestoneMultiplier = 2
+    end
+    
+    -- Scale with player progress
+    local progressScaling = 1 + (math.log(playerData.cannon + 10, 10) * 0.2)
+    
+    -- Calculate final reward
+    local reward = baseReward * milestoneMultiplier * progressScaling
+    
+    -- For money rewards
+    return math.floor(reward / 100) * 100
+end
+
+local function referralReward(referrerLevel)
+    -- Base reward that's meaningful even for new players
+    local baseReward = 5000
+    
+    -- Scaling component based on referrer's progress
+    local progressBonus = referrerLevel * 200
+    
+    -- Cap the maximum reward
+    local maxReward = 25000
+    
+    return math.min(baseReward + progressBonus, maxReward)
 end
 
 local module = {
 	luckyBlockWaitTime = 20,
-	playerJoinReward = 50,
-	luckyBlockFormula = randomRewardLog,
+	playerJoinReward = referralReward,
+	luckyBlockFormula = luckyBlockReward,
 	vipRewardDuration = 10000,
 	vipGamepass = 1060138098,
 	referWaitTime = 50,
@@ -65,7 +117,7 @@ local module = {
 		{
 			day = 4,
 			callback = function(playerData)
-				playerData.money += 125 * logFormula(playerData.cannon)
+				playerData.money +=getDailyReward(4,playerData.cannon)
 			end,
 			type = "image",
 			image = "",
@@ -83,7 +135,7 @@ local module = {
 		{
 			day = 6,
 			callback = function(playerData)
-				playerData.money += 125 * logFormula(playerData.cannon)
+				playerData.money +=getDailyReward(6,playerData.cannon)
 			end,
 			type = "image",
 			image = "",
@@ -101,7 +153,7 @@ local module = {
 		{
 			day = 8,
 			callback = function(playerData)
-				playerData.money += 125 * logFormula(playerData.cannon)
+				playerData.money += getDailyReward(8,playerData.cannon)
 			end,
 			type = "image",
 			image = "",
@@ -110,7 +162,7 @@ local module = {
 		{
 			day = 9,
 			callback = function(playerData)
-				playerData.money += 125 * logFormula(playerData.cannon)
+				playerData.money +=getDailyReward(9,playerData.cannon)
 			end,
 			type = "image",
 			image = "",
@@ -130,7 +182,7 @@ local module = {
 		{
 			day = 11,
 			callback = function(playerData)
-				playerData.money += 150 * logFormula(playerData.cannon)
+				playerData.money  += getDailyReward(11,playerData.cannon)
 			end,
 			type = "image",
 			image = "",
@@ -160,7 +212,7 @@ local module = {
 		{
 			day = 14,
 			callback = function(playerData)
-				playerData.money += 150 * logFormula(playerData.cannon)
+				playerData.money  += getDailyReward(14,playerData.cannon)
 			end,
 			type = "image",
 			image = "",
@@ -190,7 +242,7 @@ local module = {
 		{
 			day = 17,
 			callback = function(playerData)
-				playerData.money += 200 * logFormula(playerData.cannon)
+				playerData.money  += getDailyReward(17,playerData.cannon)
 			end,
 			type = "image",
 			image = "",
@@ -199,7 +251,7 @@ local module = {
 		{
 			day = 18,
 			callback = function(playerData)
-				playerData.money += 200 * logFormula(playerData.cannon)
+				playerData.money +=getDailyReward(18,playerData.cannon)
 			end,
 			type = "image",
 			image = "",
@@ -208,7 +260,7 @@ local module = {
 		{
 			day = 19,
 			callback = function(playerData)
-				playerData.money += 200 * logFormula(playerData.cannon)
+				playerData.money +=getDailyReward(19,playerData.cannon)
 			end,
 			type = "image",
 			image = "",
@@ -226,7 +278,7 @@ local module = {
 		{
 			day = 21,
 			callback = function(playerData)
-				playerData.money += 210 * logFormula(playerData.cannon)
+				playerData.money +=getDailyReward(21,playerData.cannon)
 			end,
 			type = "image",
 			image = "",
@@ -256,7 +308,7 @@ local module = {
 		{
 			day = 24,
 			callback = function(playerData)
-				playerData.money += 250 * logFormula(playerData.cannon)
+				playerData.money +=getDailyReward(24,playerData.cannon)
 			end,
 			type = "image",
 			image = "",
@@ -274,7 +326,7 @@ local module = {
 		{
 			day = 26,
 			callback = function(playerData)
-				playerData.money += 300 * logFormula(playerData.cannon)
+				playerData.money +=getDailyReward(26,playerData.cannon)
 			end,
 			type = "image",
 			image = "",
@@ -283,7 +335,7 @@ local module = {
 		{
 			day = 27,
 			callback = function(playerData)
-				playerData.money += 300 * logFormula(playerData.cannon)
+				playerData.money +=getDailyReward(27,playerData.cannon)
 			end,
 			type = "image",
 			image = "",
@@ -292,7 +344,7 @@ local module = {
 		{
 			day = 28,
 			callback = function(playerData)
-				playerData.money += 300 * logFormula(playerData.cannon)
+				playerData.money +=getDailyReward(28,playerData.cannon)
 			end,
 			type = "image",
 			image = "",

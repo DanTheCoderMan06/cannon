@@ -48,12 +48,12 @@ local function rewardReferrer(ref)
 		local targetPlayer = Players:GetPlayerByUserId(tonumber(ref))
 		local profileData = dataService.getPlayerData(targetPlayer)
 
-		profileData.money = (profileData.money or 0) + rewardsConfig.playerJoinReward
+		profileData.money = (profileData.money or 0) + rewardsConfig.playerJoinReward(profileData.cannon)
 		dataService.updatePlayerData(targetPlayer, profileData)
 		print("[joinRewardService]: Rewarded referrer " .. ref .. " with 50 money! IN GAME")
 	else
 		local profileData = dataService.getGlobalPlayerData(ref)
-		profileData.money = (profileData.money or 0) + rewardsConfig.playerJoinReward
+		profileData.money = (profileData.money or 0) + rewardsConfig.playerJoinReward(profileData.cannon)
 
 		dataService.overwriteUserData(profileData)
 		print("[joinRewardService]: Rewarded referrer " .. ref .. " with 50 money! OFFLINE")
@@ -83,7 +83,7 @@ function joinService.start()
 		MessagingService:SubscribeAsync("joinReward", function(msg)
 			local targetPlayer = Players:GetPlayerByUserId(tonumber(msg.Data))
 			local profileData = dataService.getPlayerData(targetPlayer)
-			profileData.money = (profileData.money or 0) + rewardsConfig.playerJoinReward
+			profileData.money = (profileData.money or 0) + rewardsConfig.playerJoinReward(profileData.cannon)
 			dataService.updatePlayerData(targetPlayer, profileData)
 		end)
 	end)

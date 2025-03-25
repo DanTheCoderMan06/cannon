@@ -1,7 +1,11 @@
 local function cost(l1, l2)
-	local la = l1 - l2
-	local m = math.floor(la / 5) * 300
-	return math.round(math.pow(m, 1.2)) + 500
+    local la = l1 - l2
+    -- Smoother early progression with more aggressive scaling later
+    -- Base cost is lower for first purchases
+    local baseValue = 100 + (la * 50)
+    -- Power scaling becomes more significant at higher levels
+    local scaleFactor = 1 + (la * 0.05)
+    return math.round(baseValue * math.pow(l1, scaleFactor)) + 250
 end
 
 local function power(playerLevel)
@@ -238,8 +242,16 @@ local module = {
 		},
 	},
 	rewardFormula = function(distance)
-		return math.log(0.6 * distance, 1.1) * 100 + 1000
-	end,
+		-- More rewarding for shorter distances, maintains logarithmic scaling
+		local baseReward = 500
+		local distanceScale = distance * 0.8
+		-- Quick rewards early, diminishing returns later
+		local logarithmicComponent = math.log(distanceScale + 100, 1.08) * 150
+		-- Linear component ensures rewards always increase
+		local linearComponent = distance * 0.5
+		
+		return math.round(baseReward + logarithmicComponent + linearComponent)
+	end
 }
 
 function module.getCannon(playerLevel)

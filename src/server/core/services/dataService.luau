@@ -101,7 +101,7 @@ function dataService.start()
 
 				profile.Data.lastEntered = os.time()
 				if RunService:IsStudio() then
-					profile.Data.cannon = 0
+					profile.Data.floors = 0
 					profile.Data.firstTimeVIP = true
 					profile.Data.money = 0
 					profile.Data.infiniteVIP = false
