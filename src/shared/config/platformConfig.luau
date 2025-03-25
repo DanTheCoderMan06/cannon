@@ -153,21 +153,35 @@ return {
 					end
 					cannonValue = v
 					trove:Add(v:GetPropertyChangedSignal("Value"):Connect(function()
-						updateEvent:Fire({
-							title = "LEVEL " .. tostring(v.Value),
-							description = tostring(cannonConfig.costFormula(v.Value + 1, playerData.boughtLevels))
-								.. "$",
-						})
+						if v.Value == cannonConfig.maxLevel then
+							updateEvent:Fire({
+								title = "LEVEL " .. tostring(v.Value),
+								description = "MAX",
+							})
+						else
+							updateEvent:Fire({
+								title = "LEVEL " .. tostring(v.Value),
+								description = tostring(cannonConfig.costFormula(v.Value + 1, playerData.boughtLevels))
+									.. "$",
+							})
+						end
 					end))
 				end
 				trove:Add(dataController.dataChanged:Connect(function(newdata)
 					playerData = newdata
-					updateEvent:Fire({
-						title = "LEVEL " .. tostring(cannonValue.Value),
-						description = tostring(
-							cannonConfig.costFormula(cannonValue.Value + 1, playerData.boughtLevels)
-						) .. "$",
-					})
+					if cannonValue.Value == cannonConfig.maxLevel then
+						updateEvent:Fire({
+							title = "LEVEL " .. tostring(cannonValue.Value),
+							description = "MAX",
+						})
+					else
+						updateEvent:Fire({
+							title = "LEVEL " .. tostring(cannonValue.Value),
+							description = tostring(
+								cannonConfig.costFormula(cannonValue.Value + 1, playerData.boughtLevels)
+							) .. "$",
+						})
+					end
 				end))
 			end,
 			init = function()
@@ -206,9 +220,12 @@ return {
 				if success then
 					switchPlatformColor(states.model, Color3.new(0.992156, 1, 0.580392) )
 				else
-					local id = gamepassConfig.upgradeCannon.getId(dataController.getData())
-					MarketplaceService:PromptProductPurchase(Players.LocalPlayer, id)
 					switchPlatformColor(states.model, Color3.new(1, 0, 0) )
+					local playerData = dataController.getData()
+					if playerData.cannon < cannonConfig.maxLevel then
+						local id = gamepassConfig.upgradeCannon.getId(dataController.getData())
+						MarketplaceService:PromptProductPurchase(Players.LocalPlayer, id)
+					end
 				end
 
 				task.delay(1, function()
