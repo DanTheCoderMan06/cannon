@@ -350,6 +350,7 @@ function cannonController.start()
 				windController.toggle(false)
 
 				keysController.freezeMovement(true)
+				task.wait()
 				stateController.getEvents().radgollEvent:Fire(false)
 
 				character:PivotTo(
