@@ -35,9 +35,12 @@ end
 
 return {
 	cannonIndex = 1,
+	defaultHoverDistance = 5,
+	uiHoverDistance = 0,
 	changedCannonSignal = changedCannonSignal,
 	platforms = {
 		luckyBlock = {
+			hoverDistance = 2,
 			callback = function(callbackEvent)
 				local success = zap.requestLuckyBlock.Call()
 				callbackEvent:Fire(success)
@@ -89,6 +92,7 @@ return {
 			end,
 		},
 		tasks = {
+			hoverDistance = 2.5,
 			callback = function(callbackEvent)
 				local success = false
 				if uiController.canPromptIn() then
@@ -136,6 +140,7 @@ return {
 			end,
 		},
 		cannon = {
+			hoverDistance = 3,
 			callback = function(callbackEvent)
 				local success = zap.purchaseUpgrade.Call("cannon")
 				callbackEvent:Fire(success)
@@ -234,6 +239,7 @@ return {
 			end,
 		},
 		floor = {
+			hoverDistance = 2,
 			callback = function(callbackEvent)
 				local localPlayer = Players.LocalPlayer
 				local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(localPlayer.Name)
@@ -340,6 +346,7 @@ return {
 			end,
 		},
 		tenFloors = {
+			hoverDistance = 2,
 			callback = function(callbackEvent)
 				local playerData = dataController.getData()
 				local localPlayer = Players.LocalPlayer
@@ -403,6 +410,7 @@ return {
 			initModel = ReplicatedStorage.assets.twofloors,
 		},
 		fiftyFloors = {
+			hoverDistance = 2,
 			callback = function(callbackEvent)
 				local playerData = dataController.getData()
 				local localPlayer = Players.LocalPlayer
@@ -467,32 +475,61 @@ return {
 		},
 		changeTower = {
 			callback = function(callbackEvent)
-				local result = zap.changePrivacy.Call()
-				callbackEvent:Fire(result)
+				local localPlayer = Players.LocalPlayer
+				local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(localPlayer.Name)
+				if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
+					local result = zap.changePrivacy.Call()
+					callbackEvent:Fire(result)
+				else
+					local result = zap.selectPlatform.Call(localPlayer)
+					callbackEvent:Fire(result)
+				end
 			end,
 			title = "SET STATUS",
 			description = "PUBLIC 👥",
 			updateValues = function(trove, updateEvent, states)
-				local playerData = dataController.currentData
-				if playerData.towerStatus == 0 then
-					switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255) )
-				elseif playerData.towerStatus == 1 then
-					switchPlatformColor(states.model, Color3.new(0.474509, 0.505882, 0.792156) )
-				else
-					switchPlatformColor(states.model, Color3.new(0.788235, 0.474509, 0.933333) )
+				local localPlayer = Players.LocalPlayer
+				local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(localPlayer.Name)
+
+				local function updateColor()
+					local playerData = dataController.currentData
+					if playerData.towerStatus == 0 then
+						switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255) )
+					elseif playerData.towerStatus == 1 then
+						switchPlatformColor(states.model, Color3.new(0.474509, 0.505882, 0.792156) )
+					else
+						switchPlatformColor(states.model, Color3.new(0.788235, 0.474509, 0.933333) )
+					end
 				end
-				trove:Add(dataController.dataChanged:Connect(function(newdata)
-					updateEvent:Fire({
-						title = "TOWER STATUS",
-						description = if newdata.towerStatus == 0
-							then "PUBLIC 🌐"
-							elseif newdata.towerStatus == 1 then "FRIENDS ONLY 👥"
-							else "PRIVATE 🔒",
-					})
+
+				trove:Add(playerPlatform:GetAttributeChangedSignal("currentTower"):Connect(function()
+					if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
+						updateColor()
+					else
+						switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255) )
+						updateEvent:Fire({
+							title = "TELEPORT",
+							description = "RETURN TO YOUR TOWER",
+						})
+					end
 				end))
+
+				trove:Add(dataController.dataChanged:Connect(function(newdata)
+					if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
+						updateEvent:Fire({
+							title = "TOWER STATUS",
+							description = if newdata.towerStatus == 0
+								then "PUBLIC 🌐"
+								elseif newdata.towerStatus == 1 then "FRIENDS ONLY 👥"
+								else "PRIVATE 🔒",
+						})
+					end
+				end))
+
+				updateColor()
 			end,
 			init = function()
-				local playerData = dataController.currentData
+				local playerData = dataController.getData()
 				return {
 					title = "TOWER STATUS",
 					description = if playerData.towerStatus == 0
@@ -521,6 +558,7 @@ return {
 			end,
 		},
 		upgradeCannon = {
+			hoverDistance = 3,
 			callback = function(callbackEvent)
 				local Players = game:GetService("Players")
 				local stats = Players.LocalPlayer:WaitForChild("leaderstats")
@@ -629,6 +667,7 @@ return {
 			end,
 		},
 		switchCannon = {
+			hoverDistance = 3,
 			checkToLoad = function(loadEvent)
 				local playerData = dataController.getData()
 

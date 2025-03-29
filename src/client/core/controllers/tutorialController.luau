@@ -24,12 +24,16 @@ local toggleEvent
 local text, setText = React.createBinding()
 local loadedSignal
 
+local oldActionTrove = Trove.new()
+
 local effectsController = require(ReplicatedStorage.client.controllers.effectsController)
 local dataController = require(ReplicatedStorage.client.controllers.dataController)
 local castleController = require(ReplicatedStorage.client.controllers.castleController)
 local cannonController = require(ReplicatedStorage.client.controllers.cannonController)
 
 local tutorialConfig = require(ReplicatedStorage.shared.config.tutorialConfig)
+
+local reactUtil = require(ReplicatedStorage.shared.utilities.reactUtil)
 
 local nextPageSignal = Signal.new()
 
@@ -91,12 +95,19 @@ function tutorialController.loadPage(index)
 	end
 
 	setText(pageInfo.text)
+
+	if oldActionTrove then
+		oldActionTrove:Destroy()
+		oldActionTrove = nil
+	end
+	oldActionTrove = Trove.new()
 	pageInfo.action(tutorialItems, nextPageSignal, {
 		getData = dataController.getData,
 		dataChanged = dataController.dataChanged,
 		togglePlatform = castleController.togglePlatform,
 		toggleAllPlatforms = castleController.toggleAllPlatforms,
 		toggleEntrance = cannonController.toggleEntrance,
+		trove = oldActionTrove
 	})
 end
 
@@ -109,6 +120,8 @@ function tutorialController.endTutorial()
 	if tutorialItems then
 		tutorialItems:Destroy()
 	end
+
+	oldActionTrove = nil
 end
 
 function tutorialController.startTutorial()
@@ -126,12 +139,27 @@ function tutorialController.startTutorial()
 	local currentIndex = 1
 	tutorialItems = ReplicatedStorage.assets.tutorial:Clone()
 	tutorialItems.Parent = workspace
+
 	nextPageSignal:Connect(function()
 		currentIndex += 1
 		tutorialController.loadPage(currentIndex)
 	end)
 
+	local rainbowTrove = Trove.new()
+	local startedTime = tick()
+
+	rainbowTrove:BindToRenderStep("rainbowTutorial",Enum.RenderPriority.Last.Value,function(dt)
+		if tutorialItems then
+			tutorialItems.beam.Color = ColorSequence.new(reactUtil.getSmoothColorFromElapsedTime(tick() - startedTime))
+		end
+	end)
+
+
 	tutorialController.loadPage(currentIndex)
+
+	task.wait()
+	tutorialItems.Parent = workspace
+	rainbowTrove:AttachToInstance(tutorialItems)
 end
 
 function tutorialController.start()
@@ -153,12 +181,6 @@ function tutorialController.start()
 		end)
 
 		loadedSignal:Wait()
-
-		if RunService:IsStudio() then
-			connection:Disconnect()
-			task.wait(1)
-			tutorialController.startTutorial()
-		end
 	end)
 end
 

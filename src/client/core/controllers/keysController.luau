@@ -25,6 +25,21 @@ local function constantMovement(dt)
 	character:WaitForChild("Humanoid"):MoveTo(cannonPart.Position)
 end
 
+local function stopMovement()
+	local character = Players.LocalPlayer.Character
+	if not character then
+		return
+	end
+	if character:GetAttribute("inCannon") then
+		return
+	end
+	local playerPlatform = workspace:WaitForChild("playerPlatforms"):FindFirstChild(Players.LocalPlayer.Name)
+	if not playerPlatform then
+		return
+	end
+	character:WaitForChild("Humanoid"):MoveTo(character.PrimaryPart.Position)
+end
+
 function controlsController.freezeMovement(toggle)
 	local FREEZE_ACTION = "freezeMovement"
 	if toggle then
@@ -47,6 +62,7 @@ function controlsController.updateFarming()
 		RunService:BindToRenderStep("moveCharacter", Enum.RenderPriority.Last.Value, constantMovement)
 	else
 		RunService:UnbindFromRenderStep("moveCharacter")
+		stopMovement()
 	end
 
 	controlsController.freezeMovement(isFarming)

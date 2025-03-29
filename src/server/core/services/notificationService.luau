@@ -6,7 +6,7 @@ local RunService = game:GetService("RunService")
 local ServerStorage = game:GetService("ServerStorage")
 
 -- Debug flag - set to true to enable debug logging
-local DEBUG = true
+local DEBUG = false
 
 -- Debug logging function
 local function debugLog(message)
@@ -81,7 +81,9 @@ local function safeCall(callback, resultVar)
         end)
         
         if not success then
-            warn("[Notification Service] Attempt " .. attempts .. " failed. Retrying...")
+            if DEBUG then
+                warn("[Notification Service] Attempt " .. attempts .. " failed. Retrying...")
+            end
             debugLog("Safe call attempt " .. attempts .. " failed, waiting to retry")
             task.wait(1)
         end
@@ -126,7 +128,9 @@ function notificationService.sendNotification(userId, info, notificationKey, tim
     
     local savedUserData = userData.value
     if not success or not savedUserData then
-        warn("[Notification Service] Failed to get data for user ID: " .. tostring(userId))
+        if DEBUG then
+            warn("[Notification Service] Failed to get data for user ID: " .. tostring(userId))
+        end
         debugLog("Failed to get user data, aborting notification send")
         return false
     end
@@ -172,7 +176,9 @@ function notificationService.sendNotification(userId, info, notificationKey, tim
     end, result)
     
     if not success or result.value.statusCode ~= 200 then
-        warn("[Notification Service] Failed to send notification to user ID: " .. tostring(userId))
+        if DEBUG then
+            warn("[Notification Service] Failed to send notification to user ID: " .. tostring(userId))
+        end
         debugLog("Failed to send notification, status code: " .. (result.value and result.value.statusCode or "unknown"))
         return false
     end
@@ -250,7 +256,9 @@ function notificationService.processBatch(pageIndex, startIndex)
     end, keysPage)
     
     if not success or not keysPage.value then
-        warn("[Notification Service] Failed to get player list")
+        if DEBUG then
+            warn("[Notification Service] Failed to get player list")
+        end
         debugLog("Failed to get player list from DataStore")
         return false, 0, 0
     end
@@ -265,7 +273,9 @@ function notificationService.processBatch(pageIndex, startIndex)
         end, {value = nil})
         
         if not success then
-            warn("[Notification Service] Failed to advance to page " .. pageIndex)
+            if DEBUG then
+                warn("[Notification Service] Failed to advance to page " .. pageIndex)
+            end
             debugLog("Failed to advance page cursor")
             return false, currentPageNumber, 0
         end

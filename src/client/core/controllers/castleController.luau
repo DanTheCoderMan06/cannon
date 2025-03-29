@@ -46,7 +46,14 @@ function castleController.toggleAllPlatforms(toggle)
 	end
 end
 
+local animateTrove 
+
 function castleController.animateFloor(floor)
+	if animateTrove then
+		animateTrove:Destroy()
+	end
+	animateTrove = Trove.new()
+	
 	local id = HttpService:GenerateGUID()
 
 	print("[castleController]: Animate Floor!")
@@ -124,12 +131,19 @@ end
 
 function castleController.setupPlatform(targetPlatform, callbackSignal, modelUsed, platformInfo)
 	local container = ReactRoblox.createRoot(Instance.new("Folder"))
+
+	local targetHover = platformConfig.defaultHoverDistance  
+	
+	if platformConfig[targetPlatform.Name] then
+		targetHover = platformConfig[targetPlatform.Name].hoverDistance
+	end
+
 	container:render(ReactRoblox.createPortal(
 		React.createElement("BillboardGui", {
 			Active = true,
 			AlwaysOnTop = true,
 			ClipsDescendants = true,
-			StudsOffset = Vector3.new(0, 4, 0),
+			StudsOffset = Vector3.new(0,targetHover + platformConfig.uiHoverDistance, 0),
 			LightInfluence = 1,
 			MaxDistance = 100,
 			Size = UDim2.fromScale(12, 6),
@@ -165,7 +179,7 @@ function castleController.updateSpot(spot, newValue, places, playerFloors)
 				local weld = Instance.new("Weld")
 				local newMiniFloor = ReplicatedStorage.assets.miniFloorTeleport:Clone()
 				table.insert(parts, newMiniFloor.PrimaryPart)
-				weld.C0 = CFrame.new(0, ((i - 1) * floorHeight * 0.025) + 2, 0)
+				weld.C0 = CFrame.new(0, ((i - 1) * floorHeight * 0.025) + 1.1, 0)
 				newMiniFloor.Name = tostring(i)
 				newMiniFloor.Parent = spot:FindFirstChildWhichIsA("Model")
 				weld.Part0 = spot 
@@ -188,10 +202,9 @@ function castleController.updateSpot(spot, newValue, places, playerFloors)
 		weld.Part0 = spot 
 		weld.Part1 =  spot:FindFirstChild("characterModel", true).PrimaryPart
 		weld.Parent = spot:FindFirstChild("characterModel",true)
-		print("Create Weld!")
 	end
 
-	spot:FindFirstChild("characterModel", true):FindFirstChild("centerWeld").C0 = CFrame.new(0, (newValue * floorHeight * 0.025) + 3, 0)
+	spot:FindFirstChild("characterModel", true):FindFirstChild("centerWeld").C0 = CFrame.new(0, (newValue * floorHeight * 0.025) + 2.1, 0)
 	spot:FindFirstChild("characterModel", true):FindFirstChild("floors", true).Text = playerFloors .. " Floors!"
 	if places[1] == spot.Name then
 		spot:FindFirstChild("characterModel", true):FindFirstChild("record", true).Text = "🥇1st Place!"
@@ -471,13 +484,14 @@ function castleController.start()
 	local lastAnimated = 0
 	local oldPos = localPlayerCastle:WaitForChild("topFloor").PrimaryPart.Position
 	localPlayerCastle:WaitForChild("topFloor").PrimaryPart:GetPropertyChangedSignal("CFrame"):Connect(function()
-		if tick() - lastAnimated < 2 then
+		if tick() - lastAnimated < 1 then
 			return
 		end
-		if (localPlayerCastle:WaitForChild("topFloor").PrimaryPart.Position - oldPos).Magnitude < 16 then
+		if (localPlayerCastle:WaitForChild("topFloor").PrimaryPart.Position - oldPos).Magnitude < 5 then
 			return
 		end
 		lastAnimated = tick()
+		task.wait()
 		castleController.animateFloor(localPlayerCastle:FindFirstChild("topFloor"))
 		oldPos = localPlayerCastle:WaitForChild("topFloor").PrimaryPart.Position
 	end)
@@ -504,7 +518,11 @@ function castleController.start()
 				if not model.PrimaryPart then
 					continue
 				end
-				local targetCFrame = CFrame.new(v.Position + Vector3.new(0, 7, 0))
+				local targetHover = platformConfig.defaultHoverDistance
+				if platformConfig.platforms[v.Name] then
+					targetHover = platformConfig.platforms[v.Name].hoverDistance or targetHover
+				end
+				local targetCFrame = CFrame.new(v.Position + Vector3.new(0, targetHover, 0))
 					* CFrame.Angles(0, math.rad(rotateAngle), 0)
 				table.insert(targetModels, model.PrimaryPart)
 				table.insert(targetCFrames, targetCFrame)

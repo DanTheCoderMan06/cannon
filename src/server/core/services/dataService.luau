@@ -10,7 +10,7 @@ local profileStore = require(serverPackages.ProfileStore)
 local Players = game:GetService("Players")
 
 local profileTemplate = require(ServerStorage.server.modules.profileTemplate)
-local PlayerStore = profileStore.New("PlayerDataStoreDEV6", profileTemplate)
+local PlayerStore = profileStore.New("SavedPlayerData", profileTemplate)
 local Profiles = {}
 
 local dataService = {}
@@ -78,9 +78,6 @@ function dataService.start()
 
 		if profile ~= nil then
 			profile:AddUserId(player.UserId)
-			if RunService:IsStudio() and player.Name == "DanTheCoderMan" then
-				profile.Data = {}
-			end
 			profile:Reconcile()
 			profile.OnSessionEnd:Connect(function()
 				Profiles[player] = nil

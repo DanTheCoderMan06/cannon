@@ -13,19 +13,27 @@ local config = {
 				items.beam.Attachment1 = target
 				states.toggleEntrance(false)
 				
-				local con
-				task.delay(2.5, function()
-					if con then
-						con:Disconnect()
-					end
+				-- Use Trove to manage the delay task
+				local delayTask = task.delay(2.5, function()
 					print("Next Signal")
 					nextSignal:Fire()
 				end)
+				-- Add task cancellation function to the trove
+				states.trove:Add(function()
+					pcall(function()
+						task.cancel(delayTask)
+					end)
+				end)
 
+				-- Connect using Trove's Connect method
+				states.trove:Connect(
+					Players.LocalPlayer.Character:WaitForChild("Humanoid"):GetPropertyChangedSignal("MoveDirection"), 
+					function() end
+				)
 				Players.LocalPlayer.Character:WaitForChild("Humanoid"):GetPropertyChangedSignal("MoveDirection"):Wait()
 
-				con = Players.LocalPlayer.CharacterRemoving:Connect(function(character)
-					con:Disconnect()
+				-- Connect to CharacterRemoving with Trove
+				states.trove:Connect(Players.LocalPlayer.CharacterRemoving, function(character)
 					nextSignal:Fire()
 				end)
 			end,
@@ -42,18 +50,19 @@ local config = {
 				highlight.Adornee = upgradePlatform:FindFirstChildWhichIsA("Model", true)
 				items.beam.Attachment0 =
 					Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChildWhichIsA("Attachment")
-				target.CFrame = upgradePlatform.CFrame
+				target.WorldCFrame = playerPlatform:FindFirstChild("cannonPart").CFrame
 
-				local con
-
-				con = Players.LocalPlayer.Character:GetAttributeChangedSignal("inCannon"):Connect(function()
-					if Players.LocalPlayer.Character:GetAttribute("inCannon") then
-						con:Disconnect()
-						items.beam.Attachment0 = target
-						Players.LocalPlayer.Character:GetAttributeChangedSignal("inCannon"):Wait()
-						nextSignal:Fire()
+				-- Connect to GetAttributeChangedSignal using Trove
+				states.trove:Connect(
+					Players.LocalPlayer.Character:GetAttributeChangedSignal("inCannon"),
+					function()
+						if Players.LocalPlayer.Character:GetAttribute("inCannon") then
+							items.beam.Attachment0 = target
+							Players.LocalPlayer.Character:GetAttributeChangedSignal("inCannon"):Wait()
+							nextSignal:Fire()
+						end
 					end
-				end)
+				)
 
 				states.toggleEntrance(true)
 			end,
@@ -69,13 +78,13 @@ local config = {
 				highlight.Adornee = upgradePlatform:FindFirstChildWhichIsA("Model", true)
 				items.beam.Attachment0 =
 					Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChildWhichIsA("Attachment")
-				target.CFrame = upgradePlatform.CFrame
+				target.WorldCFrame = upgradePlatform.CFrame
 
 				local oldCannon = states.getData().cannon
-				local conn
-				conn = states.dataChanged:Connect(function(newData)
+				
+				-- Connect to dataChanged using Trove
+				states.trove:Connect(states.dataChanged, function(newData)
 					if newData.cannon ~= oldCannon then
-						conn:Disconnect()
 						nextSignal:Fire()
 					end
 				end)
@@ -96,22 +105,26 @@ local config = {
 				highlight.Adornee = upgradePlatform:FindFirstChildWhichIsA("Model", true)
 				items.beam.Attachment0 =
 					Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChildWhichIsA("Attachment")
-				target.CFrame = upgradePlatform.CFrame
+				target.WorldCFrame = upgradePlatform.CFrame
 
-				local con
-				con = Players.LocalPlayer.Character:GetAttributeChangedSignal("inCannon"):Connect(function()
-					if Players.LocalPlayer.Character:GetAttribute("inCannon") then
-						con:Disconnect()
-						items.beam.Attachment0 = target
-						Players.LocalPlayer.Character:GetAttributeChangedSignal("inCannon"):Wait()
-						nextSignal:Fire()
+				-- Connect to inCannon attribute change using Trove
+				states.trove:Connect(
+					Players.LocalPlayer.Character:GetAttributeChangedSignal("inCannon"),
+					function()
+						if Players.LocalPlayer.Character:GetAttribute("inCannon") then
+							items.beam.Attachment0 = target
+							Players.LocalPlayer.Character:GetAttributeChangedSignal("inCannon"):Wait()
+							nextSignal:Fire()
+						end
 					end
-				end)
+				)
 
 				states.toggleEntrance(true)
 
-				Players.LocalPlayer.CharacterRemoving:Wait()
-				nextSignal:Fire()
+				-- Connect to CharacterRemoving using Trove
+				states.trove:Connect(Players.LocalPlayer.CharacterRemoving, function()
+					nextSignal:Fire()
+				end)
 			end,
 		},
 		{
@@ -126,13 +139,13 @@ local config = {
 				highlight.Adornee = upgradePlatform:FindFirstChildWhichIsA("Model", true)
 				items.beam.Attachment0 =
 					Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChildWhichIsA("Attachment")
-				target.CFrame = upgradePlatform.CFrame
+				target.WorldCFrame = upgradePlatform.CFrame
 
 				local oldFloors = states.getData().floors
-				local conn
-				conn = states.dataChanged:Connect(function(newData)
+				
+				-- Connect to dataChanged using Trove
+				states.trove:Connect(states.dataChanged, function(newData)
 					if newData.floors ~= oldFloors then
-						conn:Disconnect()
 						nextSignal:Fire()
 					end
 				end)
@@ -152,9 +165,17 @@ local config = {
 				items.beam.Attachment0 = target
 				items.beam.Attachment1 = target
 				states.toggleEntrance(false)
-				task.delay(2.5, function()
+				
+				-- Use Trove to manage the delay
+				local delayTask = task.delay(2.5, function()
 					nextSignal:Fire()
 				end)
+				states.trove:Add(function()
+					pcall(function()
+						task.cancel(delayTask)
+					end)
+				end)
+				
 				states.toggleEntrance(true)
 			end,
 		},

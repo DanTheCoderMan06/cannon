@@ -8,15 +8,7 @@ local React = require(sharedPackages.React)
 local ReactSpring = require(sharedPackages.ReactSpring)
 local Trove = require(sharedPackages.Trove)
 
-local function getSmoothColorFromElapsedTime(elapsedTime, speed)
-	speed = speed or 1
-
-	local r = (math.sin(elapsedTime * speed) + 1) / 2
-	local g = (math.sin(elapsedTime * speed + 2) + 1) / 2
-	local b = (math.sin(elapsedTime * speed + 4) + 1) / 2
-
-	return Color3.new(r, g, b)
-end
+local reactUtil = require(shared.utilities.reactUtil)
 
 return function(props)
 	local styles, api = ReactSpring.useSpring(function()

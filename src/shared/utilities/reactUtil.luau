@@ -21,4 +21,14 @@ function reactUtil.getValueIfAvailable(props, offset)
 	return props.styles ~= nil and reactUtil.simpleBinding(props.styles.transparency, offset) or offset
 end
 
+function reactUtil.getSmoothColorFromElapsedTime(elapsedTime, speed)
+	local speed = speed or 1
+
+	local r = (math.sin(elapsedTime * speed) + 1) / 2
+	local g = (math.sin(elapsedTime * speed + 2) + 1) / 2
+	local b = (math.sin(elapsedTime * speed + 4) + 1) / 2
+
+	return Color3.new(r, g, b)
+end
+
 return reactUtil

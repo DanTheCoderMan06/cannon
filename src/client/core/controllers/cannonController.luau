@@ -37,6 +37,7 @@ local windController = require(ReplicatedStorage.client.controllers.windControll
 local effectsController = require(ReplicatedStorage.client.controllers.effectsController)
 local cameraController = require(ReplicatedStorage.client.controllers.cameraController)
 local dataController = require(ReplicatedStorage.client.controllers.dataController)
+local keysController = require(ReplicatedStorage.client.controllers.keysController)
 
 local MAX_TIME = 3.7
 local MAX_IMPACT = 200
@@ -348,13 +349,15 @@ function cannonController.start()
 				end)
 				windController.toggle(false)
 
+				keysController.freezeMovement(true)
+				stateController.getEvents().radgollEvent:Fire(false)
+
 				character:PivotTo(
 					CFrame.new(
 						character.PrimaryPart.Position + Vector3.new(0, 4, 0),
 						character.PrimaryPart.Position + Vector3.new(1, 0, 0)
 					)
 				)
-				stateController.getEvents().radgollEvent:Fire(false)
 
 				effectsController.finishedPath(physics)
 

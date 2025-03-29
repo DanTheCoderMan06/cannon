@@ -23,6 +23,8 @@ local dataController = require(ReplicatedStorage.client.controllers.dataControll
 local stateController = require(ReplicatedStorage.client.controllers.stateController)
 local keysController = require(ReplicatedStorage.client.controllers.keysController)
 
+local reactUtil = require(ReplicatedStorage.shared.utilities.reactUtil)
+
 local currentHighScore = 0
 
 function effectsController.getHighScore()
@@ -190,16 +192,6 @@ function effectsController.start()
 	effectsController.updateHighscore()
 end
 
-local function getSmoothColorFromElapsedTime(elapsedTime, speed)
-	speed = speed or 1
-
-	local r = (math.sin(elapsedTime * speed) + 1) / 2
-	local g = (math.sin(elapsedTime * speed + 2) + 1) / 2
-	local b = (math.sin(elapsedTime * speed + 4) + 1) / 2
-
-	return Color3.new(r, g, b)
-end
-
 function effectsController.finishedPath(results)
 	local character = Players.LocalPlayer.Character
 	local finishedPathEffects = ReplicatedStorage.assets.finishedPath:Clone()
@@ -208,8 +200,6 @@ function effectsController.finishedPath(results)
 	local reward = cannonConfig.rewardFormula(results.distance)
 	local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
 	local targetColor, setTargetColor = React.createBinding(Color3.new())
-
-	keysController.freezeMovement(true)
 
 	local newAnim = ReplicatedStorage.assets.animations.dance
 		:GetChildren()[math.random(1, #ReplicatedStorage.assets.animations.dance:GetChildren())]
@@ -257,8 +247,8 @@ function effectsController.finishedPath(results)
 		finishedPathEffects:FindFirstChildWhichIsA("BasePart").Size =
 			Vector3.new(0.7, 12 + increaseFactor, 12 + increaseFactor)
 		finishedPathEffects:FindFirstChildWhichIsA("BasePart").Color =
-			getSmoothColorFromElapsedTime(tick() - startTime, 2)
-		setTargetColor(getSmoothColorFromElapsedTime(tick() - startTime, 2))
+			reactUtil.getSmoothColorFromElapsedTime(tick() - startTime, 2)
+		setTargetColor(reactUtil.getSmoothColorFromElapsedTime(tick() - startTime, 2))
 	end)
 	partTrove:AttachToInstance(finishedPathEffects)
 
