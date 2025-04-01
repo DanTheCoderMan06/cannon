@@ -64,10 +64,8 @@ function cannonController.createCannon(cannonName: string)
 	playerPlatform:FindFirstChild("cannonPosition"):ClearAllChildren()
 	local targetCannon = ReplicatedStorage.assets.cannons:FindFirstChild(cannonName):Clone()
 	local cTrove = Trove.new()
-	targetCannon:FindFirstChildWhichIsA("Model").PrimaryPart.CFrame = (
+	targetCannon:FindFirstChildWhichIsA("Model").PrimaryPart.CFrame =
 		playerPlatform:FindFirstChild("cannonPosition").CFrame
-		--	* CFrame.new(targetCannon:GetAttribute("offset") or Vector3.new())
-	)
 	targetCannon:SetAttribute("cannonName", cannonName)
 	targetCannon
 		:FindFirstChildWhichIsA("Model")
@@ -353,10 +351,11 @@ function cannonController.start()
 				task.wait()
 				stateController.getEvents().radgollEvent:Fire(false)
 
+				character.PrimaryPart.Anchored = true
 				character:PivotTo(
 					CFrame.new(
-						character.PrimaryPart.Position + Vector3.new(0, 4, 0),
-						character.PrimaryPart.Position + Vector3.new(1, 0, 0)
+						character.PrimaryPart.Position + Vector3.new(0, 2, 0),
+						character.PrimaryPart.Position + Vector3.new(1, 2, 0)
 					)
 				)
 
@@ -384,7 +383,7 @@ function cannonController.start()
 	local function updateCannon()
 		local newCannonName = Players.LocalPlayer:GetAttribute("currentCannon")
 		if not newCannonName then
-			task.delay(2,function()
+			task.delay(2, function()
 				updateCannon()
 			end)
 			return
@@ -396,8 +395,12 @@ function cannonController.start()
 	updateCannon()
 
 	local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
-	playerPlatform:FindFirstChild("cannonPosition",true):GetPropertyChangedSignal("CFrame"):Connect(function()
-		playerPlatform:FindFirstChild("cannonPosition",true):FindFirstChildWhichIsA("Model",true).PrimaryPart.CFrame = playerPlatform:FindFirstChild("cannonPosition",true).CFrame
+	playerPlatform:FindFirstChild("cannonPosition", true):GetPropertyChangedSignal("CFrame"):Connect(function()
+		if not playerPlatform:FindFirstChild("cannonPosition", true):FindFirstChildWhichIsA("Model", true) then
+			return
+		end
+		playerPlatform:FindFirstChild("cannonPosition", true):FindFirstChildWhichIsA("Model", true).PrimaryPart.CFrame =
+			playerPlatform:FindFirstChild("cannonPosition", true).CFrame
 	end)
 end
 

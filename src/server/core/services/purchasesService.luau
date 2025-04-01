@@ -120,7 +120,7 @@ function purchaseService.start()
 
 		if purchaseType == "cannon" then
 			playerData.cannon += 1
-			playerData.cannon = math.clamp(playerData.cannon,0,cannonConfig.maxLevel)
+			playerData.cannon = math.clamp(playerData.cannon, 0, cannonConfig.maxLevel)
 			dataService.updatePlayerData(player, playerData)
 			cannonService.addCannon(player, cannonConfig.getCannon(playerData.cannon))
 		else
@@ -137,7 +137,7 @@ function purchaseService.start()
 			return
 		end
 		local playerData = dataService.getPlayerData(player)
-		print(playerData.daysPlayed)
+		print(playerData.daysClaimed)
 		if playerData.daysPlayed < rewardDay then
 			print(playerData.daysPlayed)
 			return
@@ -147,7 +147,9 @@ function purchaseService.start()
 		end
 		info.callback(playerData, player)
 		table.insert(playerData.daysClaimed, rewardDay)
-		task.defer(function()
+		print(playerData)
+		-- Removed task.defer for immediate saving
+		task.delay(1, function()
 			dataService.updatePlayerData(player, playerData)
 		end)
 	end)

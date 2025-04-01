@@ -46,45 +46,66 @@ function castleController.toggleAllPlatforms(toggle)
 	end
 end
 
-local animateTrove 
+local animateTrove
 
 function castleController.animateFloor(floor)
+	-- Destroying the trove might still be useful for other connections, but let's keep it for now.
 	if animateTrove then
 		animateTrove:Destroy()
 	end
 	animateTrove = Trove.new()
-	
-	local id = HttpService:GenerateGUID()
 
 	print("[castleController]: Animate Floor!")
-	local welds = {}
 
 	for i, v in pairs(floor.PrimaryPart:GetChildren()) do
-		task.spawn(function()
-			if v:IsA("BasePart") then
-				local target = v.Transparency
+		if v:IsA("BasePart") then
+			-- Use a local trove for each part's animations/connections
+			local partTrove = Trove.new()
+			animateTrove:Add(partTrove) -- Add part's trove to the main animation trove
 
-				v:SetAttribute("animateId", id)
-				v.Transparency = 1
+			task.spawn(function()
+				local originalCFrame = v.CFrame
+				local originalTransparency = v.Transparency
+				local originalAnchored = v.Anchored -- Store original anchored state
 
+				-- Stop any previous animations managed by spr on this part
 				spr.stop(v, "Transparency")
 				spr.stop(v, "CFrame")
 
-				task.delay(0.2, function()
-					spr.target(v, 1, 1, { Transparency = target })
-				end)
-
+				-- Stop texture animations too
 				for _, z in pairs(v:GetChildren()) do
 					if z:IsA("Texture") then
-						local zTarget = z.Transparency
-						z.Transparency = 1
 						spr.stop(z, "Transparency")
-						task.delay(0.2, function()
-							spr.target(z, 1, 1, { Transparency = zTarget })
+					end
+				end
+
+				-- Set initial state for animation
+				v.Transparency = 1
+				v.Anchored = true -- Anchor for the animation
+
+				-- Animate transparency for the part
+				local transparencyTween = spr.target(v, 1, 1, { Transparency = originalTransparency })
+				partTrove:Add(function()
+					if transparencyTween and transparencyTween.cancel then
+						transparencyTween:cancel()
+					end
+				end) -- Ensure tween is cancelled if trove is destroyed
+
+				-- Animate transparency for textures
+				for _, z in pairs(v:GetChildren()) do
+					if z:IsA("Texture") then
+						local originalTextureTransparency = z.Transparency
+						z.Transparency = 1
+						local textureTween = spr.target(z, 1, 1, { Transparency = originalTextureTransparency })
+						partTrove:Add(function()
+							if textureTween and textureTween.cancel then
+								textureTween:cancel()
+							end
 						end)
 					end
 				end
 
+				-- Calculate offset and set initial CFrame
 				local offset = CFrame.new(
 					Vector3.new(math.random(-100, 100), math.random(-100, 0), math.random(-100, 100))
 				) * CFrame.Angles(
@@ -92,22 +113,31 @@ function castleController.animateFloor(floor)
 					math.random() * 2 * math.pi,
 					math.random() * 2 * math.pi
 				)
+				v.CFrame = originalCFrame * offset -- Apply offset relative to original CFrame
 
-				local targetCFrame = v.CFrame
+				-- Animate CFrame back to original position
+				local cframeTween = spr.target(v, 1, 1, { CFrame = originalCFrame })
+				partTrove:Add(function()
+					if cframeTween and cframeTween.cancel then
+						cframeTween:cancel()
+					end
+				end)
 
-				v.Anchored = true
+				-- Use Tween.Completed to reset anchored state
+				-- Note: spr might not directly expose the underlying Tween object or a reliable completion signal easily.
+				-- A simple delay might be the most practical approach, but shorter than 2s.
+				-- Let's try task.delay matching the tween duration (1 second).
+				task.delay(1.1, function() -- Add a small buffer
+					-- Check if the part still exists and if the trove hasn't been destroyed prematurely
+					if v and v.Parent and partTrove then
+						v.Anchored = originalAnchored -- Restore original anchored state
+						-- No need to stop tweens here as they should have completed.
+					end
+				end)
 
-				v.CFrame *= offset
-
-				spr.target(v, 1, 1, { CFrame = targetCFrame })
-				task.wait(2)
-				if v:GetAttribute("animateId") == id then
-					spr.stop(v, "Transparency")
-					spr.stop(v, "CFrame")
-					v.Anchored = false
-				end
-			end
-		end)
+				-- The partTrove will automatically clean up the cancel functions if animateTrove is destroyed early.
+			end)
+		end
 	end
 end
 
@@ -132,8 +162,8 @@ end
 function castleController.setupPlatform(targetPlatform, callbackSignal, modelUsed, platformInfo)
 	local container = ReactRoblox.createRoot(Instance.new("Folder"))
 
-	local targetHover = platformConfig.defaultHoverDistance  
-	
+	local targetHover = platformConfig.defaultHoverDistance
+
 	if platformConfig[targetPlatform.Name] then
 		targetHover = platformConfig[targetPlatform.Name].hoverDistance
 	end
@@ -143,7 +173,7 @@ function castleController.setupPlatform(targetPlatform, callbackSignal, modelUse
 			Active = true,
 			AlwaysOnTop = true,
 			ClipsDescendants = true,
-			StudsOffset = Vector3.new(0,targetHover + platformConfig.uiHoverDistance, 0),
+			StudsOffset = Vector3.new(0, targetHover + platformConfig.uiHoverDistance, 0),
 			LightInfluence = 1,
 			MaxDistance = 100,
 			Size = UDim2.fromScale(12, 6),
@@ -182,7 +212,7 @@ function castleController.updateSpot(spot, newValue, places, playerFloors)
 				weld.C0 = CFrame.new(0, ((i - 1) * floorHeight * 0.025) + 1.1, 0)
 				newMiniFloor.Name = tostring(i)
 				newMiniFloor.Parent = spot:FindFirstChildWhichIsA("Model")
-				weld.Part0 = spot 
+				weld.Part0 = spot
 				weld.Part1 = newMiniFloor.PrimaryPart
 				weld.Parent = newMiniFloor
 			end
@@ -199,12 +229,13 @@ function castleController.updateSpot(spot, newValue, places, playerFloors)
 	if not spot:FindFirstChild("characterModel", true):FindFirstChild("centerWeld") then
 		local weld = Instance.new("Weld")
 		weld.Name = "centerWeld"
-		weld.Part0 = spot 
-		weld.Part1 =  spot:FindFirstChild("characterModel", true).PrimaryPart
-		weld.Parent = spot:FindFirstChild("characterModel",true)
+		weld.Part0 = spot
+		weld.Part1 = spot:FindFirstChild("characterModel", true).PrimaryPart
+		weld.Parent = spot:FindFirstChild("characterModel", true)
 	end
 
-	spot:FindFirstChild("characterModel", true):FindFirstChild("centerWeld").C0 = CFrame.new(0, (newValue * floorHeight * 0.025) + 2.1, 0)
+	spot:FindFirstChild("characterModel", true):FindFirstChild("centerWeld").C0 =
+		CFrame.new(0, (newValue * floorHeight * 0.025) + 2.1, 0)
 	spot:FindFirstChild("characterModel", true):FindFirstChild("floors", true).Text = playerFloors .. " Floors!"
 	if places[1] == spot.Name then
 		spot:FindFirstChild("characterModel", true):FindFirstChild("record", true).Text = "🥇1st Place!"

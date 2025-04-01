@@ -259,6 +259,8 @@ function effectsController.finishedPath(results)
 	container:unmount()
 	finishedPathEffects:Destroy()
 
+	character.PrimaryPart.Anchored = false
+	character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
 	task.wait()
 	zap.requestLoad.Fire()
 

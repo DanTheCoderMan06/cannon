@@ -100,12 +100,11 @@ function controlsController.start()
 
 	controlsController.updateFarming()
 
-	repeat
-		local success = pcall(function()
+	RunService:BindToRenderStep("noReset", Enum.RenderPriority.Last.Value, function()
+		pcall(function()
 			StarterGui:SetCore("ResetButtonCallback", false)
 		end)
-		task.wait()
-	until success
+	end)
 end
 
 return controlsController
