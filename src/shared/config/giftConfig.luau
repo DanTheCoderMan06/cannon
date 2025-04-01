@@ -35,7 +35,6 @@ return {
 
 				task.defer(function()
 					dataService.updatePlayerData(player, playerData)
-					 
 				end)
 			else
 				-- Traditional flow for gifting another player
@@ -73,7 +72,6 @@ return {
 
 				task.defer(function()
 					dataService.updatePlayerData(player, playerData)
-					 
 				end)
 			else
 				local playerData = dataService.getPlayerData(player)
@@ -114,7 +112,6 @@ return {
 
 				task.defer(function()
 					dataService.updatePlayerData(player, playerData)
-					 
 				end)
 			else
 				local playerData = dataService.getPlayerData(player)
@@ -151,7 +148,6 @@ return {
 
 				task.defer(function()
 					dataService.updatePlayerData(player, playerData)
-					 
 				end)
 			else
 				local playerData = dataService.getPlayerData(player)
@@ -192,7 +188,6 @@ return {
 
 				task.defer(function()
 					dataService.updatePlayerData(player, playerData)
-					 
 				end)
 			else
 				local playerData = dataService.getPlayerData(player)
@@ -229,7 +224,6 @@ return {
 
 				task.defer(function()
 					dataService.updatePlayerData(player, playerData)
-					 
 				end)
 			else
 				local playerData = dataService.getPlayerData(player)
@@ -448,7 +442,7 @@ return {
 
 				local targetPlayerData = dataService.getPlayerData(target)
 				targetPlayerData.infiniteVIP = true
-				
+
 				task.defer(function()
 					dataService.updatePlayerData(target, targetPlayerData)
 					dataService.updatePlayerData(player, playerData)

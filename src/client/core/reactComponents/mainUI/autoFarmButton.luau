@@ -13,6 +13,7 @@ local components = ReplicatedStorage.client.reactComponents
 local zap = require(ReplicatedStorage.zap)
 
 local isMobile = UserInputService.TouchEnabled
+local lastCalled = 0
 
 return function(props)
 	local styles, api = ReactSpring.useSpring(function()
@@ -128,6 +129,10 @@ return function(props)
 			TextWrapped = true,
 			ZIndex = 100,
 			[React.Event.Activated] = function()
+				if tick() - lastCalled < 0.5 then
+					return
+				end
+				lastCalled = tick()
 				SoundService.effects.click:Play()
 				local success = zap.toggleAutoFarm.Call()
 				if success then

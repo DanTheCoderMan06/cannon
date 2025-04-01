@@ -104,9 +104,7 @@ function notificationService.sendNotification(userId, info, notificationKey, tim
 	local savedUserData = userData.value
 	if not success or not savedUserData then
 		-- Warn only if DEBUG is on, as this could be noisy otherwise
-		if DEBUG then
-			warn("[Notification Service] Failed to get data for user ID: " .. tostring(userId))
-		end
+		warn("[Notification Service] Failed to get data for user ID: " .. tostring(userId))
 		return false
 	end
 
@@ -125,6 +123,7 @@ function notificationService.sendNotification(userId, info, notificationKey, tim
 
 	if amountExisting * info.waitTime > timeElapsed then
 		-- Only log if DEBUG is true, as this can be very frequent
+		print("Too Frequent" .. "Wait .. " .. (amountExisting * info.waitTime - timeElapsed))
 		if DEBUG then
 			debugLog(
 				"Too frequent, not sending notification "
@@ -196,14 +195,13 @@ end
 
 -- Process notifications for a player
 function notificationService.processPlayerNotifications(playerUserId)
+	print("Processing " .. playerUserId)
 	local lastPlayed = { value = nil }
 	local success = safeCall(function()
 		local time = playerBase:GetAsync(playerUserId)
 		if not time then
 			-- Keep this debug log as it indicates a potential issue or first-time player
-			if DEBUG then
-				debugLog("No last played time found for user " .. playerUserId .. ", setting to current time")
-			end
+			debugLog("No last played time found for user " .. playerUserId .. ", setting to current time")
 			time = os.time()
 			playerBase:SetAsync(playerUserId, time)
 		end
@@ -460,8 +458,29 @@ function notificationService.processNotificationTasks()
 			currentPage = nextPage
 			currentIndex = nextIndex
 			notificationService.saveTaskProgress(currentPage, currentIndex)
+
+			-- Check if we finished the list
+			if nextPage == 0 and nextIndex == 0 then
+				-- Finished processing all players, wait 20 seconds before restarting
+				if DEBUG then
+					debugLog("Finished processing all players, waiting 20 seconds.")
+				end
+				task.wait(20)
+			else
+				-- Wait 10 seconds before processing the next batch
+				if DEBUG then
+					debugLog("Batch processed, waiting 10 seconds.")
+				end
+				task.wait(10)
+			end
+		else
+			-- If batch processing failed, wait 10 seconds before retrying
+			if DEBUG then
+				debugLog("Batch processing failed, waiting 10 seconds.")
+			end
+			task.wait(10)
 		end
-		task.wait(0.5) -- Small delay
+		-- Original task.wait(0.5) removed
 	end
 	isProcessingTask = false
 end
