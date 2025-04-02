@@ -22,11 +22,11 @@ return {
 	luckyBlockSkip = {
 		floorTiers = true,
 		id = {
-			3226268798, -- Tier 1: Floors 1-49
-			3226268869, -- Tier 2: Floors 50-99
-			3226268926, -- Tier 3: Floors 100-149
-			3226269002, -- Tier 4: Floors 150-199
-			3226269059, -- Tier 5: Floors 200+
+			1228168162, -- Tier 1: Floors 1-49 (Skip Timer)
+			3101480459, -- Tier 2: Floors 50-99 (Skip Timer II)
+			3101497833, -- Tier 3: Floors 100-149 (Skip Timer III)
+			3101507555, -- Tier 4: Floors 150-199 (Skip Timer IV)
+			3101517491, -- Tier 5: Floors 200+ (Skip Timer V)
 		},
 		getId = function(playerData)
 			local tierRanges = {
@@ -38,11 +38,11 @@ return {
 			}
 
 			local ids = {
-				3226268798, -- Tier 1: Floors 1-49
-				3226268869, -- Tier 2: Floors 50-99
-				3226268926, -- Tier 3: Floors 100-149
-				3226269002, -- Tier 4: Floors 150-199
-				3226269059, -- Tier 5: Floors 200+
+				1228168162, -- Tier 1: Floors 1-49 (Skip Timer)
+				3101480459, -- Tier 2: Floors 50-99 (Skip Timer II)
+				3101497833, -- Tier 3: Floors 100-149 (Skip Timer III)
+				3101507555, -- Tier 4: Floors 150-199 (Skip Timer IV)
+				3101517491, -- Tier 5: Floors 200+ (Skip Timer V)
 			}
 
 			for i, range in ipairs(tierRanges) do
@@ -63,11 +63,11 @@ return {
 			}
 
 			local ids = {
-				3226268798, -- Tier 1: Floors 1-49
-				3226268869, -- Tier 2: Floors 50-99
-				3226268926, -- Tier 3: Floors 100-149
-				3226269002, -- Tier 4: Floors 150-199
-				3226269059, -- Tier 5: Floors 200+
+				1228168162, -- Tier 1: Floors 1-49 (Skip Timer)
+				3101480459, -- Tier 2: Floors 50-99 (Skip Timer II)
+				3101497833, -- Tier 3: Floors 100-149 (Skip Timer III)
+				3101507555, -- Tier 4: Floors 150-199 (Skip Timer IV)
+				3101517491, -- Tier 5: Floors 200+ (Skip Timer V)
 			}
 
 			local playerData = dataService.getPlayerData(player)
@@ -108,11 +108,11 @@ return {
 	},
 	upgradeCannon = {
 		id = {
-			3226816503, -- Tier 1: Floors 1-49
-			3226816511, -- Tier 2: Floors 50-99
-			3226816524, -- Tier 3: Floors 100-149
-			3226816531, -- Tier 4: Floors 150-199
-			3226816536, -- Tier 5: Floors 200+
+			2691922174, -- Tier 1: Cannon Upgrade 1
+			2691922949, -- Tier 2: Cannon Upgrade 2
+			2691923019, -- Tier 3: Cannon Upgrade 3
+			2691925876, -- Tier 4: Cannon Upgrade 4
+			2691925945, -- Tier 5: Cannon Upgrade 5
 		},
 		getId = function(playerData)
 			local tierRanges = {
@@ -124,11 +124,11 @@ return {
 			}
 
 			local ids = {
-				3226816503, -- Tier 1: Floors 1-49
-				3226816511, -- Tier 2: Floors 50-99
-				3226816524, -- Tier 3: Floors 100-149
-				3226816531, -- Tier 4: Floors 150-199
-				3226816536, -- Tier 5: Floors 200+
+				2691922174, -- Tier 1: Cannon Upgrade 1
+				2691922949, -- Tier 2: Cannon Upgrade 2
+				2691923019, -- Tier 3: Cannon Upgrade 3
+				2691925876, -- Tier 4: Cannon Upgrade 4
+				2691925945, -- Tier 5: Cannon Upgrade 5
 			}
 			for i, range in ipairs(tierRanges) do
 				if playerData.cannon >= range.min and playerData.cannon <= range.max then
@@ -148,11 +148,11 @@ return {
 			}
 
 			local ids = {
-				3226816503, -- Tier 1: Floors 1-49
-				3226816511, -- Tier 2: Floors 50-99
-				3226816524, -- Tier 3: Floors 100-149
-				3226816531, -- Tier 4: Floors 150-199
-				3226816536, -- Tier 5: Floors 200+
+				2691922174, -- Tier 1: Cannon Upgrade 1
+				2691922949, -- Tier 2: Cannon Upgrade 2
+				2691923019, -- Tier 3: Cannon Upgrade 3
+				2691925876, -- Tier 4: Cannon Upgrade 4
+				2691925945, -- Tier 5: Cannon Upgrade 5
 			}
 
 			local playerData = dataService.getPlayerData(player)
@@ -185,7 +185,7 @@ return {
 
 			if cannonConfig.maxLevel > playerData.cannon then
 				playerData.cannon += 10
-				playerData.cannon = math.clamp(playerData.cannon,0,cannonConfig.maxLevel)
+				playerData.cannon = math.clamp(playerData.cannon, 0, cannonConfig.maxLevel)
 			end
 
 			task.defer(function()
@@ -200,7 +200,7 @@ return {
 		speicalTiers = true,
 	},
 	allRewardsWhale = {
-		id = 3225912732,
+		id = 3101617187, -- Unlock All Daily Rewards
 		callback = function(player)
 			local playerData = dataService.getPlayerData(player)
 			if playerData.productTiers.products["allRewards"] then
@@ -209,6 +209,7 @@ return {
 				end
 			end
 			for _, reward in pairs(rewardsConfig.rewards) do
+				task.wait()
 				reward.callback(playerData, player)
 			end
 			playerData.daysPlayed = 0
@@ -229,7 +230,7 @@ return {
 	},
 
 	allRewardsWhaleTier2 = {
-		id = 3225913161,
+		id = 3101617187, -- Using same ID for now since no specific Tier II ID was provided
 		callback = function(player)
 			local playerData = dataService.getPlayerData(player)
 			for _, reward in pairs(rewardsConfig.rewards) do
@@ -246,35 +247,33 @@ return {
 		shouldAppear = false,
 	},
 	tenFloorsTier2 = {
-		id = 3218172172,
+		id = 2706011527, -- +10 Floors (Tier II)
 		callback = function(player)
 			local playerData = dataService.getPlayerData(player)
 			playerData.floors += 10
 			playerData.boughtFloors += 10
 			playerData.productTiers.products["floors"] += 1
 			dataService.updatePlayerData(player, playerData)
-			 
 		end,
 		type = "floors",
 		infoType = Enum.InfoType.Product,
 		shouldAppear = false,
 	},
 	fiftyFloorsTier2 = {
-		id = 3218172192,
+		id = 2706011767, -- +50 Floors (Tier II)
 		callback = function(player)
 			local playerData = dataService.getPlayerData(player)
 			playerData.floors += 50
 			playerData.boughtFloors += 50
 			playerData.productTiers.products["floors"] += 1
 			dataService.updatePlayerData(player, playerData)
-			 
 		end,
 		type = "floors",
 		infoType = Enum.InfoType.Product,
 		shouldAppear = false,
 	},
 	tenFloors = {
-		id = 2697043460,
+		id = 2691912508, -- +10 Floors
 		callback = function(player)
 			local playerData = dataService.getPlayerData(player)
 			if playerData.productTiers.products["floors"] then
@@ -287,7 +286,6 @@ return {
 			playerData.productTiers.products["floors"] = playerData.productTiers.products["floors"] or 0
 			playerData.productTiers.products["floors"] += 1
 			dataService.updatePlayerData(player, playerData)
-			 
 		end,
 		type = "floors",
 		infoType = Enum.InfoType.Product,
@@ -297,7 +295,7 @@ return {
 		giftName = "tenFloors",
 	},
 	fiftyFloors = {
-		id = 2697043455,
+		id = 2691912808, -- +50 Floors
 		callback = function(player)
 			local playerData = dataService.getPlayerData(player)
 			if playerData.productTiers.products["floors"] then
@@ -310,7 +308,6 @@ return {
 			playerData.productTiers.products["floors"] = playerData.productTiers.products["floors"] or 0
 			playerData.productTiers.products["floors"] += 1
 			dataService.updatePlayerData(player, playerData)
-			 
 		end,
 		type = "floors",
 		infoType = Enum.InfoType.Product,
@@ -320,7 +317,7 @@ return {
 		giftName = "fiftyFloors",
 	},
 	twoHundredFiftyFloors = {
-		id = 3220619326,
+		id = 2691913116, -- +250 Floors (BEST DEAL!)
 		callback = function(player)
 			local playerData = dataService.getPlayerData(player)
 			if playerData.productTiers.products["floors"] then
@@ -333,7 +330,6 @@ return {
 			playerData.productTiers.products["floors"] = playerData.productTiers.products["floors"] or 0
 			playerData.productTiers.products["floors"] += 1
 			dataService.updatePlayerData(player, playerData)
-			 
 		end,
 		type = "floors",
 		infoType = Enum.InfoType.Product,
@@ -343,24 +339,24 @@ return {
 		giftName = "twoHundredFiftyFloors",
 	},
 	twoHundredFiftyFloorsTier2 = {
-		id = 3220619459,
+		id = 2706012109, -- +250 Floors (Tier II)
 		callback = function(player)
 			local playerData = dataService.getPlayerData(player)
 			playerData.floors += 250
 			playerData.boughtFloors += 250
 			playerData.productTiers.products["floors"] += 1
 			dataService.updatePlayerData(player, playerData)
-			 
 		end,
 		type = "floors",
 		infoType = Enum.InfoType.Product,
 		shouldAppear = false,
 	},
+	--[[
 	buyCircusCannon = {
-		id = 1051314279,
+		id = 3102291606, -- Special Cannon 1
 		callback = function(player)
 			local playerData = dataService.getPlayerData(player)
-			marketplaceUtil.updatePlayerCache(player, 1051314279)
+			marketplaceUtil.updatePlayerCache(player, 3102291606)
 			table.insert(playerData.cannons, "circusCannon")
 			dataService.updatePlayerData(player, playerData)
 		end,
@@ -370,11 +366,12 @@ return {
 		--Gift Compatability
 		giftName = "circusCannon",
 	},
+	--]]
 	buyArmyCannon = {
-		id = 1051600321,
+		id = 1136518787, -- Army Cannon
 		callback = function(player)
 			local playerData = dataService.getPlayerData(player)
-			marketplaceUtil.updatePlayerCache(player, 1051600321)
+			marketplaceUtil.updatePlayerCache(player, 1136518787)
 			table.insert(playerData.cannons, "armyCannon")
 			dataService.updatePlayerData(player, playerData)
 		end,
@@ -384,11 +381,12 @@ return {
 		--Gift Compatability
 		--giftName = "giftArmyCannon",
 	},
+	--[[
 	buyArtillery = {
-		id = 1028783141,
+		id = 3102302619, -- Special Cannon 2
 		callback = function(player)
 			local playerData = dataService.getPlayerData(player)
-			marketplaceUtil.updatePlayerCache(player, 1028783141)
+			marketplaceUtil.updatePlayerCache(player, 3102302619)
 			table.insert(playerData.cannons, "artillery")
 			dataService.updatePlayerData(player, playerData)
 		end,
@@ -398,11 +396,12 @@ return {
 		--Gift Compatability
 		giftName = "giftArtillery",
 	},
+	--]]
 	buyRailgun = {
-		id = 1035960145,
+		id = 1137894433, -- Railgun
 		callback = function(player)
 			local playerData = dataService.getPlayerData(player)
-			marketplaceUtil.updatePlayerCache(player, 1035960145)
+			marketplaceUtil.updatePlayerCache(player, 1137894433)
 			table.insert(playerData.cannons, "railgun")
 			dataService.updatePlayerData(player, playerData)
 		end,
@@ -410,13 +409,13 @@ return {
 		infoType = Enum.InfoType.GamePass,
 		cannonName = "railgun",
 		--Gift Compatability
-		giftName = "giftRailgun",
+		--giftName = "giftRailgun",
 	},
 	buyDoubleDistance = {
-		id = 1092466385,
+		id = 1022787535, -- 2x Distance
 		callback = function(player)
 			local playerData = dataService.getPlayerData(player)
-			marketplaceUtil.updatePlayerCache(player, 1092466385)
+			marketplaceUtil.updatePlayerCache(player, 1022787535)
 			playerData.doubleDistance = true
 			dataService.updatePlayerData(player, playerData)
 		end,
@@ -427,10 +426,10 @@ return {
 	},
 
 	buyDoubleMoney = {
-		id = 1094774976,
+		id = 1022657721, -- 2x Money
 		callback = function(player)
 			local playerData = dataService.getPlayerData(player)
-			marketplaceUtil.updatePlayerCache(player, 1094774976)
+			marketplaceUtil.updatePlayerCache(player, 1022657721)
 			playerData.doubleMoney = true
 			dataService.updatePlayerData(player, playerData)
 		end,
@@ -441,10 +440,10 @@ return {
 	},
 
 	buyInfiniteVIP = {
-		id = 1060138098,
+		id = 1022963419, -- VIP
 		callback = function(player)
 			local playerData = dataService.getPlayerData(player)
-			marketplaceUtil.updatePlayerCache(player, 1060138098)
+			marketplaceUtil.updatePlayerCache(player, 1022963419)
 			playerData.infiniteVIP = true
 			dataService.updatePlayerData(player, playerData)
 		end,
@@ -454,9 +453,9 @@ return {
 		giftName = "giveVIP",
 	},
 	artilleryGamepasses = {
-		["1028783141"] = "artillery",
-		["1035960145"] = "railgun",
-		["1051600321"] = "armyCannon",
-		["1051314279"] = "circusCannon",
+		["3102302619"] = "artillery", -- Special Cannon 2
+		["1137894433"] = "railgun", -- Railgun
+		["1136518787"] = "armyCannon", -- Army Cannon
+		["3102291606"] = "circusCannon", -- Special Cannon 1
 	},
 }

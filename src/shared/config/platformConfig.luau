@@ -29,8 +29,8 @@ local startTimeLuckyBlock = tick()
 local changedCannonSignal = Signal.new()
 
 local function switchPlatformColor(model, target)
-	spr.target(model.touch,	.9,	2.5, {["Color"] = target})
-	spr.target(model.color,	.9,	2.5, {["Color"] = target})
+	spr.target(model.touch, 0.9, 2.5, { ["Color"] = target })
+	spr.target(model.color, 0.9, 2.5, { ["Color"] = target })
 end
 
 return {
@@ -79,15 +79,15 @@ return {
 			initModel = ReplicatedStorage.assets:WaitForChild("luckyBlock"),
 			callbackFunction = function(success, states)
 				if success then
-					switchPlatformColor(states.model, Color3.new(0.992156, 1, 0.580392) )
+					switchPlatformColor(states.model, Color3.new(0.992156, 1, 0.580392))
 				else
 					local luckyBlockId = gamepassConfig.luckyBlockSkip.getId(dataController.getData())
 					MarketplaceService:PromptProductPurchase(Players.LocalPlayer, luckyBlockId)
-					switchPlatformColor(states.model, Color3.new(1, 0, 0) )
+					switchPlatformColor(states.model, Color3.new(1, 0, 0))
 				end
 
 				task.delay(1, function()
-					switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255) )
+					switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255))
 				end)
 			end,
 		},
@@ -129,13 +129,13 @@ return {
 			initModel = ReplicatedStorage.assets:FindFirstChild("rewardSuitcase"),
 			callbackFunction = function(success, states)
 				if success then
-					switchPlatformColor(states.model, Color3.new(0.992156, 1, 0.580392) )
+					switchPlatformColor(states.model, Color3.new(0.992156, 1, 0.580392))
 				else
-					switchPlatformColor(states.model, Color3.new(1, 0, 0) )
+					switchPlatformColor(states.model, Color3.new(1, 0, 0))
 				end
 
 				task.delay(1, function()
-					switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255) )
+					switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255))
 				end)
 			end,
 		},
@@ -223,9 +223,9 @@ return {
 			end,
 			callbackFunction = function(success, states)
 				if success then
-					switchPlatformColor(states.model, Color3.new(0.992156, 1, 0.580392) )
+					switchPlatformColor(states.model, Color3.new(0.992156, 1, 0.580392))
 				else
-					switchPlatformColor(states.model, Color3.new(1, 0, 0) )
+					switchPlatformColor(states.model, Color3.new(1, 0, 0))
 					local playerData = dataController.getData()
 					if playerData.cannon < cannonConfig.maxLevel then
 						local id = gamepassConfig.upgradeCannon.getId(dataController.getData())
@@ -234,7 +234,7 @@ return {
 				end
 
 				task.delay(1, function()
-					switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255) )
+					switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255))
 				end)
 			end,
 		},
@@ -335,13 +335,13 @@ return {
 			initModel = ReplicatedStorage.assets.miniFloor,
 			callbackFunction = function(success, states)
 				if success then
-					switchPlatformColor(states.model, Color3.new(0.992156, 1, 0.580392) )
+					switchPlatformColor(states.model, Color3.new(0.992156, 1, 0.580392))
 				else
-					switchPlatformColor(states.model, Color3.new(1, 0, 0) )
+					switchPlatformColor(states.model, Color3.new(1, 0, 0))
 				end
 
 				task.delay(1, function()
-					switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255) )
+					switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255))
 				end)
 			end,
 		},
@@ -494,11 +494,11 @@ return {
 				local function updateColor()
 					local playerData = dataController.currentData
 					if playerData.towerStatus == 0 then
-						switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255) )
+						switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255))
 					elseif playerData.towerStatus == 1 then
-						switchPlatformColor(states.model, Color3.new(0.474509, 0.505882, 0.792156) )
+						switchPlatformColor(states.model, Color3.new(0.474509, 0.505882, 0.792156))
 					else
-						switchPlatformColor(states.model, Color3.new(0.788235, 0.474509, 0.933333) )
+						switchPlatformColor(states.model, Color3.new(0.788235, 0.474509, 0.933333))
 					end
 				end
 
@@ -506,7 +506,7 @@ return {
 					if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
 						updateColor()
 					else
-						switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255) )
+						switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255))
 						updateEvent:Fire({
 							title = "TELEPORT",
 							description = "RETURN TO YOUR TOWER",
@@ -540,19 +540,19 @@ return {
 			end,
 			callbackFunction = function(success, states) -- callBackFunction is just a function to change the staes if needed
 				if success then
-					switchPlatformColor(states.model, Color3.new(0.992156, 1, 0.580392) )
+					switchPlatformColor(states.model, Color3.new(0.992156, 1, 0.580392))
 				else
-					switchPlatformColor(states.model, Color3.new(1, 0, 0) )
+					switchPlatformColor(states.model, Color3.new(1, 0, 0))
 				end
 
 				task.delay(1, function()
 					local newData = dataController.getData()
 					if newData.towerStatus == 0 then
-						switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255) )
+						switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255))
 					elseif newData.towerStatus == 1 then
-						switchPlatformColor(states.model, Color3.new(0.474509, 0.505882, 0.792156) )
+						switchPlatformColor(states.model, Color3.new(0.474509, 0.505882, 0.792156))
 					else
-						switchPlatformColor(states.model, Color3.new(0.788235, 0.474509, 0.933333) )
+						switchPlatformColor(states.model, Color3.new(0.788235, 0.474509, 0.933333))
 					end
 				end)
 			end,
@@ -608,7 +608,9 @@ return {
 
 				return {
 					title = "TIER " .. playerData.cannonTier,
-					description = itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>',
+					description = if #tierConfig.cannonTiers ~= playerData.cannonTier
+						then itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
+						else "MAX TIER",
 				}
 			end,
 			initModel = function(modelTrove, updateModelEvent)
@@ -656,13 +658,13 @@ return {
 			end,
 			callbackFunction = function(success, states)
 				if success then
-					switchPlatformColor(states.model, Color3.new(0.992156, 1, 0.580392) )
+					switchPlatformColor(states.model, Color3.new(0.992156, 1, 0.580392))
 				else
-					switchPlatformColor(states.model, Color3.new(1, 0, 0) )
+					switchPlatformColor(states.model, Color3.new(1, 0, 0))
 				end
 
 				task.delay(1, function()
-					switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255) )
+					switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255))
 				end)
 			end,
 		},
@@ -770,13 +772,13 @@ return {
 			end,
 			callbackFunction = function(success, states)
 				if success then
-					switchPlatformColor(states.model, Color3.new(0.992156, 1, 0.580392) )
+					switchPlatformColor(states.model, Color3.new(0.992156, 1, 0.580392))
 				else
-					switchPlatformColor(states.model, Color3.new(1, 0, 0) )
+					switchPlatformColor(states.model, Color3.new(1, 0, 0))
 				end
 
 				task.delay(1, function()
-					switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255) )
+					switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255))
 				end)
 			end,
 		},

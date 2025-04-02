@@ -16,7 +16,7 @@ end
 
 return {
 	tenFloors = {
-		id = 3221610346,
+		id = 2706012608, -- Gift 10 Floors (Tier II)
 		shouldAppear = true,
 		tiers = true,
 		tier2Name = "tenFloorsTier2",
@@ -62,7 +62,7 @@ return {
 	},
 	tenFloorsTier2 = {
 		type = "floors",
-		id = 3223017209,
+		id = 2706012608, -- Gift 10 Floors (Tier II)
 		callback = function(player, target)
 			if player == target then
 				local playerData = dataService.getPlayerData(player)
@@ -94,7 +94,7 @@ return {
 		end,
 	},
 	fiftyFloors = {
-		id = 3224502320,
+		id = 2706012927, -- Gift 50 Floors (Tier II)
 		type = "floors",
 		shouldAppear = true,
 		tiers = true,
@@ -137,7 +137,7 @@ return {
 		end,
 	},
 	fiftyFloorsTier2 = {
-		id = 3224502578,
+		id = 2706012927, -- Gift 50 Floors (Tier II)
 		type = "floors",
 		callback = function(player, target)
 			if player == target then
@@ -170,7 +170,7 @@ return {
 		end,
 	},
 	twoHundredFifty = {
-		id = 3224504001,
+		id = 2691917179, -- Gift 250 Floors (BEST DEAL!)
 		shouldAppear = true,
 		tiers = true,
 		type = "floors",
@@ -213,7 +213,7 @@ return {
 		end,
 	},
 	twoHundredFiftyTier2 = {
-		id = 3224504000,
+		id = 2706013070, -- Gift 250 Floors (Tier II)
 		type = "floors",
 		callback = function(player, target)
 			if player == target then
@@ -246,7 +246,7 @@ return {
 		end,
 	},
 	doubleDistance = {
-		id = 3224600930,
+		id = 3106616737, -- 2x Distance (Gift)
 		shouldAppear = true,
 		tiers = true,
 		type = "gamepasses",
@@ -296,7 +296,7 @@ return {
 		end,
 	},
 	doubleDistanceTier2 = {
-		id = 3224600931,
+		id = 3106616737, -- 2x Distance (Gift)
 		type = "gamepasses",
 		shouldAppear = false,
 		callback = function(player, target)
@@ -330,7 +330,7 @@ return {
 		end,
 	},
 	doubleMoney = {
-		id = 3224601898,
+		id = 3106616541, -- 2x Cash (Gift)
 		shouldAppear = true,
 		tiers = true,
 		type = "gamepasses",
@@ -380,7 +380,7 @@ return {
 		end,
 	},
 	doubleMoneyTier2 = {
-		id = 3224601897,
+		id = 3106616541, -- 2x Cash (Gift)
 		shouldAppear = false,
 		type = "gamepasses",
 		callback = function(player, target)
@@ -414,7 +414,7 @@ return {
 		end,
 	},
 	giveVIP = {
-		id = 3224616084,
+		id = 3106616269, -- VIP (Gift)
 		shouldAppear = true,
 		tiers = true,
 		type = "gamepasses",
@@ -458,7 +458,7 @@ return {
 		end,
 	},
 	giveVIPTier2 = {
-		id = 3224616147,
+		id = 3106616269, -- VIP (Gift)
 		type = "gamepasses",
 		shouldAppear = false,
 		callback = function(player, target)
@@ -492,7 +492,7 @@ return {
 		end,
 	},
 	giftArtillery = {
-		id = 3224676081,
+		id = 3106618096, -- Special Cannon 1 (Gift)
 		shouldAppear = true,
 		tiers = true,
 		type = "cannons",
@@ -538,7 +538,7 @@ return {
 		giftName = "giftArtillery",
 	},
 	giftArtilleryTier2 = {
-		id = 3224676143,
+		id = 3106618096, -- Special Cannon 1 (Gift)
 		type = "cannons",
 		shouldAppear = false,
 		callback = function(player, target)
@@ -572,7 +572,7 @@ return {
 		end,
 	},
 	giftRailgun = {
-		id = 3225217016,
+		id = 3106618239, -- Special Cannon 2 (Gift)
 		shouldAppear = true,
 		tiers = true,
 		type = "cannons",
@@ -616,7 +616,7 @@ return {
 		end,
 	},
 	giftRailgunTier2 = {
-		id = 3225217064,
+		id = 3106618239, -- Special Cannon 2 (Gift)
 		type = "cannons",
 		shouldAppear = false,
 		callback = function(player, target)

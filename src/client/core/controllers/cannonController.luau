@@ -330,8 +330,10 @@ function cannonController.start()
 				repeat
 					task.wait()
 				until not character
-					or character.PrimaryPart.AssemblyLinearVelocity.Magnitude < 0.1
-					or tick() - startWait > 7.5
+					or (
+						(character.PrimaryPart.AssemblyLinearVelocity.Magnitude < 0.1 or tick() - startWait > 7.5)
+						and character.PrimaryPart.Position.Y < 3
+					)
 				cameraController.endShake()
 				RunService:UnbindFromRenderStep("noFallThrough")
 				RunService:UnbindFromRenderStep("fallSound")
