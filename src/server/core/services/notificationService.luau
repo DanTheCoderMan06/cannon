@@ -94,105 +94,125 @@ local function getSortedNotificationsByPriority()
 	return sortedNotifications
 end
 
--- Send a notification to a user
+-- Send a notification to a user (using offline update pattern)
 function notificationService.sendNotification(userId, info, notificationKey, timeElapsed)
-	local userData = { value = nil }
-	local success = safeCall(function()
-		return dataService.getGlobalPlayerData(userId)
-	end, userData)
+	local notificationSent = false -- Flag to track if notification was sent
 
-	local savedUserData = userData.value
-	if not success or not savedUserData then
-		-- Warn only if DEBUG is on, as this could be noisy otherwise
-		warn("[Notification Service] Failed to get data for user ID: " .. tostring(userId))
-		return false
-	end
+	local success = dataService.updateOfflinePlayerData(userId, function(offlineData)
+		-- This callback runs if the profile is loaded successfully (online or offline)
 
-	local amountExisting = 1
-	if info.multiple then
-		for _, v in pairs(savedUserData.Data.notificationQueue) do
-			if v == notificationKey then
-				amountExisting += 1
+		-- Ensure Data and notificationQueue exist before proceeding
+		if not offlineData or not offlineData.Data or typeof(offlineData.Data.notificationQueue) ~= "table" then
+			if DEBUG then
+				debugLog(
+					"User "
+						.. userId
+						.. " data or notificationQueue is missing or not a table. Type: "
+						.. typeof(offlineData and offlineData.Data and offlineData.Data.notificationQueue)
+				)
+			end
+			-- Cannot process notifications without a valid queue, throw error to prevent save
+			error("User data or notificationQueue invalid for user " .. userId)
+			return -- Exit callback
+		end
+
+		local amountExisting = 1
+		if info.multiple then
+			for _, v in pairs(offlineData.Data.notificationQueue) do
+				if v == notificationKey then
+					amountExisting += 1
+				end
+			end
+		else
+			if Sift.Array.includes(offlineData.Data.notificationQueue, notificationKey) then
+				if DEBUG then
+					debugLog("User " .. userId .. " already has non-repeatable notification " .. notificationKey)
+				end
+				return -- Already has non-repeatable notification, exit callback without error (no change needed)
 			end
 		end
-	else
-		if Sift.Array.includes(savedUserData.Data.notificationQueue, notificationKey) then
-			return false -- Already has non-repeatable notification
-		end
-	end
 
-	if amountExisting * info.waitTime > timeElapsed then
-		-- Only log if DEBUG is true, as this can be very frequent
-		--print("Too Frequent" .. "Wait .. " .. (amountExisting * info.waitTime - timeElapsed))
+		if amountExisting * info.waitTime > timeElapsed then
+			if DEBUG then
+				debugLog(
+					"Too frequent, not sending notification "
+						.. notificationKey
+						.. " to user "
+						.. userId
+						.. ". Wait time: "
+						.. (amountExisting * info.waitTime)
+						.. ", time elapsed: "
+						.. timeElapsed
+				)
+			end
+			return -- Cooldown active, exit callback without error (no change needed)
+		end
+
+		print("Attempting to send notification " .. notificationKey .. " to user " .. userId)
+
+		local userNotification = {
+			payload = {
+				messageId = info.assetid,
+				type = "MOMENT",
+				parameters = info.parseParameters(userId, offlineData.Data),
+			},
+		}
+
 		if DEBUG then
-			debugLog(
-				"Too frequent, not sending notification "
-					.. notificationKey
-					.. " to user "
-					.. userId
-					.. ". Wait time: "
-					.. (amountExisting * info.waitTime)
-					.. ", time elapsed: "
-					.. timeElapsed
-			)
+			debugLog("Notification payload prepared: " .. HttpService:JSONEncode(userNotification))
 		end
-		return false
-	end
 
-	print("Send notification " .. notificationKey)
+		-- Call Open Cloud API (outside safeCall as updateOfflinePlayerData handles retries/errors for data)
+		-- We still need pcall for the API call itself
+		local apiSuccess, result = pcall(function()
+			return OCUserNotification.createUserNotification(userId, userNotification)
+		end)
 
-	local userNotification = {
-		payload = {
-			messageId = info.assetid,
-			type = "MOMENT",
-			parameters = info.parseParameters(userId, savedUserData.Data),
-		},
-	}
+		if not apiSuccess then
+			warn(
+				"[Notification Service] Open Cloud API pcall failed for user ID: "
+					.. tostring(userId)
+					.. " - Error: "
+					.. tostring(result)
+			)
+			-- Throw error to signal updateOfflinePlayerData that the operation failed and data shouldn't be saved with changes
+			error("Open Cloud API pcall failed for user " .. userId)
+			return -- Exit callback
+		elseif result.statusCode ~= 200 then
+			local statusCode = result.statusCode or "unknown"
+			local responseBody = result.body or "{no body}"
+			warn(
+				"[Notification Service] Open Cloud API Error for user ID: "
+					.. tostring(userId)
+					.. " - Status: "
+					.. statusCode
+					.. ", Body: "
+					.. responseBody
+			)
+			-- Throw error to signal updateOfflinePlayerData that the operation failed
+			error("Open Cloud API returned status " .. statusCode .. " for user " .. userId)
+			return -- Exit callback
+		end
 
-	-- Log payload only if debugging
-	if DEBUG then
-		debugLog("Notification payload prepared: " .. HttpService:JSONEncode(userNotification))
-	end
-
-	local result = { value = nil }
-	success = safeCall(function()
-		return OCUserNotification.createUserNotification(userId, userNotification)
-	end, result)
+		-- API call successful, now modify the data
+		table.insert(offlineData.Data.notificationQueue, notificationKey)
+		notificationSent = true -- Set flag
+		print(
+			"[Notification Service] Successfully sent notification "
+				.. notificationKey
+				.. " to user "
+				.. userId
+				.. " and updated queue."
+		)
+		-- No need to manually save, updateOfflinePlayerData handles it
+	end)
 
 	if not success then
-		-- Keep this warning as it indicates a fundamental issue
-		warn(
-			"[Notification Service] Failed to send notification to user ID: "
-				.. tostring(userId)
-				.. " - pcall failed within safeCall."
-		)
-		return false
-	elseif result.value.statusCode ~= 200 then
-		local statusCode = result.value.statusCode or "unknown"
-		local responseBody = result.value.body or "{no body}"
-		-- Keep this warning as it indicates an API error
-		warn(
-			"[Notification Service] Failed to send notification to user ID: "
-				.. tostring(userId)
-				.. " - API Error Status: "
-				.. statusCode
-				.. ", Body: "
-				.. responseBody
-		)
-		return false
+		warn("[Notification Service] updateOfflinePlayerData failed for user ID: " .. tostring(userId))
+		return false -- Overall operation failed
 	end
 
-	table.insert(savedUserData.Data.notificationQueue, notificationKey)
-
-	if not Players:GetPlayerByUserId(userId) then
-		safeCall(function()
-			savedUserData:SetAsync()
-		end, { value = nil })
-	end
-
-	-- Keep essential success log
-	print("[Notification Service] Sent notification " .. notificationKey .. " to user " .. userId)
-	return true
+	return notificationSent -- Return true only if the notification was actually sent and data updated
 end
 
 -- Process notifications for a player

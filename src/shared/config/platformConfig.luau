@@ -28,6 +28,17 @@ local startTimeLuckyBlock = tick()
 
 local changedCannonSignal = Signal.new()
 
+-- Helper function to format numbers into K/M strings
+local function formatNumber(num)
+	if num >= 1000000 then
+		return string.format("%.1fM", num / 1000000) -- e.g., 1.5M
+	elseif num >= 1000 then
+		return string.format("%dK", num / 1000) -- e.g., 150K
+	else
+		return tostring(num) -- e.g., 500
+	end
+end
+
 local function switchPlatformColor(model, target)
 	spr.target(model.touch, 0.9, 2.5, { ["Color"] = target })
 	spr.target(model.color, 0.9, 2.5, { ["Color"] = target })
@@ -106,24 +117,68 @@ return {
 				end
 				callbackEvent:Fire(success)
 			end,
-			title = "1M+ REWARD!",
-			description = "ENABLE NOTIFICATIONS",
+			-- Title will now be dynamic based on player's potential reward
+			title = "CALCULATING...",
+			description = "ENABLE NOTIFICATIONS", -- Initial description
 			updateValues = function(trove, updateEvent)
-				uiController.promptInEvent:Connect(function(success)
-					print(success)
-					if success then
+				local currentCannonLevel = -1 -- Initialize to track changes
+				local currentDescription = "ENABLE NOTIFICATIONS" -- Track current description state
+
+				-- Function to update the display
+				local function updateDisplay(playerData)
+					local rewardAmount = rewardsConfig.playerJoinReward(playerData.cannon)
+					local formattedReward = formatNumber(rewardAmount) .. " REWARD!"
+					local canPromptIn = uiController.canPromptIn() -- Check current notification status
+
+					-- Determine description based on notification status
+					local newDescription = if canPromptIn then "ENABLE NOTIFICATIONS" else "INVITE A NEW PLAYER"
+
+					-- Only fire update if title or description changes
+					if
+						formattedReward ~= (updateEvent.CurrentValue and updateEvent.CurrentValue.title)
+						or newDescription ~= currentDescription
+					then
 						updateEvent:Fire({
-							title = "1M+ REWARD!",
-							description = "INVITE A NEW PLAYER",
+							title = formattedReward,
+							description = newDescription,
 						})
+						currentDescription = newDescription -- Update tracked description
 					end
-				end)
+					currentCannonLevel = playerData.cannon -- Update tracked level
+				end
+
+				-- Handle notification prompt success
+				trove:Add(uiController.promptInEvent:Connect(function(success)
+					if success then
+						-- Re-run updateDisplay to potentially change description and ensure title is current
+						local playerData = dataController.getData()
+						updateDisplay(playerData)
+					end
+				end))
+
+				-- Handle player data changes (specifically cannon level)
+				trove:Add(dataController.dataChanged:Connect(function(newData)
+					if newData.cannon ~= currentCannonLevel then
+						updateDisplay(newData)
+					end
+				end))
+
+				-- Initial update call after setup
+				local initialData = dataController.getData()
+				currentCannonLevel = initialData.cannon -- Set initial level before first update
+				updateDisplay(initialData)
 			end,
 			init = function()
+				-- Get initial data and calculate initial reward/description
+				local playerData = dataController.getData()
+				local initialReward = rewardsConfig.playerJoinReward(playerData.cannon)
+				local formattedReward = formatNumber(initialReward) .. " REWARD!"
 				local canPromptIn = uiController.canPromptIn()
+				local initialDescription = if canPromptIn then "ENABLE NOTIFICATIONS" else "INVITE A NEW PLAYER"
+
 				return {
-					title = "1M+ REWARD!",
-					description = canPromptIn and "ENABLE NOTIFICATIONS" or "INVITE A NEW PLAYER",
+					title = formattedReward,
+					description = initialDescription,
 				}
 			end,
 			initModel = ReplicatedStorage.assets:FindFirstChild("rewardSuitcase"),

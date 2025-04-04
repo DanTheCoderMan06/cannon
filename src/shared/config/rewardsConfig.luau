@@ -89,7 +89,38 @@ local function referralReward(referrerLevel)
 	local reward = math.min(baseReward + progressBonus, maxReward)
 
 	-- Round to nearest 500 for clean numbers
-	return math.floor(reward / 500) * 500
+	-- New formula inspired by cannonConfig.costFormula structure
+	local baseValue = 500 + (referrerLevel * 25) -- Base reward scales linearly
+
+	local scaledReward
+	if referrerLevel <= 10 then
+		-- Early levels: Moderate reward increase
+		scaledReward = baseValue * (1 + referrerLevel * 0.1) * 2
+	elseif referrerLevel <= 30 then
+		-- Mid levels: Stronger increase, introduce gentle power scaling
+		local scaleFactor = 1 + (referrerLevel * 0.02)
+		scaledReward = baseValue * math.pow(referrerLevel, scaleFactor * 0.5) * 3 -- Adjusted exponent
+	elseif referrerLevel <= 70 then
+		-- Upper-mid levels: Continue scaling, add logarithmic component
+		local logScale = math.log10(referrerLevel)
+		scaledReward = baseValue * referrerLevel * logScale * 1.5 -- More emphasis on level and log
+	else
+		-- Late levels: Dampen scaling slightly but maintain high reward potential
+		local logScale = math.log10(referrerLevel)
+		local expScale = math.exp((referrerLevel - 70) * 0.01) -- Very gentle exponential boost
+		scaledReward = (baseValue * referrerLevel * logScale * expScale) * 1.2
+	end
+
+	-- Add a small random factor for variability (90% - 110%)
+	local randomFactor = 0.9 + (math.random() * 0.2)
+	local finalReward = scaledReward * randomFactor
+
+	-- Cap the maximum reward to prevent extreme values
+	local maxReward = 150000 -- Increased cap
+	finalReward = math.min(finalReward, maxReward)
+
+	-- Round to nearest 100 for clean numbers
+	return math.floor(finalReward / 100) * 100
 end
 
 local module = {
