@@ -880,9 +880,7 @@ return {
 					)
 
 					modelTrove:Add(v:GetPropertyChangedSignal("Value"):Connect(function()
-						if cannonIndex == 0 then
-							updateDefaultModel(v.Value)
-						end
+						changedCannonSignal:Fire(0)
 					end))
 
 					updateDefaultModel(v.Value)

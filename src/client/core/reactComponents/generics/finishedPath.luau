@@ -49,7 +49,7 @@ return function(props)
 			FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
 			Position = UDim2.fromScale(0.1, 0.404),
 			RichText = true,
-			Size = UDim2.fromScale(0.8, 0.25),
+			Size = UDim2.fromScale(0.9, 0.25), -- Increased X scale from 0.8 to 0.9
 			Text = props.distance .. " studs",
 			TextColor3 = Color3.fromRGB(255, 255, 255),
 			TextScaled = true,

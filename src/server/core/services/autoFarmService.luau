@@ -50,7 +50,7 @@ function autoFarmService.start()
 				if not v:GetAttribute("autoFarming") then
 					continue
 				end
-				if os.time() - startTimes[v.Name] > 20 or RunService:IsStudio() then
+				if os.time() - startTimes[v.Name] > 1000 or RunService:IsStudio() then
 					autoFarmService.migrate(v)
 				end
 			end

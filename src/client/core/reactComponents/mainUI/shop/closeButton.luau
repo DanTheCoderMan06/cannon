@@ -23,7 +23,7 @@ return function(props)
 		BorderSizePixel = 0,
 		Position = UDim2.fromScale(0.984, -0.00141),
 		ScaleType = Enum.ScaleType.Fit,
-		Size = UDim2.fromScale(0.129, 0.238),
+		Size = _G.isMobile and UDim2.fromScale(0.1677, 0.3094) or UDim2.fromScale(0.129, 0.238), -- 1.3x bigger on mobile
 		ZIndex = 5,
 		[React.Event.MouseEnter] = function()
 			api.start({

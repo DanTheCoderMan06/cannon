@@ -158,7 +158,7 @@ return function(props)
 				BorderSizePixel = 0,
 				Image = "rbxassetid://85156488647867",
 				LayoutOrder = 3,
-				Position = UDim2.fromScale(0.5, 0.805),
+				Position = _G.isMobile and UDim2.fromScale(0.5, 0.765) or UDim2.fromScale(0.5, 0.805),
 				ScaleType = Enum.ScaleType.Fit,
 				Size = UDim2.fromScale(0.608, 0.827),
 			}, {

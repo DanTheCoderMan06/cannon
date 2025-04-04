@@ -327,7 +327,7 @@ return function(props)
 			}),
 
 			gifts = React.createElement(optionsGroup, {
-				Position = UDim2.fromScale(0.0371, 0.5),
+				Position = UDim2.fromScale(0.0371, 0.5), -- Reverted mobile position change from previous incorrect attempt
 				elements = gifts,
 			}),
 
@@ -339,7 +339,7 @@ return function(props)
 				BorderSizePixel = 0,
 				Image = "rbxassetid://85156488647867",
 				LayoutOrder = 3,
-				Position = UDim2.fromScale(0.495, 0.946),
+				Position = _G.isMobile and UDim2.fromScale(0.475, 0.946) or UDim2.fromScale(0.495, 0.946), -- Shift left by 0.02 on mobile (Corrected value)
 				ScaleType = Enum.ScaleType.Fit,
 				Size = styles.selected:map(function(val)
 					return UDim2.fromScale(0.608, 0.0582):Lerp(UDim2.fromScale(0.608 * 1.1, 0.0582 * 1.1), val)
@@ -392,7 +392,7 @@ return function(props)
 							return
 						end
 						local productId = giftConfig[selectedGift].id
-						
+
 						MarketplaceService:PromptProductPurchase(Players.LocalPlayer, productId)
 					end,
 				}, {

@@ -336,7 +336,7 @@ return {
 		tiers = true,
 		tier2Name = "twoHundredFiftyFloorsTier2",
 		--Gift Compatability
-		giftName = "twoHundredFiftyFloors",
+		giftName = "twoHundredFifty",
 	},
 	twoHundredFiftyFloorsTier2 = {
 		id = 2706012109, -- +250 Floors (Tier II)

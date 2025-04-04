@@ -222,7 +222,7 @@ function effectsController.finishedPath(results)
 			ResetOnSpawn = false,
 			AlwaysOnTop = true,
 			StudsOffset = Vector3.new(0, 8, 0),
-			Size = UDim2.fromScale(6, 7.5),
+			Size = UDim2.fromScale(8, 7.5), -- Increased width scale from 6 to 8
 			Adornee = finishedPathEffects,
 		}, {
 			main = React.createElement(finishedPath, {

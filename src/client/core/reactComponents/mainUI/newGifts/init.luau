@@ -85,27 +85,47 @@ return function(props)
 	end, { allPlayers, props.selectedGift })
 
 	React.useEffect(function()
+		-- Don't run if no gift is selected
 		if props.selectedGift == "" then
 			return
 		end
-		local currentData = props.getData()
-		local newTier = 1
-		local giftType = giftConfig[props.selectedGift]
 
-		if giftType then
-			task.wait()
-			props.selectedUIEvent:Fire("")
+		-- Validate giftType
+		local giftType = giftConfig[props.selectedGift]
+		if not giftType then
+			warn("newGifts: Invalid selectedGift:", props.selectedGift)
+			task.delay(1, function()
+				props.selectedUIEvent:Fire("") -- Close UI if gift config is missing
+			end)
+			return
 		end
 
+		-- Validate currentData and necessary nested tables
+		local currentData = props.getData()
+		if not currentData or not currentData.productTiers or not currentData.productTiers.gifts then
+			warn("newGifts: Missing player data (productTiers or productTiers.gifts)")
+			props.selectedUIEvent:Fire("") -- Close UI if data is missing
+			return
+		end
+
+		-- Now it's safe to access giftType.type and currentData.productTiers.gifts
+		local newTier = 1
 		if currentData.productTiers.gifts[giftType.type] then
 			newTier = currentData.productTiers.gifts[giftType.type] >= 5 and 2 or 1
 		end
-
 		setCurrentTier(newTier)
 
 		local uiTrove = Trove.new()
 
+		-- Connect to data changes
 		uiTrove:Add(props.dataChanged:Connect(function(newData)
+			-- Re-validate necessary data structures in callback as well
+			if not newData or not newData.productTiers or not newData.productTiers.gifts then
+				warn("newGifts (dataChanged): Missing player data")
+				-- Optionally close UI here too, or just prevent update
+				return
+			end
+			-- giftType should still be valid here because the effect reruns if props.selectedGift changes
 			local newTier = 1
 			if newData.productTiers.gifts[giftType.type] then
 				newTier = newData.productTiers.gifts[giftType.type] >= 5 and 2 or 1

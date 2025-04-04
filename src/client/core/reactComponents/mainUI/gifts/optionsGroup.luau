@@ -23,7 +23,7 @@ return function(props)
 		Size = UDim2.fromScale(0.918, 0.13 * (_G.isMobile and 1.7 or 1)),
 	}, {
 		uIGridLayout = React.createElement("UIGridLayout", {
-			CellPadding = UDim2.fromScale(0, 0.1),
+			CellPadding = _G.isMobile and UDim2.fromScale(0.02, 0.1) or UDim2.fromScale(0, 0.1), -- Add 0.02 X padding on mobile
 			CellSize = UDim2.fromScale(0.031, 1),
 			SortOrder = Enum.SortOrder.LayoutOrder,
 		}),

@@ -235,7 +235,7 @@ function castleController.updateSpot(spot, newValue, places, playerFloors)
 	end
 
 	spot:FindFirstChild("characterModel", true):FindFirstChild("centerWeld").C0 =
-		CFrame.new(0, (newValue * floorHeight * 0.025) + 2.1, 0)
+		CFrame.new(0, (newValue * floorHeight * 0.025) + 1.6, 0) -- Lowered offset from 2.1 to 0.9
 	spot:FindFirstChild("characterModel", true):FindFirstChild("floors", true).Text = playerFloors .. " Floors!"
 	if places[1] == spot.Name then
 		spot:FindFirstChild("characterModel", true):FindFirstChild("record", true).Text = "🥇1st Place!"
@@ -336,7 +336,7 @@ function castleController.updatePlayer(player)
 
 	towerPrompt.Triggered:Connect(function()
 		local success = zap.selectPlatform.Call(player)
-
+		SoundService.effects.click:Play()
 		if success then
 			spr.target(towerModel.towerHighlight, 0.9, 3, { OutlineColor = Color3.new(0.580392, 1, 0.768627) })
 		else
