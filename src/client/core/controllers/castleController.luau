@@ -358,8 +358,13 @@ function castleController.updatePlayer(player)
 	newRig.Name = "characterModel"
 	newRig.Parent = towerModel
 
+	local targetUserId = player.UserId
+	if targetUserId <= 0 then
+		targetUserId = 1 -- Default to Roblox's UserId if the player's UserId is invalid
+	end
+
 	local s, r = pcall(function()
-		local playerHumDescription = Players:GetHumanoidDescriptionFromUserId(player.UserId)
+		local playerHumDescription = Players:GetHumanoidDescriptionFromUserId(targetUserId)
 		newRig:WaitForChild("Humanoid"):ApplyDescription(playerHumDescription)
 	end)
 
@@ -368,7 +373,8 @@ function castleController.updatePlayer(player)
 		task.wait(1)
 		tries += 1
 		s, r = pcall(function()
-			local playerHumDescription = Players:GetHumanoidDescriptionFromUserId(player.UserId)
+			-- Use the same targetUserId logic in the retry attempt
+			local playerHumDescription = Players:GetHumanoidDescriptionFromUserId(targetUserId)
 			newRig:WaitForChild("Humanoid"):ApplyDescription(playerHumDescription)
 		end)
 	end
@@ -586,7 +592,7 @@ function castleController.start()
 		end
 
 		players = Sift.Array.sort(players, function(a, b)
-			return playerStats[b] > playerStats[a]
+			return playerStats[b] < playerStats[a]
 		end)
 
 		for _, v in pairs(Players:GetPlayers()) do
