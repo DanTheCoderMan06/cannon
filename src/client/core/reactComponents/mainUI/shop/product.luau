@@ -234,7 +234,8 @@ return function(props)
 				LayoutOrder = 3,
 				ZIndex = 5,
 				Position = styles.clicked2:map(function(val)
-					return UDim2.fromScale(if _G.isMobile then 0.85 else .79, 0.799):Lerp(UDim2.fromScale(if _G.isMobile then 0.85 else .79, 0.81), val)
+					return UDim2.fromScale(if _G.isMobile then 0.85 else 0.79, 0.799)
+						:Lerp(UDim2.fromScale(if _G.isMobile then 0.85 else 0.79, 0.81), val)
 				end),
 				ScaleType = Enum.ScaleType.Fit,
 				Size = styles.hover2:map(function(val)

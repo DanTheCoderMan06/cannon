@@ -123,7 +123,7 @@ function notificationService.sendNotification(userId, info, notificationKey, tim
 
 	if amountExisting * info.waitTime > timeElapsed then
 		-- Only log if DEBUG is true, as this can be very frequent
-		print("Too Frequent" .. "Wait .. " .. (amountExisting * info.waitTime - timeElapsed))
+		--print("Too Frequent" .. "Wait .. " .. (amountExisting * info.waitTime - timeElapsed))
 		if DEBUG then
 			debugLog(
 				"Too frequent, not sending notification "
@@ -138,6 +138,8 @@ function notificationService.sendNotification(userId, info, notificationKey, tim
 		end
 		return false
 	end
+
+	print("Send notification " .. notificationKey)
 
 	local userNotification = {
 		payload = {

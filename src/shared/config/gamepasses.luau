@@ -25,7 +25,7 @@ return {
 		cannonName = "railgun",
 	},
 	buyVIP = {
-		id = 1060138098,
+		id = 1022963419,
 	},
 	newCannon = {
 		id = 2697043453,

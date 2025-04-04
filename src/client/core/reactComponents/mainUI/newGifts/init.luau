@@ -56,6 +56,9 @@ return function(props)
 		local _players = {}
 
 		for i, player in pairs(allPlayers) do
+			if player.Name == Players.LocalPlayer.Name then
+				continue
+			end
 			local userThumbnail = marketplaceUtil.getPlayerImage(player)
 			table.insert(
 				_players,
@@ -88,6 +91,11 @@ return function(props)
 		local currentData = props.getData()
 		local newTier = 1
 		local giftType = giftConfig[props.selectedGift]
+
+		if giftType then
+			task.wait()
+			props.selectedUIEvent:Fire("")
+		end
 
 		if currentData.productTiers.gifts[giftType.type] then
 			newTier = currentData.productTiers.gifts[giftType.type] >= 5 and 2 or 1

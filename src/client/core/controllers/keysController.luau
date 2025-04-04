@@ -100,7 +100,7 @@ function controlsController.start()
 
 	controlsController.updateFarming()
 
-	RunService:BindToRenderStep("noReset", Enum.RenderPriority.Last.Value, function()
+	RunService:BindToRenderStep("noReset", Enum.RenderPriority.First.Value, function()
 		pcall(function()
 			StarterGui:SetCore("ResetButtonCallback", false)
 		end)

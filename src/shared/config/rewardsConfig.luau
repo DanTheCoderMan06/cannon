@@ -93,11 +93,11 @@ local function referralReward(referrerLevel)
 end
 
 local module = {
-	luckyBlockWaitTime = 20,
+	luckyBlockWaitTime = 300,
 	playerJoinReward = referralReward,
 	luckyBlockFormula = luckyBlockReward,
 	vipRewardDuration = 10000,
-	vipGamepass = 1060138098,
+	vipGamepass = 1022963419,
 	referWaitTime = 50,
 	rewards = {
 		{
