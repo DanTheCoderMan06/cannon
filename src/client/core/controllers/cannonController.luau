@@ -169,7 +169,7 @@ function cannonController.start()
 
 		local events = stateController.getEvents()
 
-		local oldPosition
+		local oldPosition = startPosition -- Initialize oldPosition here
 		local timeElapsed
 		local newPosition
 		local finishedSignal = Signal.new()
@@ -206,6 +206,8 @@ function cannonController.start()
 		end
 
 		cameraController.startShake()
+
+		cameraController.startAir()
 
 		cannonController.playLaunchSound(multiplier, physics.time)
 
@@ -272,7 +274,7 @@ function cannonController.start()
 		end)
 
 		finishedSignal:Connect(function() --TODO: Use raycast + spr to  finish up dummy falling
-			cameraController.removeTracker()
+			cameraController.endAir()
 			spr.target(workspace.CurrentCamera, 1, 0.25, { FieldOfView = 70 })
 			cameraController.shakeBump()
 			local mapParams = RaycastParams.new()
@@ -326,12 +328,12 @@ function cannonController.start()
 			end)
 
 			local startWait = tick()
-			task.delay(3, function()
+			task.delay(1, function() -- Reduced outer delay
 				repeat
 					task.wait()
 				until not character
 					or (
-						(character.PrimaryPart.AssemblyLinearVelocity.Magnitude < 0.1 or tick() - startWait > 7.5)
+						(character.PrimaryPart.AssemblyLinearVelocity.Magnitude < 0.1 or tick() - startWait > 2.9) -- Reduced inner timeout
 						and character.PrimaryPart.Position.Y < 1
 					)
 				cameraController.endShake()

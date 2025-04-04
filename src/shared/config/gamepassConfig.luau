@@ -367,6 +367,7 @@ return {
 		giftName = "circusCannon",
 	},
 	--]]
+	--[[
 	buyArmyCannon = {
 		id = 1136518787, -- Army Cannon
 		callback = function(player)
@@ -381,12 +382,12 @@ return {
 		--Gift Compatability
 		--giftName = "giftArmyCannon",
 	},
-	--[[
+	--]]
 	buyArtillery = {
-		id = 3102302619, -- Special Cannon 2
+		id = 1136518787, -- Special Cannon 1
 		callback = function(player)
 			local playerData = dataService.getPlayerData(player)
-			marketplaceUtil.updatePlayerCache(player, 3102302619)
+			marketplaceUtil.updatePlayerCache(player, 1136518787)
 			table.insert(playerData.cannons, "artillery")
 			dataService.updatePlayerData(player, playerData)
 		end,
@@ -396,7 +397,6 @@ return {
 		--Gift Compatability
 		giftName = "giftArtillery",
 	},
-	--]]
 	buyRailgun = {
 		id = 1137894433, -- Railgun
 		callback = function(player)

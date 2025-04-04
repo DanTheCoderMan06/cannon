@@ -134,6 +134,7 @@ return {
 					local newDescription = if canPromptIn then "ENABLE NOTIFICATIONS" else "INVITE A NEW PLAYER"
 
 					-- Only fire update if title or description changes
+					print("Update")
 					if
 						formattedReward ~= (updateEvent.CurrentValue and updateEvent.CurrentValue.title)
 						or newDescription ~= currentDescription
@@ -366,9 +367,15 @@ return {
 							) .. "$",
 						})
 					else
+						-- Fetch dynamic price for gifting
+						local giftId = giftConfig.tenFloors.id
+						-- TODO: Add logic to check playerData.productTiers.gifts["floors"] for tier 2 ID if necessary
+						local itemInfo = marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
+						local priceDesc = itemInfo and itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
+							or "Loading..."
 						updateEvent:Fire({
 							title = "GIFT 10 FLOORS",
-							description = '100 <font color="#008000">\u{E002}</font>',
+							description = priceDesc,
 						})
 					end
 				end))
@@ -437,10 +444,16 @@ return {
 				end
 			end,
 			init = function()
-				return { title = "+10 FLOORS", description = '100 <font color="#008000">\u{E002}</font>' }
+				-- Fetch initial dynamic price for self-purchase
+				local productId = gamepassConfig.tenFloors.id
+				-- TODO: Add logic to check playerData.productTiers.products["floors"] for tier 2 ID if necessary
+				local itemInfo = marketplaceUtil.getProductInfo(productId, Enum.InfoType.Product)
+				local priceDesc = itemInfo and itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
+					or "Loading..."
+				return { title = "+10 FLOORS", description = priceDesc }
 			end,
-			title = "+10 FLOORS",
-			description = '100 <font color="#008000">\u{E002}</font>',
+			title = "+10 FLOORS", -- Title remains static
+			description = "Loading...", -- Initial description, updated by init/updateValues
 			updateValues = function(trove, updateEvent)
 				local Players = game:GetService("Players")
 				local stats = Players.LocalPlayer:WaitForChild("leaderstats")
@@ -448,19 +461,41 @@ return {
 				local localPlayer = Players.LocalPlayer
 				local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(localPlayer.Name)
 
-				trove:Add(playerPlatform:GetAttributeChangedSignal("currentTower"):Connect(function()
+				-- Local function to update the platform display based on current tower
+				local function updateTenFloorsDisplay()
+					local playerData = dataController.getData() -- Get current data for tier checks
+					local title, productId, giftId
 					if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
-						updateEvent:Fire({
-							title = "+10 FLOORS",
-							description = '100 <font color="#008000">\u{E002}</font>',
-						})
+						title = "+10 FLOORS"
+						productId = gamepassConfig.tenFloors.id
+						if
+							playerData.productTiers.products["floors"]
+							and playerData.productTiers.products["floors"] >= 5
+						then
+							productId = gamepassConfig.tenFloorsTier2.id
+						end
+						local itemInfo = marketplaceUtil.getProductInfo(productId, Enum.InfoType.Product)
+						local priceDesc = itemInfo and itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
+							or "Loading..."
+						updateEvent:Fire({ title = title, description = priceDesc })
 					else
-						updateEvent:Fire({
-							title = "GIFT 50 FLOORS",
-							description = '100 <font color="#008000">\u{E002}</font>',
-						})
+						title = "GIFT 50 FLOORS"
+						giftId = giftConfig.fiftyFloors.id
+						if playerData.productTiers.gifts["floors"] and playerData.productTiers.gifts["floors"] >= 5 then
+							giftId = giftConfig.fiftyFloorsTier2.id
+						end
+						local itemInfo = marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
+						local priceDesc = itemInfo and itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
+							or "Loading..."
+						updateEvent:Fire({ title = title, description = priceDesc })
 					end
-				end))
+				end
+
+				-- Connect the attribute change signal to the update function
+				trove:Add(playerPlatform:GetAttributeChangedSignal("currentTower"):Connect(updateTenFloorsDisplay))
+
+				-- Call the function once initially to set the correct state
+				updateTenFloorsDisplay()
 			end,
 			initModel = ReplicatedStorage.assets.twofloors,
 		},
@@ -501,10 +536,16 @@ return {
 				end
 			end,
 			init = function()
-				return { title = "+50 FLOORS", description = '100 <font color="#008000">\u{E002}</font>' }
+				-- Fetch initial dynamic price for self-purchase
+				local productId = gamepassConfig.fiftyFloors.id
+				-- TODO: Add logic to check playerData.productTiers.products["floors"] for tier 2 ID if necessary
+				local itemInfo = marketplaceUtil.getProductInfo(productId, Enum.InfoType.Product)
+				local priceDesc = itemInfo and itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
+					or "Loading..."
+				return { title = "+50 FLOORS", description = priceDesc }
 			end,
-			title = "+50 FLOORS",
-			description = '100 <font color="#008000">\u{E002}</font>',
+			title = "+50 FLOORS", -- Title remains static
+			description = "Loading...", -- Initial description, updated by init/updateValues
 			initModel = ReplicatedStorage.assets.fivefloors,
 			updateValues = function(trove, updateEvent)
 				local Players = game:GetService("Players")
@@ -513,19 +554,41 @@ return {
 				local localPlayer = Players.LocalPlayer
 				local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(localPlayer.Name)
 
-				trove:Add(playerPlatform:GetAttributeChangedSignal("currentTower"):Connect(function()
+				-- Local function to update the platform display based on current tower
+				local function updateFiftyFloorsDisplay()
+					local playerData = dataController.getData() -- Get current data for tier checks
+					local title, productId, giftId
 					if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
-						updateEvent:Fire({
-							title = "+10 FLOORS",
-							description = '100 <font color="#008000">\u{E002}</font>',
-						})
+						title = "+50 FLOORS"
+						productId = gamepassConfig.fiftyFloors.id
+						if
+							playerData.productTiers.products["floors"]
+							and playerData.productTiers.products["floors"] >= 5
+						then
+							productId = gamepassConfig.fiftyFloorsTier2.id
+						end
+						local itemInfo = marketplaceUtil.getProductInfo(productId, Enum.InfoType.Product)
+						local priceDesc = itemInfo and itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
+							or "Loading..."
+						updateEvent:Fire({ title = title, description = priceDesc })
 					else
-						updateEvent:Fire({
-							title = "GIFT 250 FLOORS",
-							description = '100 <font color="#008000">\u{E002}</font>',
-						})
+						title = "GIFT 250 FLOORS"
+						giftId = giftConfig.twoHundredFifty.id
+						if playerData.productTiers.gifts["floors"] and playerData.productTiers.gifts["floors"] >= 5 then
+							giftId = giftConfig.twoHundredFiftyTier2.id
+						end
+						local itemInfo = marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
+						local priceDesc = itemInfo and itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
+							or "Loading..."
+						updateEvent:Fire({ title = title, description = priceDesc })
 					end
-				end))
+				end
+
+				-- Connect the attribute change signal to the update function
+				trove:Add(playerPlatform:GetAttributeChangedSignal("currentTower"):Connect(updateFiftyFloorsDisplay))
+
+				-- Call the function once initially to set the correct state
+				updateFiftyFloorsDisplay()
 			end,
 		},
 		changeTower = {

@@ -1,8 +1,8 @@
 return {
-	cloudSky = 100000,
-	cloudSkyLerp = 20000,
-	nightSky = 300000,
-	nightSkyLerp = 150000,
+	cloudSky = 10000,
+	cloudSkyLerp = 2000,
+	nightSky = 60000,
+	nightSkyLerp = 40000,
 	attachToAttachments = {
 		--[[
 		"HatAttachment",

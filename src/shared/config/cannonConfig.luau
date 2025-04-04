@@ -1,93 +1,53 @@
 local function cost(level, boughtLevels)
-    -- Ensure we're working with a valid level difference
-    local levelDiff = math.max(0, level - boughtLevels)
-    
-    -- Base cost with more reasonable scaling
-    local baseValue = 100 + (levelDiff * 50)
-    
-    -- Control the exponential growth with a much gentler curve
-    -- Starting with linear growth, transitioning to gentle logarithmic
-    if level <= 5 then
-        -- Very early game - 4x more expensive than before
-        return math.round(baseValue * level * 1.2 * 4) + 1000  -- 4x multiplier and increased base
-    elseif level <= 10 then
-        -- Early game - 4x more expensive
-        return math.round(baseValue * level * 1.5 * 4) + 2000  -- 4x multiplier and increased base
-    elseif level <= 30 then
-        -- Mid game - 10x more expensive to reach ~20M at level 20
-        local scaleFactor = 1 + (level * 0.03)
-        return math.round(baseValue * math.pow(level, scaleFactor) * 10) + 10000  -- 10x multiplier and increased base
-    else
-        -- Late game - logarithmic dampening but with higher base to maintain progression
-        local logScale = math.log10(level)
-        local expScale = math.exp((level - 20) * 0.4 + 1)  -- Keeping your exponential scaling
-        -- Combined approach with 10x scaling
-        return math.round((baseValue * level * level * logScale * 10) / 2) + 50000  -- 10x multiplier and increased base
-    end
+	local levelDiff = math.max(0, level - boughtLevels)
+	local baseValue = 100 + (levelDiff * 50)
+
+	if level <= 5 then
+		return math.round(baseValue * level * 1.2 * 4) + 1000
+	elseif level <= 10 then
+		return math.round(baseValue * level * 1.5 * 4) + 2000
+	elseif level <= 30 then
+		local scaleFactor = 1 + (level * 0.024)
+		return math.round(baseValue * math.pow(level, scaleFactor) * 10) + 10000
+	elseif level <= 70 then
+		local logScale = math.log10(level)
+		local expScale = math.exp((level - 20) * 0.35 + 1)
+		return math.round((baseValue * level * level * logScale * 8) / 2) + 50000
+	else
+		local logScale = math.log10(level)
+		local expScale = math.exp((level - 20) * 0.4 + 1)
+		return math.round((baseValue * level * level * logScale * 10) / 2) + 50000
+	end
 end
 
-local function rewardFormula(distance)
-    -- Further reduced base reward (40x less than original version)
-    local baseReward = 37  -- Reduced by 4x from 150
-    
-    -- Thresholds for scaling transitions
-    local midThreshold = 100000
-    local lateThreshold = 500000
-    
-    -- Early to mid game rewards (reduced by ~40x from original version)
-    if distance <= midThreshold then
-        -- Further scaled-down values for early game
-        local distanceScale = distance * 0.037  -- Reduced by 4x from 0.15
-        local logarithmicComponent = math.log(distanceScale + 100, 1.08) * 12.5  -- Reduced by 4x from 50
-        local linearComponent = distance * 0.0125  -- Reduced by 4x from 0.05
-        
-        return math.round(baseReward + logarithmicComponent + linearComponent) + 2000
-    
-    -- Late mid-game (transitional scaling)
-    elseif distance <= lateThreshold then
-        -- Get the reward at threshold point
-        local midReward = baseReward + 
-                         (math.log(midThreshold * 0.15 + 100, 1.08) * 50) + 
-                         (midThreshold * 0.05)
-        
-        -- Additional distance beyond threshold
-        local excessDistance = distance - midThreshold
-        
-        -- More aggressive scaling for this range with polynomial growth
-        local bonusFactor = math.pow(excessDistance, 1.1) / 1000 + excessDistance * 0.1
-        
-        return math.round(midReward + bonusFactor)
-    
-    -- Late game rewards (significantly increased - ~2x+ previous version)
-    else
-        -- Calculate the reward at late threshold point for continuity
-        local midReward = baseReward + 
-                         (math.log(midThreshold * 0.15 + 100, 1.08) * 50) + 
-                         (midThreshold * 0.05)
-                         
-        local lateThresholdExcess = lateThreshold - midThreshold
-        local lateMidReward = midReward + 
-                             (math.pow(lateThresholdExcess, 1.1) / 1000 + 
-                              lateThresholdExcess * 0.1)
-        
-        -- Additional distance beyond late threshold
-        local ultraLateExcess = distance - lateThreshold
-        
-        -- Much more aggressive scaling with combined approaches for late game:
-        -- 1. Strong polynomial component (grows faster than linear)
-        -- 2. Square root component for large numbers
-        -- 3. Logarithmic boost to ensure meaningful jumps
-        local ultraLateBonus = 
-            (math.pow(ultraLateExcess, 1.2) / 500) +  -- Stronger polynomial growth
-            (math.sqrt(ultraLateExcess) * 30) +       -- Square root scaling
-            (math.log(ultraLateExcess + 1000, 1.5) * 2000)  -- Logarithmic component
-        
-        return math.round(lateMidReward + ultraLateBonus)
-    end
+local function rewardFormula(x)
+	local LOW_X = 966
+	local MID_X = 128000
+	local HIGH_X = 940000
+
+	local LOW_Y = 4000
+	local MID_Y = 1000000
+	local HIGH_Y = 4000000
+
+	if x < MID_X then
+		local progress = (x - LOW_X) / (MID_X - LOW_X)
+		local curve = progress * progress * (3 - 2 * progress)
+		local linear = progress * 0.2
+		return LOW_Y + (curve * 0.8 + linear) * (MID_Y - LOW_Y)
+	else
+		local progress = (x - MID_X) / (HIGH_X - MID_X)
+		local curve = progress ^ 0.8 * (3 - 2 * progress ^ 0.8)
+		local linear = progress * 0.3
+		return MID_Y + (curve * 0.7 + linear) * (HIGH_Y - MID_Y)
+	end
 end
 
-local function power(playerLevel)
-	return math.log(1 + 25 * (playerLevel + 1), 1.01) * 40 - 12000
+local function power(x)
+	local L = 15200
+	local k = 0.068
+	local x0 = 59.5
+
+	return L / (1 + math.exp(-k * (x - x0))) + 200
 end
 
 local module = {
@@ -319,10 +279,8 @@ local module = {
 			["min"] = 16,
 		},
 	},
-	rewardFormula = rewardFormula
+	rewardFormula = rewardFormula,
 }
-
-
 
 function module.getCannon(playerLevel)
 	local maxLevel = -1
@@ -349,7 +307,6 @@ function module.getNextCannon(playerLevel)
 	end
 	return currentCannon
 end
-
 function module.getPower(playerLevel)
 	return power(playerLevel)
 end

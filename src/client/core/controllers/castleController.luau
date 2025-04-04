@@ -378,6 +378,7 @@ function castleController.updatePlayer(player)
 	end)
 
 	local track = newRig.Humanoid.Animator:LoadAnimation(newAnim)
+	track.Priority = Enum.AnimationPriority.Action4
 	track.Looped = true
 	track:Play()
 end
@@ -617,6 +618,14 @@ function castleController.start()
 	end
 
 	updateTowers()
+
+	-- Start periodic tower update loop
+	task.spawn(function()
+		while true do
+			task.wait(60)
+			pcall(updateTowers) -- Use pcall to prevent errors in updateTowers from stopping the loop
+		end
+	end)
 
 	--Teleports
 

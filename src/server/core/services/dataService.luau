@@ -143,6 +143,25 @@ function dataService.updateOfflinePlayerData(userId, updateCallback)
 	return true
 end
 
+-- Function to fetch raw data for an OFFLINE player using GetAsync (read-only)
+function dataService.fetchOfflinePlayerData(userId)
+	local profileKey = `Player_{userId}`
+
+	local getSuccess, profile = pcallWithRetry(function()
+		return PlayerStore:GetAsync(profileKey)
+	end, `GetAsync Offline Profile {profileKey} (fetch)`)
+
+	if getSuccess and profile and profile.Data then
+		return profile.Data -- Return the raw data table
+	elseif not getSuccess then
+		warn(`[DataService] Failed to fetch offline profile for {userId}. Error: {profile}`)
+		return nil
+	else
+		-- Profile doesn't exist or has no Data field
+		return nil
+	end
+end
+
 function dataService.overwriteUserData(playerData)
 	-- This function seems intended for direct profile manipulation,
 	-- but using SetAsync directly on a profile object is unusual with ProfileService.

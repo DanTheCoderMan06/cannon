@@ -65,62 +65,9 @@ local function getDailyReward(day, playerLevel)
 end
 
 local function referralReward(referrerLevel)
-	-- Base reward meaningful even for new players
-	local baseReward = 5000
+	local baseReward = 100000
 
-	-- Logarithmic scaling with referrer's progress
-	local logScale = math.log10(referrerLevel + 10)
-
-	-- Scale rewards differently based on referrer's progress
-	local progressBonus
-	if referrerLevel < 30 then
-		-- Early game referrers
-		progressBonus = referrerLevel * 100
-	elseif referrerLevel < 70 then
-		-- Mid game referrers - use logarithmic scaling
-		progressBonus = referrerLevel * 50 * logScale
-	else
-		-- Late game referrers - more logarithmic dampening
-		progressBonus = referrerLevel * 30 * logScale
-	end
-
-	-- Cap maximum reward
-	local maxReward = 25000
-	local reward = math.min(baseReward + progressBonus, maxReward)
-
-	-- Round to nearest 500 for clean numbers
-	-- New formula inspired by cannonConfig.costFormula structure
-	local baseValue = 500 + (referrerLevel * 25) -- Base reward scales linearly
-
-	local scaledReward
-	if referrerLevel <= 10 then
-		-- Early levels: Moderate reward increase
-		scaledReward = baseValue * (1 + referrerLevel * 0.1) * 2
-	elseif referrerLevel <= 30 then
-		-- Mid levels: Stronger increase, introduce gentle power scaling
-		local scaleFactor = 1 + (referrerLevel * 0.02)
-		scaledReward = baseValue * math.pow(referrerLevel, scaleFactor * 0.5) * 3 -- Adjusted exponent
-	elseif referrerLevel <= 70 then
-		-- Upper-mid levels: Continue scaling, add logarithmic component
-		local logScale = math.log10(referrerLevel)
-		scaledReward = baseValue * referrerLevel * logScale * 1.5 -- More emphasis on level and log
-	else
-		-- Late levels: Dampen scaling slightly but maintain high reward potential
-		local logScale = math.log10(referrerLevel)
-		local expScale = math.exp((referrerLevel - 70) * 0.01) -- Very gentle exponential boost
-		scaledReward = (baseValue * referrerLevel * logScale * expScale) * 1.2
-	end
-
-	-- Add a small random factor for variability (90% - 110%)
-	local randomFactor = 0.9 + (math.random() * 0.2)
-	local finalReward = scaledReward * randomFactor
-
-	-- Cap the maximum reward to prevent extreme values
-	local maxReward = 150000 -- Increased cap
-	finalReward = math.min(finalReward, maxReward)
-
-	-- Round to nearest 100 for clean numbers
-	return math.floor(finalReward / 100) * 100
+	return math.floor((math.log(referrerLevel + 1) + 1) * baseReward / 100) * 100 * 5
 end
 
 local module = {
@@ -220,8 +167,8 @@ local module = {
 		{
 			day = 10,
 			callback = function(playerData)
-				if not table.find(playerData.cannons, "armyCannon") then
-					table.insert(playerData.cannons, "armyCannon")
+				if not table.find(playerData.cannons, "artillery") then
+					table.insert(playerData.cannons, "artillery")
 				end
 			end,
 			type = "image",

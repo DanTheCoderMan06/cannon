@@ -52,10 +52,6 @@ function controlsController.freezeMovement(toggle)
 end
 
 function controlsController.updateFarming()
-	if Players.LocalPlayer.Character and Players.LocalPlayer.Character:GetAttribute("inCannon") then
-		return
-	end
-
 	local isFarming = Players.LocalPlayer:GetAttribute("autoFarming")
 
 	if isFarming then
