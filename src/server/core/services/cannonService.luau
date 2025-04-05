@@ -37,6 +37,12 @@ function cannonService.addCannon(player, cannonName)
 		return
 	end
 	player:SetAttribute("currentCannon", cannonName)
+	if player.Character then
+		player.Character:MoveTo(
+			playerPlatforms:WaitForChild(player.Name):FindFirstChildWhichIsA("SpawnLocation", true).Position
+				+ Vector3.new(0, 5, 0)
+		)
+	end
 end
 
 function cannonService.launchPlayer(player)
