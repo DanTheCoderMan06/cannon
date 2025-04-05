@@ -24,6 +24,8 @@ local playerPlatforms = workspace:WaitForChild("playerPlatforms")
 
 local zap = require(ServerStorage.zap)
 
+local playerFloorsCache = {} -- Cache to store player floor counts
+
 local floorStorage = Instance.new("Folder")
 floorStorage.Name = "floorStorage"
 floorStorage.Parent = ServerStorage
@@ -158,7 +160,10 @@ function castleService.start()
 		local newSpot = castleService.findSpot()
 		newSpot.Name = player.Name
 		newCastle.Parent = newSpot
-		castleService.updateTower(player)
+		-- castleService.updateTower(player) -- Removed: Handled by dataChanged now
+		local playerData = dataService.getPlayerData(player)
+		playerFloorsCache[player] = playerData.floors -- Initialize cache
+		castleService.updateTower(player) -- Initial tower build on join
 		local newplatform = ReplicatedStorage.assets.playerPlatform:Clone()
 		newplatform:AddPersistentPlayer(player)
 		newplatform.Name = player.Name
@@ -169,6 +174,7 @@ function castleService.start()
 	end)
 
 	Players.PlayerRemoving:Connect(function(player)
+		playerFloorsCache[player] = nil -- Clear cache on leave
 		playerPlatforms:WaitForChild(player.Name):Destroy()
 		for i, v in pairs(castleFolder:GetChildren()) do
 			if v:FindFirstChildWhichIsA("Model") and v.Name == player.Name then
@@ -224,14 +230,26 @@ function castleService.start()
 		return true
 	end)
 
-	local oldTowers = {}
-	dataService.dataChanged:Connect(function(player,data)
-		if oldTowers[player] then
-			if data.floors ~= oldTowers[player] then
-				castleService.updateTower(player)
-			end
+	-- Listen for data changes to update towers
+	dataService.dataChanged:Connect(function(player, newData)
+		if playerFloorsCache[player] and newData.floors ~= playerFloorsCache[player] then
+			print(
+				string.format(
+					"Floor change detected for %s: %d -> %d. Updating tower.",
+					player.Name,
+					playerFloorsCache[player],
+					newData.floors
+				)
+			)
+			castleService.updateTower(player)
+			playerFloorsCache[player] = newData.floors -- Update cache
+		elseif not playerFloorsCache[player] then
+			-- Player might have joined before cache was populated or cache got cleared unexpectedly
+			print(string.format("Initializing floor cache for %s during data change.", player.Name))
+			playerFloorsCache[player] = newData.floors
+			-- Optionally update tower here if needed, though initial build should handle it
+			-- castleService.updateTower(player)
 		end
-		oldTowers[player] = data.floors
 	end)
 end
 

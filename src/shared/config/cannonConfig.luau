@@ -20,7 +20,9 @@ local function cost(level, boughtLevels)
 	end
 end
 
-local function rewardFormula(x)
+-- Updated reward formula to include floor bonus
+local function rewardFormula(x, floors)
+	floors = floors or 0
 	local LOW_X = 966
 	local MID_X = 128000
 	local HIGH_X = 940000
@@ -28,18 +30,34 @@ local function rewardFormula(x)
 	local LOW_Y = 4000
 	local MID_Y = 1000000
 	local HIGH_Y = 4000000
+	local SUPER_HIGH_X = 5000000
+	local SUPER_HIGH_Y = 20000000
 
-	if x < MID_X then
+	local result
+	if x < LOW_X then
+		result = LOW_Y
+	elseif x < MID_X then
 		local progress = (x - LOW_X) / (MID_X - LOW_X)
 		local curve = progress * progress * (3 - 2 * progress)
 		local linear = progress * 0.2
-		return LOW_Y + (curve * 0.8 + linear) * (MID_Y - LOW_Y)
-	else
-		local progress = (x - MID_X) / (HIGH_X - MID_X)
+		result = LOW_Y + (curve * 0.8 + linear) * (MID_Y - LOW_Y)
+	elseif x < HIGH_X then
+		local progress = math.min(1, (x - MID_X) / (HIGH_X - MID_X))
 		local curve = progress ^ 0.8 * (3 - 2 * progress ^ 0.8)
 		local linear = progress * 0.3
-		return MID_Y + (curve * 0.7 + linear) * (HIGH_Y - MID_Y)
+		result = MID_Y + (curve * 0.7 + linear) * (HIGH_Y - MID_Y)
+	elseif x < SUPER_HIGH_X then
+		local progress = (x - HIGH_X) / (SUPER_HIGH_X - HIGH_X)
+		local curve = progress ^ 0.7 * (3 - 2 * progress ^ 0.7)
+		local linear = progress * 0.25
+		result = HIGH_Y + (curve * 0.6 + linear) * (SUPER_HIGH_Y - HIGH_Y)
+	else
+		result = SUPER_HIGH_Y + math.log10(x / SUPER_HIGH_X + 1) * (SUPER_HIGH_Y * 0.5)
 	end
+
+	local floorMultiplier = 1 + (math.sqrt(math.max(1, floors)) * 0.3)
+
+	return math.max(0, result * floorMultiplier)
 end
 
 local function power(x)

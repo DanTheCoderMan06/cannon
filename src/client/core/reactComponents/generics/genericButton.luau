@@ -115,7 +115,7 @@ return function(props)
 				return UDim2.fromScale(0.9, 0.9):Lerp(UDim2.fromScale(1, 1), 1 - val)
 			end),
 			[React.Event.MouseButton1Down] = function()
-				SoundService.effects.click:Play()
+				SoundService.effects.uiClick:Play()
 				task.spawn(function()
 					props.onActivated()
 					api.start({

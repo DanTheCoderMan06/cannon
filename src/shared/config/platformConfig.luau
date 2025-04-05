@@ -63,13 +63,18 @@ return {
 					startTimeLuckyBlock = tick()
 				end)
 				trove:BindToRenderStep("renderTimeLuckyBlock", Enum.RenderPriority.Last.Value + 1, function()
-					local timeLeft = math.floor(
-						math.clamp(
-							rewardsConfig.luckyBlockWaitTime - (tick() - startTimeLuckyBlock),
-							-10,
-							rewardsConfig.luckyBlockWaitTime
-						)
-					)
+					-- Get current player cannon level
+					local playerData = dataController.getData()
+					local cannonLevel = playerData.cannon or 1 -- Default to level 1
+
+					-- Calculate wait time directly based on cannon level
+					local currentWaitTime = rewardsConfig.luckyBlockWaitTime(cannonLevel)
+
+					local timeLeft = math.floor(math.clamp(
+						currentWaitTime - (tick() - startTimeLuckyBlock), -- Use dynamic wait time
+						-10,
+						currentWaitTime -- Use dynamic wait time for clamp max
+					))
 
 					updateEvent:Fire({
 						title = timeLeft > 0 and reactUtil.secondsToMMSS(timeLeft) or "READY!",

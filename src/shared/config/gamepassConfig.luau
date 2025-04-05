@@ -103,7 +103,7 @@ return {
 		changeOnData = "floors",
 		type = "gamepasses",
 		infoType = Enum.InfoType.Product,
-		shouldAppear = true,
+		shouldAppear = false,
 		speicalTiers = true,
 	},
 	upgradeCannon = {
@@ -196,7 +196,7 @@ return {
 		changeOnData = "cannon",
 		type = "cannons",
 		infoType = Enum.InfoType.Product,
-		shouldAppear = true,
+		shouldAppear = false,
 		speicalTiers = true,
 	},
 	allRewardsWhale = {
@@ -224,7 +224,7 @@ return {
 		end,
 		type = "gamepasses",
 		infoType = Enum.InfoType.Product,
-		shouldAppear = true,
+		shouldAppear = false,
 		tiers = true,
 		tier2Name = "allRewardsWhaleTier2",
 	},
@@ -293,6 +293,7 @@ return {
 		tier2Name = "tenFloorsTier2",
 		--Gift Compatability
 		giftName = "tenFloors",
+		index = 3,
 	},
 	fiftyFloors = {
 		id = 2691912808, -- +50 Floors
@@ -315,6 +316,7 @@ return {
 		tier2Name = "fiftyFloorsTier2",
 		--Gift Compatability
 		giftName = "fiftyFloors",
+		index = 2,
 	},
 	twoHundredFiftyFloors = {
 		id = 2691913116, -- +250 Floors (BEST DEAL!)
@@ -337,6 +339,7 @@ return {
 		tier2Name = "twoHundredFiftyFloorsTier2",
 		--Gift Compatability
 		giftName = "twoHundredFifty",
+		index = 1,
 	},
 	twoHundredFiftyFloorsTier2 = {
 		id = 2706012109, -- +250 Floors (Tier II)
@@ -396,6 +399,7 @@ return {
 		cannonName = "artillery",
 		--Gift Compatability
 		giftName = "giftArtillery",
+		index = 2,
 	},
 	buyRailgun = {
 		id = 1137894433, -- Railgun
@@ -410,6 +414,7 @@ return {
 		cannonName = "railgun",
 		--Gift Compatability
 		--giftName = "giftRailgun",
+		index = 1,
 	},
 	buyDoubleDistance = {
 		id = 1022787535, -- 2x Distance
@@ -423,6 +428,7 @@ return {
 		infoType = Enum.InfoType.GamePass,
 		--Gift Compatability
 		giftName = "doubleDistance",
+		index = 1,
 	},
 
 	buyDoubleMoney = {
@@ -437,6 +443,7 @@ return {
 		infoType = Enum.InfoType.GamePass,
 		--Gift Compatability
 		giftName = "doubleMoney",
+		index = 2,
 	},
 
 	buyInfiniteVIP = {
@@ -451,6 +458,7 @@ return {
 		infoType = Enum.InfoType.GamePass,
 		--Gift Compatability
 		giftName = "giveVIP",
+		index = 3,
 	},
 	artilleryGamepasses = {
 		["3102302619"] = "artillery", -- Special Cannon 2

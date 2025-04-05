@@ -1,6 +1,7 @@
 local PhysicsService = game:GetService("PhysicsService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local SoundService = game:GetService("SoundService")
 
 local zap = require(ReplicatedStorage.zap)
 local spr = require(ReplicatedStorage.sharedPackages.spr)
@@ -52,6 +53,7 @@ function luckyBlockController.start()
 			end
 			print(data.reward)
 			effectsController.rewardPopup(newLuckyBlock.PrimaryPart.Position, "+" .. data.reward .. "$")
+			SoundService.effects.claim:Play()
 			task.delay(1.2, function()
 				newLuckyBlock:Destroy()
 			end)

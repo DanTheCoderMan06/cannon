@@ -64,7 +64,7 @@ return function(props)
 			end),
 			ZIndex = 5,
 			[React.Event.Activated] = function()
-				SoundService.effects.click:Play()
+				SoundService.effects.uiClick:Play()
 				task.spawn(function()
 					print("Go")
 					api.start({

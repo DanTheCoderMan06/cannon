@@ -18,6 +18,8 @@ local dataController = require(ReplicatedStorage.client.controllers.dataControll
 
 local rewardFrame = require(ReplicatedStorage.client.reactComponents.mainUI.rewards.reward)
 
+local skipAllFrame = require(ReplicatedStorage.client.reactComponents.mainUI.rewards.skipAll)
+
 local zap = require(ReplicatedStorage.zap)
 
 local function viewportFrame(props)
@@ -80,6 +82,9 @@ return function(props)
 	local currentData = dataController.getData()
 	local rewards = React.useMemo(function()
 		local newRewards = {}
+
+		table.insert(newRewards, React.createElement(skipAllFrame))
+
 		for i, v in pairs(rewardConfig.rewards) do
 			local children = {}
 
@@ -109,7 +114,7 @@ return function(props)
 					Sift.Dictionary.merge({
 						index = v.day,
 						onActivated = function()
-							SoundService.effects.click:Play()
+							SoundService.effects.uiClick:Play()
 							zap.claimDailyReward.Fire(v.day)
 						end,
 						isLocked = isLocked,

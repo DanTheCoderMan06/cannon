@@ -31,6 +31,8 @@ local dataController = require(ReplicatedStorage.client.controllers.dataControll
 local castleController = require(ReplicatedStorage.client.controllers.castleController)
 local cannonController = require(ReplicatedStorage.client.controllers.cannonController)
 
+local cannonConfig = require(ReplicatedStorage.shared.config.cannonConfig)
+local floorsConfig = require(ReplicatedStorage.shared.config.floorConfig)
 local tutorialConfig = require(ReplicatedStorage.shared.config.tutorialConfig)
 
 local reactUtil = require(ReplicatedStorage.shared.utilities.reactUtil)
@@ -107,14 +109,14 @@ function tutorialController.loadPage(index)
 		togglePlatform = castleController.togglePlatform,
 		toggleAllPlatforms = castleController.toggleAllPlatforms,
 		toggleEntrance = cannonController.toggleEntrance,
-		trove = oldActionTrove
+		trove = oldActionTrove,
 	})
 end
 
 function tutorialController.endTutorial()
 	castleController.toggleAllPlatforms(true)
 	cannonController.toggleEntrance(true)
-
+	RAN_TUTORIAL = false
 	nextPageSignal:Destroy()
 	toggleEvent:Fire(false)
 	if tutorialItems then
@@ -148,12 +150,11 @@ function tutorialController.startTutorial()
 	local rainbowTrove = Trove.new()
 	local startedTime = tick()
 
-	rainbowTrove:BindToRenderStep("rainbowTutorial",Enum.RenderPriority.Last.Value,function(dt)
+	rainbowTrove:BindToRenderStep("rainbowTutorial", Enum.RenderPriority.Last.Value, function(dt)
 		if tutorialItems then
 			tutorialItems.beam.Color = ColorSequence.new(reactUtil.getSmoothColorFromElapsedTime(tick() - startedTime))
 		end
 	end)
-
 
 	tutorialController.loadPage(currentIndex)
 
@@ -181,6 +182,45 @@ function tutorialController.start()
 		end)
 
 		loadedSignal:Wait()
+	end)
+
+	--Set up guiding beam
+	local guiderModel = ReplicatedStorage.assets.guiding:Clone()
+	guiderModel.Parent = workspace
+	guiderModel.Name = "initialGuider"
+	local start = tick()
+	RunService:BindToRenderStep("guidingBeam", Enum.RenderPriority.Last.Value + 1, function()
+		if RAN_TUTORIAL then
+			guiderModel.beam.Enabled = false
+			return
+		end
+		local character = Players.LocalPlayer.Character
+		if not character then
+			guiderModel.beam.Enabled = false
+			return
+		end
+		if character:GetAttribute("inCannon") then
+			guiderModel.beam.Enabled = false
+			return
+		end
+
+		guiderModel.beam.Enabled = true
+		guiderModel.beam.Color = ColorSequence.new(reactUtil.getSmoothColorFromElapsedTime(tick() - start, 1))
+		guiderModel.beamPart.start.WorldCFrame = character.HumanoidRootPart.CFrame
+
+		local localPlayerPlatform = workspace.playerPlatforms:WaitForChild(Players.LocalPlayer.Name)
+		local currentData = dataController.getData()
+		local targetCFrame
+
+		if currentData.money >= cannonConfig.costFormula(currentData.cannon + 1, currentData.boughtLevels) then
+			targetCFrame = localPlayerPlatform.platforms:WaitForChild("cannon").CFrame
+		elseif currentData.money >= floorsConfig.costFormula(currentData.floors + 1, currentData.boughtFloors) then
+			targetCFrame = localPlayerPlatform.platforms:WaitForChild("floor").CFrame
+		else
+			targetCFrame = localPlayerPlatform:WaitForChild("cannonPosition", true).CFrame
+		end
+
+		guiderModel.beamPart.target.WorldCFrame = targetCFrame
 	end)
 end
 

@@ -2,6 +2,7 @@ local uiController = {}
 
 local MarketplaceService = game:GetService("MarketplaceService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local SoundService = game:GetService("SoundService")
 local StarterGui = game:GetService("StarterGui")
 local ExperienceNotificationService = game:GetService("ExperienceNotificationService")
 local Players = game:GetService("Players")
@@ -147,6 +148,7 @@ function uiController.start()
 			for _, v in pairs(newDays) do
 				claimedItemEvent:Fire(v)
 			end
+			SoundService.effects.claim:Play()
 		end
 		if newData.daysPlayed > currentData.daysPlayed then
 			for i = 1, newData.daysPlayed - currentData.daysPlayed do

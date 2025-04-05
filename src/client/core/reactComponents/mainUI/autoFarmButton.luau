@@ -133,7 +133,7 @@ return function(props)
 					return
 				end
 				lastCalled = tick()
-				SoundService.effects.click:Play()
+				SoundService.effects.uiClick:Play()
 				local success = zap.toggleAutoFarm.Call()
 				if success then
 					api.start({ toggle = not enabled:getValue() and 0 or 1 })

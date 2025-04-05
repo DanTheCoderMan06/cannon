@@ -145,7 +145,7 @@ return function(props)
 					})
 				end,
 				[React.Event.Activated] = function()
-					SoundService.effects.click:Play()
+					SoundService.effects.uiClick:Play()
 					task.spawn(function()
 						api.start({
 							clicked = 1,

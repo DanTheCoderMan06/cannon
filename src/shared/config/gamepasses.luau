@@ -12,12 +12,8 @@ return {
 		id = 1051314279,
 		cannonName = "circusCannon",
 	},
-	buyArmyCannon = {
-		id = 1051600321,
-		cannonName = "armyCannon",
-	},
 	buyArtillery = {
-		id = 1028783141,
+		id = 1136518787,
 		cannonName = "artillery",
 	},
 	buyRailgun = {

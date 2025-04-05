@@ -36,7 +36,7 @@ function cannonService.addCannon(player, cannonName)
 		warn("[CannonService]: Attempted to give null player cannon!")
 		return
 	end
-	player:SetAttribute("currentCannon",cannonName)
+	player:SetAttribute("currentCannon", cannonName)
 end
 
 function cannonService.launchPlayer(player)
@@ -48,10 +48,30 @@ function cannonService.launchPlayer(player)
 	else
 		cannonPower = cannonConfig.specialCannons[playerCannon].power
 	end
-	local playerHeight = math.abs(
-		playerPlatforms:WaitForChild(player.Name):FindFirstChild("cannonPosition").Position.Y
-			- castleFolder:FindFirstChild(player.Name).Position.Y
-	)
+
+	-- Calculate height based on the tower the player is currently on
+	local playerPlatform = playerPlatforms:WaitForChild(player.Name)
+	local cannonPosition = playerPlatform:FindFirstChild("cannonPosition")
+	local currentTowerName = playerPlatform:GetAttribute("currentTower") or player.Name -- Default to own tower if attribute missing
+	local targetCastleSpot = castleFolder:FindFirstChild(currentTowerName)
+
+	local playerHeight = 0
+	if cannonPosition and targetCastleSpot then
+		playerHeight = math.abs(cannonPosition.Position.Y - targetCastleSpot.Position.Y)
+	else
+		warn(
+			string.format(
+				"[CannonService] Could not determine height for %s on tower %s",
+				player.Name,
+				currentTowerName
+			)
+		)
+		-- Fallback or default height if needed, e.g., using player's own tower base as before or a fixed value
+		local ownCastleSpot = castleFolder:FindFirstChild(player.Name)
+		if cannonPosition and ownCastleSpot then
+			playerHeight = math.abs(cannonPosition.Position.Y - ownCastleSpot.Position.Y)
+		end
+	end
 
 	if player:GetAttribute("isVIP") then
 		cannonPower *= 1.5
@@ -83,7 +103,8 @@ end
 
 function cannonService.awardPlayer(player, playerPath)
 	local playerData = dataService.getPlayerData(player)
-	local award = cannonConfig.rewardFormula(playerPath.distance)
+	-- Pass player floors to the reward formula
+	local award = cannonConfig.rewardFormula(playerPath.distance, playerData.floors)
 	if playerData.doubleMoney then
 		award *= 2
 	end

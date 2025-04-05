@@ -74,7 +74,6 @@ function purchaseService.handlePurchase(recieptInfo)
 
 	for name, info in pairs(giftConfig) do
 		if info.id == recieptInfo.ProductId then
-			print("FOUND GIFT")
 			if not targets[player.Name] then
 				return Enum.ProductPurchaseDecision.NotProcessedYet
 			end

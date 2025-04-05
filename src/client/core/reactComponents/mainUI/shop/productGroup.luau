@@ -132,6 +132,7 @@ return function(props)
 						getId = info.getId,
 						specialTierAmount = info.speicalTiers and #info.id,
 						extraInfo = info,
+						index = info.index,
 					})
 				)
 			)

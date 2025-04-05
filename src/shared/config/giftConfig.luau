@@ -66,6 +66,7 @@ return {
 		callback = function(player, target)
 			if player == target then
 				local playerData = dataService.getPlayerData(player)
+				playerData.productTiers.gifts["floors"] = playerData.productTiers.gifts["floors"] or 5 -- Initialize if nil
 				playerData.productTiers.gifts["floors"] += 1
 				playerData.floors += 10
 				playerData.boughtFloors += 10
@@ -75,6 +76,7 @@ return {
 				end)
 			else
 				local playerData = dataService.getPlayerData(player)
+				playerData.productTiers.gifts["floors"] = playerData.productTiers.gifts["floors"] or 5 -- Initialize if nil
 				playerData.productTiers.gifts["floors"] += 1
 
 				local targetPlayerData = dataService.getPlayerData(target)
@@ -142,6 +144,7 @@ return {
 		callback = function(player, target)
 			if player == target then
 				local playerData = dataService.getPlayerData(player)
+				playerData.productTiers.gifts["floors"] = playerData.productTiers.gifts["floors"] or 5 -- Initialize if nil
 				playerData.productTiers.gifts["floors"] += 1
 				playerData.floors += 50
 				playerData.boughtFloors += 50
@@ -151,6 +154,7 @@ return {
 				end)
 			else
 				local playerData = dataService.getPlayerData(player)
+				playerData.productTiers.gifts["floors"] = playerData.productTiers.gifts["floors"] or 5 -- Initialize if nil
 				playerData.productTiers.gifts["floors"] += 1
 
 				local targetPlayerData = dataService.getPlayerData(target)
@@ -218,6 +222,7 @@ return {
 		callback = function(player, target)
 			if player == target then
 				local playerData = dataService.getPlayerData(player)
+				playerData.productTiers.gifts["floors"] = playerData.productTiers.gifts["floors"] or 5 -- Initialize if nil
 				playerData.productTiers.gifts["floors"] += 1
 				playerData.floors += 250
 				playerData.boughtFloors += 250
@@ -227,6 +232,7 @@ return {
 				end)
 			else
 				local playerData = dataService.getPlayerData(player)
+				playerData.productTiers.gifts["floors"] = playerData.productTiers.gifts["floors"] or 5 -- Initialize if nil
 				playerData.productTiers.gifts["floors"] += 1
 
 				local targetPlayerData = dataService.getPlayerData(target)
@@ -302,6 +308,7 @@ return {
 		callback = function(player, target)
 			if player == target then
 				local playerData = dataService.getPlayerData(player)
+				playerData.productTiers.gifts["doubleDistance"] = playerData.productTiers.gifts["doubleDistance"] or 5 -- Initialize if nil
 				playerData.productTiers.gifts["doubleDistance"] += 1
 				playerData.doubleDistance = true
 
@@ -310,6 +317,7 @@ return {
 				end)
 			else
 				local playerData = dataService.getPlayerData(player)
+				playerData.productTiers.gifts["doubleDistance"] = playerData.productTiers.gifts["doubleDistance"] or 5 -- Initialize if nil
 				playerData.productTiers.gifts["doubleDistance"] += 1
 
 				local targetPlayerData = dataService.getPlayerData(target)
@@ -386,6 +394,7 @@ return {
 		callback = function(player, target)
 			if player == target then
 				local playerData = dataService.getPlayerData(player)
+				playerData.productTiers.gifts["doubleMoney"] = playerData.productTiers.gifts["doubleMoney"] or 5 -- Initialize if nil
 				playerData.productTiers.gifts["doubleMoney"] += 1
 				playerData.doubleMoney = true
 
@@ -394,6 +403,7 @@ return {
 				end)
 			else
 				local playerData = dataService.getPlayerData(player)
+				playerData.productTiers.gifts["doubleMoney"] = playerData.productTiers.gifts["doubleMoney"] or 5 -- Initialize if nil
 				playerData.productTiers.gifts["doubleMoney"] += 1
 
 				local targetPlayerData = dataService.getPlayerData(target)
@@ -464,6 +474,7 @@ return {
 		callback = function(player, target)
 			if player == target then
 				local playerData = dataService.getPlayerData(player)
+				playerData.productTiers.gifts["giveVIP"] = playerData.productTiers.gifts["giveVIP"] or 5 -- Initialize if nil
 				playerData.productTiers.gifts["giveVIP"] += 1
 				playerData.infiniteVIP = true
 
@@ -472,6 +483,7 @@ return {
 				end)
 			else
 				local playerData = dataService.getPlayerData(player)
+				playerData.productTiers.gifts["giveVIP"] = playerData.productTiers.gifts["giveVIP"] or 5 -- Initialize if nil
 				playerData.productTiers.gifts["giveVIP"] += 1
 
 				local targetPlayerData = dataService.getPlayerData(target)
@@ -544,6 +556,7 @@ return {
 		callback = function(player, target)
 			if player == target then
 				local playerData = dataService.getPlayerData(player)
+				playerData.productTiers.gifts["cannons"] = playerData.productTiers.gifts["cannons"] or 5 -- Initialize if nil
 				playerData.productTiers.gifts["cannons"] += 1
 				table.insert(playerData.cannons, "artillery")
 
@@ -552,6 +565,7 @@ return {
 				end)
 			else
 				local playerData = dataService.getPlayerData(player)
+				playerData.productTiers.gifts["cannons"] = playerData.productTiers.gifts["cannons"] or 5 -- Initialize if nil
 				playerData.productTiers.gifts["cannons"] += 1
 
 				local targetPlayerData = dataService.getPlayerData(target)
@@ -622,6 +636,7 @@ return {
 		callback = function(player, target)
 			if player == target then
 				local playerData = dataService.getPlayerData(player)
+				playerData.productTiers.gifts["cannons"] = playerData.productTiers.gifts["cannons"] or 5 -- Initialize if nil
 				playerData.productTiers.gifts["cannons"] += 1
 				table.insert(playerData.cannons, "railgun")
 
@@ -630,6 +645,7 @@ return {
 				end)
 			else
 				local playerData = dataService.getPlayerData(player)
+				playerData.productTiers.gifts["cannons"] = playerData.productTiers.gifts["cannons"] or 5 -- Initialize if nil
 				playerData.productTiers.gifts["cannons"] += 1
 
 				local targetPlayerData = dataService.getPlayerData(target)

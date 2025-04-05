@@ -1,8 +1,11 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local cannonConfig = require(ReplicatedStorage.shared.config.cannonConfig)
 
-local function logFormula(playerLevel: IntValue)
-	return math.round(math.log(playerLevel, 10))
+local function luckyBlockWaitTime(playerLevel)
+	if playerLevel < 70 then
+		return 180 + playerLevel * 4
+	end
+	return 460
 end
 
 local function luckyBlockReward(playerLevel)
@@ -71,298 +74,294 @@ local function referralReward(referrerLevel)
 end
 
 local module = {
-	luckyBlockWaitTime = 300,
+	luckyBlockWaitTime = luckyBlockWaitTime, -- Revert to original static value
 	playerJoinReward = referralReward,
 	luckyBlockFormula = luckyBlockReward,
 	vipRewardDuration = 10000,
 	vipGamepass = 1022963419,
 	referWaitTime = 50,
 	rewards = {
-		{
+		{ -- Day 1: money reward
 			day = 1,
-			callback = function(playerData, player)
-				local ServerStorage = game:GetService("ServerStorage")
-				local vipService = require(ServerStorage.server.services.vipService)
-				vipService.givePlayerTempVIP(player)
+			callback = function(playerData)
+				playerData.money += getDailyReward(1, playerData.cannon)
 			end,
 			type = "image",
-			image = "rbxassetid://128528383855205", -- money 1
-			name = "VIP",
+			image = "rbxassetid://128528383855205",
+			name = "Cash",
 		},
-		{
+		{ -- Day 2: 10 floors
 			day = 2,
 			callback = function(playerData)
 				playerData.floors += 10
 			end,
 			type = "image",
-			image = "rbxassetid://114681769444446", -- floors 1
+			image = "rbxassetid://114681769444446",
 			name = "+10 Floors",
 		},
-		{
+		{ -- Day 3: 5 levels
 			day = 3,
 			callback = function(playerData)
 				if cannonConfig.maxLevel > playerData.cannon then
-					playerData.cannon += 5
-					playerData.cannon = math.clamp(playerData.cannon, 0, cannonConfig.maxLevel)
+					playerData.cannon = math.min(playerData.cannon + 5, cannonConfig.maxLevel)
 				end
 			end,
 			type = "image",
-			image = "rbxassetid://130622146298272", -- levels 1
+			image = "rbxassetid://130622146298272",
 			name = "+5 Levels",
 		},
-		{
+		{ -- Day 4: money reward
 			day = 4,
 			callback = function(playerData)
 				playerData.money += getDailyReward(4, playerData.cannon)
 			end,
 			type = "image",
-			image = "rbxassetid://128528383855205", -- money 1
+			image = "rbxassetid://103800518067222",
 			name = "Cash",
 		},
-		{
+		{ -- Day 5: 10 floors
 			day = 5,
 			callback = function(playerData)
 				playerData.floors += 10
 			end,
 			type = "image",
-			image = "rbxassetid://114681769444446", -- floors 1
+			image = "rbxassetid://114681769444446",
 			name = "+10 Floors",
 		},
-		{
+		{ -- Day 6: money reward
 			day = 6,
 			callback = function(playerData)
 				playerData.money += getDailyReward(6, playerData.cannon)
 			end,
 			type = "image",
-			image = "rbxassetid://103800518067222", -- money 2
+			image = "rbxassetid://138174371404751",
 			name = "Cash",
 		},
-		{
+		{ -- Day 7: 2x Money gamepass
 			day = 7,
 			callback = function(playerData)
-				playerData.money *= 2
+				playerData.doubleMoney = true
 			end,
 			type = "image",
-			image = "rbxassetid://99606636871207", -- money 4
-			name = "x2 Money",
+			image = "rbxassetid://99606636871207",
+			name = "2x Cash", -- Reusing money 4 image
 		},
-		{
+		{ -- Day 8: money reward
 			day = 8,
 			callback = function(playerData)
 				playerData.money += getDailyReward(8, playerData.cannon)
 			end,
 			type = "image",
-			image = "rbxassetid://103800518067222", -- money 2
+			image = "rbxassetid://103800518067222",
 			name = "Cash",
 		},
-		{
+		{ -- Day 9: money reward
 			day = 9,
 			callback = function(playerData)
 				playerData.money += getDailyReward(9, playerData.cannon)
 			end,
 			type = "image",
-			image = "rbxassetid://138174371404751", -- money 3
+			image = "rbxassetid://138174371404751",
 			name = "Cash",
 		},
-		{
+		{ -- Day 10: 799 robux cannon (Artillery)
 			day = 10,
 			callback = function(playerData)
 				if not table.find(playerData.cannons, "artillery") then
 					table.insert(playerData.cannons, "artillery")
 				end
 			end,
-			type = "image",
-			image = "rbxassetid://128528383855205", -- money 1
-			name = "Cash",
+			type = "image", -- Changed from viewport
+			image = "rbxassetid://99541703558018", -- Placeholder image ID
+			name = "Artillery Cannon", -- Updated name
 		},
-		{
+		{ -- Day 11: money reward
 			day = 11,
 			callback = function(playerData)
 				playerData.money += getDailyReward(11, playerData.cannon)
 			end,
 			type = "image",
-			image = "rbxassetid://109170235764314", -- floors 2
-			name = "+20 Floors",
+			image = "rbxassetid://103800518067222",
+			name = "Cash",
 		},
-		{
+		{ -- Day 12: 20 floors
 			day = 12,
 			callback = function(playerData)
 				playerData.floors += 20
 			end,
 			type = "image",
-			image = "rbxassetid://109170235764314", -- floors 2
+			image = "rbxassetid://109170235764314",
 			name = "+20 Floors",
 		},
-		{
+		{ -- Day 13: 10 levels
 			day = 13,
 			callback = function(playerData)
 				if cannonConfig.maxLevel > playerData.cannon then
-					playerData.cannon += 10
-					playerData.cannon = math.clamp(playerData.cannon, 0, cannonConfig.maxLevel)
+					playerData.cannon = math.min(playerData.cannon + 10, cannonConfig.maxLevel)
 				end
 			end,
 			type = "image",
-			image = "rbxassetid://125247795327983", -- levels 2
+			image = "rbxassetid://125247795327983",
 			name = "+10 Levels",
 		},
-		{
+		{ -- Day 14: money reward
 			day = 14,
 			callback = function(playerData)
 				playerData.money += getDailyReward(14, playerData.cannon)
 			end,
 			type = "image",
-			image = "rbxassetid://103800518067222", -- money 2
+			image = "rbxassetid://138174371404751",
 			name = "Cash",
 		},
-		{
+		{ -- Day 15: 20 floors
 			day = 15,
 			callback = function(playerData)
 				playerData.floors += 20
 			end,
 			type = "image",
-			image = "rbxassetid://109170235764314", -- floors 2
+			image = "rbxassetid://109170235764314",
 			name = "+20 Floors",
 		},
-		{
+		{ -- Day 16: 10 levels
 			day = 16,
 			callback = function(playerData)
 				if cannonConfig.maxLevel > playerData.cannon then
-					playerData.cannon += 10
-					playerData.cannon = math.clamp(playerData.cannon, 0, cannonConfig.maxLevel)
+					playerData.cannon = math.min(playerData.cannon + 10, cannonConfig.maxLevel)
 				end
 			end,
 			type = "image",
-			image = "rbxassetid://125247795327983", -- levels 2
+			image = "rbxassetid://125247795327983",
 			name = "+10 Levels",
 		},
-		{
+		{ -- Day 17: money reward
 			day = 17,
 			callback = function(playerData)
 				playerData.money += getDailyReward(17, playerData.cannon)
 			end,
 			type = "image",
-			image = "rbxassetid://138174371404751", -- money 3
+			image = "rbxassetid://99606636871207",
 			name = "Cash",
 		},
-		{
+		{ -- Day 18: money reward
 			day = 18,
 			callback = function(playerData)
 				playerData.money += getDailyReward(18, playerData.cannon)
 			end,
 			type = "image",
-			image = "rbxassetid://138174371404751", -- money 3
+			image = "rbxassetid://103800518067222",
 			name = "Cash",
 		},
-		{
+		{ -- Day 19: money reward
 			day = 19,
 			callback = function(playerData)
 				playerData.money += getDailyReward(19, playerData.cannon)
 			end,
 			type = "image",
-			image = "rbxassetid://99606636871207", -- money 4
+			image = "rbxassetid://138174371404751",
 			name = "Cash",
 		},
-		{
+		{ -- Day 20: 2x Distance gamepass
 			day = 20,
 			callback = function(playerData)
-				playerData.distanceIncreased = true
+				playerData.doubleDistance = true
 			end,
 			type = "image",
-			image = "rbxassetid://128528383855205", -- money 1
-			name = "Cash", -- Note: Callback is distanceIncreased, but name is Cash
+			image = "rbxassetid://128528383855205",
+			name = "2x Distance", -- Reusing money 1 image
 		},
-		{
+		{ -- Day 21: money reward
 			day = 21,
 			callback = function(playerData)
 				playerData.money += getDailyReward(21, playerData.cannon)
 			end,
 			type = "image",
-			image = "rbxassetid://103800518067222", -- money 2
+			image = "rbxassetid://99606636871207",
 			name = "Cash",
 		},
-		{
+		{ -- Day 22: 50 floors
 			day = 22,
 			callback = function(playerData)
 				playerData.floors += 50
 			end,
 			type = "image",
-			image = "rbxassetid://76426067940627", -- floors 3
+			image = "rbxassetid://76426067940627",
 			name = "+50 Floors",
 		},
-		{
+		{ -- Day 23: 20 levels
 			day = 23,
 			callback = function(playerData)
 				if cannonConfig.maxLevel > playerData.cannon then
-					playerData.cannon += 20
-					playerData.cannon = math.clamp(playerData.cannon, 0, cannonConfig.maxLevel)
+					playerData.cannon = math.min(playerData.cannon + 20, cannonConfig.maxLevel)
 				end
 			end,
 			type = "image",
-			image = "rbxassetid://95225204873256", -- levels 3
+			image = "rbxassetid://95225204873256",
 			name = "+20 Levels",
 		},
-		{
+		{ -- Day 24: money reward
 			day = 24,
 			callback = function(playerData)
 				playerData.money += getDailyReward(24, playerData.cannon)
 			end,
 			type = "image",
-			image = "rbxassetid://138174371404751", -- money 3
+			image = "rbxassetid://103800518067222",
 			name = "Cash",
 		},
-		{
+		{ -- Day 25: 100 floors
 			day = 25,
 			callback = function(playerData)
 				playerData.floors += 100
 			end,
 			type = "image",
-			image = "rbxassetid://76426067940627", -- floors 3
+			image = "rbxassetid://76426067940627",
 			name = "+100 Floors",
 		},
-		{
+		{ -- Day 26: money reward
 			day = 26,
 			callback = function(playerData)
 				playerData.money += getDailyReward(26, playerData.cannon)
 			end,
 			type = "image",
-			image = "rbxassetid://99606636871207", -- money 4
+			image = "rbxassetid://138174371404751",
 			name = "Cash",
 		},
-		{
+		{ -- Day 27: money reward
 			day = 27,
 			callback = function(playerData)
 				playerData.money += getDailyReward(27, playerData.cannon)
 			end,
 			type = "image",
-			image = "rbxassetid://99606636871207", -- money 4
+			image = "rbxassetid://99606636871207",
 			name = "Cash",
 		},
-		{
+		{ -- Day 28: money reward
 			day = 28,
 			callback = function(playerData)
 				playerData.money += getDailyReward(28, playerData.cannon)
 			end,
 			type = "image",
-			image = "rbxassetid://99606636871207", -- money 4
+			image = "rbxassetid://103800518067222",
 			name = "Cash",
 		},
-		{
+		{ -- Day 29: 250 floors
 			day = 29,
 			callback = function(playerData)
-				playerData.floors += 500
+				playerData.floors += 250
 			end,
 			type = "image",
-			image = "rbxassetid://76426067940627", -- floors 3
-			name = "+500 Floors",
+			image = "rbxassetid://76426067940627",
+			name = "+250 Floors",
 		},
-		{
+		{ -- Day 30: 1699 robux cannon (Railgun)
 			day = 30,
 			callback = function(playerData)
-				table.insert(playerData.cannons, "railgun")
+				if not table.find(playerData.cannons, "railgun") then
+					table.insert(playerData.cannons, "railgun")
+				end
 			end,
-			type = "viewport",
-			model = ReplicatedStorage.assets.cannons:FindFirstChild("railgun"),
-			name = "Rail-gun",
+			type = "image", -- Changed from viewport
+			image = "rbxassetid://90322020414034", -- Placeholder image ID
+			name = "Railgun Cannon", -- Updated name
 		},
 	},
 	rewardNotification = {

@@ -1,3 +1,5 @@
+local MarketplaceService = game:GetService("MarketplaceService")
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SoundService = game:GetService("SoundService")
 
@@ -8,39 +10,29 @@ local React = require(sharedPackages.React)
 local Trove = require(sharedPackages.Trove)
 local ReactSpring = require(sharedPackages.ReactSpring)
 local components = ReplicatedStorage.client.reactComponents
+local marketplaceUtil = require(ReplicatedStorage.shared.utilities.marketplaceUtil) -- Added import
+
+local SKIP_ALL_PRODUCT_ID = 3101617187 -- Define the product ID
 
 return function(props)
 	local styles, api = ReactSpring.useSpring(function()
 		return { hover = 0, clicked = 0 }
 	end)
 
-	local claimed, setIsClaimed = React.useBinding(props.isClaimed)
-	local locked, setIsLocked = React.useBinding(props.isLocked)
+	local price, setPrice = React.useBinding("...") -- Initialize price state
 
 	React.useEffect(function()
-		local uiTrove = Trove.new()
-
-		uiTrove:Add(props.claimedItemEvent:Connect(function(itemDay)
-			if itemDay == props.day then
-				setIsClaimed(true)
-			end
-		end))
-
-		uiTrove:Add(props.unlockedItemEvent:Connect(function(itemDay)
-			if itemDay == props.day then
-				setIsLocked(false)
-			end
-		end))
-
-		uiTrove:Add(props.resetEvent:Connect(function()
-			setIsClaimed(true)
-			setIsLocked(true)
-		end))
-
-		return function()
-			uiTrove:Destroy()
+		-- Fetch product info on mount
+		local success, info = pcall(function()
+			return marketplaceUtil.getProductInfo(SKIP_ALL_PRODUCT_ID, Enum.InfoType.Product)
+		end)
+		if success and info then
+			setPrice(info.PriceInRobux)
+		else
+			warn("Failed to get product info for skipAll button:", info)
+			setPrice("?") -- Show error indicator
 		end
-	end, {})
+	end, {}) -- Empty dependency array means run once on mount
 
 	return React.createElement("ImageButton", {
 		AnchorPoint = Vector2.new(0.5, 0.5),
@@ -49,7 +41,7 @@ return function(props)
 		BorderColor3 = Color3.fromRGB(0, 0, 0),
 		BorderSizePixel = 0,
 		Image = "rbxassetid://95213254815108",
-		LayoutOrder = props.index,
+		LayoutOrder = 0,
 		Position = UDim2.fromScale(0.101, 0.714),
 		ScaleType = Enum.ScaleType.Fit,
 		Size = UDim2.fromScale(0.0641 / 2, 1.1),
@@ -61,9 +53,9 @@ return function(props)
 			BorderColor3 = Color3.fromRGB(0, 0, 0),
 			BorderSizePixel = 0,
 			FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
-			Position = UDim2.fromScale(0.5, 0.0221),
+			Position = UDim2.fromScale(0.5, 0.12),
 			Size = UDim2.fromScale(0.938, 0.182),
-			Text = "Day " .. props.index,
+			Text = "SKIP ALL REWARDS",
 			TextColor3 = Color3.fromRGB(255, 255, 255),
 			TextScaled = true,
 			TextSize = 14,
@@ -78,102 +70,88 @@ return function(props)
 			}),
 		}),
 
-		name = React.createElement("TextLabel", {
+		buy = React.createElement("ImageButton", {
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 			BackgroundTransparency = 1,
 			BorderColor3 = Color3.fromRGB(0, 0, 0),
 			BorderSizePixel = 0,
-			FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
-			Position = UDim2.fromScale(0.5, 0.686),
-			Size = UDim2.fromScale(0.86, 0.287),
-			Text = props.name,
-			TextColor3 = Color3.fromRGB(255, 255, 255),
-			TextScaled = true,
-			TextSize = 14,
-			TextWrapped = true,
-		}, {
-			uIAspectRatioConstraint1 = React.createElement("UIAspectRatioConstraint", {
-				AspectRatio = 4.38,
-			}),
-
-			uIStroke1 = React.createElement("UIStroke", {
-				Thickness = 4,
-			}),
-		}),
-
-		uIAspectRatioConstraint2 = React.createElement("UIAspectRatioConstraint", {
-			AspectRatio = 1,
-		}),
-
-		claim = React.createElement("ImageButton", {
-			AnchorPoint = Vector2.new(0.5, 0.5),
-			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-			BackgroundTransparency = 1,
-			BorderColor3 = Color3.fromRGB(0, 0, 0),
-			BorderSizePixel = 0,
-			Image = claimed:map(function(val)
-				return val and "rbxassetid://105652446380406" or "rbxassetid://133893845022134"
-			end),
+			Image = "rbxassetid://85156488647867",
 			LayoutOrder = 3,
 			Position = styles.clicked:map(function(val)
-				return UDim2.fromScale(0.497, 0.913):Lerp(UDim2.fromScale(0.497, 0.913 + 0.02), val)
+				return UDim2.fromScale(0.5, 0.805):Lerp(UDim2.fromScale(0.5, 0.82), val)
 			end),
 			ScaleType = Enum.ScaleType.Fit,
 			Size = styles.hover:map(function(val)
-				return UDim2.fromScale(0.694 * 0.9, 0.255 * 0.9):Lerp(UDim2.fromScale(0.694, 0.255), val)
-			end),
-			Visible = locked:map(function(val)
-				return not val
+				return UDim2.fromScale(0.608 * 0.9, 0.827 * 0.9):Lerp(UDim2.fromScale(0.608, 0.827), val)
 			end),
 			Rotation = styles.hover:map(function(val)
-				return val * 5
+				return val * 4
 			end),
-			[React.Event.MouseEnter] = function()
-				api.start({
-					hover = 1,
-					config = {
-						tension = 900,
-						friction = 15,
-					},
-				})
-			end,
-			[React.Event.MouseLeave] = function()
-				api.start({
-					hover = 0,
-					config = {
-						tension = 900,
-						friction = 15,
-					},
-				})
-			end,
-			[React.Event.Activated] = function()
-				SoundService.effects.uiClick:Play()
-				task.spawn(function()
+			ZIndex = 0,
+		}, {
+			clicker = React.createElement("ImageButton", {
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+				BackgroundTransparency = 1,
+				BorderColor3 = Color3.fromRGB(0, 0, 0),
+				BorderSizePixel = 0,
+				Image = "",
+				Position = UDim2.fromScale(0.5, 0.5),
+				ScaleType = Enum.ScaleType.Fit,
+				Size = UDim2.fromScale(1, 1),
+				ZIndex = 10,
+				ImageTransparency = 1,
+				[React.Event.MouseEnter] = function()
 					api.start({
-						clicked = 1,
+						hover = 1,
 						config = {
-							tension = 700,
-							friction = 30,
+							tension = 900,
+							friction = 15,
 						},
 					})
-					props.onActivated()
-					task.delay(0.05, function()
+				end,
+				[React.Event.MouseLeave] = function()
+					api.start({
+						hover = 0,
+						config = {
+							tension = 900,
+							friction = 15,
+						},
+					})
+				end,
+				[React.Event.Activated] = function()
+					SoundService.effects.uiClick:Play()
+					task.spawn(function()
 						api.start({
-							clicked = 0,
+							clicked = 1,
 							config = {
 								tension = 700,
 								friction = 30,
 							},
 						})
+						MarketplaceService:PromptProductPurchase(Players.LocalPlayer, 3101617187)
+						task.delay(0.05, function()
+							api.start({
+								clicked = 0,
+								config = {
+									tension = 700,
+									friction = 30,
+								},
+							})
+						end)
 					end)
-				end)
-			end,
-		}, {
-			uIScale = React.createElement("UIScale", {
-				Scale = _G.isMobile and 1.2 or 1,
+				end,
 			}),
-			text = React.createElement("TextLabel", {
+			uIAspectRatioConstraint2 = React.createElement("UIAspectRatioConstraint", {
+				AspectRatio = 2.77,
+			}),
+
+			uIScale = React.createElement("UIScale", {
+				Scale = _G.isMobile and 1.35 or 1,
+			}),
+
+			price = React.createElement("TextLabel", {
 				AnchorPoint = Vector2.new(0.5, 0.5),
 				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 				BackgroundTransparency = 1,
@@ -181,25 +159,21 @@ return function(props)
 				BorderSizePixel = 0,
 				FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
 				Position = UDim2.fromScale(0.5, 0.5),
-				Size = UDim2.fromScale(0.723, 0.862),
-				Text = claimed:map(function(val)
-					return val and "Claimed" or "Claim"
+				Size = UDim2.fromScale(1.19, 0.893),
+				-- Update Text to use the price state
+				Text = price:map(function(val)
+					return "" .. val -- Display Robux icon and fetched price
 				end),
 				TextColor3 = styles.clicked:map(function(val)
-					return Color3.fromRGB(255, 255, 255)
-						:Lerp(claimed and Color3.fromRGB(255, 128, 128) or Color3.fromRGB(134, 231, 199), val)
+					return Color3.fromRGB(255, 255, 255):Lerp(Color3.fromRGB(89, 160, 136), val)
 				end),
 				TextScaled = true,
 				TextSize = 14,
 				TextWrapped = true,
 			}, {
-				uIStroke2 = React.createElement("UIStroke", {
-					Thickness = 4,
+				uIAspectRatioConstraint3 = React.createElement("UIAspectRatioConstraint", {
+					AspectRatio = 4.38,
 				}),
-			}),
-
-			uIAspectRatioConstraint3 = React.createElement("UIAspectRatioConstraint", {
-				AspectRatio = 2.73,
 			}),
 		}),
 
@@ -216,7 +190,14 @@ return function(props)
 			uIAspectRatioConstraint4 = React.createElement("UIAspectRatioConstraint", {
 				AspectRatio = 1.06,
 			}),
-			React.createElement(React.Fragment, nil, props.image),
+			main = React.createElement("ImageLabel", {
+				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+				BackgroundTransparency = 1,
+				BorderColor3 = Color3.fromRGB(0, 0, 0),
+				BorderSizePixel = 0,
+				Size = UDim2.fromScale(1, 1),
+				Image = "rbxassetid://99981368805393",
+			}),
 		}),
 	})
 end

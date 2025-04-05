@@ -59,7 +59,16 @@ function luckyBlockService.start()
 			player:Kick("Lucky Block service didn't set up properly, please rejoin!")
 			return
 		end
-		if tick() - playerBlocks[tostring(player.UserId)].lastClaimed < rewardsConfig.luckyBlockWaitTime then
+
+		-- Get player cannon level to calculate wait time
+		local playerData = dataService.getPlayerData(player)
+		local cannonLevel = playerData.cannon or 1 -- Default to level 1 if not found
+
+		-- Calculate wait time directly based on cannon level
+		local waitTime = rewardsConfig.luckyBlockWaitTime(cannonLevel)
+
+		-- Check cooldown
+		if tick() - playerBlocks[tostring(player.UserId)].lastClaimed < waitTime then
 			return false
 		end
 		playerBlocks[tostring(player.UserId)].lastClaimed = tick()

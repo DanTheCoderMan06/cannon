@@ -1,11 +1,11 @@
 return {
 	money = 0,
-	floors = 1,
+	floors = 10,
 	cannon = 1,
 	highscore = 0,
 	towerStatus = 0, -- 0 PUBLIC 1 FRIENDS 2 PRIVATE
 	boughtLevels = 0,
-	boughtFloors = 0,
+	boughtFloors = 9,
 
 	cannons = {},
 	lastClaimed = os.time(),

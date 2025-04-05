@@ -4,6 +4,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
 
 local dataService = require(ServerStorage.server.services.dataService)
+local castleService = require(ServerStorage.server.services.castleService)
 
 local rewardsConfig = require(ReplicatedStorage.shared.config.rewardsConfig)
 local marketplaceUtil = require(ReplicatedStorage.shared.utilities.marketplaceUtil)
@@ -13,7 +14,7 @@ local vipService = {}
 function vipService.givePlayerTempVIP(player)
 	local playerData = dataService.getPlayerData(player)
 	playerData.vipTimeStart = os.time()
-	task.delay(.1,function()
+	task.delay(0.1, function()
 		dataService.updatePlayerData(player, playerData)
 	end)
 end
@@ -36,8 +37,9 @@ function vipService.start()
 						playerData.floors += 100
 						playerData.firstTimeVIP = false
 						print("Give floors!")
+						-- castleService.updateTower(player) -- Update tower after giving floors -- Removed, handled by dataChanged now
 					end
-					task.delay(.1,function()
+					task.delay(0.1, function()
 						dataService.updatePlayerData(player, playerData)
 					end)
 				else

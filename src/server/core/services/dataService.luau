@@ -182,6 +182,7 @@ function dataService.loadGamepasses(player)
 		if v.cannonName then
 			if marketplaceUtil.userOwnsGamepass(player, v.id) then
 				if not table.find(playerProfile.Data.cannons, v.cannonName) then
+					print("INSERTED: " .. v.cannonName)
 					table.insert(playerProfile.Data.cannons, v.cannonName)
 				end
 			end

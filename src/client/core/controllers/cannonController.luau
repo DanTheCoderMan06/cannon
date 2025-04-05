@@ -333,8 +333,8 @@ function cannonController.start()
 					task.wait()
 				until not character
 					or (
-						(character.PrimaryPart.AssemblyLinearVelocity.Magnitude < 0.1 or tick() - startWait > 2.9) -- Reduced inner timeout
-						and character.PrimaryPart.Position.Y < 1
+						(character.PrimaryPart.AssemblyLinearVelocity.Magnitude < 5 or tick() - startWait > 2.9) -- Reduced inner timeout
+						and character.PrimaryPart.Position.Y < 5
 					)
 				cameraController.endShake()
 				RunService:UnbindFromRenderStep("noFallThrough")
@@ -353,8 +353,14 @@ function cannonController.start()
 
 				keysController.freezeMovement(true)
 				task.wait()
+
+				-- Play dance animation first
+				local track, animationInstance = effectsController.playDanceAnimation()
+
+				-- Then unragdoll
 				stateController.getEvents().radgollEvent:Fire(false)
 
+				-- Then move character up
 				character.PrimaryPart.Anchored = true
 				character:PivotTo(
 					CFrame.new(
@@ -363,7 +369,8 @@ function cannonController.start()
 					)
 				)
 
-				effectsController.finishedPath(physics)
+				-- Pass the track and animation instance to finishedPath
+				effectsController.finishedPath(physics, track, animationInstance)
 
 				zap.finishedPath.Fire()
 			end)

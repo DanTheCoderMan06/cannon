@@ -50,12 +50,36 @@ local animateTrove
 
 function castleController.animateFloor(floor)
 	-- Destroying the trove might still be useful for other connections, but let's keep it for now.
+	local playerPlatform = workspace:FindFirstChild("playerPlatforms")
+		and workspace.playerPlatforms:FindFirstChild(Player.Name)
+
 	if animateTrove then
 		animateTrove:Destroy()
+		playerPlatform.PrimaryPart.LocalTransparencyModifier = 0
 	end
 	animateTrove = Trove.new()
 
 	print("[castleController]: Animate Floor!")
+
+	-- Hide the player's character model on the leaderboard during animation
+	local playerSpot = castleController.findSpot()
+	local charModel = playerSpot and playerSpot:FindFirstChild("characterModel")
+	local centerWeld = charModel and charModel:FindFirstChild("centerWeld")
+	local originalWeldC0
+
+	if centerWeld then
+		originalWeldC0 = centerWeld.C0
+		centerWeld.C0 = CFrame.new(0, 10000, 0) -- Move it far away vertically
+		animateTrove:Add(function()
+			if centerWeld and centerWeld.Parent then -- Check if weld still exists
+				centerWeld.C0 = originalWeldC0 -- Restore original position
+			end
+		end)
+	end
+
+	if playerPlatform then
+		playerPlatform.PrimaryPart.LocalTransparencyModifier = 1
+	end
 
 	for i, v in pairs(floor.PrimaryPart:GetChildren()) do
 		if v:IsA("BasePart") then
@@ -131,6 +155,7 @@ function castleController.animateFloor(floor)
 					-- Check if the part still exists and if the trove hasn't been destroyed prematurely
 					if v and v.Parent and partTrove then
 						v.Anchored = originalAnchored -- Restore original anchored state
+						playerPlatform.PrimaryPart.LocalTransparencyModifier = 0
 						-- No need to stop tweens here as they should have completed.
 					end
 				end)

@@ -13,12 +13,12 @@ return function(props)
 	local isOn, setIsOn = React.useBinding(true)
 
 	return React.createElement("CanvasGroup", {
-		AnchorPoint = Vector2.new(0.5, 0.5),
+		AnchorPoint = if _G.isMobile then Vector2.new(0.5, 0.5) else Vector2.new(1, 1),
 		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 		BackgroundTransparency = 1,
 		BorderColor3 = Color3.fromRGB(0, 0, 0),
 		BorderSizePixel = 0,
-		Position = if _G.isMobile then UDim2.fromScale(0.93, 0.1) else UDim2.fromScale(0.913, 0.85),
+		Position = if _G.isMobile then UDim2.fromScale(0.93, 0.1) else UDim2.new(1, -10, 1, -10),
 		Size = UDim2.fromScale(0.072, 0.105),
 	}, {
 		uIScale = React.createElement("UIScale", {
@@ -40,7 +40,7 @@ return function(props)
 				return not val
 			end),
 			[React.Event.Activated] = function()
-				SoundService.effects.click:Play()
+				SoundService.effects.uiClick:Play()
 				setIsOn(true)
 				props.toggleMusicEvent:Fire(true)
 			end,
@@ -58,7 +58,7 @@ return function(props)
 			Size = UDim2.fromScale(1, 1),
 			ZIndex = 3,
 			[React.Event.Activated] = function()
-				SoundService.effects.click:Play()
+				SoundService.effects.uiClick:Play()
 				setIsOn(false)
 				props.toggleMusicEvent:Fire(false)
 			end,

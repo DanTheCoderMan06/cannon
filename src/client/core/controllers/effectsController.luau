@@ -27,6 +27,18 @@ local reactUtil = require(ReplicatedStorage.shared.utilities.reactUtil)
 
 local currentHighScore = 0
 
+function effectsController.playDanceAnimation()
+	local newAnim = ReplicatedStorage.assets.animations.dance
+		:GetChildren()[math.random(1, #ReplicatedStorage.assets.animations.dance:GetChildren())]
+		:Clone()
+
+	local track = Players.LocalPlayer.Character:FindFirstChildWhichIsA("Animator", true):LoadAnimation(newAnim)
+	track.Priority = Enum.AnimationPriority.Action4
+	track.Looped = true
+	track:Play()
+	return track, newAnim -- Return track and animation instance
+end
+
 function effectsController.getHighScore()
 	for _, v in pairs(Players.LocalPlayer:WaitForChild("leaderstats"):GetChildren()) do
 		if v:GetAttribute("statName") == "highscore" then
@@ -154,7 +166,7 @@ function effectsController.start()
 		end
 		local currentAltitude = math.abs(part.Position.Y)
 		if math.round(Lighting.ClockTime * 10) / 10 == 12 or math.round(Lighting.ClockTime * 10) / 10 > 22 then
-			spr.target(Lighting, 1, 0.25, {
+			spr.target(Lighting, 1, 0.75, {
 				ClockTime = if currentAltitude > config.nightSky then 23.9 else 12,
 			})
 		end
@@ -183,7 +195,7 @@ function effectsController.start()
 
 		-- Only update cloud cover if it needs to change significantly
 		if math.abs(clouds.Cover - cloudTarget) > 0.01 then
-			spr.target(clouds, 1, 0.25, {
+			spr.target(clouds, 1, 0.75, {
 				Cover = cloudTarget,
 			})
 		end
@@ -192,7 +204,7 @@ function effectsController.start()
 	effectsController.updateHighscore()
 end
 
-function effectsController.finishedPath(results)
+function effectsController.finishedPath(results, track, animationInstance) -- Added track and animationInstance parameters
 	local character = Players.LocalPlayer.Character
 	local finishedPathEffects = ReplicatedStorage.assets.finishedPath:Clone()
 	local container = ReactRoblox.createRoot(Instance.new("Folder"))
@@ -201,14 +213,7 @@ function effectsController.finishedPath(results)
 	local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
 	local targetColor, setTargetColor = React.createBinding(Color3.new())
 
-	local newAnim = ReplicatedStorage.assets.animations.dance
-		:GetChildren()[math.random(1, #ReplicatedStorage.assets.animations.dance:GetChildren())]
-		:Clone()
-
-	local track = Players.LocalPlayer.Character:FindFirstChildWhichIsA("Animator", true):LoadAnimation(newAnim)
-	track.Priority = Enum.AnimationPriority.Action4
-	track.Looped = true
-	track:Play()
+	-- Animation playing is now handled before this function is called
 
 	local partTrove = Trove.new()
 	local startTime = tick()
@@ -266,8 +271,13 @@ function effectsController.finishedPath(results)
 
 	keysController.freezeMovement(false)
 	keysController.updateFarming()
-	track:Stop()
-	track:Destroy()
+	if track then
+		track:Stop()
+		track:Destroy() -- Destroy the track
+	end
+	if animationInstance then
+		animationInstance:Destroy() -- Destroy the animation instance
+	end
 
 	task.wait(1)
 	effectsController.updateHighscore()

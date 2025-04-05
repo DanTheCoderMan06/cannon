@@ -42,7 +42,7 @@ local function lockedFrame(props)
 		Position = UDim2.fromScale(0.5, 0.5),
 		ScaleType = Enum.ScaleType.Fit,
 		Size = UDim2.fromScale(1, 1),
-		ImageTransparency = 0.8,
+		ImageTransparency = 0.6,
 		Visible = props.owned,
 		ZIndex = 10,
 	}, {
@@ -121,8 +121,10 @@ return function(props)
 				end
 
 				if props.type == "cannons" then
+					print(table.find(newData.cannons, props.cannonName) ~= nil)
 					setIsOwned(table.find(newData.cannons, props.cannonName) ~= nil)
 				end
+
 				if props.tiers then
 					if newData.productTiers.products[props.type] then
 						setTierFrameVisible(newData.productTiers.products[props.type] >= 5)
@@ -173,6 +175,7 @@ return function(props)
 		Visible = props.transparency:map(function(val)
 			return val < 0.7
 		end),
+		LayoutOrder = props.index,
 	}, {
 		lockedFrame = React.createElement(lockedFrame, { owned = owned }),
 
@@ -280,7 +283,7 @@ return function(props)
 						})
 					end,
 					[React.Event.Activated] = function()
-						SoundService.effects.click:Play()
+						SoundService.effects.uiClick:Play()
 						task.spawn(function()
 							api.start({
 								clicked2 = 1,
@@ -368,7 +371,7 @@ return function(props)
 						})
 					end,
 					[React.Event.Activated] = function()
-						SoundService.effects.click:Play()
+						SoundService.effects.uiClick:Play()
 						task.spawn(function()
 							api.start({
 								clicked = 1,
