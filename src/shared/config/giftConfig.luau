@@ -517,7 +517,7 @@ return {
 				end
 				playerData.productTiers.gifts["cannons"] = playerData.productTiers.gifts["cannons"] or 0
 				playerData.productTiers.gifts["cannons"] += 1
-				table.insert(playerData.cannons, "artillery")
+				dataService.addCannon(player, "artillery")
 
 				task.defer(function()
 					dataService.updatePlayerData(player, playerData)
@@ -530,11 +530,10 @@ return {
 				playerData.productTiers.gifts["cannons"] = playerData.productTiers.gifts["cannons"] or 0
 				playerData.productTiers.gifts["cannons"] += 1
 
-				local targetPlayerData = dataService.getPlayerData(target)
-				table.insert(targetPlayerData.cannons, "artillery")
+				dataService.addCannon(target, "artillery")
 
 				task.defer(function()
-					dataService.updatePlayerData(target, targetPlayerData)
+					-- No need to update target data here, addCannon handles it
 					dataService.updatePlayerData(player, playerData)
 				end)
 			end
@@ -558,7 +557,7 @@ return {
 				local playerData = dataService.getPlayerData(player)
 				playerData.productTiers.gifts["cannons"] = playerData.productTiers.gifts["cannons"] or 5 -- Initialize if nil
 				playerData.productTiers.gifts["cannons"] += 1
-				table.insert(playerData.cannons, "artillery")
+				dataService.addCannon(player, "artillery")
 
 				task.defer(function()
 					dataService.updatePlayerData(player, playerData)
@@ -568,11 +567,10 @@ return {
 				playerData.productTiers.gifts["cannons"] = playerData.productTiers.gifts["cannons"] or 5 -- Initialize if nil
 				playerData.productTiers.gifts["cannons"] += 1
 
-				local targetPlayerData = dataService.getPlayerData(target)
-				table.insert(targetPlayerData.cannons, "artillery")
+				dataService.addCannon(target, "artillery")
 
 				task.defer(function()
-					dataService.updatePlayerData(target, targetPlayerData)
+					-- No need to update target data here, addCannon handles it
 					dataService.updatePlayerData(player, playerData)
 				end)
 			end
@@ -588,7 +586,7 @@ return {
 	giftRailgun = {
 		id = 3106618239, -- Special Cannon 2 (Gift)
 		shouldAppear = true,
-		tiers = true,
+		tiers = false,
 		type = "cannons",
 		tier2Name = "giftRailgunTier2",
 		callback = function(player, target)

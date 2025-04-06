@@ -24,9 +24,36 @@ function luckyBlockService.spawnLuckyBlock(player)
 	newBlock.id = HttpService:GenerateGUID()
 	newBlock.reward = rewardsConfig.luckyBlockFormula(playerData.cannon)
 	newBlock.model = ReplicatedStorage.assets.luckyBlock:Clone()
-	newBlock.model.Parent = workspace.castles:WaitForChild(player.Name):FindFirstChildWhichIsA("Model")
+
+	-- Find the player's platform and the spawn part
+	local playerCastle = workspace.castles:WaitForChild(player.Name)
+	local playerPlatform = playerCastle and playerCastle:FindFirstChildWhichIsA("Model") -- Assuming platform is the first model
+	local blockSpawnPart = playerPlatform and playerPlatform:FindFirstChild("blockSpawn")
+
+	if blockSpawnPart then
+		-- Calculate random position within the blockSpawn part
+		local spawnSize = blockSpawnPart.Size
+		local spawnCFrame = blockSpawnPart.CFrame
+		-- Generate random numbers biased towards the center by averaging two randoms
+		local function biasedRandom()
+			return (math.random() + math.random()) / 2
+		end
+		local randomX = biasedRandom() * spawnSize.X - spawnSize.X / 2
+		local randomY = biasedRandom() * spawnSize.Y - spawnSize.Y / 2
+		local randomZ = biasedRandom() * spawnSize.Z - spawnSize.Z / 2
+		local randomPositionOffset = Vector3.new(randomX, randomY, randomZ)
+		local spawnPosition = spawnCFrame * CFrame.new(randomPositionOffset)
+
+		newBlock.model:SetPrimaryPartCFrame(spawnPosition) -- Set position before parenting
+		newBlock.model.Parent = playerPlatform -- Parent to the platform
+	else
+		-- Fallback: Parent to platform origin if blockSpawn part not found
+		warn("Could not find blockSpawn part for player:", player.Name)
+		newBlock.model.Parent = playerPlatform
+	end
+
 	playerBlocks[tostring(player.UserId)][newBlock.id] = newBlock
-	zap.spawnLuckyBlock.Fire(player, newBlock)
+	zap.spawnLuckyBlock.Fire(player, newBlock) -- Assuming this event handles client-side visuals if needed
 end
 
 function luckyBlockService.start()

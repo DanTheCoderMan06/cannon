@@ -1,0 +1,1 @@
+-- This script is deprecated. Logic moved to friendRewardController.luau

@@ -204,23 +204,45 @@ function tutorialController.start()
 			return
 		end
 
-		guiderModel.beam.Enabled = true
-		guiderModel.beam.Color = ColorSequence.new(reactUtil.getSmoothColorFromElapsedTime(tick() - start, 1))
-		guiderModel.beamPart.start.WorldCFrame = character.HumanoidRootPart.CFrame
-
 		local localPlayerPlatform = workspace.playerPlatforms:WaitForChild(Players.LocalPlayer.Name)
 		local currentData = dataController.getData()
 		local targetCFrame
+		local shouldEnableBeam = true -- Flag to control beam visibility
 
-		if currentData.money >= cannonConfig.costFormula(currentData.cannon + 1, currentData.boughtLevels) then
-			targetCFrame = localPlayerPlatform.platforms:WaitForChild("cannon").CFrame
-		elseif currentData.money >= floorsConfig.costFormula(currentData.floors + 1, currentData.boughtFloors) then
-			targetCFrame = localPlayerPlatform.platforms:WaitForChild("floor").CFrame
-		else
-			targetCFrame = localPlayerPlatform:WaitForChild("cannonPosition", true).CFrame
+		-- Condition 1: Disable if cannon level is 20 or higher
+		if currentData.cannon >= 20 then
+			shouldEnableBeam = false
 		end
 
-		guiderModel.beamPart.target.WorldCFrame = targetCFrame
+		-- Determine target only if beam might be enabled
+		if shouldEnableBeam then
+			local canAffordCannon = currentData.money
+				>= cannonConfig.costFormula(currentData.cannon + 1, currentData.boughtLevels)
+			local canAffordFloor = currentData.money
+				>= floorsConfig.costFormula(currentData.floors + 1, currentData.boughtFloors)
+
+			if canAffordCannon then
+				targetCFrame = localPlayerPlatform.platforms:WaitForChild("cannon").CFrame
+			elseif canAffordFloor then
+				targetCFrame = localPlayerPlatform.platforms:WaitForChild("floor").CFrame
+				-- Condition 2: If target is floor AND player is viewing another tower, point to cannon instead
+				if localPlayerPlatform:GetAttribute("currentTower") ~= Players.LocalPlayer.Name then
+					targetCFrame = localPlayerPlatform:WaitForChild("cannonPosition", true).CFrame -- Point to cannon
+					-- Beam remains enabled (shouldEnableBeam is not set to false here)
+				end
+			else
+				-- Cannot afford either upgrade, point to cannon entrance
+				targetCFrame = localPlayerPlatform:WaitForChild("cannonPosition", true).CFrame
+			end
+		end
+
+		-- Set beam properties based on final decision
+		guiderModel.beam.Enabled = shouldEnableBeam
+		if shouldEnableBeam then
+			guiderModel.beam.Color = ColorSequence.new(reactUtil.getSmoothColorFromElapsedTime(tick() - start, 1))
+			guiderModel.beamPart.start.WorldCFrame = character.HumanoidRootPart.CFrame
+			guiderModel.beamPart.target.WorldCFrame = targetCFrame
+		end
 	end)
 end
 

@@ -14,7 +14,7 @@ local targetVolume = 1
 
 function musicController.toggle(toggle: boolean)
 	targetVolume = toggle and 1 or 0
-	SoundService.music.Volume = targetVolume * 0.2
+	SoundService.music.Volume = targetVolume * 0.1 -- Changed volume multiplier to 0.1
 end
 
 function musicController.start()

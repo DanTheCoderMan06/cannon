@@ -36,13 +36,10 @@ local musicController = require(ReplicatedStorage.client.controllers.musicContro
 local rewardsConfig = require(ReplicatedStorage.shared.config.rewardsConfig)
 uiController.promptInEvent = Signal.new()
 
-function uiController.getRandomPosition()
-	local x = math.random() * 0.7 + 0.2
-	local y = math.random() * 0.1 + 0.1
-	return UDim2.fromScale(x, y)
-end
+-- Removed unused getRandomPosition function
 
-function uiController.renderNotification(text: string, color: Color3)
+-- Modified function to accept a specific start position
+function uiController.renderNotification(text: string, color: Color3, startPosition: UDim2)
 	local container = ReactRoblox.createRoot(Instance.new("Folder"))
 	local destroyEvent = Signal.new()
 
@@ -55,7 +52,8 @@ function uiController.renderNotification(text: string, color: Color3)
 		}, {
 			content = React.createElement(notification, {
 				text = text,
-				start = uiController.getRandomPosition(),
+				-- Use the provided start position
+				start = startPosition,
 				color = color,
 				destroyEvent = destroyEvent,
 			}),
@@ -156,15 +154,19 @@ function uiController.start()
 			end
 		end
 		if newData.money > currentData.money then
+			-- Render money notification below the money stat
 			uiController.renderNotification(
 				"+ " .. math.round(newData.money - currentData.money) .. "$",
-				Color3.new(0.419607, 0.572549, 0.349019)
+				Color3.new(0.419607, 0.572549, 0.349019),
+				UDim2.fromScale(0.349, 0.12) -- Position below money stat
 			)
 		end
 		if newData.floors > currentData.floors then
+			-- Render floors notification below the floors stat
 			uiController.renderNotification(
 				"+ " .. math.round(newData.floors - currentData.floors) .. " Floors",
-				Color3.new(0.333333, 0.392156, 0.592156)
+				Color3.new(0.333333, 0.392156, 0.592156),
+				UDim2.fromScale(0.639, 0.12) -- Position below floors stat
 			)
 		end
 		currentData = newData
@@ -172,6 +174,16 @@ function uiController.start()
 
 	ExperienceNotificationService.OptInPromptClosed:Connect(function()
 		uiController.promptInEvent:Fire(true)
+	end)
+
+	-- Listen for gift received notifications from the server
+	zap.giftReceived.SetCallback(function(message) -- Changed :SetCallback to .SetCallback
+		-- Render gift notification (using a default position and color)
+		uiController.renderNotification(
+			message,
+			Color3.fromRGB(170, 85, 255), -- Purple color for gifts
+			UDim2.fromScale(0.5, 0.1) -- Default top-center position
+		)
 	end)
 end
 

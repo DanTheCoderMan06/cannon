@@ -285,4 +285,22 @@ function dataService.getPlayerData(player: Player)
 	return Sift.Dictionary.copyDeep(Profiles[player].Data)
 end
 
+function dataService.addCannon(player: Player, cannonName: string)
+	local profile = Profiles[player]
+	if not profile then
+		warn(`[DataService] addCannon: Profile not loaded for player {player.Name}`)
+		return false
+	end
+	-- Ensure cannons table exists and add the cannon if not already present
+	profile.Data.cannons = profile.Data.cannons or {}
+	if not table.find(profile.Data.cannons, cannonName) then
+		table.insert(profile.Data.cannons, cannonName)
+		zap.dataChanged.Fire(player, profile.Data) -- Fire signal to notify listeners of the change
+		dataService.dataChanged:Fire(player, profile.Data) -- Fire generic data changed signal
+		print(`[DataService] Added cannon '{cannonName}' to player {player.Name}`)
+		return true
+	end
+	return false -- Cannon already exists
+end
+
 return dataService

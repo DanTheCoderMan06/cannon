@@ -177,3 +177,31 @@ funct checkRecipient = {
 }
 
 --Player
+
+-- Gift Notification
+event giftReceived = {
+    from: Server,
+    type: Reliable,
+    call: SingleAsync,
+    data: string -- The notification message
+}
+
+-- Friend Reward Block
+event spawnFriendRewardBlock = {
+    from: Server,
+    type: Reliable,
+    call: SingleAsync,
+    data: struct {
+        rewardAmount: u32,
+        blockId: string 
+    }
+}
+
+event claimFriendReward = {
+    from: Client,
+    type: Reliable,
+    call: SingleAsync,
+    data: struct {
+        blockId: string 
+    }
+}

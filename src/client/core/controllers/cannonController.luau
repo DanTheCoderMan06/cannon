@@ -386,7 +386,7 @@ function cannonController.start()
 			return
 		end
 		local spawnPosition = playerPlatform:FindFirstChildWhichIsA("SpawnLocation", true).Position
-		if (character.PrimaryPart.Position - spawnPosition).Magnitude > 43 then
+		if (character.PrimaryPart.Position - spawnPosition).Magnitude > 50 then
 			character:MoveTo(spawnPosition)
 		end
 	end)

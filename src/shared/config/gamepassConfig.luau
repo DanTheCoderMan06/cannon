@@ -413,7 +413,7 @@ return {
 		infoType = Enum.InfoType.GamePass,
 		cannonName = "railgun",
 		--Gift Compatability
-		--giftName = "giftRailgun",
+		giftName = "giftRailgun",
 		index = 1,
 	},
 	buyDoubleDistance = {
