@@ -1,7 +1,11 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
 local cannonConfig = require(ReplicatedStorage.shared.config.cannonConfig)
 
 local function luckyBlockWaitTime(playerLevel)
+	if RunService:IsStudio() then
+		return 10
+	end
 	if playerLevel < 70 then
 		return 180 + playerLevel * 4
 	end

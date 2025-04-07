@@ -13,8 +13,10 @@ local luckyBlockController = {}
 
 function luckyBlockController.start()
 	zap.spawnLuckyBlock.On(function(data)
-		local playerCastle = workspace.castles:WaitForChild(Players.LocalPlayer.Name):FindFirstChildWhichIsA("Model")
-		local newLuckyBlock = playerCastle:WaitForChild("luckyBlock"):Clone()
+		-- Correctly find the player's platform model
+		local playerPlatformModel = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
+		-- Clone the lucky block template from ReplicatedStorage
+		local newLuckyBlock = ReplicatedStorage.assets:WaitForChild("luckyBlock"):Clone()
 		local targetCFrame = workspace
 			:WaitForChild("playerPlatforms")
 			:WaitForChild(Players.LocalPlayer.Name)

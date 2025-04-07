@@ -19,41 +19,19 @@ PhysicsService:RegisterCollisionGroup("luckyBlock")
 PhysicsService:CollisionGroupSetCollidable("players", "luckyBlock", false)
 
 function luckyBlockService.spawnLuckyBlock(player)
-	local newBlock = {}
+	-- Server only needs ID and reward amount
+	local blockData = {}
 	local playerData = dataService.getPlayerData(player)
-	newBlock.id = HttpService:GenerateGUID()
-	newBlock.reward = rewardsConfig.luckyBlockFormula(playerData.cannon)
-	newBlock.model = ReplicatedStorage.assets.luckyBlock:Clone()
+	blockData.id = HttpService:GenerateGUID()
+	blockData.reward = rewardsConfig.luckyBlockFormula(playerData.cannon)
+	-- Removed: newBlock.model = ReplicatedStorage.assets.luckyBlock:Clone()
 
-	-- Find the player's platform and the spawn part
-	local playerCastle = workspace.castles:WaitForChild(player.Name)
-	local playerPlatform = playerCastle and playerCastle:FindFirstChildWhichIsA("Model") -- Assuming platform is the first model
-	local blockSpawnPart = playerPlatform and playerPlatform:FindFirstChild("blockSpawn")
+	-- Removed server-side model cloning, positioning, and parenting
 
-	if blockSpawnPart then
-		-- Calculate random position within the blockSpawn part
-		local spawnSize = blockSpawnPart.Size
-		local spawnCFrame = blockSpawnPart.CFrame
-		-- Generate random numbers biased towards the center by averaging two randoms
-		local function biasedRandom()
-			return (math.random() + math.random()) / 2
-		end
-		local randomX = biasedRandom() * spawnSize.X - spawnSize.X / 2
-		local randomY = biasedRandom() * spawnSize.Y - spawnSize.Y / 2
-		local randomZ = biasedRandom() * spawnSize.Z - spawnSize.Z / 2
-		local randomPositionOffset = Vector3.new(randomX, randomY, randomZ)
-		local spawnPosition = spawnCFrame * CFrame.new(randomPositionOffset)
-
-		newBlock.model:SetPrimaryPartCFrame(spawnPosition) -- Set position before parenting
-		newBlock.model.Parent = playerPlatform -- Parent to the platform
-	else
-		-- Fallback: Parent to platform origin if blockSpawn part not found
-		warn("Could not find blockSpawn part for player:", player.Name)
-		newBlock.model.Parent = playerPlatform
-	end
-
-	playerBlocks[tostring(player.UserId)][newBlock.id] = newBlock
-	zap.spawnLuckyBlock.Fire(player, newBlock) -- Assuming this event handles client-side visuals if needed
+	-- Store only the necessary data (ID and reward)
+	playerBlocks[tostring(player.UserId)][blockData.id] = { reward = blockData.reward } -- Store reward associated with ID
+	-- Fire event to client with ID and reward
+	zap.spawnLuckyBlock.Fire(player, { id = blockData.id, reward = blockData.reward })
 end
 
 function luckyBlockService.start()
@@ -69,17 +47,20 @@ function luckyBlockService.start()
 			player:Kick("Lucky Block service didn't set up properly, please rejoin!")
 			return
 		end
-		if
-			not playerBlocks[tostring(player.UserId)][data.id]
-			or type(playerBlocks[tostring(player.UserId)][data.id]) == "number"
-		then
-			return
+		-- Check if the block ID exists in the player's tracked blocks
+		local blockData = playerBlocks[tostring(player.UserId)][data.id]
+		if not blockData or type(blockData) ~= "table" then -- Check if it's the expected table format
+			warn(
+				`[luckyBlockService] Player {player.Name} tried to claim invalid or already claimed block ID: {data.id}`
+			)
+			return -- Invalid or already claimed
 		end
-		local newBlock = playerBlocks[tostring(player.UserId)][data.id]
-		newBlock.model:Destroy()
+		-- Removed: newBlock.model:Destroy() - No server model to destroy
 		local playerData = dataService.getPlayerData(player)
-		playerData.money += newBlock.reward
+		playerData.money += blockData.reward -- Use the stored reward
 		dataService.updatePlayerData(player, playerData)
+		-- Mark the block as claimed by removing it from the player's tracked blocks
+		playerBlocks[tostring(player.UserId)][data.id] = nil
 	end)
 	zap.requestLuckyBlock.SetCallback(function(player)
 		if not playerBlocks[tostring(player.UserId)] then

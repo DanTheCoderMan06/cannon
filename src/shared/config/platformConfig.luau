@@ -81,7 +81,7 @@ return {
 						description = "UNTIL REWARD",
 					})
 
-					if timeLeft == -10 then
+					if Players.LocalPlayer:GetAttribute("autoFarming") == true then
 						local success = zap.requestLuckyBlock.Call()
 					end
 				end)
@@ -102,7 +102,7 @@ return {
 					switchPlatformColor(states.model, Color3.new(1, 0, 0))
 				end
 
-				task.delay(1, function()
+				task.delay(0.5, function()
 					switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255))
 				end)
 			end,
@@ -195,7 +195,7 @@ return {
 					switchPlatformColor(states.model, Color3.new(1, 0, 0))
 				end
 
-				task.delay(1, function()
+				task.delay(0.5, function()
 					switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255))
 				end)
 			end,
@@ -294,7 +294,7 @@ return {
 					end
 				end
 
-				task.delay(1, function()
+				task.delay(0.5, function()
 					switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255))
 				end)
 			end,
@@ -407,7 +407,7 @@ return {
 					switchPlatformColor(states.model, Color3.new(1, 0, 0))
 				end
 
-				task.delay(1, function()
+				task.delay(0.5, function()
 					switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255))
 				end)
 			end,
@@ -621,7 +621,7 @@ return {
 					elseif playerData.towerStatus == 1 then
 						switchPlatformColor(states.model, Color3.new(0.474509, 0.505882, 0.792156))
 					else
-						switchPlatformColor(states.model, Color3.new(0.788235, 0.474509, 0.933333))
+						switchPlatformColor(states.model, Color3.new(1, 0, 0)) -- Bright Red for Private
 					end
 				end
 
@@ -668,14 +668,14 @@ return {
 					switchPlatformColor(states.model, Color3.new(1, 0, 0))
 				end
 
-				task.delay(1, function()
+				task.delay(0.5, function()
 					local newData = dataController.getData()
 					if newData.towerStatus == 0 then
 						switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255))
 					elseif newData.towerStatus == 1 then
 						switchPlatformColor(states.model, Color3.new(0.474509, 0.505882, 0.792156))
 					else
-						switchPlatformColor(states.model, Color3.new(0.788235, 0.474509, 0.933333))
+						switchPlatformColor(states.model, Color3.new(1, 0, 0)) -- Bright Red for Private
 					end
 				end)
 			end,
@@ -786,7 +786,7 @@ return {
 					switchPlatformColor(states.model, Color3.new(1, 0, 0))
 				end
 
-				task.delay(1, function()
+				task.delay(0.5, function()
 					switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255))
 				end)
 			end,
@@ -898,7 +898,7 @@ return {
 					switchPlatformColor(states.model, Color3.new(1, 0, 0))
 				end
 
-				task.delay(1, function()
+				task.delay(0.5, function()
 					switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255))
 				end)
 			end,

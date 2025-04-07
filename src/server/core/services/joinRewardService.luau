@@ -147,10 +147,11 @@ function joinRewardService.spawnBlock(player: Player, rewardAmount: number)
 		newBlock:Destroy() -- Clean up the unused block
 		return
 	end
-	local blockSpawnPart = playerPlatform:FindFirstChild("blockSpawn", true) -- Recursive search within platform
+	local blockSpawnPart = playerPlatform:FindFirstChild("blockSpawn")
+
 	if not blockSpawnPart or not blockSpawnPart:IsA("BasePart") then
 		warn(
-			`[joinRewardService] Could not find 'blockSpawn' BasePart within platform for {player.Name}. Cannot spawn reward block.`
+			`[joinRewardService] Could not find 'blockSpawn' BasePart directly under the player platform model for {player.Name}. Path checked: Workspace.playerPlatforms.{playerPlatform.Name}.blockSpawn. Cannot spawn reward block.`
 		)
 		newBlock:Destroy() -- Clean up the unused block
 		return
@@ -162,8 +163,16 @@ function joinRewardService.spawnBlock(player: Player, rewardAmount: number)
 	local randomRadius = math.random() * 10 -- Max radius of 10 studs
 	local offsetX = math.cos(randomAngle) * randomRadius
 	local offsetZ = math.sin(randomAngle) * randomRadius
-	local spawnPosition = basePosition + Vector3.new(offsetX, 2, offsetZ) -- Spawn 2 studs above the calculated point
+	local spawnPosition = basePosition + Vector3.new(offsetX, 12, offsetZ) -- Spawn 12 studs above the calculated point
 	newBlock:SetPrimaryPartCFrame(CFrame.new(spawnPosition))
+
+	-- Set collision group for the interaction part
+	local interactionPart = newBlock:FindFirstChild("InteractionPart")
+	if interactionPart and interactionPart:IsA("BasePart") then
+		interactionPart.CollisionGroup = "luckyBlock"
+	else
+		warn(`[joinRewardService] Could not find 'InteractionPart' in friendReward model for block {blockId}.`)
+	end
 
 	-- Set attributes for the block script
 	newBlock:SetAttribute("RewardAmount", rewardAmount)
@@ -290,7 +299,29 @@ end
 -- Initialize the service
 function joinRewardService.start()
 	-- Connect to player added event
-	Players.PlayerAdded:Connect(joinRewardService.onPlayerJoined)
+	Players.PlayerAdded:Connect(function(player)
+		-- Handle normal join logic
+		joinRewardService.onPlayerJoined(player)
+
+		-- Add debug chat command listener only in Studio
+		if RunService:IsStudio() then
+			player.Chatted:Connect(function(msg)
+				if msg == ":spawnReward" then
+					print(`[joinRewardService] Debug command :spawnReward received from {player.Name}`)
+					local playerData = dataService.getPlayerData(player)
+					if playerData then
+						local rewardAmount = rewardsConfig.playerJoinReward(playerData.cannon or 0) -- Use 0 if cannon level is missing
+						joinRewardService.spawnBlock(player, rewardAmount)
+						print(
+							`[joinRewardService] Spawned debug reward block for {player.Name} with amount {rewardAmount}`
+						)
+					else
+						warn(`[joinRewardService] Could not get player data for {player.Name} to spawn debug reward.`)
+					end
+				end
+			end)
+		end
+	end)
 
 	-- Listen for the client event when they trigger the reward block
 	zap.claimFriendReward.SetCallback(function(player, data)
