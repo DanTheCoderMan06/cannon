@@ -234,6 +234,16 @@ function dataService.start()
 				dataService.giveRewards(player)
 				zap.dataChanged.Fire(player, profile.Data)
 
+				-- Schedule a forced save after a short delay
+				task.delay(3, function()
+					-- Check if player and profile still exist before forced save
+					if player and player.Parent == Players and Profiles[player] then
+						print(`[DataService] Performing delayed initial forced save for {player.Name}`)
+						-- Call updatePlayerData with forceSave = true, using the current data
+						dataService.updatePlayerData(player, Profiles[player].Data, true)
+					end
+				end)
+
 				profile.Data.firstTimeRewards = false
 				profile.Data.firstTime = false
 			else
@@ -271,11 +281,38 @@ function dataService.updateLeaderstats(player)
 	end
 end
 
-function dataService.updatePlayerData(player: Player, newData)
-	Profiles[player].Data = newData
-	zap.dataChanged.Fire(player, newData)
+-- Updated function with deep comparison and forceSave option
+function dataService.updatePlayerData(player: Player, newData, forceSave: boolean?)
+	local profile = Profiles[player]
+	if not profile then
+		warn(`[DataService] updatePlayerData called for player {player.Name} but profile is not loaded.`)
+		return
+	end
+
+	-- Default forceSave to false if not provided
+	forceSave = forceSave or false
+
+	-- Check for redundant save unless forced
+	if not forceSave then
+		if Sift.Dictionary.equalsDeep(profile.Data, newData) then
+			if RunService:IsStudio() then
+				warn(
+					`[DataService] updatePlayerData called for {player.Name} with identical data. Skipping redundant update.`
+				)
+			end
+			return -- Exit if data is the same and not forced
+		end
+	end
+
+	-- Proceed with update
+	profile.Data = newData
+	zap.dataChanged.Fire(player, newData) -- Fire specific event (if still used)
 	dataService.updateLeaderstats(player)
-	dataService.dataChanged:Fire(player, newData)
+	dataService.dataChanged:Fire(player, newData) -- Fire generic event
+	-- Note: ProfileService automatically handles saving on Release or periodically.
+	-- Explicitly calling profile:Save() is generally not needed unless for critical moments.
+	-- If a forced immediate save to datastore is *required* here (unlikely), you'd call profile:Save()
+	-- print(`[DataService] Updated data for {player.Name}. Forced: {forceSave}`)
 end
 
 function dataService.getPlayerData(player: Player)

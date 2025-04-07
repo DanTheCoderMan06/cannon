@@ -88,7 +88,11 @@ end
 
 function purchaseService.start()
 	MarketplaceService.ProcessReceipt = function(recieptInfo)
-		return purchaseService.handlePurchase(recieptInfo)
+		local value
+		pcall(function()
+			value = purchaseService.handlePurchase(recieptInfo)
+		end)
+		return value or Enum.ProductPurchaseDecision.NotProcessedYet
 	end
 
 	MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player, gamePassId, wasPurchased)
