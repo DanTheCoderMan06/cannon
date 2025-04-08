@@ -69,6 +69,17 @@ return {
 					["rewardName"] = { stringValue = rewardName },
 				}
 			end,
+			-- Custom checker to ensure 24 hours have passed since the last claim
+			customChecker = function(userId, playerData, timeElapsed)
+				if not playerData.lastClaimed then
+					-- If never claimed, allow the notification (waitTime will handle initial delay)
+					return true
+				end
+				local timeSinceLastClaim = os.time() - playerData.lastClaimed
+				print("TIME SINCE LAST DAILY NOTIF: " .. timeSinceLastClaim)
+				-- Check if at least 24 hours (86400 seconds) have passed
+				return timeSinceLastClaim >= 86400
+			end,
 		},
 	},
 }

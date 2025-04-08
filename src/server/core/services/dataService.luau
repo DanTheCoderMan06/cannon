@@ -242,6 +242,31 @@ function dataService.start()
 						-- Call updatePlayerData with forceSave = true, using the current data
 						dataService.updatePlayerData(player, Profiles[player].Data, true)
 					end
+
+					-- Check for Group Reward
+					local GROUP_ID = 13101898
+					local GROUP_REWARD_FLOORS = 20
+
+					if not profile.Data.joinedGroupReward or RunService:IsStudio() then
+						local success, isInGroup = pcall(function()
+							return player:IsInGroup(GROUP_ID)
+						end)
+						if success and isInGroup then
+							profile.Data.floors += GROUP_REWARD_FLOORS
+							profile.Data.joinedGroupReward = true
+							print(`Granted group reward ({GROUP_REWARD_FLOORS} floors) to {player.Name}`)
+							-- Fire notification to the client
+							zap.giftReceived.Fire(
+								player,
+								`👍Thank you for joining our group for {GROUP_REWARD_FLOORS} bonus floors!👍`
+							)
+							zap.dataChanged.Fire(player, profile.Data)
+							-- Ensure data change is propagated if needed (ProfileService might auto-save, but firing dataChanged is good practice)
+							dataService.updateLeaderstats(player) -- Update leaderstats immediately
+						elseif not success then
+							warn(`Failed to check group status for player {player.Name}`)
+						end
+					end
 				end)
 
 				profile.Data.firstTimeRewards = false

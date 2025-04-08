@@ -7,28 +7,27 @@ local HttpService = game:GetService("HttpService") -- For generating UUIDs
 
 local dataService = require(ServerStorage.server.services.dataService)
 local rewardsConfig = require(ReplicatedStorage.shared.config.rewardsConfig)
-local zap = require(ServerStorage.zap) -- Corrected path as per user feedback
+local zap = require(ServerStorage.zap)
 local assets = ReplicatedStorage:WaitForChild("assets")
 local friendRewardPrefab = assets:WaitForChild("friendReward")
--- blockSpawn is per-player, find it dynamically
 
 local joinRewardService = {}
 local pendingFriendRewards = {} -- Cache: [player] = { blockId = blockId, rewardAmount = amount }
 local activeBlocks = {} -- Cache: [blockId] = { blockInstance = instance, player = player }
 
--- Constant for the 24-hour cooldown period in seconds
-local REFERRAL_COOLDOWN = 86400 -- 24 hours in seconds
+-- Cooldown period from rewardsConfig
+local FRIEND_JOIN_COOLDOWN = rewardsConfig.referWaitTime -- Use the value from config (50 seconds)
 
--- Simple function to handle pcalls with retry logic
+-- Simple function to handle pcalls with retry logic (kept for potential future use, but less critical now)
 local function pcallWithRetry(callback)
 	if RunService:IsStudio() then
-		callback()
-		return true
+		local success, result = pcall(callback)
+		return success, result
 	end
 
 	local success, result
 	local attempts = 0
-	local maxAttempts = 5
+	local maxAttempts = 3 -- Reduced attempts
 
 	repeat
 		attempts = attempts + 1
@@ -43,83 +42,6 @@ local function pcallWithRetry(callback)
 	return success, result
 end
 
--- Core function to handle a player referral
-function joinRewardService.handleReferral(joinedUserId, referrerId)
-	local joinedUserIdStr = tostring(joinedUserId)
-	local referrerPlayer = Players:GetPlayerByUserId(referrerId)
-
-	if referrerPlayer then
-		-- Referrer is ONLINE in this server
-		local referrerData = dataService.getPlayerData(referrerPlayer)
-
-		-- Check cooldown
-		local lastReferTime = referrerData.invitedPlayers[joinedUserIdStr]
-		if lastReferTime and (os.time() - lastReferTime) < REFERRAL_COOLDOWN then
-			print(`[joinRewardService] Cooldown active for referrer {referrerId} regarding user {joinedUserId}.`)
-			return false -- Already rewarded recently
-		end
-
-		-- Calculate and add reward
-		local rewardAmount = rewardsConfig.playerJoinReward(referrerData.cannon)
-
-		-- Record the referral timestamp in player data
-		referrerData.invitedPlayers[joinedUserIdStr] = os.time()
-		dataService.updatePlayerData(referrerPlayer, referrerData) -- Save timestamp
-
-		-- Spawn the block instead of directly giving money
-		joinRewardService.spawnBlock(referrerPlayer, rewardAmount)
-
-		print(
-			`[joinRewardService] Triggered reward block spawn for ONLINE player {referrerPlayer.Name} ({referrerId}) with reward {rewardAmount} for referring {joinedUserId}.`
-		)
-		return true
-	else
-		-- Referrer is OFFLINE or in another server, attempt offline update
-		print(`[joinRewardService] Referrer {referrerId} is offline or in another server. Attempting offline update.`)
-
-		local success = dataService.updateOfflinePlayerData(referrerId, function(offlineData)
-			-- This function runs only if the offline profile is loaded successfully
-
-			-- Ensure invitedPlayers table exists
-			if not offlineData.invitedPlayers then
-				offlineData.invitedPlayers = {}
-			end
-
-			-- Check cooldown within the offline data
-			local lastReferTime = offlineData.invitedPlayers[joinedUserIdStr]
-			if lastReferTime and (os.time() - lastReferTime) < REFERRAL_COOLDOWN then
-				print(
-					`[joinRewardService] Cooldown active for OFFLINE referrer {referrerId} regarding user {joinedUserId}. No update needed.`
-				)
-				-- To prevent unnecessary saves, we can potentially return a specific value or error,
-				-- but ProfileService might save anyway if data is modified.
-				-- For simplicity, we'll let it save but log that no reward was given.
-				-- Alternatively, throw an error to signal no changes needed:
-				-- error("Cooldown active, no reward given.") -- This would stop the save if updateOfflinePlayerData handles it.
-				-- Let's assume updateOfflinePlayerData saves regardless, so we just don't modify money.
-				return -- Exit the callback without modifying data further
-			end
-
-			-- Calculate and add reward based on offline data
-			local rewardAmount = rewardsConfig.playerJoinReward(offlineData.cannon or 0) -- Use 0 if cannon level is missing
-			offlineData.money += rewardAmount
-			offlineData.invitedPlayers[joinedUserIdStr] = os.time() -- Record timestamp
-
-			print(
-				`[joinRewardService] Calculated offline reward {rewardAmount} for referrer {referrerId} (Level: {offlineData.cannon or 0}).`
-			)
-		end)
-
-		if success then
-			print(`[joinRewardService] Successfully processed offline referral reward for referrer {referrerId}.`)
-			return true
-		else
-			warn(`[joinRewardService] Failed to process offline referral reward for referrer {referrerId}.`)
-			return false
-		end
-	end
-end
-
 -- Function to spawn the physical reward block
 function joinRewardService.spawnBlock(player: Player, rewardAmount: number)
 	if not player or not player:IsDescendantOf(Players) then
@@ -129,13 +51,14 @@ function joinRewardService.spawnBlock(player: Player, rewardAmount: number)
 
 	-- Check if player already has a pending reward (prevent spamming blocks for same reward)
 	if pendingFriendRewards[player] then
-		warn(`[joinRewardService] Player {player.Name} already has a pending reward block. Ignoring new spawn request.`)
 		-- Optional: Could refresh the existing block's lifetime or ignore
+		-- For simplicity, we ignore the new spawn request if one is pending.
+		-- warn(`[joinRewardService] Player {player.Name} already has a pending reward block. Ignoring new spawn request.`)
 		return
 	end
 
 	local blockId = HttpService:GenerateGUID(false)
-	print(`[joinRewardService] Spawning friend reward block {blockId} for {player.Name} with reward {rewardAmount}`)
+	-- print(`[joinRewardService] Spawning friend reward block {blockId} for {player.Name} with reward {rewardAmount}`)
 
 	local newBlock = friendRewardPrefab:Clone()
 
@@ -150,9 +73,7 @@ function joinRewardService.spawnBlock(player: Player, rewardAmount: number)
 	local blockSpawnPart = playerPlatform:FindFirstChild("blockSpawn")
 
 	if not blockSpawnPart or not blockSpawnPart:IsA("BasePart") then
-		warn(
-			`[joinRewardService] Could not find 'blockSpawn' BasePart directly under the player platform model for {player.Name}. Path checked: Workspace.playerPlatforms.{playerPlatform.Name}.blockSpawn. Cannot spawn reward block.`
-		)
+		warn(`[joinRewardService] Could not find 'blockSpawn' BasePart for {player.Name}. Cannot spawn reward block.`)
 		newBlock:Destroy() -- Clean up the unused block
 		return
 	end
@@ -169,7 +90,7 @@ function joinRewardService.spawnBlock(player: Player, rewardAmount: number)
 	-- Set collision group for the interaction part
 	local interactionPart = newBlock:FindFirstChild("InteractionPart")
 	if interactionPart and interactionPart:IsA("BasePart") then
-		interactionPart.CollisionGroup = "luckyBlock"
+		interactionPart.CollisionGroup = "luckyBlock" -- Re-use existing group for simplicity
 	else
 		warn(`[joinRewardService] Could not find 'InteractionPart' in friendReward model for block {blockId}.`)
 	end
@@ -184,7 +105,6 @@ function joinRewardService.spawnBlock(player: Player, rewardAmount: number)
 	newBlock.Parent = Workspace
 
 	-- Fire event to the specific client to let them know the block exists
-	-- (Client script on the block might handle visuals/prompt directly, but this confirms spawn)
 	zap.spawnFriendRewardBlock.Fire(player, { rewardAmount = rewardAmount, blockId = blockId })
 
 	-- Handle cleanup if the player leaves while the block exists
@@ -193,13 +113,15 @@ function joinRewardService.spawnBlock(player: Player, rewardAmount: number)
 		if not parent then
 			local pending = pendingFriendRewards[player]
 			if pending and pending.blockId == blockId then
-				print(`[joinRewardService] Cleaning up reward block {blockId} for player {player.Name} who left.`)
+				-- print(`[joinRewardService] Cleaning up reward block {blockId} for player {player.Name} who left.`)
 				if activeBlocks[blockId] and activeBlocks[blockId].blockInstance then
 					activeBlocks[blockId].blockInstance:Destroy()
 				end
 				activeBlocks[blockId] = nil
 				pendingFriendRewards[player] = nil
-				playerLeavingConnection:Disconnect()
+				if playerLeavingConnection and playerLeavingConnection.Connected then
+					playerLeavingConnection:Disconnect()
+				end
 			end
 		end
 	end)
@@ -209,46 +131,20 @@ function joinRewardService.spawnBlock(player: Player, rewardAmount: number)
 	blockDestroyingConnection = newBlock.Destroying:Connect(function()
 		if activeBlocks[blockId] then
 			local ownerPlayer = activeBlocks[blockId].player
-			-- Clear active block cache
 			activeBlocks[blockId] = nil
-			-- Clear pending reward cache if it matches this block
 			if pendingFriendRewards[ownerPlayer] and pendingFriendRewards[ownerPlayer].blockId == blockId then
 				pendingFriendRewards[ownerPlayer] = nil
 			end
 		end
-		-- Disconnect player leaving connection if block is destroyed first
 		if playerLeavingConnection and playerLeavingConnection.Connected then
 			playerLeavingConnection:Disconnect()
 		end
-		blockDestroyingConnection:Disconnect() -- Disconnect self
+		if blockDestroyingConnection and blockDestroyingConnection.Connected then
+			blockDestroyingConnection:Disconnect()
+		end
 	end)
 end
 
--- Handler for when a player joins the game
-function joinRewardService.onPlayerJoined(player)
-	local joinData = player:GetJoinData()
-
-	-- Check if they were referred by someone
-	if joinData and joinData.ReferredByPlayerId then
-		local referrerId = joinData.ReferredByPlayerId
-		print("REFERRED BY: " .. referrerId)
-		-- Validate referrer ID
-		if not referrerId or referrerId == 0 then
-			return
-		end
-
-		-- Process the referral
-		print("Proccess Referral")
-		local success = joinRewardService.handleReferral(player.UserId, referrerId)
-
-		-- Mark that this player has been processed
-		if success then
-			player:SetAttribute("ReferralRewarded", true)
-		end
-	end
-end
-
--- Initialize the service
 -- Function to handle claiming the cached reward via the block
 function joinRewardService.claimReward(player: Player, blockId: string)
 	local blockData = activeBlocks[blockId]
@@ -268,7 +164,6 @@ function joinRewardService.claimReward(player: Player, blockId: string)
 		warn(
 			`[joinRewardService] Player {player.Name} tried to claim block {blockId}, but pending reward data mismatch or missing. PendingData: {pendingData}`
 		)
-		-- Clean up potentially orphaned block if it exists
 		if blockData.blockInstance then
 			blockData.blockInstance:Destroy()
 		end
@@ -296,24 +191,84 @@ function joinRewardService.claimReward(player: Player, blockId: string)
 	return true, rewardAmount -- Return success and amount for potential effects
 end
 
+-- New function to check friends and grant rewards when a player joins
+function joinRewardService.processFriendRewardsOnJoin(joiningPlayer: Player)
+	task.wait(2) -- Short delay to allow other players' data to potentially load
+
+	local joiningPlayerId = joiningPlayer.UserId
+	local joiningPlayerIdStr = tostring(joiningPlayerId)
+
+	for _, existingPlayer in ipairs(Players:GetPlayers()) do
+		-- Skip the player who just joined
+		if existingPlayer == joiningPlayer then
+			continue
+		end
+
+		-- Check friendship (use pcall for safety)
+		local areFriendsSuccess, areFriends = pcall(function()
+			return existingPlayer:IsFriendsWith(joiningPlayerId)
+		end)
+
+		if not areFriendsSuccess then
+			warn(
+				`[joinRewardService] Failed to check friendship between {existingPlayer.Name} and {joiningPlayer.Name}. Error: {areFriends}`
+			)
+			continue -- Skip this pair if API fails
+		end
+
+		if areFriends then
+			-- They are friends, now check cooldown for the existing player
+			local existingPlayerData = dataService.getPlayerData(existingPlayer) -- This function waits for data
+
+			-- Ensure the rewards table exists
+			if not existingPlayerData.friendJoinRewards then
+				existingPlayerData.friendJoinRewards = {}
+			end
+
+			local lastRewardTime = existingPlayerData.friendJoinRewards[joiningPlayerIdStr]
+
+			if not lastRewardTime or (os.time() - lastRewardTime) >= FRIEND_JOIN_COOLDOWN then
+				-- Cooldown passed or first time, grant reward block
+				local rewardAmount =
+					rewardsConfig.playerJoinReward(existingPlayerData.floors or 0, existingPlayerData.boughtFloors or 0)
+
+				-- Spawn the block for the existing player
+				joinRewardService.spawnBlock(existingPlayer, rewardAmount)
+
+				-- Update the timestamp for this specific friend
+				existingPlayerData.friendJoinRewards[joiningPlayerIdStr] = os.time()
+				dataService.updatePlayerData(existingPlayer, existingPlayerData) -- Save the updated timestamp
+
+				print(
+					`[joinRewardService] Spawned friend reward block for {existingPlayer.Name} because friend {joiningPlayer.Name} joined.`
+				)
+			else
+				-- Still on cooldown for this specific friend
+				-- print(`[joinRewardService] Player {existingPlayer.Name} is on cooldown for friend {joiningPlayer.Name}.`)
+			end
+		end
+	end
+end
+
 -- Initialize the service
 function joinRewardService.start()
 	-- Connect to player added event
 	Players.PlayerAdded:Connect(function(player)
-		-- Handle normal join logic
-		joinRewardService.onPlayerJoined(player)
+		-- Use task.defer to avoid potential issues with data loading order
+		task.defer(joinRewardService.processFriendRewardsOnJoin, player)
 
 		-- Add debug chat command listener only in Studio
 		if RunService:IsStudio() then
 			player.Chatted:Connect(function(msg)
-				if msg == ":spawnReward" then
-					print(`[joinRewardService] Debug command :spawnReward received from {player.Name}`)
+				if msg == ":spawnFriendReward" then -- Changed command name for clarity
+					print(`[joinRewardService] Debug command :spawnFriendReward received from {player.Name}`)
 					local playerData = dataService.getPlayerData(player)
 					if playerData then
-						local rewardAmount = rewardsConfig.playerJoinReward(playerData.cannon or 0) -- Use 0 if cannon level is missing
+						local rewardAmount =
+							rewardsConfig.playerJoinReward(playerData.floors or 0, playerData.boughtFloors or 0)
 						joinRewardService.spawnBlock(player, rewardAmount)
 						print(
-							`[joinRewardService] Spawned debug reward block for {player.Name} with amount {rewardAmount}`
+							`[joinRewardService] Spawned debug friend reward block for {player.Name} with amount {rewardAmount}`
 						)
 					else
 						warn(`[joinRewardService] Could not get player data for {player.Name} to spawn debug reward.`)
@@ -329,13 +284,12 @@ function joinRewardService.start()
 		local success, amount = joinRewardService.claimReward(player, data.blockId)
 		if success then
 			-- Optional: Could fire another event here for server-side effects if needed
-			-- e.g., zap.friendRewardClaimedEffect.Fire(player, { amount = amount })
 		end
 	end)
 
 	-- PlayerRemoving cleanup is handled by the connection made in spawnBlock
 
-	print("[joinRewardService] Started successfully. Handles online/offline referrals and reward block claiming.")
+	print("[joinRewardService] Started successfully. Handles friend join rewards and block claiming.")
 end
 
 return joinRewardService

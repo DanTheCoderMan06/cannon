@@ -38,6 +38,9 @@ return {
 	--Tutorial
 	firstTime = true,
 
-	--Invite Rewards
-	invitedPlayers = {},
+	--Group Reward
+	joinedGroupReward = false,
+
+	--Friend Join Reward Cooldowns { [friendUserId]: timestamp }
+	friendJoinRewards = {},
 }

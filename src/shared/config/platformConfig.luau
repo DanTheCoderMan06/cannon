@@ -131,7 +131,7 @@ return {
 
 				-- Function to update the display
 				local function updateDisplay(playerData)
-					local rewardAmount = rewardsConfig.playerJoinReward(playerData.cannon)
+					local rewardAmount = rewardsConfig.playerJoinReward(playerData.floors, playerData.boughtFloors)
 					local formattedReward = formatNumber(rewardAmount) .. " REWARD!"
 					local canPromptIn = uiController.canPromptIn() -- Check current notification status
 
@@ -177,7 +177,7 @@ return {
 			init = function()
 				-- Get initial data and calculate initial reward/description
 				local playerData = dataController.getData()
-				local initialReward = rewardsConfig.playerJoinReward(playerData.cannon)
+				local initialReward = rewardsConfig.playerJoinReward(playerData.floors, playerData.boughtFloors)
 				local formattedReward = formatNumber(initialReward) .. " REWARD!"
 				local canPromptIn = uiController.canPromptIn()
 				local initialDescription = if canPromptIn then "ENABLE NOTIFICATIONS" else "INVITE A NEW PLAYER"

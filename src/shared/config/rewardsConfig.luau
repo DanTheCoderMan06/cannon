@@ -1,5 +1,6 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local floorConfig = require(ReplicatedStorage.shared.config.floorConfig) -- Added floorConfig require
 local cannonConfig = require(ReplicatedStorage.shared.config.cannonConfig)
 
 local function luckyBlockWaitTime(playerLevel)
@@ -12,31 +13,14 @@ local function luckyBlockWaitTime(playerLevel)
 	return 460
 end
 
-local function luckyBlockReward(playerLevel)
-	-- Base reward that scales with player level
-	local baseReward = 1000 + (playerLevel * 150) * 25
+local function luckyBlockReward(floors, boughtFloors)
+	local totalCost = 0
 
-	-- Logarithmic component for diminishing returns at higher levels
-	local logScale = math.log10(playerLevel + 10)
-
-	-- Progressive reward scaling for different level ranges
-	local scaledReward
-	if playerLevel < 20 then
-		-- Early game (generous rewards to help players progress)
-		scaledReward = baseReward * (1 + logScale * 0.5)
-	elseif playerLevel < 50 then
-		-- Mid game (moderate logarithmic scaling)
-		scaledReward = baseReward * (1 + logScale * 0.4)
-	else
-		-- Late game (stronger logarithmic dampening)
-		scaledReward = baseReward * (1 + logScale * 0.3)
+	for i = 1, 2 do
+		totalCost += floorConfig.costFormula(floors + i, boughtFloors)
 	end
 
-	-- Add variability with controlled randomness (80-120% of calculated value)
-	local randomFactor = 0.8 + (math.random() * 0.4)
-
-	-- Round to nearest 100 for clean numbers
-	return math.floor((scaledReward * randomFactor) / 100) * 100
+	return math.round(totalCost)
 end
 
 local function getDailyReward(day, playerLevel)
@@ -71,10 +55,15 @@ local function getDailyReward(day, playerLevel)
 	return math.floor(scaledReward / 100) * 100
 end
 
-local function referralReward(referrerLevel)
-	local baseReward = 100000
+local function referralReward(floors, boughtFloors) -- Changed parameter to accept floors and boughtFloors
+	-- Calculate reward based on referrer's next floor cost * 6
+	local totalCost = 0
 
-	return math.floor((math.log(referrerLevel + 1) + 1) * baseReward / 100) * 100 * 5
+	for i = 1, 6 do
+		totalCost += floorConfig.costFormula(floors + i, boughtFloors)
+	end
+
+	return math.round(totalCost)
 end
 
 local module = {

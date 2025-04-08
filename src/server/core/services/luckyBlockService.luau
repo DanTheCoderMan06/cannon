@@ -6,6 +6,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
 
 local dataService = require(ServerStorage.server.services.dataService)
+local floorConfig = require(ReplicatedStorage.shared.config.floorConfig) -- Added floorConfig require
 
 local rewardsConfig = require(ReplicatedStorage.shared.config.rewardsConfig)
 
@@ -23,7 +24,8 @@ function luckyBlockService.spawnLuckyBlock(player)
 	local blockData = {}
 	local playerData = dataService.getPlayerData(player)
 	blockData.id = HttpService:GenerateGUID()
-	blockData.reward = rewardsConfig.luckyBlockFormula(playerData.cannon)
+	-- Calculate reward based on next floor cost * 2.5
+	blockData.reward = rewardsConfig.luckyBlockFormula(playerData.floors, playerData.boughtFloors)
 	-- Removed: newBlock.model = ReplicatedStorage.assets.luckyBlock:Clone()
 
 	-- Removed server-side model cloning, positioning, and parenting

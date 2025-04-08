@@ -204,23 +204,54 @@ function notificationService.sendNotification(userId, info, notificationKey, tim
 		return false
 	end
 
-	-- Check if notification should be sent based on config (multiple, waitTime)
-	local amountExisting = 0
-	if info.multiple then
-		for _, v in pairs(fetchedData.notificationQueue) do
-			if v == notificationKey then
-				amountExisting += 1
-			end
-		end
-		if (amountExisting + 1) * info.waitTime > timeElapsed then
+	-- Check 1: Prevent duplicates if multiple is false
+	if not info.multiple and Sift.Array.includes(fetchedData.notificationQueue, notificationKey) then
+		debugLog(
+			"Skipping notification " .. notificationKey .. " for user " .. userId .. ": Already sent (multiple=false)."
+		)
+		return false
+	end
+
+	-- Check 2: Use custom checker if available (overrides default waitTime)
+	if typeof(info.customChecker) == "function" then
+		local customCheckPassed = info.customChecker(userId, fetchedData, timeElapsed)
+		if not customCheckPassed then
+			debugLog("Custom checker returned false for notification " .. notificationKey .. " for user " .. userId)
 			return false
 		end
+		-- If custom checker passes, we proceed directly to sending (skipping default waitTime)
 	else
-		if Sift.Array.includes(fetchedData.notificationQueue, notificationKey) then
-			return false
-		end
-		if info.waitTime > timeElapsed then
-			return false
+		-- Check 3: Default waitTime logic (only if no custom checker)
+		if info.multiple then
+			-- Calculate amountExisting only if needed for multiple=true waitTime check
+			local amountExisting = 0
+			for _, v in pairs(fetchedData.notificationQueue) do
+				if v == notificationKey then
+					amountExisting += 1
+				end
+			end
+			if (amountExisting + 1) * info.waitTime > timeElapsed then
+				debugLog(
+					"Skipping notification "
+						.. notificationKey
+						.. " for user "
+						.. userId
+						.. ": Default waitTime not met (multiple=true)."
+				)
+				return false
+			end
+		else
+			-- The duplicate check for multiple=false was already done. Only need waitTime check.
+			if info.waitTime > timeElapsed then
+				debugLog(
+					"Skipping notification "
+						.. notificationKey
+						.. " for user "
+						.. userId
+						.. ": Default waitTime not met (multiple=false)."
+				)
+				return false
+			end
 		end
 	end
 
