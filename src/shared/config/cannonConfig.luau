@@ -1,36 +1,20 @@
-local function cost(level, boughtLevels)
-	local levelDiff = math.max(0, level - boughtLevels)
-	local baseValue = 100 + (levelDiff * 50)
-
-	if level <= 5 then
-		return math.round(baseValue * level * 1.2 * 4) + 1000
-	elseif level <= 10 then
-		return math.round(baseValue * level * 1.5 * 4) + 2000
-	elseif level <= 30 then
-		local scaleFactor = 1 + (level * 0.024)
-		return math.round(baseValue * math.pow(level, scaleFactor) * 10) + 10000
-	elseif level <= 70 then
-		local logScale = math.log10(level)
-		local expScale = math.exp((level - 20) * 0.35 + 1)
-		return math.round((baseValue * level * level * logScale * 8) / 2) + 50000
-	else
-		local logScale = math.log10(level)
-		local expScale = math.exp((level - 20) * 0.4 + 1)
-		return math.round((baseValue * level * level * logScale * 10) / 2) + 50000
-	end
+local function power(x)
+	local L = 15200
+	local k = 0.068
+	local x0 = 59.5
+	return L / (1 + math.exp(-k * (x - x0))) + 200
 end
 
--- Updated reward formula to include floor bonus
 local function rewardFormula(x, floors)
 	floors = floors or 0
 	local LOW_X = 966
 	local MID_X = 128000
 	local HIGH_X = 940000
+	local SUPER_HIGH_X = 5000000
 
 	local LOW_Y = 4000
 	local MID_Y = 1000000
 	local HIGH_Y = 4000000
-	local SUPER_HIGH_X = 5000000
 	local SUPER_HIGH_Y = 20000000
 
 	local result
@@ -56,16 +40,45 @@ local function rewardFormula(x, floors)
 	end
 
 	local floorMultiplier = 1 + (math.sqrt(math.max(1, floors)) * 0.3)
-
 	return math.max(0, result * floorMultiplier)
 end
 
-local function power(x)
-	local L = 15200
-	local k = 0.068
-	local x0 = 59.5
+local function calculateDistance(initialHeight, initialVelocity, angleDegrees)
+	local angleRadians = math.rad(angleDegrees)
+	local gravity = workspace.Gravity
+	local horizontalVelocity = math.cos(angleRadians) * initialVelocity
+	local verticalVelocity = math.sin(angleRadians) * initialVelocity
+	local timeElapsed = (verticalVelocity + math.sqrt(math.pow(verticalVelocity, 2) + 2 * gravity * initialHeight))
+		/ gravity
+	local horizontalDistanceTraveled = timeElapsed * horizontalVelocity
+	return horizontalDistanceTraveled
+end
 
-	return L / (1 + math.exp(-k * (x - x0))) + 200
+local function cost(targetLevel, boughtLevels)
+	if targetLevel <= boughtLevels then
+		return 0
+	end
+
+	if targetLevel == 1 then
+		return 100
+	end
+
+	local previousLevel = targetLevel - 1
+
+	local powerPreviousLevel = power(previousLevel)
+
+	local assumedHeight = 5
+	local distancePreviousLevel = calculateDistance(assumedHeight, powerPreviousLevel, 45)
+
+	local rewardPreviousLevel = rewardFormula(distancePreviousLevel, 0)
+
+	local finalCost = math.round(rewardPreviousLevel * math.pow(1.06, targetLevel - boughtLevels) * 0.86)
+
+	if targetLevel - boughtLevels > 50 then
+		finalCost = math.round(finalCost * math.pow(1.02, 50 - targetLevel + boughtLevels))
+	end
+
+	return math.max(1, finalCost)
 end
 
 local module = {

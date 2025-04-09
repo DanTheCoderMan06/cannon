@@ -72,7 +72,7 @@ local module = {
 	luckyBlockFormula = luckyBlockReward,
 	vipRewardDuration = 10000,
 	vipGamepass = 1022963419,
-	referWaitTime = 50,
+	referWaitTime = 60 * 60 * 24,
 	rewards = {
 		{ -- Day 1: money reward
 			day = 1,
