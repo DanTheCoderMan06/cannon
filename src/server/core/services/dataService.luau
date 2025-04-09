@@ -247,7 +247,7 @@ function dataService.start()
 					local GROUP_ID = 13101898
 					local GROUP_REWARD_FLOORS = 20
 
-					if not profile.Data.joinedGroupReward or RunService:IsStudio() then
+					if not profile.Data.joinedGroupReward then
 						local success, isInGroup = pcall(function()
 							return player:IsInGroup(GROUP_ID)
 						end)

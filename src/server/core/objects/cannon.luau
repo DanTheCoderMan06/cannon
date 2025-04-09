@@ -82,10 +82,19 @@ function Cannon:fireCannon()
 		return
 	end
 	self.character.PrimaryPart.Anchored = false
+	local blastPressure = self.power * 5000
+	print(
+		string.format(
+			"[Cannon Object Debug] Player %s firing cannon. Base Power: %f, Blast Pressure: %f",
+			self.owner.Name,
+			self.power,
+			blastPressure
+		)
+	)
 	explosionUtil:CreateExplosion(
 		self.cannonModel.center.fireDirection.WorldPosition,
 		20,
-		self.power * 5000,
+		blastPressure, -- Use the calculated variable
 		1,
 		4,
 		false,

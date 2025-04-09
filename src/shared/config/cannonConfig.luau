@@ -39,7 +39,7 @@ local function rewardFormula(x, floors)
 		result = SUPER_HIGH_Y + math.log10(x / SUPER_HIGH_X + 1) * (SUPER_HIGH_Y * 0.5)
 	end
 
-	local floorMultiplier = 1 + (math.sqrt(math.max(1, floors)) * 0.3)
+	local floorMultiplier = 1 + (math.sqrt(math.max(1, floors)) * 0.2) -- Reduced multiplier from 0.3 to 0.2
 	return math.max(0, result * floorMultiplier)
 end
 
@@ -72,7 +72,7 @@ local function cost(targetLevel, boughtLevels)
 
 	local rewardPreviousLevel = rewardFormula(distancePreviousLevel, 0)
 
-	local finalCost = math.round(rewardPreviousLevel * math.pow(1.06, targetLevel - boughtLevels) * 0.86)
+	local finalCost = math.round(rewardPreviousLevel * math.pow(1.075, targetLevel - boughtLevels) * 0.86)
 
 	if targetLevel - boughtLevels > 50 then
 		finalCost = math.round(finalCost * math.pow(1.02, 50 - targetLevel + boughtLevels))

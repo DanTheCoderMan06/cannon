@@ -109,6 +109,7 @@ function castleService.updatePlatform(player, newspot)
 			task.defer(function()
 				player.Character:MoveTo(
 					playerPlatforms:FindFirstChild(player.Name):FindFirstChildWhichIsA("SpawnLocation").Position
+						+ Vector3.new(0, 10, 0) -- Added vertical offset
 				)
 			end)
 		end

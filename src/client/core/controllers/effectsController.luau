@@ -209,7 +209,8 @@ function effectsController.finishedPath(results, track, animationInstance) -- Ad
 	local finishedPathEffects = ReplicatedStorage.assets.finishedPath:Clone()
 	local container = ReactRoblox.createRoot(Instance.new("Folder"))
 	local isHighscore = effectsController.getHighScore().Value < math.round(results.distance)
-	local reward = cannonConfig.rewardFormula(results.distance)
+	local playerData = dataController.currentData -- Get player data
+	local reward = cannonConfig.rewardFormula(results.distance, playerData.floors or 0) -- Pass floors, default to 0 if nil
 	local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
 	local targetColor, setTargetColor = React.createBinding(Color3.new())
 
@@ -218,7 +219,7 @@ function effectsController.finishedPath(results, track, animationInstance) -- Ad
 	local partTrove = Trove.new()
 	local startTime = tick()
 
-	if dataController.currentData.doubleMoney then
+	if playerData.doubleMoney then -- Use the fetched playerData
 		reward *= 2
 	end
 

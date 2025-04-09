@@ -51,9 +51,22 @@ function autoFarmService.start()
 				if not v:GetAttribute("autoFarming") then
 					continue
 				end
-				print("[AutoFarmService] " .. "Time : " .. os.time() - startTimes[v.Name] > 20)
-				if os.time() - startTimes[v.Name] > 20 or RunService:IsStudio() then
-					autoFarmService.migrate(v)
+				local startTime = startTimes[v.Name]
+				if startTime then
+					local timeElapsed = os.time() - startTime
+					print(string.format("[AutoFarmService] Player %s autofarming for %d seconds.", v.Name, timeElapsed))
+					if timeElapsed > 20 or RunService:IsStudio() then
+						autoFarmService.migrate(v)
+					end
+				else
+					-- Handle case where startTime is unexpectedly nil, maybe reset it?
+					print(
+						string.format(
+							"[AutoFarmService] Warning: No start time found for player %s. Resetting.",
+							v.Name
+						)
+					)
+					startTimes[v.Name] = os.time() -- Reset start time to prevent repeated warnings/errors
 				end
 			end
 		end

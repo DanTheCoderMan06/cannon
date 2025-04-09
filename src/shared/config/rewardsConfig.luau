@@ -20,7 +20,16 @@ local function luckyBlockReward(floors, boughtFloors)
 		totalCost += floorConfig.costFormula(floors + i, boughtFloors)
 	end
 
-	return math.round(totalCost)
+	local finalReward = math.round(totalCost)
+	print(
+		string.format(
+			"[RewardsConfig Debug] Calculated lucky block reward. Floors: %d, BoughtFloors: %d, Reward: %d",
+			floors,
+			boughtFloors,
+			finalReward
+		)
+	)
+	return finalReward
 end
 
 local function getDailyReward(day, playerLevel)

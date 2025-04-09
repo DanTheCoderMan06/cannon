@@ -81,19 +81,46 @@ function cannonService.launchPlayer(player)
 
 	if player:GetAttribute("isVIP") then
 		cannonPower *= 1.5
+		print(
+			string.format("[CannonService Debug] Player %s VIP bonus applied. New power: %f", player.Name, cannonPower)
+		)
 	end
 
 	if playerData.doubleDistance then
 		cannonPower *= 2
+		print(
+			string.format(
+				"[CannonService Debug] Player %s doubleDistance bonus applied. New power: %f",
+				player.Name,
+				cannonPower
+			)
+		)
 	end
 
 	if player.MembershipType == Enum.MembershipType.Premium then
 		cannonPower *= cannonConfig.premiumMultiplier
+		print(
+			string.format(
+				"[CannonService Debug] Player %s Premium bonus (x%f) applied. New power: %f",
+				player.Name,
+				cannonConfig.premiumMultiplier,
+				cannonPower
+			)
+		)
 	end
 
 	for _, v in pairs(tierConfig.cannonTiers) do
 		if v.tier == playerData.cannonTier then
 			cannonPower *= v.power
+			print(
+				string.format(
+					"[CannonService Debug] Player %s Cannon Tier %d bonus (x%f) applied. New power: %f",
+					player.Name,
+					v.tier,
+					v.power,
+					cannonPower
+				)
+			)
 		end
 	end
 
@@ -113,6 +140,13 @@ function cannonService.awardPlayer(player, playerPath)
 	local award = cannonConfig.rewardFormula(playerPath.distance, playerData.floors)
 	if playerData.doubleMoney then
 		award *= 2
+		print(
+			string.format(
+				"[CannonService Debug] Player %s doubleMoney bonus applied. New award: %f",
+				player.Name,
+				award
+			)
+		)
 	end
 	playerData.money += award
 	playerData.highscore = math.max(playerData.highscore, math.round(playerPath.distance))
