@@ -48,7 +48,9 @@ local function calculateDistance(initialHeight, initialVelocity, angleDegrees)
 	local gravity = workspace.Gravity
 	local horizontalVelocity = math.cos(angleRadians) * initialVelocity
 	local verticalVelocity = math.sin(angleRadians) * initialVelocity
-	local timeElapsed = (verticalVelocity + math.sqrt(math.pow(verticalVelocity, 2) + 2 * gravity * initialHeight))
+	local timeElapsed = (
+		verticalVelocity + math.sqrt(math.pow(verticalVelocity, 2) + 2 * gravity * (initialHeight * 5))
+	) -- Increased impact of height
 		/ gravity
 	local horizontalDistanceTraveled = timeElapsed * horizontalVelocity
 	return horizontalDistanceTraveled

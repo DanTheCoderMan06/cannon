@@ -9,7 +9,8 @@ function physicsUtil.getVariables(initialHeight, initialVelocity)
 	local horizontalVelocity = math.cos(math.rad(cannonConfig.cannonAngle)) * initialVelocity
 	local verticalVelocity = math.sin(math.rad(cannonConfig.cannonAngle)) * initialVelocity
 	local timeElapsed = (
-		verticalVelocity + math.sqrt(math.pow(verticalVelocity, 2) + 2 * workspace.Gravity * initialHeight)
+		verticalVelocity
+		+ math.sqrt(math.pow(verticalVelocity, 2) + 2 * workspace.Gravity * (initialHeight * 5)) -- Increased impact of height
 	) / workspace.Gravity
 	local horizontalDistanceTraveled = timeElapsed * horizontalVelocity
 
