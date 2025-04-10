@@ -110,93 +110,137 @@ return {
 		tasks = {
 			hoverDistance = 2.5,
 			callback = function(callbackEvent)
-				local success = false
-				if uiController.canPromptIn() then
-					uiController.promptOptIn()
-					success = uiController.promptInEvent:Wait()
-				else
-					local s, r = pcall(function()
-						SocialService:PromptGameInvite(Players.LocalPlayer)
+				local playerData = dataController.getData()
+				if not playerData.joinedGroupReward then
+					-- State 1: Group reward not claimed. Try opening group page. Callback always fails visually.
+					pcall(function()
+						game:GetService("GuiService"):OpenBrowserWindow("https://www.roblox.com/groups/13101898")
 					end)
-					success = s
+					callbackEvent:Fire(false) -- Indicate failure for visual feedback, reward is server-side.
+				else
+					-- State 2: Group reward claimed. Proceed with friend invite/notification logic.
+					local success = false
+					if uiController.canPromptIn() then
+						uiController.promptOptIn()
+						success = uiController.promptInEvent:Wait() -- Wait for the prompt result
+					else
+						local s, r = pcall(function()
+							SocialService:PromptGameInvite(Players.LocalPlayer)
+						end)
+						success = s -- Success is true if the prompt showed without error
+					end
+					callbackEvent:Fire(success) -- Fire success/failure for visual feedback
 				end
-				callbackEvent:Fire(success)
 			end,
 			-- Title will now be dynamic based on player's potential reward
-			title = "CALCULATING...",
-			description = "ENABLE NOTIFICATIONS", -- Initial description
+			title = "LOADING...", -- Initial title, updated dynamically
+			description = "LOADING...", -- Initial description, updated dynamically
 			updateValues = function(trove, updateEvent)
-				local currentCannonLevel = -1 -- Initialize to track changes
-				local currentDescription = "ENABLE NOTIFICATIONS" -- Track current description state
+				local currentFloors = -1
+				local currentBoughtFloors = -1
+				local currentDescription = "" -- Track current description state for comparison
+				local currentJoinedGroupReward = nil -- Track group reward state for comparison
 
-				-- Function to update the display
+				-- Function to update the display based on joinedGroupReward status
 				local function updateDisplay(playerData)
-					local rewardAmount = rewardsConfig.playerJoinReward(playerData.floors, playerData.boughtFloors)
-					local formattedReward = formatNumber(rewardAmount) .. " REWARD!"
-					local canPromptIn = uiController.canPromptIn() -- Check current notification status
-
-					-- Determine description based on notification status
-					local newDescription = if canPromptIn then "ENABLE NOTIFICATIONS" else "INVITE A NEW PLAYER"
-
-					-- Only fire update if title or description changes
-					print("Update")
-					if
-						formattedReward ~= (updateEvent.CurrentValue and updateEvent.CurrentValue.title)
-						or newDescription ~= currentDescription
-					then
-						updateEvent:Fire({
-							title = formattedReward,
-							description = newDescription,
-						})
-						currentDescription = newDescription -- Update tracked description
+					local newState = {}
+					if not playerData.joinedGroupReward then
+						-- State 1: Show Group Reward Prompt
+						newState.title = "LIKE & JOIN GROUP"
+						newState.description = "+20 FLOORS!"
+					else
+						-- State 2: Show Friend Invite Prompt
+						local rewardAmount = rewardsConfig.playerJoinReward(playerData.floors, playerData.boughtFloors)
+						newState.title = formatNumber(rewardAmount) .. " REWARD!"
+						local canPromptIn = uiController.canPromptIn()
+						newState.description = if canPromptIn then "ENABLE NOTIFICATIONS" else "INVITE A NEW PLAYER"
 					end
-					currentCannonLevel = playerData.cannon -- Update tracked level
+
+					-- Only fire update if title or description actually changes
+					if
+						newState.title ~= (updateEvent.CurrentValue and updateEvent.CurrentValue.title)
+						or newState.description ~= currentDescription
+						or playerData.joinedGroupReward ~= currentJoinedGroupReward -- Also update if state itself changed
+					then
+						updateEvent:Fire(newState)
+						currentDescription = newState.description -- Update tracked description
+					end
+
+					-- Update tracked state variables
+					currentJoinedGroupReward = playerData.joinedGroupReward
+					currentFloors = playerData.floors
+					currentBoughtFloors = playerData.boughtFloors
 				end
 
-				-- Handle notification prompt success
+				-- Handle notification prompt success (only relevant if group reward is claimed)
 				trove:Add(uiController.promptInEvent:Connect(function(success)
-					if success then
-						-- Re-run updateDisplay to potentially change description and ensure title is current
-						local playerData = dataController.getData()
-						updateDisplay(playerData)
+					local currentData = dataController.getData()
+					-- Re-run updateDisplay if the prompt succeeded AND we are in the friend invite state
+					if success and currentData.joinedGroupReward then
+						updateDisplay(currentData)
 					end
 				end))
 
-				-- Handle player data changes (specifically cannon level)
+				-- Handle relevant player data changes
 				trove:Add(dataController.dataChanged:Connect(function(newData)
-					if newData.cannon ~= currentCannonLevel then
+					local oldData = dataController.lastData or {}
+					-- Check if any relevant data point changed that affects the current state's display
+					if
+						newData.joinedGroupReward ~= currentJoinedGroupReward -- State changed
+						or (
+							newData.joinedGroupReward -- Only check floor/boughtFloors if in friend reward state
+							and (newData.floors ~= currentFloors or newData.boughtFloors ~= currentBoughtFloors)
+						)
+					then
 						updateDisplay(newData)
 					end
 				end))
 
 				-- Initial update call after setup
 				local initialData = dataController.getData()
-				currentCannonLevel = initialData.cannon -- Set initial level before first update
-				updateDisplay(initialData)
+				updateDisplay(initialData) -- This sets initial tracked values too
 			end,
 			init = function()
-				-- Get initial data and calculate initial reward/description
+				-- Determine initial state based on joinedGroupReward
 				local playerData = dataController.getData()
-				local initialReward = rewardsConfig.playerJoinReward(playerData.floors, playerData.boughtFloors)
-				local formattedReward = formatNumber(initialReward) .. " REWARD!"
-				local canPromptIn = uiController.canPromptIn()
-				local initialDescription = if canPromptIn then "ENABLE NOTIFICATIONS" else "INVITE A NEW PLAYER"
-
-				return {
-					title = formattedReward,
-					description = initialDescription,
-				}
+				if not playerData.joinedGroupReward then
+					-- State 1: Group Reward
+					return { title = "LIKE & JOIN GROUP", description = "+20 FLOORS!" }
+				else
+					-- State 2: Friend Invite
+					local initialReward = rewardsConfig.playerJoinReward(playerData.floors, playerData.boughtFloors)
+					local formattedReward = formatNumber(initialReward) .. " REWARD!"
+					local canPromptIn = uiController.canPromptIn()
+					local initialDescription = if canPromptIn then "ENABLE NOTIFICATIONS" else "INVITE A NEW PLAYER"
+					return { title = formattedReward, description = initialDescription }
+				end
 			end,
 			initModel = ReplicatedStorage.assets:FindFirstChild("rewardSuitcase"),
 			callbackFunction = function(success, states)
-				if success then
-					switchPlatformColor(states.model, Color3.new(0.992156, 1, 0.580392))
+				local playerData = dataController.getData()
+				local targetColor
+				if not playerData.joinedGroupReward then
+					-- State 1: Group reward not claimed. Flash grey as feedback for clicking.
+					targetColor = Color3.new(0.8, 0.8, 0.8) -- Grey flash
 				else
-					switchPlatformColor(states.model, Color3.new(1, 0, 0))
+					-- State 2: Group reward claimed. Show success/fail for friend invite action.
+					if success then
+						targetColor = Color3.new(0.992156, 1, 0.580392) -- Green
+					else
+						targetColor = Color3.new(1, 0, 0) -- Red
+					end
 				end
 
+				-- Apply the determined color flash
+				if states and states.model and states.model.Parent then
+					switchPlatformColor(states.model, targetColor)
+				end
+
+				-- Reset color after delay, ensuring model still exists
 				task.delay(0.5, function()
-					switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255))
+					if states and states.model and states.model.Parent then
+						switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255)) -- Original Blue
+					end
 				end)
 			end,
 		},
