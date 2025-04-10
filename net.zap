@@ -46,6 +46,12 @@ event dataChanged = {
     data: unknown
 }
 
+funct requestData = {
+    call: Async,
+    args: unknown, -- No arguments needed from client
+    rets: unknown -- Server returns player data table
+}
+
 funct changePrivacy = {
     call: Async,
     args: unknown,
