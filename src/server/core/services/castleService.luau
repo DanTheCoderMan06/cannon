@@ -74,6 +74,7 @@ function castleService.updateTower(player)
 
 	if not playerCastle:FindFirstChild("topFloor") then
 		local playerTopFloor = ReplicatedStorage.assets.topFloor:Clone()
+		playerTopFloor:AddPersistentPlayer(player)
 		playerTopFloor:PivotTo(playerSpot.CFrame * CFrame.new(0, floorHeight * (totalFloors + 0.5) + 6, 0))
 		playerTopFloor.Name = "topFloor"
 		playerTopFloor.Parent = playerCastle

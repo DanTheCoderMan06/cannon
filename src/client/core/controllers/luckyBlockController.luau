@@ -27,7 +27,7 @@ function luckyBlockController.start()
 		local timeStarted = tick()
 		local startCFrame = targetCFrame
 
-		local scaleUp = math.clamp(data.reward / 2500000, 1, 6)
+		local scaleUp = math.clamp(data.reward / 5500000, 1, 3)
 
 		blockTrove:BindToRenderStep("renderLuckyBlock" .. data.id, Enum.RenderPriority.Last.Value, function(dt)
 			local currentScale = (tick() - timeStarted) * scaleUp / 6

@@ -544,19 +544,14 @@ function castleController.start()
 
 	local localPlayerCastle = castleFolder:WaitForChild(Player.Name):FindFirstChildWhichIsA("Model")
 
-	local lastAnimated = 0
-	local oldPos = localPlayerCastle:WaitForChild("topFloor").PrimaryPart.Position
-	localPlayerCastle:WaitForChild("topFloor").PrimaryPart:GetPropertyChangedSignal("CFrame"):Connect(function()
-		if tick() - lastAnimated < 1 then
+	local oldFloors = dataController.getData().floors
+	dataController.dataChanged:Connect(function(newData)
+		if newData.floors == oldFloors then
 			return
 		end
-		if (localPlayerCastle:WaitForChild("topFloor").PrimaryPart.Position - oldPos).Magnitude < 5 then
-			return
-		end
-		lastAnimated = tick()
-		task.wait()
+		task.wait(1)
 		castleController.animateFloor(localPlayerCastle:FindFirstChild("topFloor"))
-		oldPos = localPlayerCastle:WaitForChild("topFloor").PrimaryPart.Position
+		oldFloors = newData.floors
 	end)
 
 	local pTrove = Trove.new()
