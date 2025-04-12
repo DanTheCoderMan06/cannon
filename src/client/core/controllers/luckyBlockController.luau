@@ -54,7 +54,7 @@ function luckyBlockController.start()
 				end
 			end
 			print(data.reward)
-			effectsController.rewardPopup(newLuckyBlock.PrimaryPart.Position, "+" .. data.reward .. "$")
+			effectsController.rewardPopup(newLuckyBlock.PrimaryPart.Position, "+ $" .. data.reward) -- Fixed $ placement
 			SoundService.effects.claim:Play()
 			task.delay(1.2, function()
 				newLuckyBlock:Destroy()

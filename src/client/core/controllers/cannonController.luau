@@ -39,7 +39,7 @@ local cameraController = require(ReplicatedStorage.client.controllers.cameraCont
 local dataController = require(ReplicatedStorage.client.controllers.dataController)
 local keysController = require(ReplicatedStorage.client.controllers.keysController)
 
-local MAX_TIME = 3.7
+local MAX_TIME = 8
 local MAX_IMPACT = 200
 
 function cannonController.toggleEntrance(toggle)
@@ -78,12 +78,28 @@ end
 function cannonController.start()
 	local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
 	local cannonPart = playerPlatform:WaitForChild("cannonPart", true)
-	local cannonPosition = playerPlatform:WaitForChild("cannonPosition", true)
+	local cannonPosition = playerPlatform:WaitForChild("cannonPosition")
+
+	RunService:BindToRenderStep("teleportBack", Enum.RenderPriority.Last.Value + 1, function()
+		local character = Players.LocalPlayer.Character
+		if not character then
+			return
+		end
+		if character:GetAttribute("inCannon") then
+			return
+		end
+		local spawnPosition = playerPlatform:FindFirstChildWhichIsA("SpawnLocation", true).Position
+		if (character.PrimaryPart.Position - spawnPosition).Magnitude > 50 then
+			character:MoveTo(spawnPosition)
+		end
+	end)
+
 	task.delay(2, function()
 		local cannonZone = Zone.new(cannonPart)
 		local lastTriggered = 0
 
 		cannonZone.partEntered:Connect(function(part)
+			print("Enter")
 			if not Players.LocalPlayer.Character then
 				return
 			end
@@ -106,6 +122,7 @@ function cannonController.start()
 			local lastTriggered = 0
 
 			cannonZone.partEntered:Connect(function(part)
+				print("Enter")
 				if not Players.LocalPlayer.Character then
 					return
 				end
@@ -129,6 +146,9 @@ function cannonController.start()
 	end)
 
 	zap.simulatePhysics.SetCallback(function(physics)
+		while not cannonPosition:FindFirstChild("characterPosition", true) do
+			task.wait()
+		end
 		local character = Players.LocalPlayer.Character
 		local pTrove = Trove.new()
 		pTrove:AttachToInstance(character)
@@ -179,6 +199,8 @@ function cannonController.start()
 		targetParams.FilterType = Enum.RaycastFilterType.Exclude
 		targetParams.FilterDescendantsInstances = { character }
 		windController.toggle(true)
+
+		physics.time += dataController.getData().floors / 300
 
 		local multiplier = 1
 		if physics.time > MAX_TIME then
@@ -330,6 +352,8 @@ function cannonController.start()
 				)
 			end)
 
+			zap.finishedPath.Fire()
+
 			local startWait = tick()
 			task.delay(1, function() -- Reduced outer delay
 				repeat
@@ -368,30 +392,16 @@ function cannonController.start()
 				character:PivotTo(
 					CFrame.new(
 						character.PrimaryPart.Position + Vector3.new(0, 2, 0),
-						character.PrimaryPart.Position + Vector3.new(1, 2, 0)
+						character.PrimaryPart.Position
+							+ Vector3.new(0, 2, 0)
+							- (workspace.CurrentCamera.CFrame.LookVector * Vector3.new(1, 0, 1))
 					)
 				)
 
 				-- Pass the track and animation instance to finishedPath
 				effectsController.finishedPath(physics, track, animationInstance)
-
-				zap.finishedPath.Fire()
 			end)
 		end)
-	end)
-
-	RunService:BindToRenderStep("teleportBack", Enum.RenderPriority.Last.Value + 1, function()
-		local character = Players.LocalPlayer.Character
-		if not character then
-			return
-		end
-		if character:GetAttribute("inCannon") then
-			return
-		end
-		local spawnPosition = playerPlatform:FindFirstChildWhichIsA("SpawnLocation", true).Position
-		if (character.PrimaryPart.Position - spawnPosition).Magnitude > 50 then
-			character:MoveTo(spawnPosition)
-		end
 	end)
 
 	local function updateCannon()

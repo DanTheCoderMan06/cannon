@@ -25,7 +25,7 @@ return function(props)
 		})
 		task.wait(2)
 		props.destroyEvent:Fire()
-	end)
+	end, {})
 
 	return React.createElement("ScreenGui", {
 		IgnoreGuiInset = true,

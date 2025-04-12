@@ -68,7 +68,7 @@ return function(props)
 			Position = UDim2.fromScale(0.025, 0),
 			RichText = true,
 			Size = UDim2.fromScale(1, 0.5),
-			Text = props.reward .. "$",
+			Text = "$ " .. props.reward, -- Fixed $ placement
 			TextColor3 = Color3.fromRGB(0, 200, 255),
 			TextScaled = true,
 			TextSize = 14,

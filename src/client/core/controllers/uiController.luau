@@ -1,5 +1,6 @@
 local uiController = {}
 
+local HttpService = game:GetService("HttpService")
 local MarketplaceService = game:GetService("MarketplaceService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SoundService = game:GetService("SoundService")
@@ -44,22 +45,14 @@ function uiController.renderNotification(text: string, color: Color3, startPosit
 	local destroyEvent = Signal.new()
 
 	container:render(ReactRoblox.createPortal(
-		React.createElement("ScreenGui", {
-			ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
-			ResetOnSpawn = false,
-			DisplayOrder = 1,
-			IgnoreGuiInset = true,
-		}, {
-			content = React.createElement(notification, {
-				text = text,
-				-- Use the provided start position
-				start = startPosition,
-				color = color,
-				destroyEvent = destroyEvent,
-			}),
+		React.createElement(notification, {
+			text = text,
+			start = startPosition,
+			color = color,
+			destroyEvent = destroyEvent,
 		}),
 		Players.LocalPlayer.PlayerGui,
-		"notification"
+		"notification" .. HttpService:GenerateGUID(false)
 	))
 
 	task.spawn(function()
@@ -137,6 +130,26 @@ function uiController.start()
 			currentData = newData
 			return
 		end
+		if newData.money > currentData.money then
+			-- Render money notification below the money stat
+			task.spawn(function()
+				uiController.renderNotification(
+					"+ $" .. math.round(newData.money - currentData.money), -- Fixed $ placement
+					Color3.new(0.419607, 0.572549, 0.349019),
+					UDim2.fromScale(0.349, 0.12) -- Position below money stat
+				)
+			end)
+		end
+		if newData.floors > currentData.floors then
+			-- Render floors notification below the floors stat
+			task.spawn(function()
+				uiController.renderNotification(
+					"+ " .. math.round(newData.floors - currentData.floors) .. " Floors",
+					Color3.new(0.333333, 0.392156, 0.592156),
+					UDim2.fromScale(0.639, 0.12) -- Position below floors stat
+				)
+			end)
+		end
 		if newData.daysPlayed == 0 and currentData.daysPlayed ~= 0 then
 			resetEvent:Fire()
 			currentData = newData
@@ -152,22 +165,6 @@ function uiController.start()
 			for i = 1, newData.daysPlayed - currentData.daysPlayed do
 				unlockedItemEvent:Fire(currentData.daysPlayed + i)
 			end
-		end
-		if newData.money > currentData.money then
-			-- Render money notification below the money stat
-			uiController.renderNotification(
-				"+ " .. math.round(newData.money - currentData.money) .. "$",
-				Color3.new(0.419607, 0.572549, 0.349019),
-				UDim2.fromScale(0.349, 0.12) -- Position below money stat
-			)
-		end
-		if newData.floors > currentData.floors then
-			-- Render floors notification below the floors stat
-			uiController.renderNotification(
-				"+ " .. math.round(newData.floors - currentData.floors) .. " Floors",
-				Color3.new(0.333333, 0.392156, 0.592156),
-				UDim2.fromScale(0.639, 0.12) -- Position below floors stat
-			)
 		end
 		currentData = newData
 	end)

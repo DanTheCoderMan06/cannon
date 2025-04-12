@@ -549,7 +549,11 @@ function castleController.start()
 		if newData.floors == oldFloors then
 			return
 		end
-		task.wait(1)
+		task.wait()
+		local playerSpot = workspace.castles:WaitForChild(Player.Name)
+		localPlayerCastle
+			:FindFirstChild("topFloor")
+			:PivotTo(playerSpot.CFrame * CFrame.new(0, floorHeight * (newData.floors + 0.5) + 6, 0))
 		castleController.animateFloor(localPlayerCastle:FindFirstChild("topFloor"))
 		oldFloors = newData.floors
 	end)

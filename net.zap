@@ -89,6 +89,13 @@ event finishedPath = {
     data: unknown
 }
 
+event requestImmediateReward = {
+	from: Client,
+    type: Reliable,
+    call: SingleAsync,
+    data: unknown 
+}
+
 event requestLoad = {
 	from: Client,
     type: Reliable,

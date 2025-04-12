@@ -207,7 +207,6 @@ end
 function effectsController.finishedPath(results, track, animationInstance) -- Added track and animationInstance parameters
 	local character = Players.LocalPlayer.Character
 	local finishedPathEffects = ReplicatedStorage.assets.finishedPath:Clone()
-	local container = ReactRoblox.createRoot(Instance.new("Folder"))
 	local isHighscore = effectsController.getHighScore().Value < math.round(results.distance)
 	local playerData = dataController.currentData -- Get player data
 	local reward = cannonConfig.rewardFormula(results.distance, playerData.floors or 0) -- Pass floors, default to 0 if nil
@@ -223,27 +222,31 @@ function effectsController.finishedPath(results, track, animationInstance) -- Ad
 		reward *= 2
 	end
 
-	container:render(ReactRoblox.createPortal(
-		React.createElement("BillboardGui", {
-			ResetOnSpawn = false,
-			AlwaysOnTop = true,
-			StudsOffset = Vector3.new(0, 8, 0),
-			Size = UDim2.fromScale(8, 7.5), -- Increased width scale from 6 to 8
-			Adornee = finishedPathEffects,
-		}, {
-			main = React.createElement(finishedPath, {
-				isHighscore = isHighscore or true,
-				distance = math.round(results.distance),
-				reward = math.round(reward),
-				targetColor = targetColor,
+	local container = ReactRoblox.createRoot(Instance.new("Folder"))
+
+	task.defer(function()
+		container:render(ReactRoblox.createPortal(
+			React.createElement("BillboardGui", {
+				ResetOnSpawn = false,
+				AlwaysOnTop = true,
+				StudsOffset = Vector3.new(0, 8, 0),
+				Size = UDim2.fromScale(8, 7.5),
+				Adornee = finishedPathEffects,
+			}, {
+				main = React.createElement(finishedPath, {
+					isHighscore = isHighscore or true,
+					distance = math.round(results.distance),
+					reward = math.round(reward),
+					targetColor = targetColor,
+				}),
 			}),
-		}),
-		Players.LocalPlayer.PlayerGui,
-		"finishedGUI"
-	))
+			Players.LocalPlayer.PlayerGui,
+			"finishedGUI"
+		))
+	end)
 
 	finishedPathEffects:PivotTo(
-		CFrame.new(character.PrimaryPart.Position * Vector3.new(1, 0, 1) + Vector3.new(-1.4, 1.2, 0))
+		CFrame.new(character.PrimaryPart.Position * Vector3.new(1, 0, 1) + Vector3.new(0, 1.2, 0))
 	)
 	finishedPathEffects.Parent = workspace
 

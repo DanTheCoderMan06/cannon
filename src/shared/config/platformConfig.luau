@@ -271,8 +271,8 @@ return {
 						else
 							updateEvent:Fire({
 								title = "LEVEL " .. tostring(v.Value),
-								description = tostring(cannonConfig.costFormula(v.Value + 1, playerData.boughtLevels))
-									.. "$",
+								description = "$ "
+									.. tostring(cannonConfig.costFormula(v.Value + 1, playerData.boughtLevels)), -- Fixed $ placement
 							})
 						end
 					end))
@@ -289,7 +289,9 @@ return {
 							title = "LEVEL " .. tostring(cannonValue.Value),
 							description = tostring(
 								cannonConfig.costFormula(cannonValue.Value + 1, playerData.boughtLevels)
-							) .. "$",
+							), -- Fixed $ placement
+							description = "$ "
+								.. tostring(cannonConfig.costFormula(cannonValue.Value + 1, playerData.boughtLevels)),
 						})
 					end
 				end))
@@ -302,8 +304,8 @@ return {
 					if v:GetAttribute("statName") == "cannon" then
 						return {
 							title = "LEVEL " .. v.Value,
-							description = tostring(cannonConfig.costFormula(v.Value + 1, playerData.boughtLevels))
-								.. "$",
+							description = "$ "
+								.. tostring(cannonConfig.costFormula(v.Value + 1, playerData.boughtLevels)), -- Fixed $ placement
 						}
 					end
 				end
@@ -387,8 +389,8 @@ return {
 						if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
 							updateEvent:Fire({
 								title = "LEVEL " .. tostring(v.Value),
-								description = tostring(floorConfig.costFormula(v.Value + 1, playerData.boughtFloors))
-									.. "$",
+								description = "$ "
+									.. tostring(floorConfig.costFormula(v.Value + 1, playerData.boughtFloors)), -- Fixed $ placement
 							})
 						end
 					end))
@@ -402,7 +404,9 @@ return {
 							title = "LEVEL " .. tostring(floorValue.Value),
 							description = tostring(
 								floorConfig.costFormula(floorValue.Value + 1, playerData.boughtFloors)
-							) .. "$",
+							), -- Fixed $ placement
+							description = "$ "
+								.. tostring(floorConfig.costFormula(floorValue.Value + 1, playerData.boughtFloors)),
 						})
 					end
 				end))
@@ -413,7 +417,9 @@ return {
 							title = "LEVEL " .. tostring(floorValue.Value),
 							description = tostring(
 								floorConfig.costFormula(floorValue.Value + 1, playerData.boughtFloors)
-							) .. "$",
+							), -- Fixed $ placement
+							description = "$ "
+								.. tostring(floorConfig.costFormula(floorValue.Value + 1, playerData.boughtFloors)),
 						})
 					else
 						-- Fetch dynamic price for gifting
@@ -437,8 +443,8 @@ return {
 					if v:GetAttribute("statName") == "floors" then
 						return {
 							title = "LEVEL " .. v.Value,
-							description = tostring(floorConfig.costFormula(v.Value + 1, playerData.boughtFloors))
-								.. "$",
+							description = "$ "
+								.. tostring(floorConfig.costFormula(v.Value + 1, playerData.boughtFloors)), -- Fixed $ placement
 						}
 					end
 				end

@@ -27,7 +27,7 @@ function dataController.start()
 	local initialData = zap.requestData.Call()
 
 	while not initialData do
-		task.wait(2)
+		task.wait()
 		initialData = zap.requestData.Call()
 	end
 
