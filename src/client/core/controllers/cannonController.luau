@@ -39,7 +39,7 @@ local cameraController = require(ReplicatedStorage.client.controllers.cameraCont
 local dataController = require(ReplicatedStorage.client.controllers.dataController)
 local keysController = require(ReplicatedStorage.client.controllers.keysController)
 
-local MAX_TIME = 8
+local MAX_TIME = 11
 local MAX_IMPACT = 200
 
 function cannonController.toggleEntrance(toggle)
@@ -94,8 +94,12 @@ function cannonController.start()
 		end
 	end)
 
-	task.delay(2, function()
-		local cannonZone = Zone.new(cannonPart)
+	local cannonZone
+	local function updateZone()
+		if cannonZone then
+			cannonZone:Destroy()
+		end
+		cannonZone = Zone.new(cannonPart)
 		local lastTriggered = 0
 
 		cannonZone.partEntered:Connect(function(part)
@@ -115,27 +119,12 @@ function cannonController.start()
 			lastTriggered = tick()
 			zap.enterCannon.Fire()
 		end)
+	end
 
-		cannonPart:GetPropertyChangedSignal("CFrame"):Connect(function()
-			cannonZone:destroy()
-			local cannonZone = Zone.new(cannonPart)
-			local lastTriggered = 0
+	updateZone()
 
-			cannonZone.partEntered:Connect(function(part)
-				print("Enter")
-				if not Players.LocalPlayer.Character then
-					return
-				end
-				if not part:IsDescendantOf(Players.LocalPlayer.Character) then
-					return
-				end
-				if tick() - lastTriggered < 1 then
-					return
-				end
-				lastTriggered = tick()
-				zap.enterCannon.Fire()
-			end)
-		end)
+	cannonPart:GetPropertyChangedSignal("CFrame"):Connect(function()
+		updateZone()
 	end)
 
 	cannonPosition.ChildAdded:Connect(function(child)
@@ -200,7 +189,7 @@ function cannonController.start()
 		targetParams.FilterDescendantsInstances = { character }
 		windController.toggle(true)
 
-		physics.time += dataController.getData().floors / 300
+		physics.time += dataController.getData().floors / 600
 
 		local multiplier = 1
 		if physics.time > MAX_TIME then
@@ -208,6 +197,8 @@ function cannonController.start()
 		elseif physics.time < 2 then
 			multiplier = physics.time / 2
 		end
+
+		effectsController.preloadFinishedPathUI(physics)
 
 		local trailEffects = ReplicatedStorage.assets.trailEffects
 		local characterTrails = {}
@@ -399,6 +390,7 @@ function cannonController.start()
 				)
 
 				-- Pass the track and animation instance to finishedPath
+				physics.time = tick() - startTime
 				effectsController.finishedPath(physics, track, animationInstance)
 			end)
 		end)

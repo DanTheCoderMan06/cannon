@@ -29,15 +29,6 @@ local startTimeLuckyBlock = tick()
 local changedCannonSignal = Signal.new()
 
 -- Helper function to format numbers into K/M strings
-local function formatNumber(num)
-	if num >= 1000000 then
-		return string.format("%.1fM", num / 1000000) -- e.g., 1.5M
-	elseif num >= 1000 then
-		return string.format("%dK", num / 1000) -- e.g., 150K
-	else
-		return tostring(num) -- e.g., 500
-	end
-end
 
 local function switchPlatformColor(model, target)
 	spr.target(model.touch, 0.9, 2.5, { ["Color"] = target })
@@ -151,7 +142,7 @@ return {
 					else
 						-- State 2: Show Friend Invite Prompt
 						local rewardAmount = rewardsConfig.playerJoinReward(playerData.floors, playerData.boughtFloors)
-						newState.title = formatNumber(rewardAmount) .. " REWARD!"
+						newState.title = reactUtil.formatNumber(rewardAmount) .. " REWARD!"
 						local canPromptIn = uiController.canPromptIn()
 						newState.description = if canPromptIn then "ENABLE NOTIFICATIONS" else "INVITE A NEW PLAYER"
 					end
@@ -209,7 +200,7 @@ return {
 				else
 					-- State 2: Friend Invite
 					local initialReward = rewardsConfig.playerJoinReward(playerData.floors, playerData.boughtFloors)
-					local formattedReward = formatNumber(initialReward) .. " REWARD!"
+					local formattedReward = reactUtil.formatNumber(initialReward) .. " REWARD!"
 					local canPromptIn = uiController.canPromptIn()
 					local initialDescription = if canPromptIn then "ENABLE NOTIFICATIONS" else "INVITE A NEW PLAYER"
 					return { title = formattedReward, description = initialDescription }
@@ -271,8 +262,11 @@ return {
 						else
 							updateEvent:Fire({
 								title = "LEVEL " .. tostring(v.Value),
-								description = "$ "
-									.. tostring(cannonConfig.costFormula(v.Value + 1, playerData.boughtLevels)), -- Fixed $ placement
+								description = "$ " .. tostring(
+									reactUtil.formatNumber(
+										cannonConfig.costFormula(v.Value + 1, playerData.boughtLevels)
+									)
+								), -- Fixed $ placement
 							})
 						end
 					end))
@@ -287,11 +281,12 @@ return {
 					else
 						updateEvent:Fire({
 							title = "LEVEL " .. tostring(cannonValue.Value),
-							description = tostring(
-								cannonConfig.costFormula(cannonValue.Value + 1, playerData.boughtLevels)
-							), -- Fixed $ placement
-							description = "$ "
-								.. tostring(cannonConfig.costFormula(cannonValue.Value + 1, playerData.boughtLevels)),
+
+							description = "$ " .. tostring(
+								reactUtil.formatNumber(
+									cannonConfig.costFormula(cannonValue.Value + 1, playerData.boughtLevels)
+								)
+							),
 						})
 					end
 				end))
@@ -305,7 +300,11 @@ return {
 						return {
 							title = "LEVEL " .. v.Value,
 							description = "$ "
-								.. tostring(cannonConfig.costFormula(v.Value + 1, playerData.boughtLevels)), -- Fixed $ placement
+								.. tostring(
+									reactUtil.formatNumber(
+										cannonConfig.costFormula(v.Value + 1, playerData.boughtLevels)
+									)
+								), -- Fixed $ placement
 						}
 					end
 				end
@@ -389,8 +388,11 @@ return {
 						if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
 							updateEvent:Fire({
 								title = "LEVEL " .. tostring(v.Value),
-								description = "$ "
-									.. tostring(floorConfig.costFormula(v.Value + 1, playerData.boughtFloors)), -- Fixed $ placement
+								description = "$ " .. tostring(
+									reactUtil.formatNumber(
+										floorConfig.costFormula(v.Value + 1, playerData.boughtFloors)
+									)
+								), -- Fixed $ placement
 							})
 						end
 					end))
@@ -402,11 +404,12 @@ return {
 					if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
 						updateEvent:Fire({
 							title = "LEVEL " .. tostring(floorValue.Value),
-							description = tostring(
-								floorConfig.costFormula(floorValue.Value + 1, playerData.boughtFloors)
-							), -- Fixed $ placement
-							description = "$ "
-								.. tostring(floorConfig.costFormula(floorValue.Value + 1, playerData.boughtFloors)),
+
+							description = "$ " .. tostring(
+								reactUtil.formatNumber(
+									floorConfig.costFormula(floorValue.Value + 1, playerData.boughtFloors)
+								)
+							),
 						})
 					end
 				end))
@@ -415,11 +418,12 @@ return {
 					if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
 						updateEvent:Fire({
 							title = "LEVEL " .. tostring(floorValue.Value),
-							description = tostring(
-								floorConfig.costFormula(floorValue.Value + 1, playerData.boughtFloors)
-							), -- Fixed $ placement
-							description = "$ "
-								.. tostring(floorConfig.costFormula(floorValue.Value + 1, playerData.boughtFloors)),
+
+							description = "$ " .. tostring(
+								reactUtil.formatNumber(
+									floorConfig.costFormula(floorValue.Value + 1, playerData.boughtFloors)
+								)
+							),
 						})
 					else
 						-- Fetch dynamic price for gifting
@@ -444,7 +448,11 @@ return {
 						return {
 							title = "LEVEL " .. v.Value,
 							description = "$ "
-								.. tostring(floorConfig.costFormula(v.Value + 1, playerData.boughtFloors)), -- Fixed $ placement
+								.. tostring(
+									reactUtil.formatNumber(
+										floorConfig.costFormula(v.Value + 1, playerData.boughtFloors)
+									)
+								), -- Fixed $ placement
 						}
 					end
 				end

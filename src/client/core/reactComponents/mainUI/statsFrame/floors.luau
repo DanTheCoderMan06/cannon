@@ -12,6 +12,8 @@ local Trove = require(ReplicatedStorage.sharedPackages.Trove)
 
 local zap = require(ReplicatedStorage.zap)
 
+local oldFloors = 0
+
 return function(props)
 	local currentFloors, setCurrentFloors = React.useBinding("0")
 
@@ -20,6 +22,10 @@ return function(props)
 
 		uiTrove:Add(
 			props.dataChanged:Connect(function(data)
+				if data.floors == oldFloors then
+					return
+				end
+				oldFloors = data.floors
 				setCurrentFloors(tostring(data.floors))
 			end),
 			"Disconnect"

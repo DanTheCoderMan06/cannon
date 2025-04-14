@@ -28,7 +28,7 @@ return function(props)
 	local allPlayers, setAllPlayers = React.useState({})
 	local currentTier, setCurrentTier = React.useBinding(1)
 
-	local valid, setValid = React.useState(false)
+	local valid, setValid = React.useBinding(false)
 
 	React.useEffect(function()
 		local uiTrove = Trove.new()
@@ -68,10 +68,10 @@ return function(props)
 					userid = player.UserId,
 					selectedGift = props.selectedGift,
 					onActivated = function()
-						local productId = giftConfig[props.selectedGift].id
-						if giftConfig[props.selectedGift].tiers then
+						local productId = giftConfig[props.selectedGift:getValue()].id
+						if giftConfig[props.selectedGift:getValue()].tiers then
 							if currentTier:getValue() > 1 then
-								productId = giftConfig[giftConfig[props.selectedGift].tier2Name].id
+								productId = giftConfig[giftConfig[props.selectedGift:getValue()].tier2Name].id
 							end
 						end
 						MarketplaceService:PromptProductPurchase(Players.LocalPlayer, productId)
@@ -82,18 +82,18 @@ return function(props)
 		end
 
 		return _players
-	end, { allPlayers, props.selectedGift })
+	end, { allPlayers })
 
 	React.useEffect(function()
 		-- Don't run if no gift is selected
-		if props.selectedGift == "" then
+		if props.selectedGift:getValue() == "" then
 			return
 		end
 
 		-- Validate giftType
-		local giftType = giftConfig[props.selectedGift]
+		local giftType = giftConfig[props.selectedGift:getValue()]
 		if not giftType then
-			warn("newGifts: Invalid selectedGift:", props.selectedGift)
+			warn("newGifts: Invalid selectedGift:", props.selectedGift:getValue())
 			task.delay(1, function()
 				props.selectedUIEvent:Fire("") -- Close UI if gift config is missing
 			end)
@@ -136,7 +136,7 @@ return function(props)
 		return function()
 			uiTrove:Destroy()
 		end
-	end, { props.selectedGift })
+	end, {})
 
 	React.useEffect(function()
 		local uiTrove = Trove.new()
@@ -156,7 +156,7 @@ return function(props)
 		return function()
 			uiTrove:Destroy()
 		end
-	end, { allPlayers })
+	end, {})
 
 	return React.createElement("CanvasGroup", {
 		BackgroundColor3 = Color3.fromRGB(255, 255, 255),

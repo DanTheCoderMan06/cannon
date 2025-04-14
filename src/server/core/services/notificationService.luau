@@ -339,6 +339,7 @@ function notificationService.processPlayerNotifications(playerUserId)
 	local success = false -- Flag to track if GetAsync succeeded within safeCall
 	safeCall(function()
 		lastPlayedTime = playerBase:GetAsync(tostring(playerUserId)) -- Assign inside callback
+		print(playerUserId .. "'s lastJoined " .. lastPlayedTime .. " TimeElapsed " .. os.time() - lastPlayedTime)
 		success = true -- Mark success if pcall didn't error
 	end)
 

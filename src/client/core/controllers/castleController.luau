@@ -78,7 +78,7 @@ function castleController.animateFloor(floor)
 	end
 
 	if playerPlatform then
-		playerPlatform.PrimaryPart.LocalTransparencyModifier = 1
+		playerPlatform.blocker.LocalTransparencyModifier = 1
 	end
 
 	for i, v in pairs(floor.PrimaryPart:GetChildren()) do
@@ -155,7 +155,7 @@ function castleController.animateFloor(floor)
 					-- Check if the part still exists and if the trove hasn't been destroyed prematurely
 					if v and v.Parent and partTrove then
 						v.Anchored = originalAnchored -- Restore original anchored state
-						playerPlatform.PrimaryPart.LocalTransparencyModifier = 0
+						playerPlatform.blocker.LocalTransparencyModifier = 0
 						-- No need to stop tweens here as they should have completed.
 					end
 				end)
@@ -298,6 +298,7 @@ end
 local touchZones = {}
 
 function castleController.updateZone(zoneName, targetPart, platform, callbackSignal)
+	print(zoneName .. " UPDATE")
 	local touchZone = touchZones[zoneName]
 	if touchZone then
 		touchZone:Destroy()

@@ -7,7 +7,9 @@ local function luckyBlockWaitTime(playerLevel)
 	if RunService:IsStudio() then
 		return 10
 	end
-	if playerLevel < 70 then
+	if playerLevel < 20 then
+		return 180
+	elseif playerLevel < 70 then
 		return 180 + playerLevel * 4
 	end
 	return 460
@@ -68,7 +70,7 @@ local function referralReward(floors, boughtFloors) -- Changed parameter to acce
 	-- Calculate reward based on referrer's next floor cost * 6
 	local totalCost = 0
 
-	for i = 1, 6 do
+	for i = 1, 5 do
 		totalCost += floorConfig.costFormula(floors + i, boughtFloors)
 	end
 
@@ -82,6 +84,7 @@ local module = {
 	vipRewardDuration = 10000,
 	vipGamepass = 1022963419,
 	referWaitTime = 60 * 60 * 24,
+	getDailyReward = getDailyReward,
 	rewards = {
 		{ -- Day 1: money reward
 			day = 1,

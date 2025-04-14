@@ -124,7 +124,7 @@ function cameraController.startAir()
 			return
 		end
 		lastAirShake = tick()
-		camShake:Shake(camerashaker.Presets.Bump)
+		camShake:Shake(miniBump(0.5))
 	end)
 end
 

@@ -35,8 +35,6 @@ return function(props)
 
 		rewards = React.createElement(rewards, props),
 		statsFrame = React.createElement(statsFrame, props),
-		--giftFrame = React.createElement(giftFrame, props),
 		musicButton = React.createElement(musicButton, props),
-		--giftsButton = React.createElement(giftsButton, props),
 	})
 end

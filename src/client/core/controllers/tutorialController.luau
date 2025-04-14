@@ -151,7 +151,7 @@ function tutorialController.startTutorial()
 	local startedTime = tick()
 
 	rainbowTrove:BindToRenderStep("rainbowTutorial", Enum.RenderPriority.Last.Value, function(dt)
-		if tutorialItems then
+		if tutorialItems and tutorialItems.beam then
 			tutorialItems.beam.Color = ColorSequence.new(reactUtil.getSmoothColorFromElapsedTime(tick() - startedTime))
 		end
 	end)

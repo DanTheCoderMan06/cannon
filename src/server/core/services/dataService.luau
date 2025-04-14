@@ -192,7 +192,7 @@ end
 
 function dataService.start()
 	local function PlayerAdded(player)
-		task.wait(0)
+		task.wait()
 		local profile = PlayerStore:StartSessionAsync(`Player_{player.UserId}`, {
 			Cancel = function()
 				return player.Parent ~= Players

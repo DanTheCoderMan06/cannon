@@ -86,7 +86,7 @@ function uiController.promptOptIn()
 end
 
 local function app()
-	local selectedGift, setSelectedGift = React.useState("")
+	local selectedGift, setSelectedGift = React.useBinding("")
 
 	return React.createElement(menuUi, {
 		selectedUIEvent = selectedUIEvent,

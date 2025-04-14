@@ -1,46 +1,14 @@
+-- New logarithmic power formula
 local function power(x)
-	local L = 15200
-	local k = 0.068
-	local x0 = 59.5
-	return L / (1 + math.exp(-k * (x - x0))) + 200
+	-- Ensures initial power (level 1) gives ~2000 distance/reward
+	return math.max(0, 10000 * math.log10(x + 9) - 9374)
 end
 
+-- Original reward formula based on distance (x)
 local function rewardFormula(x, floors)
 	floors = floors or 0
-	local LOW_X = 966
-	local MID_X = 128000
-	local HIGH_X = 940000
-	local SUPER_HIGH_X = 5000000
-
-	local LOW_Y = 4000
-	local MID_Y = 1000000
-	local HIGH_Y = 4000000
-	local SUPER_HIGH_Y = 20000000
-
-	local result
-	if x < LOW_X then
-		result = LOW_Y
-	elseif x < MID_X then
-		local progress = (x - LOW_X) / (MID_X - LOW_X)
-		local curve = progress * progress * (3 - 2 * progress)
-		local linear = progress * 0.2
-		result = LOW_Y + (curve * 0.8 + linear) * (MID_Y - LOW_Y)
-	elseif x < HIGH_X then
-		local progress = math.min(1, (x - MID_X) / (HIGH_X - MID_X))
-		local curve = progress ^ 0.8 * (3 - 2 * progress ^ 0.8)
-		local linear = progress * 0.3
-		result = MID_Y + (curve * 0.7 + linear) * (HIGH_Y - MID_Y)
-	elseif x < SUPER_HIGH_X then
-		local progress = (x - HIGH_X) / (SUPER_HIGH_X - HIGH_X)
-		local curve = progress ^ 0.7 * (3 - 2 * progress ^ 0.7)
-		local linear = progress * 0.25
-		result = HIGH_Y + (curve * 0.6 + linear) * (SUPER_HIGH_Y - HIGH_Y)
-	else
-		result = SUPER_HIGH_Y + math.log10(x / SUPER_HIGH_X + 1) * (SUPER_HIGH_Y * 0.5)
-	end
-
-	local floorMultiplier = 1 + (math.sqrt(math.max(1, floors)) * 0.2) -- Reduced multiplier from 0.3 to 0.2
-	return math.max(0, result * floorMultiplier)
+	local result = x -- Reward is directly based on distance
+	return math.max(0, result)
 end
 
 local function calculateDistance(initialHeight, initialVelocity, angleDegrees)
@@ -72,6 +40,7 @@ local function cost(targetLevel, boughtLevels)
 	local assumedHeight = 5
 	local distancePreviousLevel = calculateDistance(assumedHeight, powerPreviousLevel, 45)
 
+	-- Calculate reward based on the distance achieved with the previous level's power
 	local rewardPreviousLevel = rewardFormula(distancePreviousLevel, 0)
 
 	local finalCost = math.round(rewardPreviousLevel * math.pow(1.075, targetLevel - boughtLevels) * 0.86)
@@ -312,6 +281,7 @@ local module = {
 			["min"] = 16,
 		},
 	},
+	-- Export the original reward formula
 	rewardFormula = rewardFormula,
 }
 

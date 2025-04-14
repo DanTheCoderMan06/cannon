@@ -12,6 +12,8 @@ local Trove = require(ReplicatedStorage.sharedPackages.Trove)
 
 local zap = require(ReplicatedStorage.zap)
 
+local oldMoney = 0
+
 return function(props)
 	local currentMoney, setCurrentMoney = React.useBinding("0")
 
@@ -20,6 +22,10 @@ return function(props)
 
 		uiTrove:Add(
 			props.dataChanged:Connect(function(data)
+				if oldMoney == data.money then
+					return
+				end
+				oldMoney = data.money
 				setCurrentMoney((math.ceil(data.money)))
 			end),
 			"Disconnect"

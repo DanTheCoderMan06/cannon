@@ -124,6 +124,8 @@ function cannonService.launchPlayer(player)
 		end
 	end
 
+	cannonPower *= (1 + playerData.floors / 700)
+
 	local simulatedPhysics = physicsUtil.getVariables(playerHeight, cannonPower)
 
 	print("Player Fired ")

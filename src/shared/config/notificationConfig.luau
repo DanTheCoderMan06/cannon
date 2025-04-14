@@ -14,7 +14,7 @@ return {
 			priority = 2, -- Priority level (higher = sent first)
 			multiple = true, -- Can be sent multiple times
 			waitTime = 7 * 24 * 60 * 60, -- Minimum seconds between repeated notifications
-			assetid = "04db6352-3a0f-4d4b-a1bb-9c764a6892cf",
+			assetid = "29ef74fb-3af9-0b4c-b8ea-e6465387a6b1",
 			callback = function(playerData)
 				-- Grant 50 floors when notification closes
 				playerData.Data.floors += 50
@@ -63,7 +63,9 @@ return {
 				local daysPassed = math.floor(timePassed / (24 * 60 * 60))
 				local rewardInfo = rewardsConfig.getDailyReward(playerData.daysPlayed + math.clamp(daysPassed, 0, 1))
 				local rewardName = rewardInfo and rewardInfo.name or "Unknown Reward"
-
+				if rewardName == "Cash" then
+					rewardName = "+ $" .. rewardsConfig.getDailyReward(1, playerData.cannon)
+				end
 				-- Return parameters
 				return {
 					["rewardName"] = { stringValue = rewardName },

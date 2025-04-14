@@ -15,9 +15,17 @@ local zap = require(ReplicatedStorage.zap)
 
 local config = require(ReplicatedStorage.shared.config.effectsConfig)
 local cannonConfig = require(ReplicatedStorage.shared.config.cannonConfig)
+local floorConfig = require(ReplicatedStorage.shared.config.floorConfig)
 
 local effectsUi = require(ReplicatedStorage.client.reactComponents.generics.effectText)
 local finishedPath = require(ReplicatedStorage.client.reactComponents.generics.finishedPath)
+
+-- Store references to preloaded UI elements
+local preloadedUI = {
+	container = nil,
+	billboardRef = nil,
+	mounted = false,
+}
 
 local dataController = require(ReplicatedStorage.client.controllers.dataController)
 local stateController = require(ReplicatedStorage.client.controllers.stateController)
@@ -204,33 +212,114 @@ function effectsController.start()
 	effectsController.updateHighscore()
 end
 
-function effectsController.finishedPath(results, track, animationInstance) -- Added track and animationInstance parameters
+-- Preload the finishedPathUI so it's ready to be displayed when needed
+function effectsController.preloadFinishedPathUI(results)
 	local character = Players.LocalPlayer.Character
-	local finishedPathEffects = ReplicatedStorage.assets.finishedPath:Clone()
 	local isHighscore = effectsController.getHighScore().Value < math.round(results.distance)
-	local playerData = dataController.currentData -- Get player data
-	local reward = cannonConfig.rewardFormula(results.distance, playerData.floors or 0) -- Pass floors, default to 0 if nil
-	local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
+	local playerData = dataController.currentData
+	local reward = cannonConfig.rewardFormula(results.distance, playerData.floors or 0)
 	local targetColor, setTargetColor = React.createBinding(Color3.new())
+	local startTime = tick()
+	local newMoney = reward
+	if playerData.doubleMoney then
+		newMoney += reward
+	end
 
-	-- Animation playing is now handled before this function is called
+	local gainedFloors = 0
+	while newMoney > 0 and gainedFloors < 100 do
+		local newFloors = 1
+		local floorCost = floorConfig.costFormula(playerData.floors + gainedFloors, playerData.boughtLevels)
+		if floorCost > newMoney then
+			gainedFloors += math.round(newMoney / floorCost * 10) / 10
+			break
+		end
+		newMoney -= floorCost
+		gainedFloors += 1
+	end
 
-	local partTrove = Trove.new()
+	-- Clean up previous preloaded UI if it exists
+	if preloadedUI.container then
+		preloadedUI.container:unmount()
+	end
+
+	-- Create a new container
+	preloadedUI.container = ReactRoblox.createRoot(Instance.new("Folder"))
+
+	-- Create a ref for the billboard
+	local billboardRef = React.createRef()
+	preloadedUI.billboardRef = billboardRef
+
+	-- Create and mount the UI but don't set an adornee yet
+	local timeBinding, setTimeBinding = React.createBinding(0)
+	preloadedUI.setTimeBinding = setTimeBinding
+	preloadedUI.container:render(ReactRoblox.createPortal(
+		React.createElement("BillboardGui", {
+			ref = preloadedUI.billboardRef,
+			ResetOnSpawn = false,
+			AlwaysOnTop = true,
+			StudsOffset = Vector3.new(0, 0, 0),
+			Size = UDim2.fromScale(16, 8),
+			Enabled = true,
+		}, {
+			main = React.createElement(finishedPath, {
+				isHighscore = isHighscore or true,
+				distance = math.round(results.distance),
+				reward = math.round(reward),
+				targetColor = targetColor,
+				duration = timeBinding,
+				floors = gainedFloors,
+			}),
+		}),
+		Players.LocalPlayer.PlayerGui,
+		"finishedGUI"
+	))
+
+	preloadedUI.mounted = true
+	print("Preloaded finishedPathUI")
+end
+
+function effectsController.finishedPath(results, track, animationInstance)
+	local character = Players.LocalPlayer.Character
+	local isHighscore = effectsController.getHighScore().Value < math.round(results.distance)
+	local playerData = dataController.currentData
+	local reward = cannonConfig.rewardFormula(results.distance, playerData.floors or 0)
+	local targetColor, setTargetColor = React.createBinding(Color3.new())
 	local startTime = tick()
 
-	if playerData.doubleMoney then -- Use the fetched playerData
+	if playerData.doubleMoney then
 		reward *= 2
 	end
 
-	local container = ReactRoblox.createRoot(Instance.new("Folder"))
+	-- Create the effects part
+	local finishedPathEffects = ReplicatedStorage.assets.finishedPath:Clone()
+	finishedPathEffects:PivotTo(
+		CFrame.new(character.PrimaryPart.Position * Vector3.new(1, 0, 1) + Vector3.new(0, 1.2, 0))
+	)
+	finishedPathEffects.Parent = workspace
 
-	task.defer(function()
+	-- Set up the trove for animations and cleanup
+	local partTrove = Trove.new()
+	partTrove:AttachToInstance(finishedPathEffects)
+
+	-- If we have a preloaded UI, use it
+	if preloadedUI.mounted and preloadedUI.billboardRef.current then
+		-- Update the billboard properties
+		local billboard = preloadedUI.billboardRef.current
+		billboard.Adornee = character.Head
+		billboard.Enabled = true
+
+		preloadedUI.setTimeBinding(math.round(results.time * 10) / 10)
+		-- Update the UI with new data
+	else
+		-- Fallback if preloaded UI isn't available
+		print("Warning: Preloaded UI not available, creating new one")
+		local container = ReactRoblox.createRoot(Instance.new("Folder"))
 		container:render(ReactRoblox.createPortal(
 			React.createElement("BillboardGui", {
 				ResetOnSpawn = false,
 				AlwaysOnTop = true,
-				StudsOffset = Vector3.new(0, 8, 0),
-				Size = UDim2.fromScale(8, 7.5),
+				StudsOffset = Vector3.new(0, 0, 0),
+				Size = UDim2.fromScale(16, 8),
 				Adornee = finishedPathEffects,
 			}, {
 				main = React.createElement(finishedPath, {
@@ -238,18 +327,18 @@ function effectsController.finishedPath(results, track, animationInstance) -- Ad
 					distance = math.round(results.distance),
 					reward = math.round(reward),
 					targetColor = targetColor,
+					duration = math.round(results.time * 10) / 10,
 				}),
 			}),
 			Players.LocalPlayer.PlayerGui,
 			"finishedGUI"
 		))
-	end)
 
-	finishedPathEffects:PivotTo(
-		CFrame.new(character.PrimaryPart.Position * Vector3.new(1, 0, 1) + Vector3.new(0, 1.2, 0))
-	)
-	finishedPathEffects.Parent = workspace
+		-- Store for cleanup
+		preloadedUI.container = container
+	end
 
+	-- Set up animation for the effects
 	partTrove:BindToRenderStep("moveCircle", Enum.RenderPriority.Last.Value, function(dt)
 		local increaseFactor = math.sin(math.rad((tick() - startTime) * 167)) * 1
 		finishedPathEffects:FindFirstChildWhichIsA("BasePart").CFrame *= CFrame.Angles(math.rad(0.5), 0, 0)
@@ -259,14 +348,20 @@ function effectsController.finishedPath(results, track, animationInstance) -- Ad
 			reactUtil.getSmoothColorFromElapsedTime(tick() - startTime, 2)
 		setTargetColor(reactUtil.getSmoothColorFromElapsedTime(tick() - startTime, 2))
 	end)
-	partTrove:AttachToInstance(finishedPathEffects)
 
 	SoundService.effects.victory:Play()
 
 	task.wait(2)
 
-	container:unmount()
+	-- Disable the billboard but don't unmount it
+	if preloadedUI.billboardRef.current then
+		preloadedUI.billboardRef.current.Enabled = false
+		preloadedUI.billboardRef.current.Adornee = nil
+	end
+
+	-- Clean up the effects
 	finishedPathEffects:Destroy()
+	partTrove:Destroy()
 
 	character.PrimaryPart.Anchored = false
 	character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
@@ -285,6 +380,16 @@ function effectsController.finishedPath(results, track, animationInstance) -- Ad
 
 	task.wait(1)
 	effectsController.updateHighscore()
+end
+
+-- Clean up preloaded UI when no longer needed
+function effectsController.cleanupPreloadedUI()
+	if preloadedUI.container then
+		preloadedUI.container:unmount()
+		preloadedUI.container = nil
+		preloadedUI.billboardRef = nil
+		preloadedUI.mounted = false
+	end
 end
 
 return effectsController

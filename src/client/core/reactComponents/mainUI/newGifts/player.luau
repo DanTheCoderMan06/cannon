@@ -22,14 +22,14 @@ return function(props)
 	local canGet, setCanGet = React.useBinding(false)
 
 	React.useEffect(function()
-		print(props.selectedGift)
-		if props.selectedGift == "" or not props.selectedGift then
+		print(props.selectedGift:getValue())
+		if props.selectedGift:getValue() == "" or not props.selectedGift:getValue() then
 			return
 		end
 		print("call")
 		local canGive = zap.checkRecipient.Call({ selectedPlayer = props.id, selectedGift = props.selectedGift })
 		setCanGet(canGive)
-	end, { props.selectedGift })
+	end, {})
 
 	return React.createElement("ImageLabel", {
 		AnchorPoint = Vector2.new(0.5, 0.5),
