@@ -34,7 +34,7 @@ local function luckyBlockReward(floors, boughtFloors)
 	return finalReward
 end
 
-local function getDailyReward(day, playerLevel)
+local function getDailyRewardCash(day, playerLevel)
 	-- Base component scaling with consecutive days
 	local baseReward = math.min(day * 300, 6000)
 
@@ -84,12 +84,12 @@ local module = {
 	vipRewardDuration = 10000,
 	vipGamepass = 1022963419,
 	referWaitTime = 60 * 60 * 24,
-	getDailyReward = getDailyReward,
+	getDailyRewardCash = getDailyRewardCash,
 	rewards = {
 		{ -- Day 1: money reward
 			day = 1,
 			callback = function(playerData)
-				playerData.money += getDailyReward(1, playerData.cannon)
+				playerData.money += getDailyRewardCash(1, playerData.cannon)
 			end,
 			type = "image",
 			image = "rbxassetid://128528383855205",
@@ -118,7 +118,7 @@ local module = {
 		{ -- Day 4: money reward
 			day = 4,
 			callback = function(playerData)
-				playerData.money += getDailyReward(4, playerData.cannon)
+				playerData.money += getDailyRewardCash(4, playerData.cannon)
 			end,
 			type = "image",
 			image = "rbxassetid://103800518067222",
@@ -136,7 +136,7 @@ local module = {
 		{ -- Day 6: money reward
 			day = 6,
 			callback = function(playerData)
-				playerData.money += getDailyReward(6, playerData.cannon)
+				playerData.money += getDailyRewardCash(6, playerData.cannon)
 			end,
 			type = "image",
 			image = "rbxassetid://138174371404751",
@@ -154,7 +154,7 @@ local module = {
 		{ -- Day 8: money reward
 			day = 8,
 			callback = function(playerData)
-				playerData.money += getDailyReward(8, playerData.cannon)
+				playerData.money += getDailyRewardCash(8, playerData.cannon)
 			end,
 			type = "image",
 			image = "rbxassetid://103800518067222",
@@ -163,7 +163,7 @@ local module = {
 		{ -- Day 9: money reward
 			day = 9,
 			callback = function(playerData)
-				playerData.money += getDailyReward(9, playerData.cannon)
+				playerData.money += getDailyRewardCash(9, playerData.cannon)
 			end,
 			type = "image",
 			image = "rbxassetid://138174371404751",
@@ -183,7 +183,7 @@ local module = {
 		{ -- Day 11: money reward
 			day = 11,
 			callback = function(playerData)
-				playerData.money += getDailyReward(11, playerData.cannon)
+				playerData.money += getDailyRewardCash(11, playerData.cannon)
 			end,
 			type = "image",
 			image = "rbxassetid://103800518067222",
@@ -212,7 +212,7 @@ local module = {
 		{ -- Day 14: money reward
 			day = 14,
 			callback = function(playerData)
-				playerData.money += getDailyReward(14, playerData.cannon)
+				playerData.money += getDailyRewardCash(14, playerData.cannon)
 			end,
 			type = "image",
 			image = "rbxassetid://138174371404751",
@@ -241,7 +241,7 @@ local module = {
 		{ -- Day 17: money reward
 			day = 17,
 			callback = function(playerData)
-				playerData.money += getDailyReward(17, playerData.cannon)
+				playerData.money += getDailyRewardCash(17, playerData.cannon)
 			end,
 			type = "image",
 			image = "rbxassetid://99606636871207",
@@ -250,7 +250,7 @@ local module = {
 		{ -- Day 18: money reward
 			day = 18,
 			callback = function(playerData)
-				playerData.money += getDailyReward(18, playerData.cannon)
+				playerData.money += getDailyRewardCash(18, playerData.cannon)
 			end,
 			type = "image",
 			image = "rbxassetid://103800518067222",
@@ -259,7 +259,7 @@ local module = {
 		{ -- Day 19: money reward
 			day = 19,
 			callback = function(playerData)
-				playerData.money += getDailyReward(19, playerData.cannon)
+				playerData.money += getDailyRewardCash(19, playerData.cannon)
 			end,
 			type = "image",
 			image = "rbxassetid://138174371404751",
@@ -277,7 +277,7 @@ local module = {
 		{ -- Day 21: money reward
 			day = 21,
 			callback = function(playerData)
-				playerData.money += getDailyReward(21, playerData.cannon)
+				playerData.money += getDailyRewardCash(21, playerData.cannon)
 			end,
 			type = "image",
 			image = "rbxassetid://99606636871207",
@@ -306,7 +306,7 @@ local module = {
 		{ -- Day 24: money reward
 			day = 24,
 			callback = function(playerData)
-				playerData.money += getDailyReward(24, playerData.cannon)
+				playerData.money += getDailyRewardCash(24, playerData.cannon)
 			end,
 			type = "image",
 			image = "rbxassetid://103800518067222",
@@ -324,7 +324,7 @@ local module = {
 		{ -- Day 26: money reward
 			day = 26,
 			callback = function(playerData)
-				playerData.money += getDailyReward(26, playerData.cannon)
+				playerData.money += getDailyRewardCash(26, playerData.cannon)
 			end,
 			type = "image",
 			image = "rbxassetid://138174371404751",
@@ -333,7 +333,7 @@ local module = {
 		{ -- Day 27: money reward
 			day = 27,
 			callback = function(playerData)
-				playerData.money += getDailyReward(27, playerData.cannon)
+				playerData.money += getDailyRewardCash(27, playerData.cannon)
 			end,
 			type = "image",
 			image = "rbxassetid://99606636871207",
@@ -342,7 +342,7 @@ local module = {
 		{ -- Day 28: money reward
 			day = 28,
 			callback = function(playerData)
-				playerData.money += getDailyReward(28, playerData.cannon)
+				playerData.money += getDailyRewardCash(28, playerData.cannon)
 			end,
 			type = "image",
 			image = "rbxassetid://103800518067222",

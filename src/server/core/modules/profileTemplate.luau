@@ -35,8 +35,10 @@ return {
 	doubleMoney = false,
 	infiniteVIP = false,
 	firstTimeVIP = true,
+
 	--Tutorial
-	firstTime = true,
+	boughtFloorYet = false,
+	boughtCannonYet = false,
 
 	--Group Reward
 	joinedGroupReward = false,

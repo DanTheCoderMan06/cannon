@@ -10,7 +10,9 @@ local profileStore = require(serverPackages.ProfileStore)
 local Players = game:GetService("Players")
 
 local profileTemplate = require(ServerStorage.server.modules.profileTemplate)
-local PlayerStore = profileStore.New("SavedPlayerData", profileTemplate)
+local PlayerStore = profileStore.New("SavedPlayerDataV3", profileTemplate)
+local realPlayerStore = PlayerStore
+PlayerStore = PlayerStore.Mock
 local Profiles = {}
 
 local dataService = {}
@@ -62,6 +64,10 @@ function dataService.giveRewards(player)
 		notificationInfo.callback(profile)
 	end
 	table.clear(profile.Data.notificationQueue)
+end
+
+function dataService.removeAsync(userId)
+	realPlayerStore:RemoveAsync(`Player_{userId}`)
 end
 
 function dataService.getGlobalPlayerData(user)
@@ -252,17 +258,16 @@ function dataService.start()
 							return player:IsInGroup(GROUP_ID)
 						end)
 						if success and isInGroup then
-							profile.Data.floors += GROUP_REWARD_FLOORS
-							profile.Data.joinedGroupReward = true
+							local newData = profile.Data
+							newData.floors += GROUP_REWARD_FLOORS
+							newData.joinedGroupReward = true
 							print(`Granted group reward ({GROUP_REWARD_FLOORS} floors) to {player.Name}`)
 							-- Fire notification to the client
 							zap.giftReceived.Fire(
 								player,
 								`👍Thank you for joining our group for {GROUP_REWARD_FLOORS} bonus floors!👍`
 							)
-							zap.dataChanged.Fire(player, profile.Data)
-							-- Ensure data change is propagated if needed (ProfileService might auto-save, but firing dataChanged is good practice)
-							dataService.updateLeaderstats(player) -- Update leaderstats immediately
+							dataService.updatePlayerData(player, newData, true)
 						elseif not success then
 							warn(`Failed to check group status for player {player.Name}`)
 						end

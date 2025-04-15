@@ -1,4 +1,5 @@
 local ContentProvider = game:GetService("ContentProvider")
+local Debris = game:GetService("Debris")
 local HttpService = game:GetService("HttpService")
 local Players = game:GetService("Players")
 local ReplicatedFirst = game:GetService("ReplicatedFirst")
@@ -46,20 +47,16 @@ function castleController.toggleAllPlatforms(toggle)
 	end
 end
 
-local animateTrove
-
 function castleController.animateFloor(floor)
 	-- Destroying the trove might still be useful for other connections, but let's keep it for now.
 	local playerPlatform = workspace:FindFirstChild("playerPlatforms")
 		and workspace.playerPlatforms:FindFirstChild(Player.Name)
 
-	if animateTrove then
-		animateTrove:Destroy()
-		playerPlatform.PrimaryPart.LocalTransparencyModifier = 0
-	end
-	animateTrove = Trove.new()
-
 	print("[castleController]: Animate Floor!")
+
+	if floor:FindFirstChild("blockSight", true) then
+		floor:FindFirstChild("blockSight", true):Destroy()
+	end
 
 	-- Hide the player's character model on the leaderboard during animation
 	local playerSpot = castleController.findSpot()
@@ -70,22 +67,12 @@ function castleController.animateFloor(floor)
 	if centerWeld then
 		originalWeldC0 = centerWeld.C0
 		centerWeld.C0 = CFrame.new(0, 10000, 0) -- Move it far away vertically
-		animateTrove:Add(function()
-			if centerWeld and centerWeld.Parent then -- Check if weld still exists
-				centerWeld.C0 = originalWeldC0 -- Restore original position
-			end
-		end)
-	end
-
-	if playerPlatform then
-		playerPlatform.blocker.LocalTransparencyModifier = 1
 	end
 
 	for i, v in pairs(floor.PrimaryPart:GetChildren()) do
 		if v:IsA("BasePart") then
 			-- Use a local trove for each part's animations/connections
 			local partTrove = Trove.new()
-			animateTrove:Add(partTrove) -- Add part's trove to the main animation trove
 
 			task.spawn(function()
 				local originalCFrame = v.CFrame
@@ -151,14 +138,7 @@ function castleController.animateFloor(floor)
 				-- Note: spr might not directly expose the underlying Tween object or a reliable completion signal easily.
 				-- A simple delay might be the most practical approach, but shorter than 2s.
 				-- Let's try task.delay matching the tween duration (1 second).
-				task.delay(1.1, function() -- Add a small buffer
-					-- Check if the part still exists and if the trove hasn't been destroyed prematurely
-					if v and v.Parent and partTrove then
-						v.Anchored = originalAnchored -- Restore original anchored state
-						playerPlatform.blocker.LocalTransparencyModifier = 0
-						-- No need to stop tweens here as they should have completed.
-					end
-				end)
+				Debris:AddItem(floor, 1.1)
 
 				-- The partTrove will automatically clean up the cancel functions if animateTrove is destroyed early.
 			end)
@@ -415,6 +395,19 @@ function castleController.updatePlayer(player)
 	track:Play()
 end
 
+local function changeTransparency(item, toOne)
+	for _, v in pairs(item:GetDescendants()) do
+		if not v:IsA("BasePart") and not v:IsA("Texture") then
+			continue
+		end
+		if v:IsA("BasePart") then
+			v.LocalTransparencyModifier = toOne and 1 or 0
+		else
+			v.Transparency = toOne and 1 or 0.6
+		end
+	end
+end
+
 function castleController.start()
 	local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
 
@@ -545,18 +538,37 @@ function castleController.start()
 
 	local localPlayerCastle = castleFolder:WaitForChild(Player.Name):FindFirstChildWhichIsA("Model")
 
+	local lastAnimated = 0
 	local oldFloors = dataController.getData().floors
 	dataController.dataChanged:Connect(function(newData)
 		if newData.floors == oldFloors then
 			return
 		end
+		if tick() - lastAnimated < 0.4 then
+			return
+		end
+		lastAnimated = tick()
+		oldFloors = newData.floors
+		print("[CastleController] Update Floors")
 		task.wait()
 		local playerSpot = workspace.castles:WaitForChild(Player.Name)
 		localPlayerCastle
 			:FindFirstChild("topFloor")
 			:PivotTo(playerSpot.CFrame * CFrame.new(0, floorHeight * (newData.floors + 0.5) + 6, 0))
-		castleController.animateFloor(localPlayerCastle:FindFirstChild("topFloor"))
-		oldFloors = newData.floors
+		local newTopFloor = localPlayerCastle:FindFirstChild("topFloor"):Clone()
+		newTopFloor.Name = "TempAnim"
+		newTopFloor.Parent = workspace
+		pcall(function()
+			castleController.animateFloor(newTopFloor)
+		end)
+		changeTransparency(localPlayerCastle:FindFirstChild("topFloor"), true)
+		task.delay(1.1, function()
+			if newTopFloor then
+				newTopFloor:Destroy()
+			end
+			print("reset to 0")
+			changeTransparency(localPlayerCastle:FindFirstChild("topFloor"), false)
+		end)
 	end)
 
 	local pTrove = Trove.new()

@@ -20,6 +20,7 @@ local playerPlatforms = workspace:WaitForChild("playerPlatforms")
 local playerCannons = workspace:WaitForChild("playerCannons")
 
 local cannonConfig = require(ReplicatedStorage.shared.config.cannonConfig)
+local floorConfig = require(ReplicatedStorage.shared.config.floorConfig) -- Added require
 local tierConfig = require(ReplicatedStorage.shared.config.tierConfig)
 
 local physicsUtil = require(ReplicatedStorage.shared.utilities.physicsUtil)
@@ -138,20 +139,57 @@ end
 
 function cannonService.awardPlayer(player, playerPath)
 	local playerData = dataService.getPlayerData(player)
-	-- Pass player floors to the reward formula
-	local award = cannonConfig.rewardFormula(playerPath.distance, playerData.floors)
+	local bonusAward = 0
+	local grantedBonus = false -- Flag to track if any bonus was given this time
+
+	-- Check for first cannon purchase bonus
+	-- Assumes 'boughtCannonYet' boolean exists in playerData, otherwise this check might grant bonus repeatedly.
+	if not playerData.boughtCannonYet then
+		local firstCannonCost = cannonConfig.costFormula(playerData.cannon, 1) -- Cost for level 1 from level 0
+		bonusAward += firstCannonCost
+		playerData.boughtCannonYet = true -- Set flag to true after granting
+		grantedBonus = true
+		print(string.format("[CannonService] Granted first cannon bonus (%d) to %s", firstCannonCost, player.Name))
+	end
+
+	-- Check for first floor purchase bonus
+	-- Assumes 'boughtFloorYet' boolean exists in playerData, otherwise this check might grant bonus repeatedly.
+	if not playerData.boughtFloorYet then
+		local firstFloorCost = floorConfig.costFormula(playerData.floors, 0) -- Cost for level 1 from level 0
+		bonusAward += firstFloorCost
+		playerData.boughtFloorYet = true -- Set flag to true after granting
+		grantedBonus = true
+		print(string.format("[CannonService] Granted first floor bonus (%d) to %s", firstFloorCost, player.Name))
+	end
+
+	-- Add any granted bonus to player money
+	if grantedBonus then
+		playerData.money += bonusAward
+		-- Note: Consider if this bonus should also be affected by doubleMoney. Currently, it's added before the doubleMoney check.
+	end
+
+	-- Calculate normal reward based on distance and floors
+	local normalAward = cannonConfig.rewardFormula(playerPath.distance, playerData.floors)
+
+	-- Apply double money gamepass if owned (applies only to normal reward)
 	if playerData.doubleMoney then
-		award *= 2
+		normalAward *= 2
 		print(
 			string.format(
-				"[CannonService Debug] Player %s doubleMoney bonus applied. New award: %f",
+				"[CannonService Debug] Player %s doubleMoney bonus applied. New normal award: %f",
 				player.Name,
-				award
+				normalAward
 			)
 		)
 	end
-	playerData.money += award
+
+	-- Add normal award to player money
+	playerData.money += normalAward
+
+	-- Update highscore
 	playerData.highscore = math.max(playerData.highscore, math.round(playerPath.distance))
+
+	-- Save updated player data (includes potential flag changes and money updates)
 	dataService.updatePlayerData(player, playerData)
 end
 

@@ -17,15 +17,27 @@ function luckyBlockController.start()
 		local playerPlatformModel = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
 		-- Clone the lucky block template from ReplicatedStorage
 		local newLuckyBlock = ReplicatedStorage.assets:WaitForChild("luckyBlock"):Clone()
-		local targetCFrame = workspace
-			:WaitForChild("playerPlatforms")
-			:WaitForChild(Players.LocalPlayer.Name)
-			:FindFirstChildWhichIsA("SpawnLocation", true).CFrame
-		newLuckyBlock:PivotTo(targetCFrame * CFrame.new(math.random() * 10 - 20, 20, math.random() * 10 - 20))
+		-- Find the specific block spawn part
+		local blockSpawnPart = playerPlatformModel:FindFirstChild("blockSpawn", true)
+		if not blockSpawnPart then
+			warn("Could not find 'blockSpawn' part for player", Players.LocalPlayer.Name)
+			-- Fallback to spawn location if blockSpawn doesn't exist
+			blockSpawnPart = playerPlatformModel:FindFirstChildWhichIsA("SpawnLocation", true)
+		end
+
+		-- Calculate random position within the blockSpawnPart bounds
+		local spawnCFrame = blockSpawnPart.CFrame
+		local spawnSize = blockSpawnPart.Size
+		local randomOffsetX = (math.random() - 0.5) * spawnSize.X
+		local randomOffsetY = (math.random() - 0.5) * spawnSize.Y
+		local randomOffsetZ = (math.random() - 0.5) * spawnSize.Z
+		local randomLocalPosition = Vector3.new(randomOffsetX, randomOffsetY, randomOffsetZ)
+		local finalWorldCFrame = spawnCFrame * CFrame.new(randomLocalPosition)
+
+		newLuckyBlock:PivotTo(finalWorldCFrame)
 
 		local blockTrove = Trove.new()
 		local timeStarted = tick()
-		local startCFrame = targetCFrame
 
 		local scaleUp = math.clamp(data.reward / 5500000, 1, 3)
 

@@ -220,6 +220,19 @@ function effectsController.preloadFinishedPathUI(results)
 	local reward = cannonConfig.rewardFormula(results.distance, playerData.floors or 0)
 	local targetColor, setTargetColor = React.createBinding(Color3.new())
 	local startTime = tick()
+
+	if not playerData.boughtCannonYet then
+		local firstCannonCost = cannonConfig.costFormula(playerData.cannon, 1) -- Cost for level 1 from level 0
+		reward += firstCannonCost
+	end
+
+	-- Check for first floor purchase bonus
+	-- Assumes 'boughtFloorYet' boolean exists in playerData, otherwise this check might grant bonus repeatedly.
+	if not playerData.boughtFloorYet then
+		local firstFloorCost = floorConfig.costFormula(playerData.floors, 0) -- Cost for level 1 from level 0
+		reward += firstFloorCost
+	end
+
 	local newMoney = reward
 	if playerData.doubleMoney then
 		newMoney += reward

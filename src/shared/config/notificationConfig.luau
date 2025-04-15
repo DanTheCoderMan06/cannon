@@ -64,7 +64,7 @@ return {
 				local rewardInfo = rewardsConfig.getDailyReward(playerData.daysPlayed + math.clamp(daysPassed, 0, 1))
 				local rewardName = rewardInfo and rewardInfo.name or "Unknown Reward"
 				if rewardName == "Cash" then
-					rewardName = "+ $" .. rewardsConfig.getDailyReward(1, playerData.cannon)
+					rewardName = "+ $" .. rewardsConfig.getDailyRewardCash(1, playerData.cannon)
 				end
 				-- Return parameters
 				return {

@@ -151,7 +151,7 @@ function tutorialController.startTutorial()
 	local startedTime = tick()
 
 	rainbowTrove:BindToRenderStep("rainbowTutorial", Enum.RenderPriority.Last.Value, function(dt)
-		if tutorialItems and tutorialItems.beam then
+		if tutorialItems and tutorialItems:FindFirstChild("beam") then
 			tutorialItems.beam.Color = ColorSequence.new(reactUtil.getSmoothColorFromElapsedTime(tick() - startedTime))
 		end
 	end)
@@ -175,7 +175,7 @@ function tutorialController.start()
 		local connection
 
 		connection = dataController.dataChanged:Connect(function(newData)
-			if newData.firstTime then
+			if newData.cannon == 1 then
 				connection:Disconnect()
 				tutorialController.startTutorial()
 			end

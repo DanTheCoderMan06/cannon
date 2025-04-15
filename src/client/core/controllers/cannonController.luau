@@ -52,8 +52,7 @@ function cannonController.playLaunchSound(multiplier, physicsTime)
 	launchSound:Play()
 	task.delay(1, function()
 		local fallingSound = SoundService.effects.falling
-		local flightDuration = physicsTime / multiplier
-		fallingSound.PlaybackSpeed = fallingSound.TimeLength / flightDuration
+		-- PlaybackSpeed will not be adjusted here; sound stops on landing.
 		fallingSound:Play()
 	end)
 end
@@ -96,6 +95,7 @@ function cannonController.start()
 
 	local cannonZone
 	local function updateZone()
+		print("Update")
 		if cannonZone then
 			cannonZone:Destroy()
 		end
@@ -124,6 +124,9 @@ function cannonController.start()
 	updateZone()
 
 	cannonPart:GetPropertyChangedSignal("CFrame"):Connect(function()
+		if RunService:IsStudio() then
+			task.wait(1)
+		end
 		updateZone()
 	end)
 
@@ -234,7 +237,7 @@ function cannonController.start()
 			)
 
 			local calculatedPosition = startPosition
-				* CFrame.new(0, verticalComponent, -fixedHorizontal)
+				* CFrame.new(0, math.min(verticalComponent, 50000), -fixedHorizontal) -- Clamp max height
 				* CFrame.Angles(-math.rad(math.fmod(timeElapsed * 180 / multiplier, 360)), 0, 0)
 
 			local timeElapsed = tick() - startTime
@@ -288,6 +291,7 @@ function cannonController.start()
 
 		finishedSignal:Connect(function() --TODO: Use raycast + spr to  finish up dummy falling
 			cameraController.endAir()
+			SoundService.effects.falling:Stop() -- Stop the airtime sound
 			spr.target(workspace.CurrentCamera, 1, 0.25, { FieldOfView = 70 })
 			cameraController.shakeBump()
 			local mapParams = RaycastParams.new()
@@ -374,6 +378,14 @@ function cannonController.start()
 
 				-- Play dance animation first
 				local track, animationInstance = effectsController.playDanceAnimation()
+
+				for _, v in pairs(SoundService.launch:GetChildren()) do
+					v:Stop()
+				end
+
+				for _, v in pairs(SoundService.hitFloor:GetChildren()) do
+					v:Stop()
+				end
 
 				-- Then unragdoll
 				stateController.getEvents().radgollEvent:Fire(false)

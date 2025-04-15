@@ -12,7 +12,7 @@ local config = {
 				items.beam.Attachment0 = target
 				items.beam.Attachment1 = target
 				states.toggleEntrance(false)
-				
+
 				-- Use Trove to manage the delay task
 				local delayTask = task.delay(2.5, function()
 					print("Next Signal")
@@ -27,7 +27,7 @@ local config = {
 
 				-- Connect using Trove's Connect method
 				states.trove:Connect(
-					Players.LocalPlayer.Character:WaitForChild("Humanoid"):GetPropertyChangedSignal("MoveDirection"), 
+					Players.LocalPlayer.Character:WaitForChild("Humanoid"):GetPropertyChangedSignal("MoveDirection"),
 					function() end
 				)
 				Players.LocalPlayer.Character:WaitForChild("Humanoid"):GetPropertyChangedSignal("MoveDirection"):Wait()
@@ -50,19 +50,17 @@ local config = {
 				highlight.Adornee = upgradePlatform:FindFirstChildWhichIsA("Model", true)
 				items.beam.Attachment0 =
 					Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChildWhichIsA("Attachment")
-				target.WorldCFrame = playerPlatform:FindFirstChild("cannonPart").CFrame
+				local cannonPart = playerPlatform:FindFirstChild("cannonPart")
+				items.beam.Attachment1 = cannonPart and cannonPart:FindFirstChild("center", true) or target -- Assign to center attachment, fallback to original target
 
 				-- Connect to GetAttributeChangedSignal using Trove
-				states.trove:Connect(
-					Players.LocalPlayer.Character:GetAttributeChangedSignal("inCannon"),
-					function()
-						if Players.LocalPlayer.Character:GetAttribute("inCannon") then
-							items.beam.Attachment0 = target
-							Players.LocalPlayer.Character:GetAttributeChangedSignal("inCannon"):Wait()
-							nextSignal:Fire()
-						end
+				states.trove:Connect(Players.LocalPlayer.Character:GetAttributeChangedSignal("inCannon"), function()
+					if Players.LocalPlayer.Character:GetAttribute("inCannon") then
+						items.beam.Attachment0 = nil
+						Players.LocalPlayer.Character:GetAttributeChangedSignal("inCannon"):Wait()
+						nextSignal:Fire()
 					end
-				)
+				end)
 
 				states.toggleEntrance(true)
 			end,
@@ -78,10 +76,10 @@ local config = {
 				highlight.Adornee = upgradePlatform:FindFirstChildWhichIsA("Model", true)
 				items.beam.Attachment0 =
 					Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChildWhichIsA("Attachment")
-				target.WorldCFrame = upgradePlatform.CFrame
+				items.beam.Attachment1 = upgradePlatform and upgradePlatform:FindFirstChild("center") or target -- Assign to center attachment, fallback to original target
 
 				local oldCannon = states.getData().cannon
-				
+
 				-- Connect to dataChanged using Trove
 				states.trove:Connect(states.dataChanged, function(newData)
 					if newData.cannon ~= oldCannon then
@@ -105,19 +103,18 @@ local config = {
 				highlight.Adornee = upgradePlatform:FindFirstChildWhichIsA("Model", true)
 				items.beam.Attachment0 =
 					Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChildWhichIsA("Attachment")
-				target.WorldCFrame = upgradePlatform.CFrame
+				-- Assuming the target should be the cannon entrance area like step 2
+				local cannonPart = playerPlatform:FindFirstChild("cannonPart")
+				items.beam.Attachment1 = cannonPart and cannonPart:FindFirstChild("center") or target -- Assign to center attachment, fallback to original target
 
 				-- Connect to inCannon attribute change using Trove
-				states.trove:Connect(
-					Players.LocalPlayer.Character:GetAttributeChangedSignal("inCannon"),
-					function()
-						if Players.LocalPlayer.Character:GetAttribute("inCannon") then
-							items.beam.Attachment0 = target
-							Players.LocalPlayer.Character:GetAttributeChangedSignal("inCannon"):Wait()
-							nextSignal:Fire()
-						end
+				states.trove:Connect(Players.LocalPlayer.Character:GetAttributeChangedSignal("inCannon"), function()
+					if Players.LocalPlayer.Character:GetAttribute("inCannon") then
+						items.beam.Attachment0 = nil
+						Players.LocalPlayer.Character:GetAttributeChangedSignal("inCannon"):Wait()
+						nextSignal:Fire()
 					end
-				)
+				end)
 
 				states.toggleEntrance(true)
 
@@ -139,10 +136,10 @@ local config = {
 				highlight.Adornee = upgradePlatform:FindFirstChildWhichIsA("Model", true)
 				items.beam.Attachment0 =
 					Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChildWhichIsA("Attachment")
-				target.WorldCFrame = upgradePlatform.CFrame
+				items.beam.Attachment1 = upgradePlatform and upgradePlatform:FindFirstChild("center") or target -- Assign to center attachment, fallback to original target
 
 				local oldFloors = states.getData().floors
-				
+
 				-- Connect to dataChanged using Trove
 				states.trove:Connect(states.dataChanged, function(newData)
 					if newData.floors ~= oldFloors then
@@ -165,7 +162,7 @@ local config = {
 				items.beam.Attachment0 = target
 				items.beam.Attachment1 = target
 				states.toggleEntrance(false)
-				
+
 				-- Use Trove to manage the delay
 				local delayTask = task.delay(2.5, function()
 					nextSignal:Fire()
@@ -175,7 +172,7 @@ local config = {
 						task.cancel(delayTask)
 					end)
 				end)
-				
+
 				states.toggleEntrance(true)
 			end,
 		},

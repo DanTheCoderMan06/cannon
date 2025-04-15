@@ -46,10 +46,13 @@ function autoFarmService.start()
 	end)
 	task.spawn(function()
 		while true do
-			task.wait(60)
+			task.wait(10)
 			for _, v in pairs(Players:GetPlayers()) do
 				if not v:GetAttribute("autoFarming") then
 					continue
+				end
+				if v.Character:GetAttribute("inCannon") then
+					return
 				end
 				local startTime = startTimes[v.Name]
 				if startTime then
