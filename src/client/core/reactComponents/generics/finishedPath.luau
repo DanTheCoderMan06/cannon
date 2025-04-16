@@ -133,9 +133,11 @@ return function(props)
 				Position = UDim2.fromScale(-0.0011, 0.396),
 				RichText = true,
 				Size = UDim2.fromScale(1, 0.125),
-				Text = props.duration:map(function(val)
-					return val .. " SECONDS"
-				end),
+				Text = if type(props.duration) == "number"
+					then props.duration .. " SECONDS"
+					else props.duration:map(function(val)
+						return val .. " SECONDS"
+					end),
 				TextColor3 = Color3.fromRGB(158, 255, 158),
 				TextScaled = true,
 				TextSize = 14,

@@ -214,6 +214,13 @@ end
 
 -- Preload the finishedPathUI so it's ready to be displayed when needed
 function effectsController.preloadFinishedPathUI(results)
+	-- Validate results before proceeding
+	if not results or typeof(results.distance) ~= "number" then
+		print("Warning: Invalid results data passed to preloadFinishedPathUI. Skipping preload.", results)
+		preloadedUI.mounted = false -- Ensure mounted is false if preload fails
+		return -- Exit early
+	end
+
 	local character = Players.LocalPlayer.Character
 	local isHighscore = effectsController.getHighScore().Value < math.round(results.distance)
 	local playerData = dataController.currentData
@@ -255,9 +262,6 @@ function effectsController.preloadFinishedPathUI(results)
 		preloadedUI.container:unmount()
 	end
 
-	-- Create a new container
-	preloadedUI.container = ReactRoblox.createRoot(Instance.new("Folder"))
-
 	-- Create a ref for the billboard
 	local billboardRef = React.createRef()
 	preloadedUI.billboardRef = billboardRef
@@ -265,6 +269,8 @@ function effectsController.preloadFinishedPathUI(results)
 	-- Create and mount the UI but don't set an adornee yet
 	local timeBinding, setTimeBinding = React.createBinding(0)
 	preloadedUI.setTimeBinding = setTimeBinding
+	-- Create a new container
+	preloadedUI.container = ReactRoblox.createRoot(Instance.new("Folder"))
 	preloadedUI.container:render(ReactRoblox.createPortal(
 		React.createElement("BillboardGui", {
 			ref = preloadedUI.billboardRef,
@@ -315,6 +321,7 @@ function effectsController.finishedPath(results, track, animationInstance)
 	partTrove:AttachToInstance(finishedPathEffects)
 
 	-- If we have a preloaded UI, use it
+	print(preloadedUI)
 	if preloadedUI.mounted and preloadedUI.billboardRef.current then
 		-- Update the billboard properties
 		local billboard = preloadedUI.billboardRef.current
@@ -322,7 +329,6 @@ function effectsController.finishedPath(results, track, animationInstance)
 		billboard.Enabled = true
 
 		preloadedUI.setTimeBinding(math.round(results.time * 10) / 10)
-		-- Update the UI with new data
 	else
 		-- Fallback if preloaded UI isn't available
 		print("Warning: Preloaded UI not available, creating new one")
@@ -403,6 +409,7 @@ function effectsController.cleanupPreloadedUI()
 		preloadedUI.billboardRef = nil
 		preloadedUI.mounted = false
 	end
+	print("cleaned up preloaded UI")
 end
 
 return effectsController

@@ -36,8 +36,8 @@ return {
 			callback = function(playerData)
 				-- Grant 500 floors and circus cannon when notification closes
 				playerData.Data.floors += 500
-				if not table.find(playerData.Data.cannons, "circusCannon") then
-					table.insert(playerData.Data.cannons, "circusCannon")
+				if not table.find(playerData.Data.cannons, "railgun") then
+					table.insert(playerData.Data.cannons, "railgun")
 				end
 			end,
 			parseParameters = function(userId, playerData)

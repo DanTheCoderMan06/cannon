@@ -123,6 +123,17 @@ function cannonController.start()
 		while not cannonPosition:FindFirstChild("characterPosition", true) do
 			task.wait()
 		end
+
+		physics.time += dataController.getData().floors / 600
+
+		local multiplier = 1
+		if physics.time > MAX_TIME then
+			multiplier = physics.time / MAX_TIME
+		elseif physics.time < 2 then
+			multiplier = physics.time / 2
+		end
+		effectsController.preloadFinishedPathUI(physics)
+
 		local character = Players.LocalPlayer.Character
 		local pTrove = Trove.new()
 		pTrove:AttachToInstance(character)
@@ -173,17 +184,6 @@ function cannonController.start()
 		targetParams.FilterType = Enum.RaycastFilterType.Exclude
 		targetParams.FilterDescendantsInstances = { character }
 		windController.toggle(true)
-
-		physics.time += dataController.getData().floors / 600
-
-		local multiplier = 1
-		if physics.time > MAX_TIME then
-			multiplier = physics.time / MAX_TIME
-		elseif physics.time < 2 then
-			multiplier = physics.time / 2
-		end
-
-		effectsController.preloadFinishedPathUI(physics)
 
 		local trailEffects = ReplicatedStorage.assets.trailEffects
 		local characterTrails = {}
@@ -340,6 +340,9 @@ function cannonController.start()
 						(character.PrimaryPart.AssemblyLinearVelocity.Magnitude < 5 or tick() - startWait > 2.9) -- Reduced inner timeout
 						and character.PrimaryPart.Position.Y < 5
 					)
+
+				local track, animationInstance = effectsController.playDanceAnimation()
+
 				cameraController.endShake()
 				RunService:UnbindFromRenderStep("noFallThrough")
 				RunService:UnbindFromRenderStep("fallSound")
@@ -359,7 +362,6 @@ function cannonController.start()
 				task.wait()
 
 				-- Play dance animation first
-				local track, animationInstance = effectsController.playDanceAnimation()
 
 				for _, v in pairs(SoundService.launch:GetChildren()) do
 					v:Stop()
@@ -386,6 +388,7 @@ function cannonController.start()
 				-- Pass the track and animation instance to finishedPath
 				physics.time = tick() - startTime
 				effectsController.finishedPath(physics, track, animationInstance)
+				effectsController.cleanupPreloadedUI()
 			end)
 		end)
 	end)

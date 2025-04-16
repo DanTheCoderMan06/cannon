@@ -12,7 +12,9 @@ local Players = game:GetService("Players")
 local profileTemplate = require(ServerStorage.server.modules.profileTemplate)
 local PlayerStore = profileStore.New("SavedPlayerDataV3", profileTemplate)
 local realPlayerStore = PlayerStore
-PlayerStore = PlayerStore.Mock
+if RunService:IsStudio() then
+	PlayerStore = PlayerStore.Mock
+end
 local Profiles = {}
 
 local dataService = {}

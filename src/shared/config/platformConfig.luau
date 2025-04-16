@@ -772,7 +772,7 @@ return {
 					local itemInfo = marketplaceUtil.getProductInfo(tierInfo.id, Enum.InfoType.Product)
 
 					updateEvent:Fire({
-						title = "TIER " .. playerData.cannonTier,
+						title = "TIER " .. playerData.cannonTier + 1,
 						description = itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>',
 					})
 				end))
@@ -788,7 +788,7 @@ return {
 				local itemInfo = marketplaceUtil.getProductInfo(tierInfo.id, Enum.InfoType.Product)
 
 				return {
-					title = "TIER " .. playerData.cannonTier,
+					title = "TIER " .. playerData.cannonTier + 1,
 					description = if #tierConfig.cannonTiers ~= playerData.cannonTier
 						then itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
 						else "MAX TIER",
