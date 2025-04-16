@@ -305,7 +305,7 @@ function dataService.start()
 	zap.requestData.SetCallback(function(player)
 		if Profiles[player] then
 			-- Return a deep copy to prevent modification issues if the client tries to change it directly
-			return Sift.Dictionary.copyDeep(Profiles[player].Data)
+			return dataService.getPlayerData(player)
 		else
 			warn(string.format("[DataService] requestData called for player %s but profile not loaded.", player.Name))
 			return nil -- Indicate data is not available

@@ -1,13 +1,12 @@
 -- New logarithmic power formula
 local function power(x)
-	-- Ensures initial power (level 1) gives ~2000 distance/reward
 	return math.max(0, 10000 * math.log10(x + 9) - 9374)
 end
 
 -- Original reward formula based on distance (x)
 local function rewardFormula(x, floors)
 	floors = floors or 0
-	local result = x -- Reward is directly based on distance
+	local result = x
 	return math.max(0, result)
 end
 
@@ -18,8 +17,7 @@ local function calculateDistance(initialHeight, initialVelocity, angleDegrees)
 	local verticalVelocity = math.sin(angleRadians) * initialVelocity
 	local timeElapsed = (
 		verticalVelocity + math.sqrt(math.pow(verticalVelocity, 2) + 2 * gravity * (initialHeight * 5))
-	) -- Increased impact of height
-		/ gravity
+	) / gravity
 	local horizontalDistanceTraveled = timeElapsed * horizontalVelocity
 	return horizontalDistanceTraveled
 end
@@ -40,7 +38,6 @@ local function cost(targetLevel, boughtLevels)
 	local assumedHeight = 5
 	local distancePreviousLevel = calculateDistance(assumedHeight, powerPreviousLevel, 45)
 
-	-- Calculate reward based on the distance achieved with the previous level's power
 	local rewardPreviousLevel = rewardFormula(distancePreviousLevel, 0)
 
 	local finalCost = math.round(rewardPreviousLevel * math.pow(1.075, targetLevel - boughtLevels) * 0.86)

@@ -281,7 +281,7 @@ function effectsController.preloadFinishedPathUI(results)
 			Enabled = true,
 		}, {
 			main = React.createElement(finishedPath, {
-				isHighscore = isHighscore or true,
+				isHighscore = isHighscore,
 				distance = math.round(results.distance),
 				reward = math.round(reward),
 				targetColor = targetColor,

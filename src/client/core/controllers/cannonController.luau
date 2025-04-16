@@ -272,6 +272,8 @@ function cannonController.start()
 		end)
 
 		finishedSignal:Connect(function() --TODO: Use raycast + spr to  finish up dummy falling
+			local track, animationInstance = effectsController.playDanceAnimation()
+
 			cameraController.endAir()
 			SoundService.effects.falling:Stop() -- Stop the airtime sound
 			spr.target(workspace.CurrentCamera, 1, 0.25, { FieldOfView = 70 })
@@ -340,8 +342,6 @@ function cannonController.start()
 						(character.PrimaryPart.AssemblyLinearVelocity.Magnitude < 5 or tick() - startWait > 2.9) -- Reduced inner timeout
 						and character.PrimaryPart.Position.Y < 5
 					)
-
-				local track, animationInstance = effectsController.playDanceAnimation()
 
 				cameraController.endShake()
 				RunService:UnbindFromRenderStep("noFallThrough")

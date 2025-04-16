@@ -49,14 +49,6 @@ function joinRewardService.spawnBlock(player: Player, rewardAmount: number)
 		return
 	end
 
-	-- Check if player already has a pending reward (prevent spamming blocks for same reward)
-	if pendingFriendRewards[player] then
-		-- Optional: Could refresh the existing block's lifetime or ignore
-		-- For simplicity, we ignore the new spawn request if one is pending.
-		-- warn(`[joinRewardService] Player {player.Name} already has a pending reward block. Ignoring new spawn request.`)
-		return
-	end
-
 	local blockId = HttpService:GenerateGUID(false)
 	-- print(`[joinRewardService] Spawning friend reward block {blockId} for {player.Name} with reward {rewardAmount}`)
 

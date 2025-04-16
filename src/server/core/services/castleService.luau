@@ -250,7 +250,7 @@ function castleService.start()
 			print(string.format("Initializing floor cache for %s during data change.", player.Name))
 			playerFloorsCache[player] = newData.floors
 			-- Optionally update tower here if needed, though initial build should handle it
-			-- castleService.updateTower(player)
+			castleService.updateTower(player)
 		end
 	end)
 end

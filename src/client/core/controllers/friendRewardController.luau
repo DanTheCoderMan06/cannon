@@ -55,8 +55,8 @@ function friendRewardController.setupBlockInteraction(blockId: string, rewardAmo
 	local promptTrove = Trove.new()
 	promptTrove:Add(prompt)
 
-	local connection = prompt.Triggered:Connect(function(playerWhoTriggered)
-		if claimed or playerWhoTriggered ~= Players.LocalPlayer then
+	local function claimBlock()
+		if claimed then
 			return -- Prevent double claim or other players claiming
 		end
 		claimed = true
@@ -77,7 +77,12 @@ function friendRewardController.setupBlockInteraction(blockId: string, rewardAmo
 		-- Clean up the prompt and connection locally
 		promptTrove:Destroy()
 		activePrompts[blockId] = nil
+	end
+
+	local connection = prompt.Triggered:Connect(function(playerWhoTriggered)
+		claimBlock()
 	end)
+
 	promptTrove:Add(connection)
 
 	-- Also clean up if the block model is destroyed by the server
@@ -87,10 +92,19 @@ function friendRewardController.setupBlockInteraction(blockId: string, rewardAmo
 			activePrompts[blockId] = nil
 		end
 	end)
+
 	promptTrove:Add(destroyingConn)
 
 	activePrompts[blockId] = { prompt = prompt, trove = promptTrove }
 	print(`[FriendRewardController] Setup interaction for block {blockId}`)
+
+	if Players.LocalPlayer:GetAttribute("autoFarming") then
+		claimBlock()
+	end
+
+	promptTrove:Add(Players.LocalPlayer:GetAttributeChangedSignal("autoFarming"):Connect(function()
+		claimBlock()
+	end))
 end
 
 function friendRewardController.start()

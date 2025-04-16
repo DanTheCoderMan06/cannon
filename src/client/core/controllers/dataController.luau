@@ -45,6 +45,15 @@ function dataController.start()
 		dataController.currentData = data
 		dataChangedEvent:Fire(data)
 	end)
+
+	task.spawn(function()
+		while true do
+			local newData = zap.requestData.Call()
+			dataController.currentData = newData
+			dataChangedEvent:Fire(newData)
+			task.wait(10)
+		end
+	end)
 end
 
 return dataController

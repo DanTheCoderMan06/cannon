@@ -56,6 +56,11 @@ local config = {
 				-- Connect to GetAttributeChangedSignal using Trove
 				states.trove:Connect(Players.LocalPlayer.Character:GetAttributeChangedSignal("inCannon"), function()
 					if Players.LocalPlayer.Character:GetAttribute("inCannon") then
+						if items:FindFirstChild("beam") then
+							items.beam.Attachment0 = nil
+						else
+							return
+						end
 						items.beam.Attachment0 = nil
 						Players.LocalPlayer.Character:GetAttributeChangedSignal("inCannon"):Wait()
 						nextSignal:Fire()
@@ -110,7 +115,11 @@ local config = {
 				-- Connect to inCannon attribute change using Trove
 				states.trove:Connect(Players.LocalPlayer.Character:GetAttributeChangedSignal("inCannon"), function()
 					if Players.LocalPlayer.Character:GetAttribute("inCannon") then
-						items.beam.Attachment0 = nil
+						if items:FindFirstChild("beam") then
+							items.beam.Attachment0 = nil
+						else
+							return
+						end
 						Players.LocalPlayer.Character:GetAttributeChangedSignal("inCannon"):Wait()
 						nextSignal:Fire()
 					end
