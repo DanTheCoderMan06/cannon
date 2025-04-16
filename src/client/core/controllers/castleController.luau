@@ -15,7 +15,6 @@ local ReactRoblox = require(game.ReplicatedStorage.sharedPackages.ReactRoblox)
 local React = require(game.ReplicatedStorage.sharedPackages.React)
 local Sift = require(game.ReplicatedStorage.sharedPackages.Sift)
 local Signal = require(game.ReplicatedStorage.sharedPackages.Signal)
-local Zone = require(game.ReplicatedStorage.sharedPackages.Zone)
 local ObjectCache = require(game.ReplicatedStorage.sharedPackages.objectcache)
 
 local enabledPlatforms = {}
@@ -275,18 +274,19 @@ function castleController.updatePrompt(prompt, status)
 	end
 end
 
-local touchZones = {}
+local platformConnections = {} -- Store connections to manage them if needed
 
 function castleController.updateZone(zoneName, targetPart, platform, callbackSignal)
-	print(zoneName .. " UPDATE")
-	local touchZone = touchZones[zoneName]
-	if touchZone then
-		touchZone:Destroy()
-		touchZone = nil
+	-- print(zoneName .. " UPDATE") -- Optional: Keep for debugging
+
+	-- Disconnect previous connection if it exists for this zoneName
+	if platformConnections[zoneName] then
+		platformConnections[zoneName]:Disconnect()
+		platformConnections[zoneName] = nil
 	end
-	touchZone = Zone.new(targetPart)
+
 	local lastTriggered = 0
-	touchZone.partEntered:Connect(function(part)
+	platformConnections[zoneName] = targetPart.Touched:Connect(function(part)
 		if not enabledPlatforms[zoneName] then
 			return
 		end
@@ -296,6 +296,7 @@ function castleController.updateZone(zoneName, targetPart, platform, callbackSig
 		if not part:IsDescendantOf(Players.LocalPlayer.Character) then
 			return
 		end
+		-- Debounce check
 		if tick() - lastTriggered < 1 then
 			return
 		end
@@ -303,6 +304,8 @@ function castleController.updateZone(zoneName, targetPart, platform, callbackSig
 		lastTriggered = tick()
 		platform.callback(callbackSignal)
 	end)
+	-- Note: Consider adding this connection to a Trove associated with the platform
+	-- if the platform or targetPart can be destroyed, to ensure cleanup.
 end
 
 local playerTroves = {}

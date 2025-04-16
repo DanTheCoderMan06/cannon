@@ -12,7 +12,6 @@ local ReactRoblox = require(game.ReplicatedStorage.sharedPackages.ReactRoblox)
 local React = require(game.ReplicatedStorage.sharedPackages.React)
 local Sift = require(game.ReplicatedStorage.sharedPackages.Sift)
 local Signal = require(game.ReplicatedStorage.sharedPackages.Signal)
-local Zone = require(game.ReplicatedStorage.sharedPackages.Zone)
 
 local zap = require(ReplicatedStorage.zap)
 
@@ -93,41 +92,24 @@ function cannonController.start()
 		end
 	end)
 
-	local cannonZone
-	local function updateZone()
-		print("Update")
-		if cannonZone then
-			cannonZone:Destroy()
+	local lastTriggered = 0
+	cannonPart.Touched:Connect(function(part)
+		-- print("Cannon Touched") -- Optional: Keep for debugging if needed
+		if not Players.LocalPlayer.Character then
+			return
 		end
-		cannonZone = Zone.new(cannonPart)
-		local lastTriggered = 0
-
-		cannonZone.partEntered:Connect(function(part)
-			print("Enter")
-			if not Players.LocalPlayer.Character then
-				return
-			end
-			if not part:IsDescendantOf(Players.LocalPlayer.Character) then
-				return
-			end
-			if tick() - lastTriggered < 1 then
-				return
-			end
-			if not canLaunchPlayer then
-				return
-			end
-			lastTriggered = tick()
-			zap.enterCannon.Fire()
-		end)
-	end
-
-	updateZone()
-
-	cannonPart:GetPropertyChangedSignal("CFrame"):Connect(function()
-		if RunService:IsStudio() then
-			task.wait(1)
+		if not part:IsDescendantOf(Players.LocalPlayer.Character) then
+			return
 		end
-		updateZone()
+		-- Debounce check
+		if tick() - lastTriggered < 1 then
+			return
+		end
+		if not canLaunchPlayer then
+			return
+		end
+		lastTriggered = tick()
+		zap.enterCannon.Fire()
 	end)
 
 	cannonPosition.ChildAdded:Connect(function(child)
