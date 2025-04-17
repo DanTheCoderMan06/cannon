@@ -10,6 +10,8 @@ local zap = require(ReplicatedStorage.zap) -- Corrected path as per user feedbac
 local effectsController = require(ReplicatedStorage.client.controllers.effectsController)
 local Trove = require(ReplicatedStorage.sharedPackages.Trove)
 
+local reactUtil = require(ReplicatedStorage.shared.utilities.reactUtil)
+
 local friendRewardController = {}
 
 local activePrompts = {} -- Cache: [blockId] = { prompt = PromptInstance, connection = Connection, trove = Trove }
@@ -69,7 +71,7 @@ function friendRewardController.setupBlockInteraction(blockId: string, rewardAmo
 		if claimSound then
 			claimSound:Play()
 		end
-		effectsController.rewardPopup(interactionPart.Position, string.format("+%d $", rewardAmount))
+		effectsController.rewardPopup(interactionPart.Position, "$" .. reactUtil.formatNumber(rewardAmount))
 
 		-- Tell the server we claimed it
 		zap.claimFriendReward.Fire({ blockId = blockId })

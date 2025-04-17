@@ -345,6 +345,9 @@ function dataService.updatePlayerData(player: Player, newData, forceSave: boolea
 			end
 			return -- Exit if data is the same and not forced
 		end
+		if newData.floors < profile.Data.floors or newData.cannon < profile.Data.cannon then
+			return
+		end
 	end
 
 	-- Proceed with update

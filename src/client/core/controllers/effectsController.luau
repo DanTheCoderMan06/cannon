@@ -20,13 +20,6 @@ local floorConfig = require(ReplicatedStorage.shared.config.floorConfig)
 local effectsUi = require(ReplicatedStorage.client.reactComponents.generics.effectText)
 local finishedPath = require(ReplicatedStorage.client.reactComponents.generics.finishedPath)
 
--- Store references to preloaded UI elements
-local preloadedUI = {
-	container = nil,
-	billboardRef = nil,
-	mounted = false,
-}
-
 local dataController = require(ReplicatedStorage.client.controllers.dataController)
 local stateController = require(ReplicatedStorage.client.controllers.stateController)
 local keysController = require(ReplicatedStorage.client.controllers.keysController)
@@ -34,6 +27,8 @@ local keysController = require(ReplicatedStorage.client.controllers.keysControll
 local reactUtil = require(ReplicatedStorage.shared.utilities.reactUtil)
 
 local currentHighScore = 0
+
+local billboardContainer = ReactRoblox.createRoot(Instance.new("Folder"))
 
 function effectsController.playDanceAnimation()
 	local newAnim = ReplicatedStorage.assets.animations.dance
@@ -61,7 +56,6 @@ function app(props)
 	end)
 
 	React.useEffect(function()
-		print("start")
 		api.start({
 			transparency = 0,
 			config = {
@@ -69,12 +63,12 @@ function app(props)
 				friction = 30,
 			},
 		})
-		task.delay(1, function()
+		task.delay(0.6, function()
 			if props.callback then
 				props.callback()
 			end
 		end)
-		task.wait(props.duration + 1.5)
+		task.wait(0.6)
 		api.start({
 			transparency = 1,
 			config = {
@@ -90,14 +84,15 @@ function app(props)
 		BackgroundTransparency = styles.transparency,
 		BorderColor3 = Color3.fromRGB(0, 0, 0),
 		BorderSizePixel = 0,
-		Position = UDim2.fromScale(0, 0.),
+		Position = UDim2.fromScale(0, 0),
 		Size = UDim2.fromScale(1, 1),
 	})
 end
 
+local blackScreenContainer = ReactRoblox.createRoot(Instance.new("Folder"))
+
 function effectsController.blackScreen(duration, callback)
-	local newBlackScreen = ReactRoblox.createRoot(Instance.new("Folder"))
-	newBlackScreen:render(ReactRoblox.createPortal(
+	blackScreenContainer:render(ReactRoblox.createPortal(
 		React.createElement("ScreenGui", {
 			ResetOnSpawn = false,
 			Enabled = true,
@@ -110,8 +105,8 @@ function effectsController.blackScreen(duration, callback)
 		"blackScreen"
 	))
 
-	task.delay(duration + 6, function()
-		newBlackScreen:unmount()
+	task.delay(2, function()
+		blackScreenContainer:unmount()
 	end)
 end
 
@@ -212,91 +207,6 @@ function effectsController.start()
 	effectsController.updateHighscore()
 end
 
--- Preload the finishedPathUI so it's ready to be displayed when needed
-function effectsController.preloadFinishedPathUI(results)
-	-- Validate results before proceeding
-	if not results or typeof(results.distance) ~= "number" then
-		print("Warning: Invalid results data passed to preloadFinishedPathUI. Skipping preload.", results)
-		preloadedUI.mounted = false -- Ensure mounted is false if preload fails
-		return -- Exit early
-	end
-
-	local character = Players.LocalPlayer.Character
-	local isHighscore = effectsController.getHighScore().Value < math.round(results.distance)
-	local playerData = dataController.currentData
-	local reward = cannonConfig.rewardFormula(results.distance, playerData.floors or 0)
-	local targetColor, setTargetColor = React.createBinding(Color3.new())
-	local startTime = tick()
-
-	if not playerData.boughtCannonYet then
-		local firstCannonCost = cannonConfig.costFormula(playerData.cannon, 1) -- Cost for level 1 from level 0
-		reward += firstCannonCost
-	end
-
-	-- Check for first floor purchase bonus
-	-- Assumes 'boughtFloorYet' boolean exists in playerData, otherwise this check might grant bonus repeatedly.
-	if not playerData.boughtFloorYet then
-		local firstFloorCost = floorConfig.costFormula(playerData.floors, 0) -- Cost for level 1 from level 0
-		reward += firstFloorCost
-	end
-
-	local newMoney = reward
-	if playerData.doubleMoney then
-		newMoney += reward
-	end
-
-	local gainedFloors = 0
-	while newMoney > 0 and gainedFloors < 100 do
-		local newFloors = 1
-		local floorCost = floorConfig.costFormula(playerData.floors + gainedFloors, playerData.boughtLevels)
-		if floorCost > newMoney then
-			gainedFloors += math.round(newMoney / floorCost * 10) / 10
-			break
-		end
-		newMoney -= floorCost
-		gainedFloors += 1
-	end
-
-	-- Clean up previous preloaded UI if it exists
-	if preloadedUI.container then
-		preloadedUI.container:unmount()
-	end
-
-	-- Create a ref for the billboard
-	local billboardRef = React.createRef()
-	preloadedUI.billboardRef = billboardRef
-
-	-- Create and mount the UI but don't set an adornee yet
-	local timeBinding, setTimeBinding = React.createBinding(0)
-	preloadedUI.setTimeBinding = setTimeBinding
-	-- Create a new container
-	preloadedUI.container = ReactRoblox.createRoot(Instance.new("Folder"))
-	preloadedUI.container:render(ReactRoblox.createPortal(
-		React.createElement("BillboardGui", {
-			ref = preloadedUI.billboardRef,
-			ResetOnSpawn = false,
-			AlwaysOnTop = true,
-			StudsOffset = Vector3.new(0, 0, 0),
-			Size = UDim2.fromScale(16, 8),
-			Enabled = true,
-		}, {
-			main = React.createElement(finishedPath, {
-				isHighscore = isHighscore,
-				distance = math.round(results.distance),
-				reward = math.round(reward),
-				targetColor = targetColor,
-				duration = timeBinding,
-				floors = gainedFloors,
-			}),
-		}),
-		Players.LocalPlayer.PlayerGui,
-		"finishedGUI"
-	))
-
-	preloadedUI.mounted = true
-	print("Preloaded finishedPathUI")
-end
-
 function effectsController.finishedPath(results, track, animationInstance)
 	local character = Players.LocalPlayer.Character
 	local isHighscore = effectsController.getHighScore().Value < math.round(results.distance)
@@ -312,7 +222,7 @@ function effectsController.finishedPath(results, track, animationInstance)
 	-- Create the effects part
 	local finishedPathEffects = ReplicatedStorage.assets.finishedPath:Clone()
 	finishedPathEffects:PivotTo(
-		CFrame.new(character.PrimaryPart.Position * Vector3.new(1, 0, 1) + Vector3.new(0, 1.2, 0))
+		CFrame.new(character.PrimaryPart.Position * Vector3.new(1, 0, 1) + Vector3.new(0, 0.5, 0))
 	)
 	finishedPathEffects.Parent = workspace
 
@@ -320,43 +230,37 @@ function effectsController.finishedPath(results, track, animationInstance)
 	local partTrove = Trove.new()
 	partTrove:AttachToInstance(finishedPathEffects)
 
-	-- If we have a preloaded UI, use it
-	print(preloadedUI)
-	if preloadedUI.mounted and preloadedUI.billboardRef.current then
-		-- Update the billboard properties
-		local billboard = preloadedUI.billboardRef.current
-		billboard.Adornee = character.Head
-		billboard.Enabled = true
-
-		preloadedUI.setTimeBinding(math.round(results.time * 10) / 10)
-	else
-		-- Fallback if preloaded UI isn't available
-		print("Warning: Preloaded UI not available, creating new one")
-		local container = ReactRoblox.createRoot(Instance.new("Folder"))
-		container:render(ReactRoblox.createPortal(
-			React.createElement("BillboardGui", {
-				ResetOnSpawn = false,
-				AlwaysOnTop = true,
-				StudsOffset = Vector3.new(0, 0, 0),
-				Size = UDim2.fromScale(16, 8),
-				Adornee = finishedPathEffects,
-			}, {
-				main = React.createElement(finishedPath, {
-					isHighscore = isHighscore or true,
-					distance = math.round(results.distance),
-					reward = math.round(reward),
-					targetColor = targetColor,
-					duration = math.round(results.time * 10) / 10,
-				}),
-			}),
-			Players.LocalPlayer.PlayerGui,
-			"finishedGUI"
-		))
-
-		-- Store for cleanup
-		preloadedUI.container = container
+	-- Check for first floor purchase bonus
+	-- Assumes 'boughtFloorYet' boolean exists in playerData, otherwise this check might grant bonus repeatedly.
+	if not playerData.boughtFloorYet then
+		local firstFloorCost = floorConfig.costFormula(playerData.floors, 0) -- Cost for level 1 from level 0
+		reward += firstFloorCost
 	end
 
+	local billboardRef = React.createRef()
+
+	-- If we have a preloaded UI, use it
+	billboardContainer:render(ReactRoblox.createPortal(
+		React.createElement("BillboardGui", {
+			ResetOnSpawn = false,
+			AlwaysOnTop = true,
+			StudsOffset = Vector3.new(0, 4, 0),
+			Size = UDim2.fromScale(16, 8),
+			Adornee = Players.LocalPlayer.Character.Head,
+			ref = billboardRef,
+		}, {
+			main = React.createElement(finishedPath, {
+				isHighscore = isHighscore or true,
+				distance = math.round(results.distance),
+				reward = math.round(reward),
+				targetColor = targetColor,
+				duration = math.round(results.time * 10) / 10,
+				floors = dataController.getData().floors,
+			}),
+		}),
+		Players.LocalPlayer.PlayerGui,
+		"finishedGUI"
+	))
 	-- Set up animation for the effects
 	partTrove:BindToRenderStep("moveCircle", Enum.RenderPriority.Last.Value, function(dt)
 		local increaseFactor = math.sin(math.rad((tick() - startTime) * 167)) * 1
@@ -372,44 +276,32 @@ function effectsController.finishedPath(results, track, animationInstance)
 
 	task.wait(2)
 
-	-- Disable the billboard but don't unmount it
-	if preloadedUI.billboardRef.current then
-		preloadedUI.billboardRef.current.Enabled = false
-		preloadedUI.billboardRef.current.Adornee = nil
-	end
+	effectsController.blackScreen(1, function()
+		billboardRef:getValue().Enabled = false
 
-	-- Clean up the effects
-	finishedPathEffects:Destroy()
-	partTrove:Destroy()
+		billboardContainer:unmount()
 
-	character.PrimaryPart.Anchored = false
-	character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
-	task.wait()
-	zap.requestLoad.Fire()
+		-- Clean up the effects
+		finishedPathEffects:Destroy()
+		partTrove:Destroy()
 
-	keysController.freezeMovement(false)
-	keysController.updateFarming()
-	if track then
-		track:Stop()
-		track:Destroy() -- Destroy the track
-	end
-	if animationInstance then
-		animationInstance:Destroy() -- Destroy the animation instance
-	end
+		character.PrimaryPart.Anchored = false
+		character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
+		task.wait()
+		zap.requestLoad.Fire()
 
+		keysController.freezeMovement(false)
+		keysController.updateFarming()
+		if track then
+			track:Stop()
+			track:Destroy() -- Destroy the track
+		end
+		if animationInstance then
+			animationInstance:Destroy() -- Destroy the animation instance
+		end
+	end)
 	task.wait(1)
 	effectsController.updateHighscore()
-end
-
--- Clean up preloaded UI when no longer needed
-function effectsController.cleanupPreloadedUI()
-	if preloadedUI.container then
-		preloadedUI.container:unmount()
-		preloadedUI.container = nil
-		preloadedUI.billboardRef = nil
-		preloadedUI.mounted = false
-	end
-	print("cleaned up preloaded UI")
 end
 
 return effectsController

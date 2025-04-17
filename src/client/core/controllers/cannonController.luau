@@ -132,7 +132,6 @@ function cannonController.start()
 		elseif physics.time < 2 then
 			multiplier = physics.time / 2
 		end
-		effectsController.preloadFinishedPathUI(physics)
 
 		local character = Players.LocalPlayer.Character
 		local pTrove = Trove.new()
@@ -212,14 +211,14 @@ function cannonController.start()
 		pTrove:BindToRenderStep("pathPhysics", Enum.RenderPriority.First.Value, function()
 			timeElapsed = (tick() - startTime) * multiplier
 			local actualHorizontal = timeElapsed * physics.horizontalVelocity
-			local fixedHorizontal = math.fmod(actualHorizontal, cannonConfig.maxDistance)
+			local fixedHorizontal = math.fmod(actualHorizontal, cannonConfig.maxDistance) + 200
 
 			local verticalComponent = (
 				timeElapsed * physics.verticalVelocity + 0.5 * -workspace.Gravity * math.pow(timeElapsed, 2)
 			)
 
 			local calculatedPosition = startPosition
-				* CFrame.new(0, math.min(verticalComponent, 50000), -fixedHorizontal) -- Clamp max height
+				* CFrame.new(0, math.min(verticalComponent, 20000), -fixedHorizontal) -- Clamp max height
 				* CFrame.Angles(-math.rad(math.fmod(timeElapsed * 180 / multiplier, 360)), 0, 0)
 
 			local timeElapsed = tick() - startTime
@@ -290,7 +289,7 @@ function cannonController.start()
 				CFrame.new(newPosition.Position, endPosition.Position):Lerp(
 					CFrame.new(newPosition.Position, endPosition.Position)
 						* CFrame.new(0, 0, -(endPosition.Position - newPosition.Position).Magnitude),
-					0.9
+					0.995
 				)
 			)
 
@@ -331,8 +330,6 @@ function cannonController.start()
 				)
 			end)
 
-			zap.finishedPath.Fire()
-
 			local startWait = tick()
 			task.delay(1, function() -- Reduced outer delay
 				repeat
@@ -371,6 +368,10 @@ function cannonController.start()
 					v:Stop()
 				end
 
+				SoundService.effects.hitFloor:Stop()
+
+				task.wait()
+
 				-- Then unragdoll
 				stateController.getEvents().radgollEvent:Fire(false)
 
@@ -387,8 +388,8 @@ function cannonController.start()
 
 				-- Pass the track and animation instance to finishedPath
 				physics.time = tick() - startTime
+				zap.finishedPath.Fire()
 				effectsController.finishedPath(physics, track, animationInstance)
-				effectsController.cleanupPreloadedUI()
 			end)
 		end)
 	end)

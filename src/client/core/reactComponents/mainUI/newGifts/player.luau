@@ -22,13 +22,22 @@ return function(props)
 	local canGet, setCanGet = React.useBinding(false)
 
 	React.useEffect(function()
-		print(props.selectedGift:getValue())
-		if props.selectedGift:getValue() == "" or not props.selectedGift:getValue() then
-			return
+		local uiTrove = Trove.new()
+
+		uiTrove:Add(props.giftSelectedEvent:Connect(function()
+			if props.selectedGift:getValue() == "" or not props.selectedGift:getValue() then
+				return
+			end
+			print("call")
+			local canGive =
+				zap.checkRecipient.Call({ selectedPlayer = props.id, selectedGift = props.selectedGift:getValue() })
+			print(canGive)
+			setCanGet(canGive)
+		end))
+
+		return function()
+			uiTrove:Destroy()
 		end
-		print("call")
-		local canGive = zap.checkRecipient.Call({ selectedPlayer = props.id, selectedGift = props.selectedGift })
-		setCanGet(canGive)
 	end, {})
 
 	return React.createElement("ImageLabel", {

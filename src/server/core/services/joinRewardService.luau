@@ -12,7 +12,8 @@ local assets = ReplicatedStorage:WaitForChild("assets")
 local friendRewardPrefab = assets:WaitForChild("friendReward")
 
 local joinRewardService = {}
-local pendingFriendRewards = {} -- Cache: [player] = { blockId = blockId, rewardAmount = amount }
+-- Cache: [player] = { [blockId] = rewardAmount } - Allows multiple pending rewards per player
+local pendingFriendRewards = {}
 local activeBlocks = {} -- Cache: [blockId] = { blockInstance = instance, player = player }
 
 -- Cooldown period from rewardsConfig
@@ -92,7 +93,10 @@ function joinRewardService.spawnBlock(player: Player, rewardAmount: number)
 	newBlock:SetAttribute("BlockId", blockId) -- Pass the ID to the block's script
 
 	-- Store references and parent to workspace
-	pendingFriendRewards[player] = { blockId = blockId, rewardAmount = rewardAmount }
+	if not pendingFriendRewards[player] then
+		pendingFriendRewards[player] = {} -- Initialize player's reward table if it doesn't exist
+	end
+	pendingFriendRewards[player][blockId] = rewardAmount -- Add the specific block ID and its reward
 	activeBlocks[blockId] = { blockInstance = newBlock, player = player }
 	newBlock.Parent = Workspace
 
@@ -103,14 +107,22 @@ function joinRewardService.spawnBlock(player: Player, rewardAmount: number)
 	local playerLeavingConnection
 	playerLeavingConnection = player.AncestryChanged:Connect(function(_, parent)
 		if not parent then
-			local pending = pendingFriendRewards[player]
-			if pending and pending.blockId == blockId then
+			-- Player is leaving the game
+			if activeBlocks[blockId] and activeBlocks[blockId].player == player then
 				-- print(`[joinRewardService] Cleaning up reward block {blockId} for player {player.Name} who left.`)
-				if activeBlocks[blockId] and activeBlocks[blockId].blockInstance then
-					activeBlocks[blockId].blockInstance:Destroy()
+				if activeBlocks[blockId].blockInstance then
+					activeBlocks[blockId].blockInstance:Destroy() -- Destroy the physical block
 				end
+				-- Remove from activeBlocks (will also be handled by Destroying connection, but good to be explicit)
 				activeBlocks[blockId] = nil
-				pendingFriendRewards[player] = nil
+				-- Remove the specific reward from the player's pending list
+				if pendingFriendRewards[player] then
+					pendingFriendRewards[player][blockId] = nil
+					-- Optional: Clean up player entry if their reward list becomes empty
+					if next(pendingFriendRewards[player]) == nil then
+						pendingFriendRewards[player] = nil
+					end
+				end
 				if playerLeavingConnection and playerLeavingConnection.Connected then
 					playerLeavingConnection:Disconnect()
 				end
@@ -124,8 +136,13 @@ function joinRewardService.spawnBlock(player: Player, rewardAmount: number)
 		if activeBlocks[blockId] then
 			local ownerPlayer = activeBlocks[blockId].player
 			activeBlocks[blockId] = nil
-			if pendingFriendRewards[ownerPlayer] and pendingFriendRewards[ownerPlayer].blockId == blockId then
-				pendingFriendRewards[ownerPlayer] = nil
+			-- Remove the specific reward from the player's pending list when block is destroyed
+			if pendingFriendRewards[ownerPlayer] then
+				pendingFriendRewards[ownerPlayer][blockId] = nil
+				-- Optional: Clean up player entry if their reward list becomes empty
+				if next(pendingFriendRewards[ownerPlayer]) == nil then
+					pendingFriendRewards[ownerPlayer] = nil
+				end
 			end
 		end
 		if playerLeavingConnection and playerLeavingConnection.Connected then
@@ -149,24 +166,28 @@ function joinRewardService.claimReward(player: Player, blockId: string)
 		return false
 	end
 
-	local pendingData = pendingFriendRewards[player]
+	local playerRewards = pendingFriendRewards[player]
+	local rewardAmount = playerRewards and playerRewards[blockId]
 
-	-- Verify there's a pending reward associated with this block
-	if not pendingData or pendingData.blockId ~= blockId then
+	-- Verify there's a pending reward associated with this specific block ID for this player
+	if not rewardAmount then
 		warn(
-			`[joinRewardService] Player {player.Name} tried to claim block {blockId}, but pending reward data mismatch or missing. PendingData: {pendingData}`
+			`[joinRewardService] Player {player.Name} tried to claim block {blockId}, but no pending reward found for this ID or player. PlayerRewards: {playerRewards}`
 		)
+		-- Block might be orphaned or already claimed, destroy it just in case
 		if blockData.blockInstance then
 			blockData.blockInstance:Destroy()
 		end
-		activeBlocks[blockId] = nil -- Ensure cleanup
+		activeBlocks[blockId] = nil -- Ensure cleanup if block instance was missing
 		return false
 	end
 
-	local rewardAmount = pendingData.rewardAmount
-
-	-- Clear the cache entries *before* giving money
-	pendingFriendRewards[player] = nil
+	-- Clear the specific reward entry *before* giving money
+	playerRewards[blockId] = nil
+	-- Optional: Clean up player entry if their reward list becomes empty
+	if next(playerRewards) == nil then
+		pendingFriendRewards[player] = nil
+	end
 	-- activeBlocks entry will be cleared by the block:Destroy() call below
 
 	-- Get current data and add the reward
@@ -268,6 +289,14 @@ function joinRewardService.start()
 				end
 			end)
 		end
+
+		--Handle DEV
+
+		pcallWithRetry(function()
+			if player:GetRankInGroup(13101898) >= 253 then
+				player:SetAttribute("isDEV", true)
+			end
+		end)
 	end)
 
 	-- Listen for the client event when they trigger the reward block

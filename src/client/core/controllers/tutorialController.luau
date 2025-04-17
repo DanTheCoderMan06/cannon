@@ -210,7 +210,7 @@ function tutorialController.start()
 		local shouldEnableBeam = true -- Flag to control beam visibility
 
 		-- Condition 1: Disable if cannon level is 20 or higher
-		if currentData.cannon >= 20 then
+		if currentData.cannon >= 10 then
 			shouldEnableBeam = false
 		end
 

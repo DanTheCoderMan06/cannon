@@ -42,7 +42,7 @@ return function(props)
 			Position = styles.position:map(function(val)
 				return props.start:Lerp(props.start + UDim2.fromScale(0.0, 0.2), val)
 			end),
-			Size = UDim2.fromScale(0.46, 0.0443),
+			Size = UDim2.fromScale(0.46 * 1.3, 0.0443 * 1.3),
 			Text = props.text,
 			TextColor3 = props.color,
 			TextScaled = true,

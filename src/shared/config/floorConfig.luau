@@ -5,15 +5,16 @@ local EXP_RATE = 1.05 -- Rate of exponential increase
 local LOG_SCALE = 280000 -- Scaling factor for the logarithmic phase
 --]]
 
-local TRANSITION_LEVEL = 1000
+local TRANSITION_LEVEL = 600
 local EXP_BASE = 500
-local EXP_RATE = 1.05
+local EXP_RATE = 1.06
 local LOG_SCALE = 280000
 
 local TRANSITION_GROUP_BASE_LEVEL = math.floor((TRANSITION_LEVEL - 1) / 5) * 5 + 1
 
 local COST_AT_TRANSITION_BASE = EXP_BASE * math.pow(EXP_RATE, (TRANSITION_GROUP_BASE_LEVEL - 1) / 5)
 
+--[[
 local function get_cost_for_base_level(baseLevel)
 	local cost
 	if baseLevel < TRANSITION_GROUP_BASE_LEVEL then
@@ -23,6 +24,12 @@ local function get_cost_for_base_level(baseLevel)
 		cost = COST_AT_TRANSITION_BASE + LOG_SCALE * math.log10(steps_past_transition + 1)
 	end
 	return math.round(math.max(0, cost))
+end
+--]]
+
+local function get_cost_for_base_level(baseLevel)
+	local cost = baseLevel * 155
+	return cost
 end
 
 local module = {
@@ -40,7 +47,7 @@ local module = {
 			totalCost = totalCost + levelCost
 		end
 
-		return math.min(totalCost, 20000000)
+		return totalCost
 	end,
 }
 

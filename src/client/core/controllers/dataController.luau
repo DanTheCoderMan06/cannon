@@ -42,15 +42,15 @@ function dataController.start()
 
 	zap.dataChanged.SetCallback(function(data)
 		print("[DataController] Received data update via dataChanged event.")
-		dataController.currentData = data
 		dataChangedEvent:Fire(data)
+		dataController.currentData = data
 	end)
 
 	task.spawn(function()
 		while true do
 			local newData = zap.requestData.Call()
-			dataController.currentData = newData
 			dataChangedEvent:Fire(newData)
+			dataController.currentData = newData
 			task.wait(10)
 		end
 	end)

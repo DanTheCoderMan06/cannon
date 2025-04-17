@@ -37,14 +37,17 @@ local musicController = require(ReplicatedStorage.client.controllers.musicContro
 local rewardsConfig = require(ReplicatedStorage.shared.config.rewardsConfig)
 uiController.promptInEvent = Signal.new()
 
+local reactUtil = require(ReplicatedStorage.shared.utilities.reactUtil)
+
 -- Removed unused getRandomPosition function
+local notifContainer = ReactRoblox.createRoot(Instance.new("Folder"))
 
 -- Modified function to accept a specific start position
 function uiController.renderNotification(text: string, color: Color3, startPosition: UDim2)
-	local container = ReactRoblox.createRoot(Instance.new("Folder"))
+	print("Render Notification!")
 	local destroyEvent = Signal.new()
 
-	container:render(ReactRoblox.createPortal(
+	notifContainer:render(ReactRoblox.createPortal(
 		React.createElement(notification, {
 			text = text,
 			start = startPosition,
@@ -57,7 +60,7 @@ function uiController.renderNotification(text: string, color: Color3, startPosit
 
 	task.spawn(function()
 		destroyEvent:Wait()
-		container:unmount()
+		notifContainer:unmount()
 		destroyEvent:Destroy()
 	end)
 end
@@ -86,14 +89,15 @@ function uiController.promptOptIn()
 end
 
 local function app()
-	local selectedGift, setSelectedGift = React.useBinding("")
-
+	local selectedGift, setSelectedGift = React.createBinding("")
+	local giftSelectedEvent = Signal.new()
 	return React.createElement(menuUi, {
 		selectedUIEvent = selectedUIEvent,
 		selectSectionEvent = selectSectionEvent,
 		claimedItemEvent = claimedItemEvent,
 		unlockedItemEvent = unlockedItemEvent,
 		dataChanged = dataController.dataChanged,
+		giftSelectedEvent = giftSelectedEvent,
 		getData = dataController.getData,
 		resetEvent = resetEvent,
 		toggleMusicEvent = musicController.toggleMusicEvent,
@@ -134,7 +138,7 @@ function uiController.start()
 			-- Render money notification below the money stat
 			task.spawn(function()
 				uiController.renderNotification(
-					"+ $" .. math.round(newData.money - currentData.money), -- Fixed $ placement
+					"+ $" .. reactUtil.formatNumber(math.round(newData.money - currentData.money)), -- Fixed $ placement
 					Color3.new(0.419607, 0.572549, 0.349019),
 					UDim2.fromScale(0.349, 0.12) -- Position below money stat
 				)

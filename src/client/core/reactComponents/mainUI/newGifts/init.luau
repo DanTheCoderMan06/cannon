@@ -67,6 +67,7 @@ return function(props)
 					id = player.Name,
 					userid = player.UserId,
 					selectedGift = props.selectedGift,
+					giftSelectedEvent = props.giftSelectedEvent,
 					onActivated = function()
 						local productId = giftConfig[props.selectedGift:getValue()].id
 						if giftConfig[props.selectedGift:getValue()].tiers then

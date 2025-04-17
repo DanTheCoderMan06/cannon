@@ -79,7 +79,7 @@ return function(props)
 			TextScaled = true,
 			TextSize = 14,
 			TextWrapped = true,
-			ZIndex = 4,
+			ZIndex = 50,
 		}, {
 			iStroke = React.createElement("UIStroke", {
 				Thickness = 4,

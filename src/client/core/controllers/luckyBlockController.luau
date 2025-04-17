@@ -9,6 +9,8 @@ local Trove = require(ReplicatedStorage.sharedPackages.Trove)
 
 local effectsController = require(ReplicatedStorage.client.controllers.effectsController)
 
+local reactUtil = require(ReplicatedStorage.shared.utilities.reactUtil)
+
 local luckyBlockController = {}
 
 function luckyBlockController.start()
@@ -66,7 +68,10 @@ function luckyBlockController.start()
 				end
 			end
 			print(data.reward)
-			effectsController.rewardPopup(newLuckyBlock.PrimaryPart.Position, "+ $" .. data.reward) -- Fixed $ placement
+			effectsController.rewardPopup(
+				newLuckyBlock.PrimaryPart.Position,
+				"+ $" .. reactUtil.formatNumber(data.reward)
+			) -- Fixed $ placement
 			SoundService.effects.claim:Play()
 			task.delay(1.2, function()
 				newLuckyBlock:Destroy()

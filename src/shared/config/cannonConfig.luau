@@ -1,6 +1,12 @@
 -- New logarithmic power formula
+--[[
 local function power(x)
 	return math.max(0, 10000 * math.log10(x + 9) - 9374)
+end
+--]]
+
+local function power(x)
+	return math.pow(1.01, x) * x * 1000
 end
 
 -- Original reward formula based on distance (x)

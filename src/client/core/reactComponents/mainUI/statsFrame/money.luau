@@ -8,6 +8,8 @@ local React = require(sharedPackages.React)
 local ReactSpring = require(sharedPackages.ReactSpring)
 local components = ReplicatedStorage.client.reactComponents
 
+local reactUtil = require(ReplicatedStorage.shared.utilities.reactUtil)
+
 local Trove = require(ReplicatedStorage.sharedPackages.Trove)
 
 local zap = require(ReplicatedStorage.zap)
@@ -77,7 +79,9 @@ return function(props)
 			FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
 			Position = UDim2.fromScale(0.56, 0.514),
 			Size = UDim2.fromScale(0.547, 0.505),
-			Text = currentMoney,
+			Text = currentMoney:map(function(val)
+				return reactUtil.formatNumber(val)
+			end),
 			TextColor3 = Color3.fromRGB(255, 255, 0),
 			TextScaled = true,
 			TextSize = 14,

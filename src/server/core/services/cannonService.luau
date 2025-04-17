@@ -190,7 +190,8 @@ function cannonService.awardPlayer(player, playerPath)
 	playerData.highscore = math.max(playerData.highscore, math.round(playerPath.distance))
 
 	-- Save updated player data (includes potential flag changes and money updates)
-	dataService.updatePlayerData(player, playerData)
+	-- Force save the data immediately after awarding to prevent data loss
+	dataService.updatePlayerData(player, playerData, true)
 end
 
 function cannonService.start()

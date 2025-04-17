@@ -72,7 +72,7 @@ return function(props)
 				Position = UDim2.fromScale(-0.0011, 0.271 + 0.125 * 2),
 				RichText = true,
 				Size = UDim2.fromScale(1, 0.125),
-				Text = "+ " .. reactUtil.formatNumber(props.floors) .. " FLOORS",
+				Text = reactUtil.formatNumber(props.floors) .. " FLOORS",
 				TextColor3 = Color3.fromRGB(142, 172, 255),
 				TextScaled = true,
 				TextSize = 14,

@@ -96,8 +96,10 @@ return function(props)
 						buyGift = function()
 							local giftName = info.giftName
 							if giftName then
+								print(giftName)
 								props.setSelectedGift(giftName)
 								task.delay(0.2, function()
+									props.giftSelectedEvent:Fire()
 									props.selectedUIEvent:Fire("newGifts")
 								end)
 							end
