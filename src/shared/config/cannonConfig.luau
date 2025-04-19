@@ -6,7 +6,7 @@ end
 --]]
 
 local function power(x)
-	return math.pow(1.01, x) * x * 1000
+	return math.pow(1.0035, x) * x * 1000
 end
 
 -- Original reward formula based on distance (x)

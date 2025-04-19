@@ -16,6 +16,7 @@ local product = require(components.mainUI.shop.product)
 local gamepassConfig = require(ReplicatedStorage.shared.config.gamepassConfig)
 
 local marketplaceUtil = require(ReplicatedStorage.shared.utilities.marketplaceUtil)
+local dataController = require(ReplicatedStorage.client.controllers.dataController)
 
 local function productsGroup(props)
 	return React.createElement("CanvasGroup", {
@@ -64,6 +65,7 @@ return function(props)
 
 	local sections = React.useMemo(function()
 		local _sections = {}
+		local playerData = dataController.getData()
 		for gamepassName, info in pairs(gamepassConfig) do
 			if info.shouldAppear == false then
 				continue
@@ -77,6 +79,13 @@ return function(props)
 			local gamepassInfo = typeof(info.id) == "table"
 					and marketplaceUtil.getProductInfo(info.id[1], Enum.InfoType.Product)
 				or marketplaceUtil.getProductInfo(info.id, info.infoType)
+			local targetPrice = gamepassInfo.PriceInRobux
+			if info.tiers then
+				if playerData.productTiers.products[info.type] and playerData.productTiers.products[info.type] >= 5 then
+					local tier2Info = gamepassConfig[info.tier2Name]
+					gamepassInfo = marketplaceUtil.getProductInfo(tier2Info.id, Enum.InfoType.Product)
+				end
+			end
 			table.insert(
 				_sections[info.type],
 				React.createElement(

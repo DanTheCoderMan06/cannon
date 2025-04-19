@@ -772,8 +772,12 @@ return {
 					local itemInfo = marketplaceUtil.getProductInfo(tierInfo.id, Enum.InfoType.Product)
 
 					updateEvent:Fire({
-						title = "TIER " .. playerData.cannonTier + 1,
-						description = itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>',
+						title = if #tierConfig.cannonTiers ~= playerData.cannonTier
+							then "TIER " .. playerData.cannonTier + 1
+							else "MAX TIER",
+						description = if #tierConfig.cannonTiers ~= playerData.cannonTier
+							then itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
+							else " ",
 					})
 				end))
 			end,
@@ -788,10 +792,12 @@ return {
 				local itemInfo = marketplaceUtil.getProductInfo(tierInfo.id, Enum.InfoType.Product)
 
 				return {
-					title = "TIER " .. playerData.cannonTier + 1,
+					title = if #tierConfig.cannonTiers ~= playerData.cannonTier
+						then "TIER " .. playerData.cannonTier + 1
+						else "MAX TIER",
 					description = if #tierConfig.cannonTiers ~= playerData.cannonTier
 						then itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
-						else "MAX TIER",
+						else " ",
 				}
 			end,
 			initModel = function(modelTrove, updateModelEvent)

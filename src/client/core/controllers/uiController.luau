@@ -21,7 +21,8 @@ local Trove = require(sharedPackages.Trove)
 local Sift = require(sharedPackages.Sift)
 local menuUi = require(ReplicatedStorage.client.reactComponents.mainUI)
 local loadUI = require(ReplicatedStorage.client.reactComponents.loadingScreen)
-local notification = require(ReplicatedStorage.client.reactComponents.notification)
+local NotificationComponent = require(ReplicatedStorage.client.reactComponents.notification) -- Renamed for clarity
+local NotificationContainer = require(ReplicatedStorage.client.reactComponents.notification.NotificationContainer) -- Require the new container
 
 local zap = require(ReplicatedStorage.zap)
 
@@ -30,6 +31,7 @@ local selectSectionEvent = Signal.new()
 local unlockedItemEvent = Signal.new()
 local claimedItemEvent = Signal.new()
 local resetEvent = Signal.new()
+local addNotificationEvent = Signal.new() -- Add signal for adding notifications
 
 local effectsController = require(ReplicatedStorage.client.controllers.effectsController)
 local dataController = require(ReplicatedStorage.client.controllers.dataController)
@@ -40,29 +42,18 @@ uiController.promptInEvent = Signal.new()
 local reactUtil = require(ReplicatedStorage.shared.utilities.reactUtil)
 
 -- Removed unused getRandomPosition function
-local notifContainer = ReactRoblox.createRoot(Instance.new("Folder"))
+-- Removed old notifContainer root
 
--- Modified function to accept a specific start position
+-- Modified function to fire an event instead of rendering directly
 function uiController.renderNotification(text: string, color: Color3, startPosition: UDim2)
-	print("Render Notification!")
-	local destroyEvent = Signal.new()
-
-	notifContainer:render(ReactRoblox.createPortal(
-		React.createElement(notification, {
-			text = text,
-			start = startPosition,
-			color = color,
-			destroyEvent = destroyEvent,
-		}),
-		Players.LocalPlayer.PlayerGui,
-		"notification" .. HttpService:GenerateGUID(false)
-	))
-
-	task.spawn(function()
-		destroyEvent:Wait()
-		notifContainer:unmount()
-		destroyEvent:Destroy()
-	end)
+	print("Queueing Notification!")
+	addNotificationEvent:Fire({
+		id = HttpService:GenerateGUID(false),
+		text = text,
+		color = color,
+		start = startPosition,
+	})
+	-- Removed portal creation and destroyEvent logic
 end
 
 function uiController.canPromptIn()
@@ -123,9 +114,13 @@ function uiController.start()
 			IgnoreGuiInset = true,
 		}, {
 			content = React.createElement(app),
+			-- Add the Notification Container here, rendered into the same ScreenGui or a dedicated one
+			notificationContainer = React.createElement(NotificationContainer, {
+				addNotificationEvent = addNotificationEvent,
+			}),
 		}),
 		Players.LocalPlayer.PlayerGui,
-		"menuUI"
+		"menuUI" -- This ScreenGui now also holds the NotificationContainer
 	))
 
 	local currentData = nil

@@ -60,16 +60,16 @@ function cannonController.createCannon(cannonName: string)
 	local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
 	local playerData = dataController.getData()
 	playerPlatform:FindFirstChild("cannonPosition"):ClearAllChildren()
-	local targetCannon = ReplicatedStorage.assets.cannons:FindFirstChild(cannonName):Clone()
+	local targetCannon =
+		ReplicatedStorage.assets.cannons:FindFirstChild(cannonName):FindFirstChildWhichIsA("Model"):Clone()
 	local cTrove = Trove.new()
-	targetCannon:FindFirstChildWhichIsA("Model").PrimaryPart.CFrame =
-		playerPlatform:FindFirstChild("cannonPosition").CFrame
+	targetCannon.PrimaryPart.CFrame = playerPlatform:FindFirstChild("cannonPosition").CFrame
 	targetCannon:SetAttribute("cannonName", cannonName)
-	targetCannon
-		:FindFirstChildWhichIsA("Model")
-		:ScaleTo(targetCannon:FindFirstChildWhichIsA("Model"):GetScale() * (playerData.cannonTier * 0.1 + 1))
+	local baseScale = targetCannon:GetScale()
+	print(playerData.cannonTier)
+	print("NEW SCALE: " .. baseScale * (playerData.cannonTier * 0.1 + 1))
+	targetCannon:ScaleTo(targetCannon:GetScale() * (playerData.cannonTier * 0.1 + 1))
 	targetCannon.Parent = playerPlatform:FindFirstChild("cannonPosition")
-
 	cTrove:AttachToInstance(targetCannon)
 end
 
@@ -415,6 +415,15 @@ function cannonController.start()
 		end
 		playerPlatform:FindFirstChild("cannonPosition", true):FindFirstChildWhichIsA("Model", true).PrimaryPart.CFrame =
 			playerPlatform:FindFirstChild("cannonPosition", true).CFrame
+	end)
+
+	local currentTier = dataController.getData().cannonTier
+	dataController.dataChanged:Connect(function(newData)
+		if newData.cannonTier == currentTier then
+			return
+		end
+		currentTier = newData.cannonTier
+		updateCannon()
 	end)
 end
 

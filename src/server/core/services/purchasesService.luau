@@ -29,16 +29,15 @@ local cannonService = require(ServerStorage.server.services.cannonService)
 
 local targets = {}
 
-function purchaseService.upgradeTier(player, tierName, target)
+function purchaseService.upgradeTier(player, target)
 	local playerData = dataService.getPlayerData(player)
-	if playerData[tierName] < target - 1 then
+	if playerData.cannonTier < target - 1 then
 		player:Kick("Anti-Exploit: You were kicked for buying a dev product you weren't meant to buy.")
 		return
 	end
-	playerData[tierName] = target
-	dataService.updatePlayerData(player, playerData)
-	task.defer(function()
-		cannonService.addCannon(player, cannonConfig.getCannon(playerData.cannon))
+	playerData.cannonTier = target
+	task.delay(0.2, function()
+		dataService.updatePlayerData(player, playerData)
 	end)
 end
 
@@ -65,9 +64,8 @@ function purchaseService.handlePurchase(recieptInfo)
 
 	for name, cannonTier in pairs(tierConfig.cannonTiers) do
 		if cannonTier.id == recieptInfo.ProductId then
-			task.defer(function()
-				purchaseService.upgradeTier(player, "cannonTier", cannonTier.tier)
-			end)
+			print("FOUND TIER")
+			purchaseService.upgradeTier(player, cannonTier.tier) -- Call directly
 			return Enum.ProductPurchaseDecision.PurchaseGranted
 		end
 	end
