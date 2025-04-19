@@ -125,13 +125,9 @@ function cannonController.start()
 		end
 
 		physics.time += dataController.getData().floors / 600
+		physics.time /= 10
 
-		local multiplier = 1
-		if physics.time > MAX_TIME then
-			multiplier = physics.time / MAX_TIME
-		elseif physics.time < 2 then
-			multiplier = physics.time / 2
-		end
+		local multiplier = math.max(physics.verticalVelocity / 1000, 3) --/ physics.time
 
 		local character = Players.LocalPlayer.Character
 		local pTrove = Trove.new()
@@ -206,7 +202,9 @@ function cannonController.start()
 
 		cameraController.startAir()
 
-		cannonController.playLaunchSound(multiplier, physics.time)
+		cannonController.playLaunchSound(multiplier, 5)
+
+		print(physics.verticalVelocity)
 
 		pTrove:BindToRenderStep("pathPhysics", Enum.RenderPriority.First.Value, function()
 			timeElapsed = (tick() - startTime) * multiplier
@@ -217,22 +215,17 @@ function cannonController.start()
 				timeElapsed * physics.verticalVelocity + 0.5 * -workspace.Gravity * math.pow(timeElapsed, 2)
 			)
 
-			local calculatedPosition = startPosition
-				* CFrame.new(0, math.min(verticalComponent, 20000), -fixedHorizontal) -- Clamp max height
-				* CFrame.Angles(-math.rad(math.fmod(timeElapsed * 180 / multiplier, 360)), 0, 0)
+			local fixedVertical
 
-			local timeElapsed = tick() - startTime
-			local progress = math.clamp(timeElapsed / MAX_TIME, 0, 1)
-			local greenBlue = math.floor(255 * (1 - progress))
-
-			--[[
-			for _, v in pairs(characterTrails) do
-				v.Color = ColorSequence.new(
-					Color3.fromRGB(255, math.clamp(greenBlue, 135, 255), math.clamp(greenBlue, 135, 255))
-				)
-				v.Transparency = NumberSequence.new(1 - math.clamp(progress + 0.3, 0, 1))
+			if verticalComponent < 10000 then
+				fixedVertical = math.min(verticalComponent, 10000)
+			else
+				fixedVertical = 10000 + verticalComponent / 500
 			end
-			--]]
+
+			local calculatedPosition = startPosition
+				* CFrame.new(0, fixedVertical, -fixedHorizontal) -- Clamp max height
+				* CFrame.Angles(-math.rad(math.fmod(timeElapsed * 180 / multiplier, 360)), 0, 0)
 
 			for _, v in pairs(character.PrimaryPart:GetDescendants()) do
 				if not v:GetAttribute("targetDistance") then
@@ -250,12 +243,7 @@ function cannonController.start()
 				return
 			end
 
-			if
-				(
-					math.abs(calculatedPosition.Position.Y) <= math.max(physics.verticalVelocity * 0.1, MAX_TIME)
-					and timeElapsed > physics.time / multiplier
-				) or calculatedPosition.Position.Y < 20
-			then
+			if calculatedPosition.Position.Y < 70 then
 				print("destroy")
 				pTrove:Destroy()
 				Player.Character.PrimaryPart.Anchored = true
@@ -289,7 +277,7 @@ function cannonController.start()
 				CFrame.new(newPosition.Position, endPosition.Position):Lerp(
 					CFrame.new(newPosition.Position, endPosition.Position)
 						* CFrame.new(0, 0, -(endPosition.Position - newPosition.Position).Magnitude),
-					0.995
+					0.5
 				)
 			)
 
@@ -336,8 +324,8 @@ function cannonController.start()
 					task.wait()
 				until not character
 					or (
-						(character.PrimaryPart.AssemblyLinearVelocity.Magnitude < 5 or tick() - startWait > 2.9) -- Reduced inner timeout
-						and character.PrimaryPart.Position.Y < 5
+						(character.PrimaryPart.AssemblyLinearVelocity.Magnitude < 5 or tick() - startWait > 4) -- Reduced inner timeout
+						and character.PrimaryPart.Position.Y < 2
 					)
 
 				cameraController.endShake()

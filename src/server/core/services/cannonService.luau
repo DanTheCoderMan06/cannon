@@ -76,7 +76,7 @@ function cannonService.launchPlayer(player)
 		-- Fallback or default height if needed, e.g., using player's own tower base as before or a fixed value
 		local ownCastleSpot = castleFolder:FindFirstChild(player.Name)
 		if cannonPosition and ownCastleSpot then
-			playerHeight = math.abs(cannonPosition.Position.Y - ownCastleSpot.Position.Y)
+			playerHeight = math.abs(player.Character.PrimaryPart.Position.Y - ownCastleSpot.Position.Y)
 		end
 	end
 
@@ -125,7 +125,7 @@ function cannonService.launchPlayer(player)
 		end
 	end
 
-	cannonPower *= (1 + playerData.floors / 700)
+	cannonPower += playerHeight / 5
 
 	local simulatedPhysics = physicsUtil.getVariables(playerHeight, cannonPower)
 
@@ -144,18 +144,19 @@ function cannonService.awardPlayer(player, playerPath)
 
 	-- Check for first cannon purchase bonus
 	-- Assumes 'boughtCannonYet' boolean exists in playerData, otherwise this check might grant bonus repeatedly.
+
+	-- Check for first floor purchase bonus
+	-- Assumes 'boughtFloorYet' boolean exists in playerData, otherwise this check might grant bonus repeatedly.
 	if not playerData.boughtCannonYet then
-		local firstCannonCost = cannonConfig.costFormula(playerData.cannon, 1) -- Cost for level 1 from level 0
+		local firstCannonCost = cannonConfig.costFormula(playerData.cannon + 1, 0) -- Cost for level 1 from level 0
 		bonusAward += firstCannonCost
 		playerData.boughtCannonYet = true -- Set flag to true after granting
 		grantedBonus = true
 		print(string.format("[CannonService] Granted first cannon bonus (%d) to %s", firstCannonCost, player.Name))
 	end
 
-	-- Check for first floor purchase bonus
-	-- Assumes 'boughtFloorYet' boolean exists in playerData, otherwise this check might grant bonus repeatedly.
 	if not playerData.boughtFloorYet then
-		local firstFloorCost = floorConfig.costFormula(playerData.floors, 0) -- Cost for level 1 from level 0
+		local firstFloorCost = floorConfig.costFormula(playerData.floors + 1, 0) -- Cost for level 1 from level 0
 		bonusAward += firstFloorCost
 		playerData.boughtFloorYet = true -- Set flag to true after granting
 		grantedBonus = true

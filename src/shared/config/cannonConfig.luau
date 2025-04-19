@@ -6,7 +6,12 @@ end
 --]]
 
 local function power(x)
-	return math.pow(1.0035, x) * x * 1000
+	local x1 = math.clamp(x, 0, 30)
+	local x2 = 0
+	if x1 < x then
+		x2 = x - x1
+	end
+	return math.pow(1.1, x1) * 450 + math.log(x2 + 1, 3) * 900
 end
 
 -- Original reward formula based on distance (x)
@@ -29,30 +34,20 @@ local function calculateDistance(initialHeight, initialVelocity, angleDegrees)
 end
 
 local function cost(targetLevel, boughtLevels)
-	if targetLevel <= boughtLevels then
+	local bl = boughtLevels or 0
+	if targetLevel <= bl then
 		return 0
 	end
 
 	if targetLevel == 1 then
-		return 100
+		return 4000
 	end
 
-	local previousLevel = targetLevel - 1
+	local delta = targetLevel - bl
 
-	local powerPreviousLevel = power(previousLevel)
+	local cost = 4000 * math.pow(1.12, delta) + 8000 * delta
 
-	local assumedHeight = 5
-	local distancePreviousLevel = calculateDistance(assumedHeight, powerPreviousLevel, 45)
-
-	local rewardPreviousLevel = rewardFormula(distancePreviousLevel, 0)
-
-	local finalCost = math.round(rewardPreviousLevel * math.pow(1.075, targetLevel - boughtLevels) * 0.86)
-
-	if targetLevel - boughtLevels > 50 then
-		finalCost = math.round(finalCost * math.pow(1.02, 50 - targetLevel + boughtLevels))
-	end
-
-	return math.max(1, finalCost)
+	return cost
 end
 
 local module = {

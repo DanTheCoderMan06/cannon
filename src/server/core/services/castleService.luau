@@ -216,6 +216,7 @@ function castleService.start()
 		castleService.updateTowerPrivacy(player, playerData.towerStatus)
 		return true
 	end)
+
 	zap.selectPlatform.SetCallback(function(player, targetPlayer)
 		targetPlayer = targetPlayer or player
 		local targetPlayerData = dataService.getPlayerData(targetPlayer)
@@ -224,7 +225,7 @@ function castleService.start()
 				return
 			end
 		elseif targetPlayerData.towerStatus == 1 then
-			if not player:IsFriendsWith(targetPlayer.UserId) then
+			if not player:IsFriendsWith(targetPlayer.UserId) and player ~= targetPlayer then
 				return
 			end
 		end

@@ -3,11 +3,10 @@ local cannonConfig = require(ReplicatedStorage.shared.config.cannonConfig)
 local physicsUtil = {}
 
 function physicsUtil.getVariables(initialHeight, initialVelocity)
-	print(initialHeight)
 	local horizontalVelocity = math.cos(math.rad(45)) * initialVelocity
 	local verticalVelocity = math.sin(math.rad(45)) * initialVelocity
 	local timeElapsed = (
-		verticalVelocity + math.sqrt(math.pow(verticalVelocity, 2) + 2 * workspace.Gravity * (initialHeight * 5))
+		verticalVelocity + math.sqrt(math.pow(verticalVelocity, 2) + 2 * workspace.Gravity * initialHeight)
 	) / workspace.Gravity
 	local horizontalDistanceTraveled = timeElapsed * horizontalVelocity
 
@@ -17,7 +16,7 @@ function physicsUtil.getVariables(initialHeight, initialVelocity)
 		horizontalVelocity = horizontalVelocity,
 		verticalVelocity = verticalVelocity,
 		distance = horizontalDistanceTraveled,
-		time = timeElapsed * 3,
+		time = timeElapsed,
 		timeCreated = tick(),
 	}
 end

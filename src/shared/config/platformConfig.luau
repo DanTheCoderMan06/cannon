@@ -685,7 +685,15 @@ return {
 
 				trove:Add(playerPlatform:GetAttributeChangedSignal("currentTower"):Connect(function()
 					if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
+						local playerData = dataController.getData()
 						updateColor()
+						updateEvent:Fire({
+							title = "TOWER STATUS",
+							description = if playerData.towerStatus == 0
+								then "PUBLIC 🌐"
+								elseif playerData.towerStatus == 1 then "FRIENDS ONLY 👥"
+								else "PRIVATE 🔒",
+						})
 					else
 						switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255))
 						updateEvent:Fire({

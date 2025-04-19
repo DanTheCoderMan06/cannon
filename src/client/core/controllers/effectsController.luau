@@ -221,9 +221,8 @@ function effectsController.finishedPath(results, track, animationInstance)
 
 	-- Create the effects part
 	local finishedPathEffects = ReplicatedStorage.assets.finishedPath:Clone()
-	finishedPathEffects:PivotTo(
-		CFrame.new(character.PrimaryPart.Position * Vector3.new(1, 0, 1) + Vector3.new(0, 0.5, 0))
-	)
+	finishedPathEffects.PrimaryPart.Position = character.PrimaryPart.Position * Vector3.new(1, 0, 1)
+	finishedPathEffects.PrimaryPart.Orientation = Vector3.new(0, 0, 90)
 	finishedPathEffects.Parent = workspace
 
 	-- Set up the trove for animations and cleanup
@@ -235,6 +234,11 @@ function effectsController.finishedPath(results, track, animationInstance)
 	if not playerData.boughtFloorYet then
 		local firstFloorCost = floorConfig.costFormula(playerData.floors, 0) -- Cost for level 1 from level 0
 		reward += firstFloorCost
+	end
+
+	if not playerData.boughtCannonYet then
+		local firstCannon = cannonConfig.costFormula(playerData.cannon, 0) -- Cost for level 1 from level 0
+		reward += firstCannon
 	end
 
 	local billboardRef = React.createRef()
@@ -276,30 +280,29 @@ function effectsController.finishedPath(results, track, animationInstance)
 
 	task.wait(2)
 
-	effectsController.blackScreen(1, function()
-		billboardRef:getValue().Enabled = false
+	billboardRef:getValue().Enabled = false
 
-		billboardContainer:unmount()
+	billboardContainer:unmount()
 
-		-- Clean up the effects
-		finishedPathEffects:Destroy()
-		partTrove:Destroy()
+	-- Clean up the effects
+	finishedPathEffects:Destroy()
+	partTrove:Destroy()
 
-		character.PrimaryPart.Anchored = false
-		character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
-		task.wait()
-		zap.requestLoad.Fire()
+	character.PrimaryPart.Anchored = false
+	character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
+	task.wait()
+	zap.requestLoad.Fire()
 
-		keysController.freezeMovement(false)
-		keysController.updateFarming()
-		if track then
-			track:Stop()
-			track:Destroy() -- Destroy the track
-		end
-		if animationInstance then
-			animationInstance:Destroy() -- Destroy the animation instance
-		end
-	end)
+	keysController.freezeMovement(false)
+	keysController.updateFarming()
+	if track then
+		track:Stop()
+		track:Destroy() -- Destroy the track
+	end
+	if animationInstance then
+		animationInstance:Destroy() -- Destroy the animation instance
+	end
+
 	task.wait(1)
 	effectsController.updateHighscore()
 end

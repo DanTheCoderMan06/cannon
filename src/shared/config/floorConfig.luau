@@ -27,25 +27,11 @@ local function get_cost_for_base_level(baseLevel)
 end
 --]]
 
-local function get_cost_for_base_level(baseLevel)
-	local cost = baseLevel * 155
-	return cost
-end
-
 local module = {
 	costFormula = function(targetLevel, boughtLevels)
-		if targetLevel <= boughtLevels then
-			return 0
-		end
-
-		local totalCost = 0
-		for currentLevel = boughtLevels + 1, targetLevel do
-			local levelGroup = math.ceil((currentLevel - 1) / 5)
-			local baseLevelForGroup = levelGroup * 5 + 1
-
-			local levelCost = get_cost_for_base_level(baseLevelForGroup)
-			totalCost = totalCost + levelCost
-		end
+		local floorDelta = math.max(targetLevel - boughtLevels, 0)
+		local floorBase = math.ceil(floorDelta / 5) * 0.5
+		local totalCost = 5000 * floorBase + math.pow(1.04, math.floor(floorBase / 2))
 
 		return totalCost
 	end,

@@ -477,8 +477,6 @@ function castleController.start()
 							newModel:ScaleTo(recievedModel:GetAttribute("miniSize"))
 						end
 						newModel.Parent = workspace
-						ContentProvider:PreloadAsync(newModel:GetDescendants())
-						task.wait(0.2)
 						if newColor ~= nil then
 							for _, v in pairs(newModel:GetDescendants()) do
 								if v:IsA("BasePart") then
