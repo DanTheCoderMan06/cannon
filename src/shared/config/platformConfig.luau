@@ -357,13 +357,13 @@ return {
 					zap.checkRecipient.Call({
 						selectedPlayer = playerPlatform:GetAttribute("currentTower"),
 						selectedGift = "tenFloors",
+						override = true,
 					})
-					if playerData.productTiers.gifts["floors"] then
-						if playerData.productTiers.gifts["floors"] >= 5 then
-							MarketplaceService:PromptProductPurchase(localPlayer, giftConfig.tenFloorsTier2.id)
-							callbackEvent:Fire(true)
-							return
-						end
+					-- Check gift tier, defaulting to 0 if nil
+					if (playerData.productTiers.gifts["floors"] or 0) >= 5 then
+						MarketplaceService:PromptProductPurchase(localPlayer, giftConfig.tenFloorsTier2.id)
+						callbackEvent:Fire(true)
+						return
 					end
 					MarketplaceService:PromptProductPurchase(localPlayer, giftConfig.tenFloors.id)
 					callbackEvent:Fire(true)
@@ -415,13 +415,14 @@ return {
 				end))
 
 				local function updateFloorDisplay()
+					local newPlayerData = dataController.getData()
 					if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
 						updateEvent:Fire({
 							title = "LEVEL " .. tostring(floorValue.Value),
 
 							description = "$ " .. tostring(
 								reactUtil.formatNumber(
-									floorConfig.costFormula(floorValue.Value + 1, playerData.boughtFloors)
+									floorConfig.costFormula(floorValue.Value + 1, newPlayerData.boughtFloors)
 								)
 							),
 						})
@@ -431,10 +432,12 @@ return {
 						-- TODO: Add logic to check playerData.productTiers.gifts["floors"] for tier 2 ID if necessary
 						local itemInfo
 						local title = "GIFT 10 FLOORS"
-						if playerData.productTiers.products["floors"] >= 5 then
+						-- Check product tier, defaulting to 0 if nil
+						if (newPlayerData.productTiers.gifts["floors"] or 0) >= 5 then
 							giftId = giftConfig.tenFloorsTier2.id
 							itemInfo = marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
 							title = "GIFT 10 FLOORS (TIER 2)"
+							print(itemInfo)
 						end
 						itemInfo = itemInfo or marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
 						local priceDesc = itemInfo and itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
@@ -455,12 +458,13 @@ return {
 				local oldDevs = currentData.productTiers.products["floors"] or 0
 				trove:Add(
 					dataController.dataChanged:Connect(function(newData)
+						-- Check product and gift tiers, defaulting to 0 if nil
 						local newGifts = newData.productTiers.gifts["floors"] or 0
 						local newDevs = newData.productTiers.products["floors"] or 0
 						if oldGifts == newGifts and oldDevs == newDevs then
-							print("Dont change")
 							return
 						end
+
 						oldDevs = newDevs
 						oldGifts = newGifts
 						updateFloorDisplay()
@@ -506,30 +510,25 @@ return {
 				local localPlayer = Players.LocalPlayer
 				local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(localPlayer.Name)
 				if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
-					if playerData.productTiers.products["floors"] then
-						if playerData.productTiers.products["floors"] >= 5 then
-							MarketplaceService:PromptProductPurchase(
-								Players.LocalPlayer,
-								gamepassConfig.tenFloorsTier2.id
-							)
-						else
-							MarketplaceService:PromptProductPurchase(Players.LocalPlayer, gamepassConfig.tenFloors.id)
-						end
+					-- Check product tier, defaulting to 0 if nil
+					if (playerData.productTiers.products["floors"] or 0) >= 5 then
+						MarketplaceService:PromptProductPurchase(Players.LocalPlayer, gamepassConfig.tenFloorsTier2.id)
+					else
+						MarketplaceService:PromptProductPurchase(Players.LocalPlayer, gamepassConfig.tenFloors.id)
 					end
-					MarketplaceService:PromptProductPurchase(Players.LocalPlayer, gamepassConfig.tenFloors.id)
 					callbackEvent:Fire(true)
 				else
 					local playerData = dataController.getData()
 					zap.checkRecipient.Call({
 						selectedPlayer = playerPlatform:GetAttribute("currentTower"),
 						selectedGift = "fiftyFloors",
+						override = true,
 					})
-					if playerData.productTiers.gifts["floors"] then
-						if playerData.productTiers.gifts["floors"] >= 5 then
-							MarketplaceService:PromptProductPurchase(localPlayer, giftConfig.fiftyFloorsTier2.id)
-							callbackEvent:Fire(true)
-							return
-						end
+					-- Check gift tier, defaulting to 0 if nil
+					if (playerData.productTiers.gifts["floors"] or 0) >= 5 then
+						MarketplaceService:PromptProductPurchase(localPlayer, giftConfig.fiftyFloorsTier2.id)
+						callbackEvent:Fire(true)
+						return
 					end
 					MarketplaceService:PromptProductPurchase(localPlayer, giftConfig.fiftyFloors.id)
 					callbackEvent:Fire(true)
@@ -562,10 +561,8 @@ return {
 						title = "+10 FLOORS"
 						productId = gamepassConfig.tenFloors.id
 						local itemInfo
-						if
-							playerData.productTiers.products["floors"]
-							and playerData.productTiers.products["floors"] >= 5
-						then
+						-- Check product tier, defaulting to 0 if nil
+						if (playerData.productTiers.products["floors"] or 0) >= 5 then
 							productId = gamepassConfig.tenFloorsTier2.id
 							title = "+10 FLOORS (TIER 2)"
 							itemInfo = marketplaceUtil.getProductInfo(productId, Enum.InfoType.Product)
@@ -578,7 +575,8 @@ return {
 						title = "GIFT 50 FLOORS"
 						local itemInfo
 						giftId = giftConfig.fiftyFloors.id
-						if playerData.productTiers.gifts["floors"] and playerData.productTiers.gifts["floors"] >= 5 then
+						-- Check gift tier, defaulting to 0 if nil
+						if (playerData.productTiers.gifts["floors"] or 0) >= 5 then
 							giftId = giftConfig.fiftyFloorsTier2.id
 							title = "GIFT 50 FLOORS (TIER 2)"
 							itemInfo = marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
@@ -597,6 +595,7 @@ return {
 				local oldGifts = currentData.productTiers.gifts["floors"] or 0
 				local oldDevs = currentData.productTiers.products["floors"] or 0
 				dataController.dataChanged:Connect(function(newData)
+					-- Check product and gift tiers, defaulting to 0 if nil
 					local newGifts = newData.productTiers.gifts["floors"] or 0
 					local newDevs = newData.productTiers.products["floors"] or 0
 					if oldGifts == newGifts and oldDevs == newDevs then
@@ -619,30 +618,28 @@ return {
 				local localPlayer = Players.LocalPlayer
 				local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(localPlayer.Name)
 				if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
-					if playerData.productTiers.products["floors"] then
-						if playerData.productTiers.products["floors"] >= 5 then
-							MarketplaceService:PromptProductPurchase(
-								Players.LocalPlayer,
-								gamepassConfig.fiftyFloorsTier2.id
-							)
-						else
-							MarketplaceService:PromptProductPurchase(Players.LocalPlayer, gamepassConfig.fiftyFloors.id)
-						end
+					-- Check product tier, defaulting to 0 if nil
+					if (playerData.productTiers.products["floors"] or 0) >= 5 then
+						MarketplaceService:PromptProductPurchase(
+							Players.LocalPlayer,
+							gamepassConfig.fiftyFloorsTier2.id
+						)
+					else
+						MarketplaceService:PromptProductPurchase(Players.LocalPlayer, gamepassConfig.fiftyFloors.id)
 					end
-					MarketplaceService:PromptProductPurchase(Players.LocalPlayer, gamepassConfig.fiftyFloors.id)
 					callbackEvent:Fire(true)
 				else
 					local playerData = dataController.getData()
 					zap.checkRecipient.Call({
 						selectedPlayer = playerPlatform:GetAttribute("currentTower"),
 						selectedGift = "twoHundredFifty",
+						override = true,
 					})
-					if playerData.productTiers.gifts["floors"] then
-						if playerData.productTiers.gifts["floors"] >= 5 then
-							MarketplaceService:PromptProductPurchase(localPlayer, giftConfig.twoHundredFiftyTier2.id)
-							callbackEvent:Fire(true)
-							return
-						end
+					-- Check gift tier, defaulting to 0 if nil
+					if (playerData.productTiers.gifts["floors"] or 0) >= 5 then
+						MarketplaceService:PromptProductPurchase(localPlayer, giftConfig.twoHundredFiftyTier2.id)
+						callbackEvent:Fire(true)
+						return
 					end
 					MarketplaceService:PromptProductPurchase(localPlayer, giftConfig.twoHundredFifty.id)
 					callbackEvent:Fire(true)
@@ -675,10 +672,8 @@ return {
 						title = "+50 FLOORS"
 						productId = gamepassConfig.fiftyFloors.id
 						local itemInfo
-						if
-							playerData.productTiers.products["floors"]
-							and playerData.productTiers.products["floors"] >= 5
-						then
+						-- Check product tier, defaulting to 0 if nil
+						if (playerData.productTiers.products["floors"] or 0) >= 5 then
 							title = "+50 FLOORS (TIER 2)"
 							productId = gamepassConfig.fiftyFloorsTier2.id
 							itemInfo = marketplaceUtil.getProductInfo(productId, Enum.InfoType.Product)
@@ -691,7 +686,8 @@ return {
 						local itemInfo
 						title = "GIFT 250 FLOORS"
 						giftId = giftConfig.twoHundredFifty.id
-						if playerData.productTiers.gifts["floors"] and playerData.productTiers.gifts["floors"] >= 5 then
+						-- Check gift tier, defaulting to 0 if nil
+						if (playerData.productTiers.gifts["floors"] or 0) >= 5 then
 							giftId = giftConfig.twoHundredFiftyTier2.id
 							title = "GIFT 250 FLOORS (TIER 2)"
 							itemInfo = marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
@@ -710,6 +706,7 @@ return {
 				local oldGifts = currentData.productTiers.gifts["floors"] or 0
 				local oldDevs = currentData.productTiers.products["floors"] or 0
 				dataController.dataChanged:Connect(function(newData)
+					-- Check product and gift tiers, defaulting to 0 if nil
 					local newGifts = newData.productTiers.gifts["floors"] or 0
 					local newDevs = newData.productTiers.products["floors"] or 0
 					if oldGifts == newGifts and oldDevs == newDevs then

@@ -166,7 +166,9 @@ function purchaseService.start()
 		if giftConfig[data.selectedGift].check(targetPlayer) == false then
 			return false
 		end
-		targets[player.Name] = targetPlayer
+		if data.override then -- See if also being used to get prompt for user!
+			targets[player.Name] = targetPlayer
+		end
 		return true
 	end)
 

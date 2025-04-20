@@ -29,9 +29,12 @@ return function(props)
 				return
 			end
 			print("call")
-			local canGive =
-				zap.checkRecipient.Call({ selectedPlayer = props.id, selectedGift = props.selectedGift:getValue() })
-			print(canGive)
+			local canGive = zap.checkRecipient.Call({
+				selectedPlayer = props.id,
+				selectedGift = props.selectedGift:getValue(),
+				override = false,
+			})
+
 			setCanGet(canGive)
 		end))
 

@@ -16,7 +16,7 @@ end
 
 return {
 	tenFloors = {
-		id = 2706012608, -- Gift 10 Floors (Tier II)
+		id = 2691916915, -- Gift 10 Floors (Tier II) 2706012608
 		shouldAppear = true,
 		tiers = true,
 		tier2Name = "tenFloorsTier2",
@@ -96,7 +96,7 @@ return {
 		end,
 	},
 	fiftyFloors = {
-		id = 2706012927, -- Gift 50 Floors (Tier II)
+		id = 2691917042, -- Gift 50 Floors (Tier II)
 		type = "floors",
 		shouldAppear = true,
 		tiers = true,
@@ -254,7 +254,7 @@ return {
 	doubleDistance = {
 		id = 3106616737, -- 2x Distance (Gift)
 		shouldAppear = true,
-		tiers = true,
+		tiers = false,
 		type = "gamepasses",
 		tier2Name = "doubleDistanceTier2",
 		callback = function(player, target)
@@ -301,6 +301,7 @@ return {
 			return true
 		end,
 	},
+	--[[
 	doubleDistanceTier2 = {
 		id = 3106616737, -- 2x Distance (Gift)
 		type = "gamepasses",
@@ -337,10 +338,11 @@ return {
 			return true
 		end,
 	},
+	--]]
 	doubleMoney = {
 		id = 3106616541, -- 2x Cash (Gift)
 		shouldAppear = true,
-		tiers = true,
+		tiers = false,
 		type = "gamepasses",
 		tier2Name = "doubleMoneyTier2",
 		callback = function(player, target)
@@ -387,6 +389,7 @@ return {
 			return true
 		end,
 	},
+	--[[
 	doubleMoneyTier2 = {
 		id = 3106616541, -- 2x Cash (Gift)
 		shouldAppear = false,
@@ -423,10 +426,11 @@ return {
 			return true
 		end,
 	},
+	--]]
 	giveVIP = {
 		id = 3106616269, -- VIP (Gift)
 		shouldAppear = true,
-		tiers = true,
+		tiers = false,
 		type = "gamepasses",
 		tier2Name = "giveVIPTier2",
 		callback = function(player, target)
@@ -467,6 +471,7 @@ return {
 			return true
 		end,
 	},
+	--[[
 	giveVIPTier2 = {
 		id = 3106616269, -- VIP (Gift)
 		type = "gamepasses",
@@ -503,6 +508,7 @@ return {
 			return true
 		end,
 	},
+	--]]
 	giftArtillery = {
 		id = 3106618096, -- Special Cannon 1 (Gift)
 		shouldAppear = true,
