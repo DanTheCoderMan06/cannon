@@ -1,3 +1,4 @@
+local Lighting = game:GetService("Lighting")
 local PhysicsService = game:GetService("PhysicsService")
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -240,6 +241,25 @@ function cannonController.start()
 				timeElapsed * physics.verticalVelocity + 0.5 * -GRAVITY * math.pow(timeElapsed, 2)
 			)
 
+			-- Dynamic Lighting based on Altitude
+			local clockTime
+			print(verticalComponent)
+			if verticalComponent < effectsConfig.NIGHT_TRANSITION_START_ALTITUDE then
+				clockTime = effectsConfig.DAY_CLOCK_TIME
+			elseif verticalComponent >= effectsConfig.NIGHT_TRANSITION_END_ALTITUDE then
+				clockTime = effectsConfig.NIGHT_CLOCK_TIME
+			else
+				local alpha = math.clamp(
+					(verticalComponent - effectsConfig.NIGHT_TRANSITION_START_ALTITUDE)
+						/ (effectsConfig.NIGHT_TRANSITION_END_ALTITUDE - effectsConfig.NIGHT_TRANSITION_START_ALTITUDE),
+					0,
+					1
+				)
+				clockTime = effectsConfig.DAY_CLOCK_TIME
+					+ (effectsConfig.NIGHT_CLOCK_TIME - effectsConfig.DAY_CLOCK_TIME) * alpha
+			end
+			Lighting.ClockTime = clockTime
+
 			local fixedVertical
 
 			fixedVertical = math.min(verticalComponent, MAX_ALLOWED_HEIGHT)
@@ -273,6 +293,8 @@ function cannonController.start()
 				finishedSignal:Fire()
 				return
 			end
+
+			-- Lighting.ClockTime =
 
 			if calculatedPosition.Position.Y < 70 then
 				print("destroy")

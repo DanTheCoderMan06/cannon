@@ -168,11 +168,6 @@ function effectsController.start()
 			return
 		end
 		local currentAltitude = math.abs(part.Position.Y)
-		if math.round(Lighting.ClockTime * 10) / 10 == 12 or math.round(Lighting.ClockTime * 10) / 10 > 22 then
-			spr.target(Lighting, 1, 0.75, {
-				ClockTime = if currentAltitude > config.nightSky then 23.9 else 12,
-			})
-		end
 
 		-- Cloud logic to match the step pattern: 0 -> 100% -> 0 for each interval
 		local cloudBand = math.floor(currentAltitude / config.cloudSky)
