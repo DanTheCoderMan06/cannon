@@ -199,6 +199,40 @@ function effectsController.start()
 		end
 	end)
 
+	-- Continuous Altitude-Based Lighting
+	RunService:BindToRenderStep("altitudeLightingUpdater", Enum.RenderPriority.Last.Value + 1, function()
+		local character = localPlayer.Character
+		if not character then
+			return
+		end
+		local part = character.PrimaryPart
+		if not part then
+			return
+		end
+
+		local currentAltitude = part.Position.Y -- Use current Y position
+
+		local clockTime
+		if currentAltitude < config.NIGHT_TRANSITION_START_ALTITUDE then
+			clockTime = config.DAY_CLOCK_TIME
+		elseif currentAltitude >= config.NIGHT_TRANSITION_END_ALTITUDE then
+			clockTime = config.NIGHT_CLOCK_TIME
+		else
+			local alpha = math.clamp(
+				(currentAltitude - config.NIGHT_TRANSITION_START_ALTITUDE)
+					/ (config.NIGHT_TRANSITION_END_ALTITUDE - config.NIGHT_TRANSITION_START_ALTITUDE),
+				0,
+				1
+			)
+			clockTime = config.DAY_CLOCK_TIME + (config.NIGHT_CLOCK_TIME - config.DAY_CLOCK_TIME) * alpha
+		end
+
+		-- Optional: Add a small tolerance check to avoid unnecessary updates if ClockTime is already very close
+		if math.abs(Lighting.ClockTime - clockTime) > 0.01 then
+			spr.target(Lighting, 1, 1, { ClockTime = clockTime })
+		end
+	end)
+
 	effectsController.updateHighscore()
 end
 
