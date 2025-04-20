@@ -63,7 +63,7 @@ function joinRewardService.spawnBlock(player: Player, rewardAmount: number)
 		newBlock:Destroy() -- Clean up the unused block
 		return
 	end
-	local blockSpawnPart = playerPlatform:FindFirstChild("blockSpawn")
+	local blockSpawnPart = playerPlatform:FindFirstChild("friendRewardSpawn")
 
 	if not blockSpawnPart or not blockSpawnPart:IsA("BasePart") then
 		warn(`[joinRewardService] Could not find 'blockSpawn' BasePart for {player.Name}. Cannot spawn reward block.`)

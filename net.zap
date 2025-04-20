@@ -108,10 +108,24 @@ event simulatePhysics = {
     type: Reliable,
     call: SingleAsync,
     data: unknown
-}
---
+   }
+   
+   event updateServerCFrame = {
+    from: Client,
+    type: Unreliable, -- Unreliable is fine for frequent position updates
+    call: SingleAsync,
+    data: CFrame
+   }
 
-funct toggleCannon = {
+   event updateClientsCFrame = {
+    from: Server,
+    type: Unreliable,
+    call: SingleAsync,
+    data: unknown
+   }
+   --
+   
+   funct toggleCannon = {
     call: Async,
     args: unknown,
     rets: boolean

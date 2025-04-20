@@ -30,8 +30,8 @@ end
 local module = {
 	costFormula = function(targetLevel, boughtLevels)
 		local floorDelta = math.max(targetLevel - boughtLevels, 0)
-		local floorBase = math.ceil(floorDelta / 5) * 0.5
-		local totalCost = 5000 * floorBase + math.pow(1.04, math.floor(floorBase / 2))
+		local floorBase = math.floor(floorDelta / 5) * 5
+		local totalCost = 500 * (floorBase + 1) + math.pow(1.04, math.floor(floorBase / 10))
 
 		return totalCost
 	end,

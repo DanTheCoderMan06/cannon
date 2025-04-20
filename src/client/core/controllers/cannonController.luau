@@ -40,6 +40,8 @@ local keysController = require(ReplicatedStorage.client.controllers.keysControll
 
 local MAX_TIME = 11
 local MAX_IMPACT = 200
+local MAX_ALLOWED_HEIGHT = 12000 -- Maximum allowed projectile height in units
+local GRAVITY = workspace.Gravity
 
 function cannonController.toggleEntrance(toggle)
 	canLaunchPlayer = toggle
@@ -127,8 +129,6 @@ function cannonController.start()
 		physics.time += dataController.getData().floors / 600
 		physics.time /= 10
 
-		local multiplier = math.max(physics.verticalVelocity / 1000, 3) --/ physics.time
-
 		local character = Players.LocalPlayer.Character
 		local pTrove = Trove.new()
 		pTrove:AttachToInstance(character)
@@ -202,11 +202,34 @@ function cannonController.start()
 
 		cameraController.startAir()
 
-		cannonController.playLaunchSound(multiplier, 5)
+		cannonController.playLaunchSound(1, 5)
 
 		print(physics.verticalVelocity)
 
-		local prevFixH
+		-- Pre-calculate theoretical max height and scale velocity if needed
+		local initialVerticalVelocity = physics.verticalVelocity
+		-- Formula: peak_height = (V * sin(angle))^2 / (2 * g)
+		-- Here, initialVerticalVelocity already incorporates V * sin(angle)
+		local theoreticalMaxHeight = (initialVerticalVelocity * initialVerticalVelocity) / (2 * GRAVITY)
+
+		if theoreticalMaxHeight > MAX_ALLOWED_HEIGHT then
+			local velocityScaleFactor = math.sqrt(MAX_ALLOWED_HEIGHT / theoreticalMaxHeight)
+			print(
+				string.format(
+					"Height limit exceeded (%.2f > %d). Scaling velocity by %.3f",
+					theoreticalMaxHeight,
+					MAX_ALLOWED_HEIGHT,
+					velocityScaleFactor
+				)
+			)
+			physics.verticalVelocity = physics.verticalVelocity * velocityScaleFactor
+		end
+
+		-- Calculate multiplier AFTER potential velocity scaling
+		local multiplier = math.max(physics.verticalVelocity / 1000, 3) --/ physics.time
+
+		local prevFixH -- Used for trail clearing logic
+		local lastCFrameUpdateTime = 0 -- Track time for server updates
 
 		pTrove:BindToRenderStep("pathPhysics", Enum.RenderPriority.First.Value, function()
 			timeElapsed = (tick() - startTime) * multiplier
@@ -214,16 +237,12 @@ function cannonController.start()
 			local fixedHorizontal = math.fmod(actualHorizontal, cannonConfig.maxDistance) + 200
 
 			local verticalComponent = (
-				timeElapsed * physics.verticalVelocity + 0.5 * -workspace.Gravity * math.pow(timeElapsed, 2)
+				timeElapsed * physics.verticalVelocity + 0.5 * -GRAVITY * math.pow(timeElapsed, 2)
 			)
 
 			local fixedVertical
 
-			if verticalComponent < 10000 then
-				fixedVertical = math.min(verticalComponent, 10000)
-			else
-				fixedVertical = 10000 + verticalComponent / 500
-			end
+			fixedVertical = math.min(verticalComponent, MAX_ALLOWED_HEIGHT)
 
 			if prevFixH then
 				if prevFixH > fixedHorizontal then
@@ -265,6 +284,12 @@ function cannonController.start()
 				oldPosition = newPosition
 				newPosition = calculatedPosition
 				character:PivotTo(newPosition)
+
+				-- Send CFrame update to server periodically
+				if tick() - lastCFrameUpdateTime >= 0.3 then
+					zap.updateServerCFrame.Fire(newPosition)
+					lastCFrameUpdateTime = tick()
+				end
 			end
 
 			workspace.CurrentCamera.FieldOfView = 70 + timeElapsed * 16
@@ -424,6 +449,17 @@ function cannonController.start()
 		end
 		currentTier = newData.cannonTier
 		updateCannon()
+	end)
+
+	zap.updateClientsCFrame.SetCallback(function(incomingData)
+		if incomingData.character == Players.LocalPlayer then
+			return
+		end
+		local character = incomingData.character.Character
+		if not character then
+			return
+		end
+		character:PivotTo(incomingData.target)
 	end)
 end
 

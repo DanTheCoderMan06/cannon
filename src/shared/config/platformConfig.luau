@@ -414,7 +414,7 @@ return {
 					end
 				end))
 
-				trove:Add(playerPlatform:GetAttributeChangedSignal("currentTower"):Connect(function()
+				local function updateFloorDisplay()
 					if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
 						updateEvent:Fire({
 							title = "LEVEL " .. tostring(floorValue.Value),
@@ -429,15 +429,44 @@ return {
 						-- Fetch dynamic price for gifting
 						local giftId = giftConfig.tenFloors.id
 						-- TODO: Add logic to check playerData.productTiers.gifts["floors"] for tier 2 ID if necessary
-						local itemInfo = marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
+						local itemInfo
+						local title = "GIFT 10 FLOORS"
+						if playerData.productTiers.products["floors"] >= 5 then
+							giftId = giftConfig.tenFloorsTier2.id
+							itemInfo = marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
+							title = "GIFT 10 FLOORS (TIER 2)"
+						end
+						itemInfo = itemInfo or marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
 						local priceDesc = itemInfo and itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
 							or "Loading..."
 						updateEvent:Fire({
-							title = "GIFT 10 FLOORS",
+							title = title,
 							description = priceDesc,
 						})
 					end
+				end
+
+				trove:Add(playerPlatform:GetAttributeChangedSignal("currentTower"):Connect(function()
+					updateFloorDisplay()
 				end))
+
+				local currentData = dataController.getData()
+				local oldGifts = currentData.productTiers.gifts["floors"] or 0
+				local oldDevs = currentData.productTiers.products["floors"] or 0
+				trove:Add(
+					dataController.dataChanged:Connect(function(newData)
+						local newGifts = newData.productTiers.gifts["floors"] or 0
+						local newDevs = newData.productTiers.products["floors"] or 0
+						if oldGifts == newGifts and oldDevs == newDevs then
+							print("Dont change")
+							return
+						end
+						oldDevs = newDevs
+						oldGifts = newGifts
+						updateFloorDisplay()
+					end),
+					"Disconnect"
+				)
 			end,
 			init = function()
 				local Players = game:GetService("Players")
@@ -528,26 +557,33 @@ return {
 				local function updateTenFloorsDisplay()
 					local playerData = dataController.getData() -- Get current data for tier checks
 					local title, productId, giftId
+					print(playerData.productTiers.products)
 					if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
 						title = "+10 FLOORS"
 						productId = gamepassConfig.tenFloors.id
+						local itemInfo
 						if
 							playerData.productTiers.products["floors"]
 							and playerData.productTiers.products["floors"] >= 5
 						then
 							productId = gamepassConfig.tenFloorsTier2.id
+							title = "+10 FLOORS (TIER 2)"
+							itemInfo = marketplaceUtil.getProductInfo(productId, Enum.InfoType.Product)
 						end
-						local itemInfo = marketplaceUtil.getProductInfo(productId, Enum.InfoType.Product)
+						itemInfo = itemInfo or marketplaceUtil.getProductInfo(productId, Enum.InfoType.Product)
 						local priceDesc = itemInfo and itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
 							or "Loading..."
 						updateEvent:Fire({ title = title, description = priceDesc })
 					else
 						title = "GIFT 50 FLOORS"
+						local itemInfo
 						giftId = giftConfig.fiftyFloors.id
 						if playerData.productTiers.gifts["floors"] and playerData.productTiers.gifts["floors"] >= 5 then
 							giftId = giftConfig.fiftyFloorsTier2.id
+							title = "GIFT 50 FLOORS (TIER 2)"
+							itemInfo = marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
 						end
-						local itemInfo = marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
+						itemInfo = itemInfo or marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
 						local priceDesc = itemInfo and itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
 							or "Loading..."
 						updateEvent:Fire({ title = title, description = priceDesc })
@@ -556,6 +592,20 @@ return {
 
 				-- Connect the attribute change signal to the update function
 				trove:Add(playerPlatform:GetAttributeChangedSignal("currentTower"):Connect(updateTenFloorsDisplay))
+
+				local currentData = dataController.getData()
+				local oldGifts = currentData.productTiers.gifts["floors"] or 0
+				local oldDevs = currentData.productTiers.products["floors"] or 0
+				dataController.dataChanged:Connect(function(newData)
+					local newGifts = newData.productTiers.gifts["floors"] or 0
+					local newDevs = newData.productTiers.products["floors"] or 0
+					if oldGifts == newGifts and oldDevs == newDevs then
+						return
+					end
+					oldDevs = newDevs
+					oldGifts = newGifts
+					updateTenFloorsDisplay()
+				end)
 
 				-- Call the function once initially to set the correct state
 				updateTenFloorsDisplay()
@@ -624,23 +674,29 @@ return {
 					if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
 						title = "+50 FLOORS"
 						productId = gamepassConfig.fiftyFloors.id
+						local itemInfo
 						if
 							playerData.productTiers.products["floors"]
 							and playerData.productTiers.products["floors"] >= 5
 						then
+							title = "+50 FLOORS (TIER 2)"
 							productId = gamepassConfig.fiftyFloorsTier2.id
+							itemInfo = marketplaceUtil.getProductInfo(productId, Enum.InfoType.Product)
 						end
-						local itemInfo = marketplaceUtil.getProductInfo(productId, Enum.InfoType.Product)
+						itemInfo = itemInfo or marketplaceUtil.getProductInfo(productId, Enum.InfoType.Product)
 						local priceDesc = itemInfo and itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
 							or "Loading..."
 						updateEvent:Fire({ title = title, description = priceDesc })
 					else
+						local itemInfo
 						title = "GIFT 250 FLOORS"
 						giftId = giftConfig.twoHundredFifty.id
 						if playerData.productTiers.gifts["floors"] and playerData.productTiers.gifts["floors"] >= 5 then
 							giftId = giftConfig.twoHundredFiftyTier2.id
+							title = "GIFT 250 FLOORS (TIER 2)"
+							itemInfo = marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
 						end
-						local itemInfo = marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
+						itemInfo = itemInfo or marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
 						local priceDesc = itemInfo and itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
 							or "Loading..."
 						updateEvent:Fire({ title = title, description = priceDesc })
@@ -649,6 +705,20 @@ return {
 
 				-- Connect the attribute change signal to the update function
 				trove:Add(playerPlatform:GetAttributeChangedSignal("currentTower"):Connect(updateFiftyFloorsDisplay))
+
+				local currentData = dataController.getData()
+				local oldGifts = currentData.productTiers.gifts["floors"] or 0
+				local oldDevs = currentData.productTiers.products["floors"] or 0
+				dataController.dataChanged:Connect(function(newData)
+					local newGifts = newData.productTiers.gifts["floors"] or 0
+					local newDevs = newData.productTiers.products["floors"] or 0
+					if oldGifts == newGifts and oldDevs == newDevs then
+						return
+					end
+					oldDevs = newDevs
+					oldGifts = newGifts
+					updateFiftyFloorsDisplay()
+				end)
 
 				-- Call the function once initially to set the correct state
 				updateFiftyFloorsDisplay()

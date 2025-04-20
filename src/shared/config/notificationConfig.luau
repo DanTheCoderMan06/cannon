@@ -74,7 +74,6 @@ return {
 			-- Custom checker to ensure 24 hours have passed since the last claim
 			customChecker = function(userId, playerData, timeElapsed)
 				if not playerData.lastClaimed then
-					-- If never claimed, allow the notification (waitTime will handle initial delay)
 					return true
 				end
 				local timeSinceLastClaim = os.time() - playerData.lastClaimed

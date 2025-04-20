@@ -11,7 +11,7 @@ local function power(x)
 	if x1 < x then
 		x2 = x - x1
 	end
-	return math.pow(1.1, x1) * 450 + math.log(x2 + 1, 3) * 900
+	return math.pow(1.1, x1) * 450 + math.log(x2 + 1, 3) * 130
 end
 
 -- Original reward formula based on distance (x)
@@ -39,13 +39,13 @@ local function cost(targetLevel, boughtLevels)
 		return 0
 	end
 
-	if targetLevel == 1 then
-		return 4000
-	end
-
 	local delta = targetLevel - bl
 
-	local cost = 4000 * math.pow(1.12, delta) + 8000 * delta
+	if delta <= 2 then
+		return 500
+	end
+
+	local cost = 500 * math.pow(1.13, delta - 2) + 8000 * (delta - 2)
 
 	return cost
 end
@@ -61,10 +61,10 @@ local module = {
 	premiumMultiplier = 1.5,
 	specialCannons = {
 		["artillery"] = {
-			power = power(70),
+			power = 9000,
 		},
 		["railgun"] = {
-			power = power(140),
+			power = 12000,
 		},
 		["circusCannon"] = {
 			power = power(100),

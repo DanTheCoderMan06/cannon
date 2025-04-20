@@ -35,6 +35,7 @@ function vipService.start()
 					playerData.hasVIPOn = true
 					if playerData.firstTimeVIP then
 						playerData.floors += 100
+						playerData.boughtFloors += 100
 						playerData.firstTimeVIP = false
 						print("Give floors!")
 						-- castleService.updateTower(player) -- Update tower after giving floors -- Removed, handled by dataChanged now

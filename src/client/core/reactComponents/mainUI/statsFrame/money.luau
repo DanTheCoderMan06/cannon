@@ -1,3 +1,4 @@
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TeleportService = game:GetService("TeleportService")
 
@@ -21,17 +22,24 @@ return function(props)
 
 	React.useEffect(function()
 		local uiTrove = Trove.new()
+		local player = Players.LocalPlayer
+		local stat
+		for _, v in pairs(player.leaderstats:GetChildren()) do
+			if v:GetAttribute("statName") == "money" then
+				stat = v
+				setCurrentMoney(tostring(stat.Value))
+			end
+		end
 
-		uiTrove:Add(
-			props.dataChanged:Connect(function(data)
-				if oldMoney == data.money then
+		if stat then
+			uiTrove:Add(stat:GetPropertyChangedSignal("Value"):Connect(function()
+				if stat.Value == oldMoney then
 					return
 				end
-				oldMoney = data.money
-				setCurrentMoney((math.ceil(data.money)))
-			end),
-			"Disconnect"
-		)
+				oldMoney = stat.Value
+				setCurrentMoney(tostring(stat.Value))
+			end))
+		end
 
 		return function()
 			uiTrove:Destroy()

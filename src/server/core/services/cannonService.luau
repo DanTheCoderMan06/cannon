@@ -125,7 +125,7 @@ function cannonService.launchPlayer(player)
 		end
 	end
 
-	cannonPower += playerHeight / 5
+	cannonPower += playerHeight
 
 	local simulatedPhysics = physicsUtil.getVariables(playerHeight, cannonPower)
 
@@ -275,6 +275,19 @@ function cannonService.start()
 			playerPlatforms:WaitForChild(player.Name):FindFirstChildWhichIsA("SpawnLocation", true).Position
 				+ Vector3.new(0, 5, 0)
 		)
+	end)
+
+	-- Listen for CFrame updates from the client during flight
+	zap.updateServerCFrame.SetCallback(function(player, clientCFrame: CFrame)
+		local character = player.Character
+		if not character or not character.PrimaryPart then
+			return -- Ignore if character doesn't exist
+		end
+		if not character:GetAttribute("inCannon") then
+			character:Kick("Event called while not in cannon!")
+			return
+		end
+		zap.updateClientsCFrame.FireExcept(player, { character = player, target = clientCFrame })
 	end)
 end
 

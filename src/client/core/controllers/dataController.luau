@@ -31,11 +31,11 @@ function dataController.start()
 		initialData = zap.requestData.Call()
 	end
 
-	task.delay(2, function()
+	task.delay(0.1, function()
 		loadedData = true
 		dataController.currentData = initialData
 		dataLoadedEvent:Fire()
-		task.delay(1, function()
+		task.delay(0.1, function()
 			dataChangedEvent:Fire(initialData)
 		end)
 	end)

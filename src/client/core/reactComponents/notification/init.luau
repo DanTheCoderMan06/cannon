@@ -14,12 +14,15 @@ return function(props)
 		return { transparency = 0, position = 0 }
 	end)
 
+	local visible, setVisible = React.useBinding(false)
+
 	React.useLayoutEffect(function()
+		setVisible(true)
 		api.start({
 			position = 1,
 			config = { tension = 300, friction = 120 },
 		})
-		task.wait(0.2) -- Reduced wait time
+		task.wait(0.5) -- Reduced wait time
 		api.start({
 			transparency = 1,
 			config = { tension = 300, friction = 60 },
@@ -46,6 +49,7 @@ return function(props)
 		TextSize = 14,
 		TextWrapped = true,
 		TextTransparency = styles.transparency,
+		Visible = visible,
 	}, {
 		uIStroke = React.createElement("UIStroke", {
 			Transparency = styles.transparency,

@@ -156,11 +156,8 @@ function tutorialController.startTutorial()
 		end
 	end)
 
-	tutorialController.loadPage(currentIndex)
-
-	task.wait()
-	tutorialItems.Parent = workspace
 	rainbowTrove:AttachToInstance(tutorialItems)
+	tutorialController.loadPage(currentIndex)
 end
 
 function tutorialController.start()

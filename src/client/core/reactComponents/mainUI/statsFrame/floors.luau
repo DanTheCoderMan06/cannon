@@ -1,3 +1,4 @@
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TeleportService = game:GetService("TeleportService")
 
@@ -19,17 +20,24 @@ return function(props)
 
 	React.useEffect(function()
 		local uiTrove = Trove.new()
+		local player = Players.LocalPlayer
+		local stat
+		for _, v in pairs(player.leaderstats:GetChildren()) do
+			if v:GetAttribute("statName") == "floors" then
+				stat = v
+				setCurrentFloors(tostring(stat.Value))
+			end
+		end
 
-		uiTrove:Add(
-			props.dataChanged:Connect(function(data)
-				if data.floors == oldFloors then
+		if stat then
+			uiTrove:Add(stat:GetPropertyChangedSignal("Value"):Connect(function()
+				if stat.Value == oldFloors then
 					return
 				end
-				oldFloors = data.floors
-				setCurrentFloors(tostring(data.floors))
-			end),
-			"Disconnect"
-		)
+				oldFloors = stat.Value
+				setCurrentFloors(tostring(stat.Value))
+			end))
+		end
 
 		return function()
 			uiTrove:Destroy()
