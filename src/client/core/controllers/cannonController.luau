@@ -206,6 +206,8 @@ function cannonController.start()
 
 		print(physics.verticalVelocity)
 
+		local prevFixH
+
 		pTrove:BindToRenderStep("pathPhysics", Enum.RenderPriority.First.Value, function()
 			timeElapsed = (tick() - startTime) * multiplier
 			local actualHorizontal = timeElapsed * physics.horizontalVelocity
@@ -222,6 +224,16 @@ function cannonController.start()
 			else
 				fixedVertical = 10000 + verticalComponent / 500
 			end
+
+			if prevFixH then
+				if prevFixH > fixedHorizontal then
+					for _, v in pairs(characterTrails) do
+						v:Clear()
+					end
+				end
+			end
+
+			prevFixH = fixedHorizontal
 
 			local calculatedPosition = startPosition
 				* CFrame.new(0, fixedVertical, -fixedHorizontal) -- Clamp max height
@@ -325,7 +337,7 @@ function cannonController.start()
 				until not character
 					or (
 						(character.PrimaryPart.AssemblyLinearVelocity.Magnitude < 5 or tick() - startWait > 4) -- Reduced inner timeout
-						and character.PrimaryPart.Position.Y < 2
+						and character.PrimaryPart.Position.Y <= 2
 					)
 
 				cameraController.endShake()
