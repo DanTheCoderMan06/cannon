@@ -411,7 +411,36 @@ local function changeTransparency(item, toOne)
 	end
 end
 
+local clientTopFloor
+
+local function updateTopFloor()
+	local playerSpot = workspace.castles:WaitForChild(Player.Name)
+	local playerPlatform = workspace.playerPlatforms:WaitForChild(Player.Name)
+	if not clientTopFloor then
+		clientTopFloor = ReplicatedStorage.assets.topFloor:Clone()
+		clientTopFloor.Parent = workspace
+	end
+	if
+		playerPlatform:GetAttribute("currentTower") == Player.Name or not playerPlatform:GetAttribute("currentTower")
+	then
+		local newData = dataController.getData()
+		clientTopFloor:PivotTo(playerSpot.CFrame * CFrame.new(0, floorHeight * (newData.floors + 0.5) + 6, 0))
+	else
+		local otherPlayer = Players:FindFirstChild(playerPlatform:GetAttribute("currentTower"))
+		local otherPlayerSpot = workspace.castles:WaitForChild(otherPlayer.Name)
+		local otherPlayerFloors = 0
+		for _, v in pairs(otherPlayer:WaitForChild("leaderstats"):GetChildren()) do
+			if v:GetAttribute("statName") == "floors" then
+				otherPlayerFloors = v.Value
+			end
+		end
+		clientTopFloor:PivotTo(otherPlayerSpot.CFrame * CFrame.new(0, floorHeight * (otherPlayerFloors + 0.5) + 6, 0))
+	end
+end
+
 function castleController.start()
+	updateTopFloor()
+
 	local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
 
 	for platformName, platform in pairs(platformConfig.platforms) do
@@ -538,7 +567,7 @@ function castleController.start()
 	end
 
 	local localPlayerCastle = castleFolder:WaitForChild(Player.Name):FindFirstChildWhichIsA("Model")
-
+	changeTransparency(localPlayerCastle:FindFirstChild("topFloor", true), 1)
 	local lastAnimated = 0
 	local oldFloors = dataController.getData().floors
 	dataController.dataChanged:Connect(function(newData)
@@ -548,28 +577,33 @@ function castleController.start()
 		if tick() - lastAnimated < 0.4 then
 			return
 		end
-		lastAnimated = tick()
 		oldFloors = newData.floors
+		if playerPlatform:GetAttribute("currentTower") ~= Player.Name then
+			return
+		end
+		lastAnimated = tick()
 		print("[CastleController] Update Floors")
 		task.wait()
 		local playerSpot = workspace.castles:WaitForChild(Player.Name)
-		localPlayerCastle
-			:FindFirstChild("topFloor")
-			:PivotTo(playerSpot.CFrame * CFrame.new(0, floorHeight * (newData.floors + 0.5) + 6, 0))
-		local newTopFloor = localPlayerCastle:FindFirstChild("topFloor"):Clone()
+		updateTopFloor()
+		local newTopFloor = clientTopFloor:Clone()
 		newTopFloor.Name = "TempAnim"
 		newTopFloor.Parent = workspace
 		pcall(function()
 			castleController.animateFloor(newTopFloor)
 		end)
-		changeTransparency(localPlayerCastle:FindFirstChild("topFloor"), true)
+		changeTransparency(clientTopFloor, true)
 		task.delay(1.1, function()
 			if newTopFloor then
 				newTopFloor:Destroy()
 			end
 			print("reset to 0")
-			changeTransparency(localPlayerCastle:FindFirstChild("topFloor"), false)
+			changeTransparency(clientTopFloor, false)
 		end)
+	end)
+
+	playerPlatform.PrimaryPart:GetPropertyChangedSignal("Position"):Connect(function()
+		updateTopFloor()
 	end)
 
 	local pTrove = Trove.new()

@@ -73,15 +73,20 @@ function castleService.updateTower(player)
 	end
 
 	if not playerCastle:FindFirstChild("topFloor") then
-		local playerTopFloor = ReplicatedStorage.assets.topFloor:Clone()
-		playerTopFloor:AddPersistentPlayer(player)
-		playerTopFloor:PivotTo(playerSpot.CFrame * CFrame.new(0, floorHeight * (totalFloors + 0.5) + 6, 0))
+		local playerTopFloor = ReplicatedStorage.assets.castleFloor:Clone()
+		playerTopFloor:PivotTo(
+			playerSpot.CFrame
+				* CFrame.new(0, floorHeight * (totalFloors + 0.5) + 6, 0)
+				* CFrame.Angles(math.rad(-90), math.rad(180), 0)
+		)
 		playerTopFloor.Name = "topFloor"
 		playerTopFloor.Parent = playerCastle
 	else
-		playerCastle
-			:FindFirstChild("topFloor", true)
-			:PivotTo(playerSpot.CFrame * CFrame.new(0, floorHeight * (totalFloors + 0.5) + 6, 0))
+		playerCastle:FindFirstChild("topFloor", true):PivotTo(
+			playerSpot.CFrame
+				* CFrame.new(0, floorHeight * (totalFloors + 0.5) + 6, 0)
+				* CFrame.Angles(math.rad(-90), math.rad(180), 0)
+		)
 	end
 end
 
