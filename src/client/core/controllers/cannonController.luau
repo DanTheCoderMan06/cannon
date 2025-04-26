@@ -127,6 +127,8 @@ function cannonController.start()
 			task.wait()
 		end
 
+		effectsController.preloadedContainer(physics)
+
 		physics.time += dataController.getData().floors / 600
 		physics.time /= 10
 
@@ -368,7 +370,7 @@ function cannonController.start()
 						(character.PrimaryPart.AssemblyLinearVelocity.Magnitude < 5 or tick() - startWait > 4) -- Reduced inner timeout
 						and character.PrimaryPart.Position.Y <= 2
 					)
-
+				SoundService.effects.falling:Stop() -- Stop the airtime sound
 				cameraController.endShake()
 				RunService:UnbindFromRenderStep("noFallThrough")
 				RunService:UnbindFromRenderStep("fallSound")

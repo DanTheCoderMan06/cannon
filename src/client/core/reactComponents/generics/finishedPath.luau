@@ -92,7 +92,9 @@ return function(props)
 				Position = UDim2.fromScale(1.87e-07, 0),
 				RichText = true,
 				Size = UDim2.fromScale(1, 0.304),
-				Text = "$" .. tostring(reactUtil.formatNumber(props.reward)),
+				Text = props.reward:map(function(val)
+					return "$" .. tostring(reactUtil.formatNumber(val))
+				end),
 				TextColor3 = Color3.fromRGB(249, 233, 3),
 				TextScaled = true,
 				TextSize = 14,
@@ -136,7 +138,7 @@ return function(props)
 				Text = if type(props.duration) == "number"
 					then props.duration .. " SECONDS"
 					else props.duration:map(function(val)
-						return val .. " SECONDS"
+						return math.round(val * 10) / 10 .. " SECONDS"
 					end),
 				TextColor3 = Color3.fromRGB(158, 255, 158),
 				TextScaled = true,

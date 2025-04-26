@@ -27,13 +27,20 @@ local function get_cost_for_base_level(baseLevel)
 end
 --]]
 
+local function cost(targetLevel, boughtLevels)
+	local floorDelta = math.max(targetLevel - boughtLevels, 0)
+	local floorBase = math.floor(floorDelta / 5)
+	if floorDelta <= 12 then
+		return 500
+	end
+	local totalCost = 35000 * (floorBase - 1) + 500
+
+	return totalCost
+end
+
 local module = {
 	costFormula = function(targetLevel, boughtLevels)
-		local floorDelta = math.max(targetLevel - boughtLevels, 0)
-		local floorBase = math.floor(floorDelta / 5) * 5
-		local totalCost = 500 * (floorBase + 1) + math.pow(1.04, math.floor(floorBase / 10))
-
-		return totalCost
+		return cost(targetLevel, boughtLevels)
 	end,
 }
 

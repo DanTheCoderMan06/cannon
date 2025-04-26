@@ -3,6 +3,8 @@ local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local SoundService = game:GetService("SoundService")
 
+local growingSound = SoundService.effects:WaitForChild("growing") -- Get the growing sound
+
 local zap = require(ReplicatedStorage.zap)
 local spr = require(ReplicatedStorage.sharedPackages.spr)
 local Trove = require(ReplicatedStorage.sharedPackages.Trove)
@@ -38,6 +40,10 @@ function luckyBlockController.start()
 
 		newLuckyBlock:PivotTo(finalWorldCFrame)
 
+		-- Prepare and play the growing sound
+		growingSound.PlaybackSpeed = growingSound.TimeLength / 5 -- Scale speed to match 5s duration
+		growingSound:Play()
+
 		local blockTrove = Trove.new()
 		local timeStarted = tick()
 
@@ -72,6 +78,7 @@ function luckyBlockController.start()
 				newLuckyBlock.PrimaryPart.Position,
 				"+ $" .. reactUtil.formatNumber(data.reward)
 			) -- Fixed $ placement
+			growingSound:Stop() -- Stop the growing sound
 			SoundService.effects.claim:Play()
 			task.delay(1.2, function()
 				newLuckyBlock:Destroy()

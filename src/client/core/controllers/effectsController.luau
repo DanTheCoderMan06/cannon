@@ -30,6 +30,49 @@ local currentHighScore = 0
 
 local billboardContainer = ReactRoblox.createRoot(Instance.new("Folder"))
 
+local preloadedUI
+
+function effectsController.preloadedContainer(results)
+	local isHighscore, setIsHighScore = React.createBinding(false)
+	local reward, setReward = React.createBinding(0)
+	local targetColor, setTargetColor = React.createBinding(Color3.new())
+	local timeElapsed, setTimeElapsed = React.createBinding(0)
+
+	preloadedUI = {
+		billboardRef = React.createRef(),
+		isHighscore = isHighscore,
+		setIsHighScore = setIsHighScore,
+		reward = reward,
+		setReward = setReward,
+		targetColor = targetColor,
+		setTargetColor = setTargetColor,
+		setTime = setTimeElapsed,
+	}
+
+	billboardContainer:render(ReactRoblox.createPortal(
+		React.createElement("BillboardGui", {
+			ResetOnSpawn = false,
+			AlwaysOnTop = true,
+			StudsOffset = Vector3.new(0, 4, 0),
+			Size = UDim2.fromScale(16, 8),
+			Adornee = Players.LocalPlayer.Character.Head,
+			ref = preloadedUI.billboardRef,
+			Enabled = false,
+		}, {
+			main = React.createElement(finishedPath, {
+				isHighscore = isHighscore,
+				distance = math.round(results.distance),
+				reward = reward,
+				targetColor = targetColor,
+				duration = timeElapsed,
+				floors = dataController.getData().floors,
+			}),
+		}),
+		Players.LocalPlayer.PlayerGui,
+		"finishedGUI"
+	))
+end
+
 function effectsController.playDanceAnimation()
 	local newAnim = ReplicatedStorage.assets.animations.dance
 		:GetChildren()[math.random(1, #ReplicatedStorage.assets.animations.dance:GetChildren())]
@@ -241,7 +284,6 @@ function effectsController.finishedPath(results, track, animationInstance)
 	local isHighscore = effectsController.getHighScore().Value < math.round(results.distance)
 	local playerData = dataController.currentData
 	local reward = cannonConfig.rewardFormula(results.distance, playerData.floors or 0)
-	local targetColor, setTargetColor = React.createBinding(Color3.new())
 	local startTime = tick()
 
 	if playerData.doubleMoney then
@@ -270,30 +312,12 @@ function effectsController.finishedPath(results, track, animationInstance)
 		reward += firstCannon
 	end
 
-	local billboardRef = React.createRef()
-
 	-- If we have a preloaded UI, use it
-	billboardContainer:render(ReactRoblox.createPortal(
-		React.createElement("BillboardGui", {
-			ResetOnSpawn = false,
-			AlwaysOnTop = true,
-			StudsOffset = Vector3.new(0, 4, 0),
-			Size = UDim2.fromScale(16, 8),
-			Adornee = Players.LocalPlayer.Character.Head,
-			ref = billboardRef,
-		}, {
-			main = React.createElement(finishedPath, {
-				isHighscore = isHighscore or true,
-				distance = math.round(results.distance),
-				reward = math.round(reward),
-				targetColor = targetColor,
-				duration = math.round(results.time * 10) / 10,
-				floors = dataController.getData().floors,
-			}),
-		}),
-		Players.LocalPlayer.PlayerGui,
-		"finishedGUI"
-	))
+	preloadedUI.setReward(reward)
+	preloadedUI.setTime(results.time)
+	preloadedUI.setIsHighScore(isHighscore)
+	preloadedUI.billboardRef:getValue().Enabled = true
+
 	-- Set up animation for the effects
 	partTrove:BindToRenderStep("moveCircle", Enum.RenderPriority.Last.Value, function(dt)
 		local increaseFactor = math.sin(math.rad((tick() - startTime) * 167)) * 1
@@ -302,16 +326,18 @@ function effectsController.finishedPath(results, track, animationInstance)
 			Vector3.new(0.7, 12 + increaseFactor, 12 + increaseFactor)
 		finishedPathEffects:FindFirstChildWhichIsA("BasePart").Color =
 			reactUtil.getSmoothColorFromElapsedTime(tick() - startTime, 2)
-		setTargetColor(reactUtil.getSmoothColorFromElapsedTime(tick() - startTime, 2))
+		preloadedUI.setTargetColor(reactUtil.getSmoothColorFromElapsedTime(tick() - startTime, 2))
 	end)
 
 	SoundService.effects.victory:Play()
 
 	task.wait(2)
 
-	billboardRef:getValue().Enabled = false
+	preloadedUI.billboardRef:getValue().Enabled = false
 
 	billboardContainer:unmount()
+
+	preloadedUI = nil
 
 	-- Clean up the effects
 	finishedPathEffects:Destroy()

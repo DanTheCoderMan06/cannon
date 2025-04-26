@@ -5,35 +5,15 @@ local function power(x)
 end
 --]]
 
-local function power(x)
-	local x1 = math.clamp(x, 0, 30)
-	local x2 = 0
-	if x1 < x then
-		x2 = x - x1
-	end
-	return math.pow(1.1, x1) * 450 + math.log(x2 + 1, 3) * 130
-end
-
--- Original reward formula based on distance (x)
-local function rewardFormula(x, floors)
-	floors = floors or 0
-	local result = x
-	return math.max(0, result)
-end
-
-local function calculateDistance(initialHeight, initialVelocity, angleDegrees)
-	local angleRadians = math.rad(angleDegrees)
-	local gravity = workspace.Gravity
-	local horizontalVelocity = math.cos(angleRadians) * initialVelocity
-	local verticalVelocity = math.sin(angleRadians) * initialVelocity
-	local timeElapsed = (
-		verticalVelocity + math.sqrt(math.pow(verticalVelocity, 2) + 2 * gravity * (initialHeight * 5))
-	) / gravity
-	local horizontalDistanceTraveled = timeElapsed * horizontalVelocity
-	return horizontalDistanceTraveled
+local function requiredLaunches(x)
+	return 0.5 + x * 2
 end
 
 local function cost(targetLevel, boughtLevels)
+	if targetLevel == 2 then
+		return 500
+	end
+
 	local bl = boughtLevels or 0
 	if targetLevel <= bl then
 		return 0
@@ -41,13 +21,49 @@ local function cost(targetLevel, boughtLevels)
 
 	local delta = targetLevel - bl
 
-	if delta <= 2 then
-		return 500
+	local clampedDelta = math.floor(delta / 2) * 2
+	local calculated_cost
+	if clampedDelta > 45 then
+		calculated_cost = 150000 * math.pow(1.1, 45) + 15000 * 45 - 5
+		calculated_cost *= math.log(math.exp(1) + (delta - 45) / 2)
+	elseif clampedDelta > 6 then
+		calculated_cost = 150000 * math.pow(1.1, clampedDelta) + 15000 * delta - 5
+	else
+		calculated_cost = 20000 * math.pow(1.1, clampedDelta - 2) + 15000 * (delta - 2)
 	end
+	-- Ensure minimum cost and integer value
+	return math.max(500, math.floor(calculated_cost))
+end
 
-	local cost = 500 * math.pow(1.13, delta - 2) + 8000 * (delta - 2)
+local gravity = workspace.Gravity
+local initialHeight = 220
+local launchAngleRadians = math.rad(45)
+local cosAngle = math.cos(launchAngleRadians)
+local sinAngle = math.sin(launchAngleRadians)
 
-	return cost
+function transformMoney(horizontalDistanceTraveled)
+	local denominator = initialHeight + horizontalDistanceTraveled
+
+	local velocitySquared = (gravity * math.pow(horizontalDistanceTraveled, 2)) / denominator
+
+	local initialVelocity = math.sqrt(velocitySquared)
+
+	return initialVelocity
+end
+
+local function power(x)
+	local launches = requiredLaunches(x)
+	local rewardTotal = cost(x + 1, 0) / launches
+	local moneyToPower = transformMoney(rewardTotal)
+	print(moneyToPower)
+	return math.max(500, moneyToPower)
+end
+
+-- Original reward formula based on distance (x)
+local function rewardFormula(x, floors)
+	floors = floors or 0
+	local result = x
+	return math.max(0, result)
 end
 
 local module = {
