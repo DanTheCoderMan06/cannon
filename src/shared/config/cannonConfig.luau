@@ -6,7 +6,19 @@ end
 --]]
 
 local function requiredLaunches(x)
-	return 0.5 + x * 2
+	if x >= 90 then
+		return 70
+	elseif x >= 70 then
+		return 50
+	elseif x >= 40 then
+		return 25
+	elseif x >= 20 then
+		return 15
+	elseif x >= 10 then
+		return 3
+	else
+		return 2.5
+	end
 end
 
 local function cost(targetLevel, boughtLevels)
@@ -22,17 +34,20 @@ local function cost(targetLevel, boughtLevels)
 	local delta = targetLevel - bl
 
 	local clampedDelta = math.floor(delta / 2) * 2
-	local calculated_cost
-	if clampedDelta > 45 then
-		calculated_cost = 150000 * math.pow(1.1, 45) + 15000 * 45 - 5
-		calculated_cost *= math.log(math.exp(1) + (delta - 45) / 2)
-	elseif clampedDelta > 6 then
-		calculated_cost = 150000 * math.pow(1.1, clampedDelta) + 15000 * delta - 5
+
+	if clampedDelta >= 90 then
+		return math.pow(1.15, clampedDelta) * 26000 + 15000 * delta
+	elseif clampedDelta >= 70 then
+		return math.pow(1.135, clampedDelta) * 25000 + 15000 * delta
+	elseif clampedDelta >= 40 then
+		return math.pow(1.13, clampedDelta) * 24000 + 15000 * delta
+	elseif clampedDelta >= 20 then
+		return math.pow(1.125, clampedDelta) * 23000 + 15000 * delta
+	elseif clampedDelta >= 10 then
+		return (math.pow(1.12, clampedDelta) * 22000 + 15000 * delta)
 	else
-		calculated_cost = 20000 * math.pow(1.1, clampedDelta - 2) + 15000 * (delta - 2)
+		return math.pow(1.11, clampedDelta) * 20000 + 15000 * delta
 	end
-	-- Ensure minimum cost and integer value
-	return math.max(500, math.floor(calculated_cost))
 end
 
 local gravity = workspace.Gravity
@@ -67,6 +82,7 @@ local function rewardFormula(x, floors)
 end
 
 local module = {
+	calculateRequiredLaunches = requiredLaunches,
 	cannonFirePeriod = 1,
 	cannonAngle = 45,
 	costFormula = function(level, boughtLevels)
@@ -77,16 +93,16 @@ local module = {
 	premiumMultiplier = 1.5,
 	specialCannons = {
 		["artillery"] = {
-			power = 9000,
+			power = power(60),
 		},
 		["railgun"] = {
-			power = 12000,
+			power = power(89),
 		},
 		["circusCannon"] = {
-			power = power(100),
+			power = power(50),
 		},
 		armyCannon = {
-			power = power(85),
+			power = power(70),
 		},
 	},
 	cannons = {

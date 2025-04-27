@@ -340,9 +340,7 @@ function cannonController.start()
 			end
 
 			-- Play impact sound only if velocity magnitude is high enough
-			if character.PrimaryPart.AssemblyLinearVelocity.Magnitude > 150 then
-				SoundService.effects.hitFloor:Play()
-			end
+			SoundService.effects.hitFloor:Play()
 
 			character.PrimaryPart.Anchored = false
 

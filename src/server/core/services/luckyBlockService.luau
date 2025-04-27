@@ -39,7 +39,7 @@ end
 function luckyBlockService.start()
 	Players.PlayerAdded:Connect(function(player)
 		playerBlocks[tostring(player.UserId)] = {}
-		playerBlocks[tostring(player.UserId)].lastClaimed = tick()
+		playerBlocks[tostring(player.UserId)].lastClaimed = tick() - rewardsConfig.luckyBlockSkipInitial
 	end)
 	Players.PlayerRemoving:Connect(function(player)
 		playerBlocks[tostring(player.UserId)] = nil

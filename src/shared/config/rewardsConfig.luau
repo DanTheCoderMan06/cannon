@@ -4,9 +4,6 @@ local floorConfig = require(ReplicatedStorage.shared.config.floorConfig) -- Adde
 local cannonConfig = require(ReplicatedStorage.shared.config.cannonConfig)
 
 local function luckyBlockWaitTime(playerLevel)
-	if RunService:IsStudio() then
-		return 10
-	end
 	if playerLevel < 20 then
 		return 180
 	elseif playerLevel < 70 then
@@ -58,6 +55,7 @@ local module = {
 	playerJoinReward = referralReward,
 	luckyBlockFormula = luckyBlockReward,
 	vipRewardDuration = 10000,
+	luckyBlockSkipInitial = 120,
 	vipGamepass = 1022963419,
 	referWaitTime = 60 * 60 * 24,
 	getDailyRewardCash = getDailyRewardCash,

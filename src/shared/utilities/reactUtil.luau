@@ -59,7 +59,11 @@ function reactUtil.formatNumber(number)
 	end
 
 	-- Handle suffix formatting
-	if num >= 1000000000 then
+	if num >= 1000000000000000 then
+		return formatWithSuffix(num, 1000000000000000, "Q")
+	elseif num >= 1000000000000 then
+		return formatWithSuffix(num, 1000000000000, "T")
+	elseif num >= 1000000000 then
 		return formatWithSuffix(num, 1000000000, "B")
 	elseif num >= 1000000 then
 		return formatWithSuffix(num, 1000000, "M")

@@ -24,7 +24,7 @@ local giftConfig = require(ReplicatedStorage.shared.config.giftConfig)
 local marketplaceUtil = require(ReplicatedStorage.shared.utilities.marketplaceUtil)
 local reactUtil = require(ReplicatedStorage.shared.utilities.reactUtil)
 
-local startTimeLuckyBlock = tick()
+local startTimeLuckyBlock = tick() - rewardsConfig.luckyBlockSkipInitial
 
 local changedCannonSignal = Signal.new()
 
@@ -53,29 +53,32 @@ return {
 				zap.spawnLuckyBlock.On(function()
 					startTimeLuckyBlock = tick()
 				end)
-				trove:BindToRenderStep("renderTimeLuckyBlock", Enum.RenderPriority.Last.Value + 1, function()
-					-- Get current player cannon level
-					local playerData = dataController.getData()
-					local cannonLevel = playerData.cannon or 1 -- Default to level 1
+				trove:Add(task.spawn(function()
+					while true do
+						-- Get current player cannon level
+						local playerData = dataController.getData()
+						local cannonLevel = playerData.cannon or 1 -- Default to level 1
 
-					-- Calculate wait time directly based on cannon level
-					local currentWaitTime = rewardsConfig.luckyBlockWaitTime(cannonLevel)
+						-- Calculate wait time directly based on cannon level
+						local currentWaitTime = rewardsConfig.luckyBlockWaitTime(cannonLevel)
 
-					local timeLeft = math.floor(math.clamp(
-						currentWaitTime - (tick() - startTimeLuckyBlock), -- Use dynamic wait time
-						-10,
-						currentWaitTime -- Use dynamic wait time for clamp max
-					))
+						local timeLeft = math.floor(math.clamp(
+							currentWaitTime - (tick() - startTimeLuckyBlock), -- Use dynamic wait time
+							-10,
+							currentWaitTime -- Use dynamic wait time for clamp max
+						))
 
-					updateEvent:Fire({
-						title = timeLeft > 0 and reactUtil.secondsToMMSS(timeLeft) or "READY!",
-						description = "UNTIL REWARD",
-					})
+						updateEvent:Fire({
+							title = timeLeft > 0 and reactUtil.secondsToMMSS(timeLeft) or "READY!",
+							description = "UNTIL REWARD",
+						})
 
-					if Players.LocalPlayer:GetAttribute("autoFarming") == true then
-						local success = zap.requestLuckyBlock.Call()
+						if Players.LocalPlayer:GetAttribute("autoFarming") == true then
+							local success = zap.requestLuckyBlock.Call()
+						end
+						task.wait(1)
 					end
-				end)
+				end))
 			end,
 			init = function()
 				return {

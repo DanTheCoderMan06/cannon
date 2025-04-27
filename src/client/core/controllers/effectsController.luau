@@ -303,12 +303,12 @@ function effectsController.finishedPath(results, track, animationInstance)
 	-- Check for first floor purchase bonus
 	-- Assumes 'boughtFloorYet' boolean exists in playerData, otherwise this check might grant bonus repeatedly.
 	if not playerData.boughtFloorYet then
-		local firstFloorCost = floorConfig.costFormula(playerData.floors, 0) -- Cost for level 1 from level 0
+		local firstFloorCost = floorConfig.costFormula(playerData.floors + 1, 0) -- Cost for level 1 from level 0
 		reward += firstFloorCost
 	end
 
 	if not playerData.boughtCannonYet then
-		local firstCannon = cannonConfig.costFormula(playerData.cannon, 0) -- Cost for level 1 from level 0
+		local firstCannon = cannonConfig.costFormula(playerData.cannon + 1, 0) -- Cost for level 1 from level 0
 		reward += firstCannon
 	end
 

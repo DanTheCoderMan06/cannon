@@ -125,7 +125,7 @@ function cannonService.launchPlayer(player)
 		end
 	end
 
-	cannonPower += playerHeight / 20
+	cannonPower += playerHeight / 10
 
 	local simulatedPhysics = physicsUtil.getVariables(playerHeight, cannonPower)
 
