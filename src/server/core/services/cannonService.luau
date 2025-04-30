@@ -39,10 +39,12 @@ function cannonService.addCannon(player, cannonName)
 	end
 	player:SetAttribute("currentCannon", cannonName)
 	if player.Character then
-		player.Character:MoveTo(
-			playerPlatforms:WaitForChild(player.Name):FindFirstChildWhichIsA("SpawnLocation", true).Position
-				+ Vector3.new(0, 5, 0)
-		)
+		if not player.Character:GetAttribute("inCannon") then
+			player.Character:MoveTo(
+				playerPlatforms:WaitForChild(player.Name):FindFirstChildWhichIsA("SpawnLocation", true).Position
+					+ Vector3.new(0, 5, 0)
+			)
+		end
 	end
 end
 

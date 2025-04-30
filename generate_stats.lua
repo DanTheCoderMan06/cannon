@@ -19,6 +19,7 @@ local floorConfig = require(game.ReplicatedStorage.shared.config.floorConfig)
 -- =============================================================================
 -- Helper Functions (Replicated from latest cannonConfig)
 -- =============================================================================
+-- No helpers needed as we require the config directly
 
 -- =============================================================================
 -- Calculation and Building Output String
@@ -27,24 +28,62 @@ local floorConfig = require(game.ReplicatedStorage.shared.config.floorConfig)
 local outputLines = {} -- Table to hold each line of the output
 
 table.insert(outputLines, "--- Cannon Stats (Level 1-100) ---")
-table.insert(outputLines, string.format("%-5s | %-15s | %-18s", "Level", "Upgrade Cost", "Required Launches"))
-table.insert(outputLines, string.rep("-", 5 + 3 + 15 + 3 + 18)) -- Adjusted separator length
+-- Add new columns: Actual Upgrade Cost, Avg Reward/Launch, Reward/TotalCost Ratio
+local headerFormat = "%-5s | %-15s | %-18s | %-15s | %-18s | %-20s"
+local separatorLength = 5 + 3 + 15 + 3 + 18 + 3 + 15 + 3 + 18 + 3 + 20
+table.insert(
+	outputLines,
+	string.format(
+		headerFormat,
+		"Level",
+		"TotalCostToLvl",
+		"Required Launches",
+		"ActualUpgrCost",
+		"Power",
+		"Reward/TotalCostRatio"
+	)
+)
+table.insert(outputLines, string.rep("-", separatorLength))
 
 for level = 1, 100 do
-	-- Upgrade cost is cost from level-1 to level (using latest cannonConfig.costFormula)
-	local upgradeCost = cannonConfig.costFormula(level + 1, 0)
-	-- Required launches uses the locally replicated latest function
+	-- Total cost from level 0 up to the current level
+	local totalCostToLevel = cannonConfig.costFormula(level + 1, 0)
+
+	-- Actual cost to upgrade from the current level to the next level
+	local actualUpgradeCost
+	if level == 1 then
+		actualUpgradeCost = cannonConfig.costFormula(2, 0) -- Special case for first upgrade
+	else
+		actualUpgradeCost = cannonConfig.costFormula(level + 1, 0)
+	end
+
+	-- Required launches at the current level
 	local requiredLaunches = cannonConfig.calculateRequiredLaunches(level)
-	-- Total cost is cost from 0 to level (using latest cannonConfig.costFormula)
-	-- local totalCostToLevel = cannonConfig.costFormula(level + 1, 0) -- Removed total cost calculation as it's no longer needed
-	-- local costPerLaunch = 0 -- Removed costPerLaunch calculation
-	-- if requiredLaunches > 0 then
-	-- 	costPerLaunch = tonumber(totalCostToLevel) / requiredLaunches
-	-- end
+
+	-- Average reward needed per launch at current level to afford the next upgrade
+	local avgRewardPerLaunch = 0
+	if requiredLaunches > 0 then
+		avgRewardPerLaunch = actualUpgradeCost / requiredLaunches
+	end
+
+	-- Ratio of the average reward per launch relative to the total cost invested so far
+	local rewardPerTotalCostRatio = 0
+	if totalCostToLevel > 0 then
+		rewardPerTotalCostRatio = avgRewardPerLaunch / totalCostToLevel
+	end
+
 	table.insert(
 		outputLines,
-		-- Format costs as integers for readability, launches potentially float
-		string.format("%-5d | %-15.0f | %-18.1f", level, upgradeCost, requiredLaunches) -- Removed costPerLaunch from format
+		-- Format costs as integers, launches/ratios as floats
+		string.format(
+			headerFormat,
+			level,
+			string.format("%.0f", totalCostToLevel), -- Total Cost
+			string.format("%.1f", requiredLaunches), -- Required Launches
+			string.format("%.0f", actualUpgradeCost), -- Actual Upgrade Cost
+			string.format("%.1f", cannonConfig.powerFormula(level)), -- Avg Reward/Launch
+			string.format("%.4f", rewardPerTotalCostRatio) -- Reward/TotalCost Ratio
+		)
 	)
 end
 
@@ -69,12 +108,20 @@ table.insert(
 	outputLines,
 	"- Calculations use the latest formulas from src/shared/config/cannonConfig.luau and src/shared/config/floorConfig.luau."
 )
-table.insert(outputLines, "- Cannon Upgrade Cost is cost from the previous level.")
-table.insert(outputLines, "- Required Launches is the number needed based on the latest cannonConfig logic.")
--- Removed Cost Per Launch note
+table.insert(outputLines, "- TotalCostToLvl: Total cost accumulated from level 0 up to the start of the current level.")
+table.insert(outputLines, "- Required Launches: Number needed at the current level based on cannonConfig logic.")
+table.insert(outputLines, "- ActualUpgrCost: Cost to upgrade from the current level to the next level.")
 table.insert(
 	outputLines,
-	"- Floor Cost is the cost to upgrade *to* the end level of the range from level 0, using the latest floorConfig logic."
+	"- AvgReward/Launch: Average reward needed per launch (at current level) to afford the next upgrade (ActualUpgrCost / RequiredLaunches)."
+)
+table.insert(
+	outputLines,
+	"- Reward/TotalCostRatio: Ratio of AvgReward/Launch to TotalCostToLvl. Indicates reward efficiency relative to total investment."
+)
+table.insert(
+	outputLines,
+	"- Floor Cost: Cost to upgrade *to* the end level of the range from level 0, using the latest floorConfig logic."
 )
 
 -- =============================================================================

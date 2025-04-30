@@ -46,7 +46,7 @@ local function cost(targetLevel, boughtLevels)
 	elseif clampedDelta >= 10 then
 		return (math.pow(1.12, clampedDelta) * 22000 + 15000 * delta)
 	else
-		return math.pow(1.11, clampedDelta) * 20000 + 15000 * delta
+		return math.pow(1.25, clampedDelta) * 8000 + 12000 * delta
 	end
 end
 
@@ -66,12 +66,37 @@ function transformMoney(horizontalDistanceTraveled)
 	return initialVelocity
 end
 
+local savedPower = {} -- Memoization table
+
 local function power(x)
+	-- Base case for recursion/iteration
+	if x < 1 then
+		return 500
+	end
+	-- Check memoization table
+	if savedPower[x] then
+		return savedPower[x]
+	end
+
+	-- Calculate base power for current level
 	local launches = requiredLaunches(x)
-	local rewardTotal = cost(x + 1, 0) / launches
-	local moneyToPower = transformMoney(rewardTotal)
-	print(moneyToPower)
-	return math.max(500, moneyToPower)
+	-- Handle potential division by zero if launches is 0 (though unlikely with current requiredLaunches logic)
+	local rewardTotal = if launches > 0 then cost(x + 1, 0) / launches else 0
+	local currentBasePower = transformMoney(rewardTotal)
+
+	-- Calculate the full power for the current level including bonus, with a minimum of 500
+	local currentCalculatedPower = math.max(500, currentBasePower + (5 * x))
+
+	-- Get the final power returned for the previous level (recursive call)
+	-- This uses the memoization table implicitly
+	local previousLevelPower = power(x - 1)
+
+	-- Ensure power is monotonically increasing: take the max of current calc and previous level's result
+	local result = math.max(currentCalculatedPower, previousLevelPower)
+
+	-- Store result in memoization table and return
+	savedPower[x] = result
+	return result
 end
 
 -- Original reward formula based on distance (x)
@@ -91,6 +116,7 @@ local module = {
 	maxLevel = 100,
 	maxDistance = 20000,
 	premiumMultiplier = 1.5,
+	powerFormula = power,
 	specialCannons = {
 		["artillery"] = {
 			power = power(60),

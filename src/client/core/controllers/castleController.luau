@@ -336,16 +336,25 @@ function castleController.updatePlayer(player)
 	castleController.updatePrompt(towerPrompt, playerCastle:GetAttribute("status"))
 
 	towerPrompt.PromptShown:Connect(function()
+		if not towerModel:FindFirstChild("towerHighlight") then
+			return
+		end
 		spr.target(towerModel.towerHighlight, 0.9, 3, { OutlineTransparency = 0 })
 	end)
 
 	towerPrompt.PromptHidden:Connect(function()
+		if not towerModel:FindFirstChild("towerHighlight") then
+			return
+		end
 		spr.target(towerModel.towerHighlight, 0.9, 3, { OutlineTransparency = 1 })
 	end)
 
 	towerPrompt.Triggered:Connect(function()
 		local success = zap.selectPlatform.Call(player)
 		SoundService.effects.click:Play()
+		if not towerModel:FindFirstChild("towerHighlight") then
+			return
+		end
 		if success then
 			spr.target(towerModel.towerHighlight, 0.9, 3, { OutlineColor = Color3.new(0.580392, 1, 0.768627) })
 		else

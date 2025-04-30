@@ -39,7 +39,7 @@ local cameraController = require(ReplicatedStorage.client.controllers.cameraCont
 local dataController = require(ReplicatedStorage.client.controllers.dataController)
 local keysController = require(ReplicatedStorage.client.controllers.keysController)
 
-local MAX_TIME = 11
+local MAX_TIME = 20
 local MAX_IMPACT = 200
 local MAX_ALLOWED_HEIGHT = 12000 -- Maximum allowed projectile height in units
 local GRAVITY = workspace.Gravity
@@ -129,7 +129,7 @@ function cannonController.start()
 
 		effectsController.preloadedContainer(physics)
 
-		physics.time += dataController.getData().floors / 600
+		physics.time += dataController.getData().floors / 50
 		physics.time /= 10
 
 		local character = Players.LocalPlayer.Character
@@ -230,6 +230,9 @@ function cannonController.start()
 
 		-- Calculate multiplier AFTER potential velocity scaling
 		local multiplier = math.max(physics.verticalVelocity / 1000, 3) --/ physics.time
+		if character.Head.Position.Y > 22 * 300 then
+			multiplier /= character.Head.Position.Y / (22 * 300)
+		end
 
 		local prevFixH -- Used for trail clearing logic
 		local lastCFrameUpdateTime = 0 -- Track time for server updates
