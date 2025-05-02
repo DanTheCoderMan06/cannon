@@ -11,7 +11,7 @@ local Trove = require(sharedPackages.Trove)
 local reactUtil = require(shared.utilities.reactUtil)
 
 return function(props)
-	print("Go")
+	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log("Go")
 
 	local elapsedTime, setElapsedTime = React.useBinding(0)
 

@@ -55,7 +55,10 @@ local function app()
 
 		uiTrove:Add(
 			toggleEvent:Connect(function(toggle)
-				print("Toggle event received:", toggle)
+				require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+					"Toggle event received:",
+					toggle
+				)
 				api.start({
 					transparency = toggle and 0 or 1,
 					config = {

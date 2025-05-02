@@ -66,7 +66,7 @@ return function(props)
 			[React.Event.Activated] = function()
 				SoundService.effects.uiClick:Play()
 				task.spawn(function()
-					print("Go")
+					require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log("Go")
 					api.start({
 						clicked = 1,
 						config = {

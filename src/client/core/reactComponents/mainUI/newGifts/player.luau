@@ -28,7 +28,7 @@ return function(props)
 			if props.selectedGift:getValue() == "" or not props.selectedGift:getValue() then
 				return
 			end
-			print("call")
+			require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log("call")
 			local canGive = zap.checkRecipient.Call({
 				selectedPlayer = props.id,
 				selectedGift = props.selectedGift:getValue(),

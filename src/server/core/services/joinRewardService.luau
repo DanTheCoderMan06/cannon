@@ -51,7 +51,7 @@ function joinRewardService.spawnBlock(player: Player, rewardAmount: number)
 	end
 
 	local blockId = HttpService:GenerateGUID(false)
-	-- print(`[joinRewardService] Spawning friend reward block {blockId} for {player.Name} with reward {rewardAmount}`)
+	-- require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(`[joinRewardService] Spawning friend reward block {blockId} for {player.Name} with reward {rewardAmount}`)
 
 	local newBlock = friendRewardPrefab:Clone()
 
@@ -109,7 +109,7 @@ function joinRewardService.spawnBlock(player: Player, rewardAmount: number)
 		if not parent then
 			-- Player is leaving the game
 			if activeBlocks[blockId] and activeBlocks[blockId].player == player then
-				-- print(`[joinRewardService] Cleaning up reward block {blockId} for player {player.Name} who left.`)
+				-- require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(`[joinRewardService] Cleaning up reward block {blockId} for player {player.Name} who left.`)
 				if activeBlocks[blockId].blockInstance then
 					activeBlocks[blockId].blockInstance:Destroy() -- Destroy the physical block
 				end
@@ -198,7 +198,7 @@ function joinRewardService.claimReward(player: Player, blockId: string)
 	-- Destroy the claimed block
 	blockData.blockInstance:Destroy()
 
-	print(
+	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
 		`[joinRewardService] Player {player.Name} claimed friend reward of {rewardAmount} money from block {blockId}.`
 	)
 	return true, rewardAmount -- Return success and amount for potential effects
@@ -252,12 +252,12 @@ function joinRewardService.processFriendRewardsOnJoin(joiningPlayer: Player)
 				existingPlayerData.friendJoinRewards[joiningPlayerIdStr] = os.time()
 				dataService.updatePlayerData(existingPlayer, existingPlayerData) -- Save the updated timestamp
 
-				print(
+				require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
 					`[joinRewardService] Spawned friend reward block for {existingPlayer.Name} because friend {joiningPlayer.Name} joined.`
 				)
 			else
 				-- Still on cooldown for this specific friend
-				-- print(`[joinRewardService] Player {existingPlayer.Name} is on cooldown for friend {joiningPlayer.Name}.`)
+				-- require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(`[joinRewardService] Player {existingPlayer.Name} is on cooldown for friend {joiningPlayer.Name}.`)
 			end
 		end
 	end
@@ -274,13 +274,15 @@ function joinRewardService.start()
 		if RunService:IsStudio() then
 			player.Chatted:Connect(function(msg)
 				if msg == ":spawnFriendReward" then -- Changed command name for clarity
-					print(`[joinRewardService] Debug command :spawnFriendReward received from {player.Name}`)
+					require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+						`[joinRewardService] Debug command :spawnFriendReward received from {player.Name}`
+					)
 					local playerData = dataService.getPlayerData(player)
 					if playerData then
 						local rewardAmount =
 							rewardsConfig.playerJoinReward(playerData.floors or 0, playerData.boughtFloors or 0)
 						joinRewardService.spawnBlock(player, rewardAmount)
-						print(
+						require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
 							`[joinRewardService] Spawned debug friend reward block for {player.Name} with amount {rewardAmount}`
 						)
 					else
@@ -310,7 +312,9 @@ function joinRewardService.start()
 
 	-- PlayerRemoving cleanup is handled by the connection made in spawnBlock
 
-	print("[joinRewardService] Started successfully. Handles friend join rewards and block claiming.")
+	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+		"[joinRewardService] Started successfully. Handles friend join rewards and block claiming."
+	)
 end
 
 return joinRewardService

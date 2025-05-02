@@ -121,7 +121,9 @@ return function(props)
 				end
 
 				if props.type == "cannons" then
-					print(table.find(newData.cannons, props.cannonName) ~= nil)
+					require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+						table.find(newData.cannons, props.cannonName) ~= nil
+					)
 					setIsOwned(table.find(newData.cannons, props.cannonName) ~= nil)
 				end
 

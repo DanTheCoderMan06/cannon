@@ -64,7 +64,9 @@ function friendRewardController.setupBlockInteraction(blockId: string, rewardAmo
 		claimed = true
 		prompt.Enabled = false -- Disable prompt immediately
 
-		print(`[FriendRewardController] Claiming block {blockId} for amount {rewardAmount}`)
+		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+			`[FriendRewardController] Claiming block {blockId} for amount {rewardAmount}`
+		)
 
 		-- Play effects
 		local claimSound = SoundService.effects:FindFirstChild("claim")
@@ -98,7 +100,9 @@ function friendRewardController.setupBlockInteraction(blockId: string, rewardAmo
 	promptTrove:Add(destroyingConn)
 
 	activePrompts[blockId] = { prompt = prompt, trove = promptTrove }
-	print(`[FriendRewardController] Setup interaction for block {blockId}`)
+	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+		`[FriendRewardController] Setup interaction for block {blockId}`
+	)
 
 	if Players.LocalPlayer:GetAttribute("autoFarming") then
 		claimBlock()
@@ -112,13 +116,15 @@ end
 function friendRewardController.start()
 	zap.spawnFriendRewardBlock.SetCallback(function(data)
 		-- The server sends this event only to the specific player who earned the reward
-		print(`[FriendRewardController] Received spawn event for block {data.blockId}`)
+		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+			`[FriendRewardController] Received spawn event for block {data.blockId}`
+		)
 		-- Wait a brief moment for the block to potentially replicate/be parented
 		task.wait(0.1)
 		friendRewardController.setupBlockInteraction(data.blockId, data.rewardAmount)
 	end)
 
-	print("[FriendRewardController] Started.")
+	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log("[FriendRewardController] Started.")
 end
 
 return friendRewardController

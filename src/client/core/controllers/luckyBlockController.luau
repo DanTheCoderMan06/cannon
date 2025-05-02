@@ -73,7 +73,7 @@ function luckyBlockController.start()
 					end)
 				end
 			end
-			print(data.reward)
+			require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(data.reward)
 			effectsController.rewardPopup(
 				newLuckyBlock.PrimaryPart.Position,
 				"+ $" .. reactUtil.formatNumber(data.reward)

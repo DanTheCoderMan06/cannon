@@ -89,7 +89,7 @@ return {
 			end
 
 			if purchasedTier ~= playerTier then
-				print(
+				require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
 					"[PurchasesService]: Player tried to use incorrect tier product. Expected tier: "
 						.. playerTier
 						.. ", got tier: "
@@ -174,7 +174,7 @@ return {
 			end
 
 			if purchasedTier ~= playerTier then
-				print(
+				require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
 					"[PurchasesService]: Player tried to use incorrect tier product. Expected tier: "
 						.. playerTier
 						.. ", got tier: "
@@ -217,7 +217,7 @@ return {
 			playerData.lastClaimed = os.time()
 			playerData.productTiers.products["allRewards"] = playerData.productTiers.products["allRewards"] or 0
 			playerData.productTiers.products["allRewards"] += 1
-			print(playerData)
+			require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(playerData)
 			task.defer(function()
 				dataService.updatePlayerData(player, playerData)
 			end)

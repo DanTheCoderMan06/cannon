@@ -29,7 +29,7 @@ function Cannon.new(args)
 
 	self.power = args.power
 
-	print(self.power)
+	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(self.power)
 
 	task.spawn(function()
 		while self.enabled do
@@ -83,7 +83,7 @@ function Cannon:fireCannon()
 	end
 	self.character.PrimaryPart.Anchored = false
 	local blastPressure = self.power * 5000
-	print(
+	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
 		string.format(
 			"[Cannon Object Debug] Player %s firing cannon. Base Power: %f, Blast Pressure: %f",
 			self.owner.Name,

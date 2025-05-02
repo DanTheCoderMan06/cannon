@@ -33,7 +33,9 @@ local function LocalRagdoll(bool)
 		return
 	end
 
-	print("[RagdollController]: Ragdoll Toggled " .. tostring(bool))
+	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+		"[RagdollController]: Ragdoll Toggled " .. tostring(bool)
+	)
 
 	Character = Players.LocalPlayer.Character
 	Humanoid = Character:WaitForChild("Humanoid")
@@ -69,8 +71,8 @@ local function LocalRagdoll(bool)
 			local Joint = Sift.Array.at(
 				motorController.getMotors(),
 				Sift.Array.findWhere(motorController.getMotors(), function(value)
-					print(value.Name)
-					print(joint)
+					require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(value.Name)
+					require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(joint)
 					return value.Name == joint
 				end)
 			)

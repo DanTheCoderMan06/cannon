@@ -53,11 +53,11 @@ return function(props)
 
 	if props.updateValues then
 		React.useEffect(function()
-			print("effect")
+			require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log("effect")
 			if not initializedPlatforms[props.name] then
 				local initializedValues = props.init()
 				setTitle(initializedValues.title)
-				print(initializedValues)
+				require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(initializedValues)
 				setDescription({
 					type(initializedValues.description) == "table" and unpack(initializedValues.description)
 						or initializedValues.description,

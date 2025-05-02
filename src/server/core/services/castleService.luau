@@ -41,7 +41,7 @@ function castleService.updateTower(player)
 
 	local totalFloors = playerData.floors
 
-	print(totalFloors)
+	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(totalFloors)
 
 	task.spawn(function()
 		local currentFloor = totalFloors - 1
@@ -241,7 +241,7 @@ function castleService.start()
 	-- Listen for data changes to update towers
 	dataService.dataChanged:Connect(function(player, newData)
 		if playerFloorsCache[player] and newData.floors ~= playerFloorsCache[player] then
-			print(
+			require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
 				string.format(
 					"Floor change detected for %s: %d -> %d. Updating tower.",
 					player.Name,
@@ -253,7 +253,9 @@ function castleService.start()
 			playerFloorsCache[player] = newData.floors -- Update cache
 		elseif not playerFloorsCache[player] then
 			-- Player might have joined before cache was populated or cache got cleared unexpectedly
-			print(string.format("Initializing floor cache for %s during data change.", player.Name))
+			require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+				string.format("Initializing floor cache for %s during data change.", player.Name)
+			)
 			playerFloorsCache[player] = newData.floors
 			-- Optionally update tower here if needed, though initial build should handle it
 			castleService.updateTower(player)

@@ -317,7 +317,7 @@ return {
 				local leaderstatsstats = Players.LocalPlayer:WaitForChild("leaderstats")
 				local function updateModel(value)
 					local newModel = ReplicatedStorage.assets.cannons:FindFirstChild(cannonConfig.getCannon(value + 1))
-					print(newModel.Name)
+					require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(newModel.Name)
 					updateModelEvent:Fire(newModel)
 				end
 				for _, v in pairs(leaderstatsstats:GetChildren()) do
@@ -402,7 +402,7 @@ return {
 				end
 
 				trove:Add(dataController.dataChanged:Connect(function(newdata)
-					print("go")
+					require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log("go")
 					playerData = newdata
 					if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
 						updateEvent:Fire({
@@ -440,7 +440,7 @@ return {
 							giftId = giftConfig.tenFloorsTier2.id
 							itemInfo = marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
 							title = "GIFT 10 FLOORS (TIER 2)"
-							print(itemInfo)
+							require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(itemInfo)
 						end
 						itemInfo = itemInfo or marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
 						local priceDesc = itemInfo and itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
@@ -559,7 +559,9 @@ return {
 				local function updateTenFloorsDisplay()
 					local playerData = dataController.getData() -- Get current data for tier checks
 					local title, productId, giftId
-					print(playerData.productTiers.products)
+					require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+						playerData.productTiers.products
+					)
 					if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
 						title = "+10 FLOORS"
 						productId = gamepassConfig.tenFloors.id
@@ -973,7 +975,7 @@ return {
 			updateValues = function(trove, updateEvent)
 				trove:Add(changedCannonSignal:Connect(function(newIndex)
 					if newIndex > 0 then
-						print("Update")
+						require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log("Update")
 						local playerData = dataController.getData()
 						local newCannon = playerData.cannons[newIndex]
 						updateEvent:Fire({

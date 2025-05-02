@@ -40,7 +40,9 @@ function castleController.togglePlatform(platformName, toggle)
 end
 
 function castleController.toggleAllPlatforms(toggle)
-	print("[CastleController]: Toggled All Platforms to " .. tostring(toggle))
+	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+		"[CastleController]: Toggled All Platforms to " .. tostring(toggle)
+	)
 	for platformName, val in pairs(enabledPlatforms) do
 		enabledPlatforms[platformName] = toggle
 	end
@@ -51,7 +53,7 @@ function castleController.animateFloor(floor)
 	local playerPlatform = workspace:FindFirstChild("playerPlatforms")
 		and workspace.playerPlatforms:FindFirstChild(Player.Name)
 
-	print("[castleController]: Animate Floor!")
+	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log("[castleController]: Animate Floor!")
 
 	if floor:FindFirstChild("blockSight", true) then
 		floor:FindFirstChild("blockSight", true):Destroy()
@@ -229,7 +231,9 @@ function castleController.updateSpot(spot, newValue, places, playerFloors)
 		end
 	end
 
-	print(spot:FindFirstChild("characterModel", true):FindFirstChild("centerWeld"))
+	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+		spot:FindFirstChild("characterModel", true):FindFirstChild("centerWeld")
+	)
 	if not spot:FindFirstChild("characterModel", true):FindFirstChild("centerWeld") then
 		local weld = Instance.new("Weld")
 		weld.Name = "centerWeld"
@@ -277,7 +281,7 @@ end
 local platformConnections = {} -- Store connections to manage them if needed
 
 function castleController.updateZone(zoneName, targetPart, platform, callbackSignal)
-	-- print(zoneName .. " UPDATE") -- Optional: Keep for debugging
+	-- require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(zoneName .. " UPDATE") -- Optional: Keep for debugging
 
 	-- Disconnect previous connection if it exists for this zoneName
 	if platformConnections[zoneName] then
@@ -311,7 +315,7 @@ end
 local playerTroves = {}
 
 function castleController.updatePlayer(player)
-	print(player.Name)
+	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(player.Name)
 	playerTroves[player.Name] = Trove.new()
 	local playerSpot = castleController.findSpot()
 	playerSpot.Name = player.Name
@@ -591,7 +595,7 @@ function castleController.start()
 			return
 		end
 		lastAnimated = tick()
-		print("[CastleController] Update Floors")
+		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log("[CastleController] Update Floors")
 		task.wait()
 		local playerSpot = workspace.castles:WaitForChild(Player.Name)
 		updateTopFloor()
@@ -606,7 +610,7 @@ function castleController.start()
 			if newTopFloor then
 				newTopFloor:Destroy()
 			end
-			print("reset to 0")
+			require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log("reset to 0")
 			changeTransparency(clientTopFloor, false)
 		end)
 	end)
@@ -686,7 +690,7 @@ function castleController.start()
 	--Teleports Service
 
 	Players.PlayerAdded:Connect(function(newPlayer)
-		print("Update")
+		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log("Update")
 		castleController.updatePlayer(newPlayer)
 		updateTowers()
 	end)
@@ -721,7 +725,7 @@ function castleController.start()
 	local playerData = dataController.currentData
 	dataController.dataChanged:Connect(function(newData)
 		local cannons = Sift.Array.difference(newData.cannons, playerData.cannons)
-		print(cannons)
+		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(cannons)
 		if #cannons > 0 and tick() - dataStart > 5 then
 			task.wait()
 			platformConfig.changedCannonSignal:Fire(#newData.cannons)

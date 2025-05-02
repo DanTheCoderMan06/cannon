@@ -137,7 +137,9 @@ function cameraController.endAir()
 end
 
 function cameraController.start()
-	print("[CameraController]: " .. "Track Camera!")
+	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+		"[CameraController]: " .. "Track Camera!"
+	)
 	workspace.CurrentCamera.CameraType = Enum.CameraType.Track
 	task.delay(2, function()
 		workspace.CurrentCamera.CameraType = Enum.CameraType.Track

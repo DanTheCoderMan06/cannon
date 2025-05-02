@@ -25,7 +25,9 @@ function vipService.start()
 			task.wait(5)
 			for _, player in pairs(Players:GetPlayers()) do
 				local playerData = dataService.getPlayerData(player)
-				print(os.time() - playerData.vipTimeStart)
+				require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+					os.time() - playerData.vipTimeStart
+				)
 				if
 					marketplaceUtil.userOwnsGamepass(player, rewardsConfig.vipGamepass)
 					or os.time() - playerData.vipTimeStart < rewardsConfig.vipRewardDuration
@@ -36,7 +38,7 @@ function vipService.start()
 					if playerData.firstTimeVIP then
 						playerData.floors += 100
 						playerData.firstTimeVIP = false
-						print("Give floors!")
+						require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log("Give floors!")
 						-- castleService.updateTower(player) -- Update tower after giving floors -- Removed, handled by dataChanged now
 					end
 					task.delay(0.1, function()

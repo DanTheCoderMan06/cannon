@@ -77,7 +77,9 @@ function dataController.start()
 	end)
 
 	zap.dataChanged.SetCallback(function(data)
-		print("[DataController] Received data update via dataChanged event.")
+		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+			"[DataController] Received data update via dataChanged event."
+		)
 		checkAndPlayUpgradeSound(data, previousData) -- Check before updating previousData
 		dataController.currentData = data
 		previousData = data -- Update previousData

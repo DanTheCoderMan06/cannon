@@ -84,14 +84,14 @@ function cannonService.launchPlayer(player)
 
 	if player:GetAttribute("isVIP") then
 		cannonPower *= 1.5
-		print(
+		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
 			string.format("[CannonService Debug] Player %s VIP bonus applied. New power: %f", player.Name, cannonPower)
 		)
 	end
 
 	if playerData.doubleDistance then
 		cannonPower *= 2
-		print(
+		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
 			string.format(
 				"[CannonService Debug] Player %s doubleDistance bonus applied. New power: %f",
 				player.Name,
@@ -102,7 +102,7 @@ function cannonService.launchPlayer(player)
 
 	if player.MembershipType == Enum.MembershipType.Premium then
 		cannonPower *= cannonConfig.premiumMultiplier
-		print(
+		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
 			string.format(
 				"[CannonService Debug] Player %s Premium bonus (x%f) applied. New power: %f",
 				player.Name,
@@ -115,7 +115,7 @@ function cannonService.launchPlayer(player)
 	for _, v in pairs(tierConfig.cannonTiers) do
 		if v.tier == playerData.cannonTier then
 			cannonPower *= v.power
-			print(
+			require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
 				string.format(
 					"[CannonService Debug] Player %s Cannon Tier %d bonus (x%f) applied. New power: %f",
 					player.Name,
@@ -131,8 +131,8 @@ function cannonService.launchPlayer(player)
 
 	local simulatedPhysics = physicsUtil.getVariables(playerHeight, cannonPower)
 
-	print("Player Fired ")
-	print(simulatedPhysics)
+	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log("Player Fired ")
+	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(simulatedPhysics)
 
 	zap.simulatePhysics.Fire(player, simulatedPhysics)
 
@@ -154,7 +154,9 @@ function cannonService.awardPlayer(player, playerPath)
 		bonusAward += firstCannonCost
 		playerData.boughtCannonYet = true -- Set flag to true after granting
 		grantedBonus = true
-		print(string.format("[CannonService] Granted first cannon bonus (%d) to %s", firstCannonCost, player.Name))
+		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+			string.format("[CannonService] Granted first cannon bonus (%d) to %s", firstCannonCost, player.Name)
+		)
 	end
 
 	if not playerData.boughtFloorYet then
@@ -162,7 +164,9 @@ function cannonService.awardPlayer(player, playerPath)
 		bonusAward += firstFloorCost
 		playerData.boughtFloorYet = true -- Set flag to true after granting
 		grantedBonus = true
-		print(string.format("[CannonService] Granted first floor bonus (%d) to %s", firstFloorCost, player.Name))
+		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+			string.format("[CannonService] Granted first floor bonus (%d) to %s", firstFloorCost, player.Name)
+		)
 	end
 
 	-- Add any granted bonus to player money
@@ -177,7 +181,7 @@ function cannonService.awardPlayer(player, playerPath)
 	-- Apply double money gamepass if owned (applies only to normal reward)
 	if playerData.doubleMoney then
 		normalAward *= 2
-		print(
+		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
 			string.format(
 				"[CannonService Debug] Player %s doubleMoney bonus applied. New normal award: %f",
 				player.Name,
@@ -234,7 +238,7 @@ function cannonService.start()
 			return
 		end
 		if tick() - simulatedPaths[player.Name].timeCreated < 3 then
-			print("Anti Exploit")
+			require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log("Anti Exploit")
 			return
 		end
 		local path = Sift.Dictionary.copyDeep(simulatedPaths[player.Name])
@@ -244,7 +248,7 @@ function cannonService.start()
 
 	zap.toggleCannon.SetCallback(function(player, target)
 		local playerData = dataService.getPlayerData(player)
-		print(target)
+		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(target)
 		if target ~= "default" then
 			if not table.find(playerData.cannons, target) then
 				return

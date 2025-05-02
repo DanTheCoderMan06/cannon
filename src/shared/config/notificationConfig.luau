@@ -77,7 +77,9 @@ return {
 					return true
 				end
 				local timeSinceLastClaim = os.time() - playerData.lastClaimed
-				print("TIME SINCE LAST DAILY NOTIF: " .. timeSinceLastClaim)
+				require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+					"TIME SINCE LAST DAILY NOTIF: " .. timeSinceLastClaim
+				)
 				-- Check if at least 24 hours (86400 seconds) have passed
 				return timeSinceLastClaim >= 86400
 			end,

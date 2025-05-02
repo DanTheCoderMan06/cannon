@@ -69,8 +69,10 @@ function cannonController.createCannon(cannonName: string)
 	targetCannon.PrimaryPart.CFrame = playerPlatform:FindFirstChild("cannonPosition").CFrame
 	targetCannon:SetAttribute("cannonName", cannonName)
 	local baseScale = targetCannon:GetScale()
-	print(playerData.cannonTier)
-	print("NEW SCALE: " .. baseScale * (playerData.cannonTier * 0.1 + 1))
+	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(playerData.cannonTier)
+	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+		"NEW SCALE: " .. baseScale * (playerData.cannonTier * 0.1 + 1)
+	)
 	targetCannon:ScaleTo(targetCannon:GetScale() * (playerData.cannonTier * 0.1 + 1))
 	targetCannon.Parent = playerPlatform:FindFirstChild("cannonPosition")
 	cTrove:AttachToInstance(targetCannon)
@@ -97,7 +99,7 @@ function cannonController.start()
 
 	local lastTriggered = 0
 	cannonPart.Touched:Connect(function(part)
-		-- print("Cannon Touched") -- Optional: Keep for debugging if needed
+		-- require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log("Cannon Touched") -- Optional: Keep for debugging if needed
 		if not Players.LocalPlayer.Character then
 			return
 		end
@@ -207,7 +209,7 @@ function cannonController.start()
 
 		cannonController.playLaunchSound(1, 5)
 
-		print(physics.verticalVelocity)
+		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(physics.verticalVelocity)
 
 		-- Pre-calculate theoretical max height and scale velocity if needed
 		local initialVerticalVelocity = physics.verticalVelocity
@@ -217,7 +219,7 @@ function cannonController.start()
 
 		if theoreticalMaxHeight > MAX_ALLOWED_HEIGHT then
 			local velocityScaleFactor = math.sqrt(MAX_ALLOWED_HEIGHT / theoreticalMaxHeight)
-			print(
+			require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
 				string.format(
 					"Height limit exceeded (%.2f > %d). Scaling velocity by %.3f",
 					theoreticalMaxHeight,
@@ -284,7 +286,7 @@ function cannonController.start()
 			-- Lighting.ClockTime =
 
 			if calculatedPosition.Position.Y < 70 then
-				print("destroy")
+				require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log("destroy")
 				pTrove:Destroy()
 				Player.Character.PrimaryPart.Anchored = true
 				finishedSignal:Fire()

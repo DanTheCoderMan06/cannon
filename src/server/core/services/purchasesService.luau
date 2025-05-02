@@ -64,7 +64,7 @@ function purchaseService.handlePurchase(recieptInfo)
 
 	for name, cannonTier in pairs(tierConfig.cannonTiers) do
 		if cannonTier.id == recieptInfo.ProductId then
-			print("FOUND TIER")
+			require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log("FOUND TIER")
 			purchaseService.upgradeTier(player, cannonTier.tier) -- Call directly
 			return Enum.ProductPurchaseDecision.PurchaseGranted
 		end
@@ -138,9 +138,9 @@ function purchaseService.start()
 			return
 		end
 		local playerData = dataService.getPlayerData(player)
-		print(playerData.daysClaimed)
+		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(playerData.daysClaimed)
 		if playerData.daysPlayed < rewardDay then
-			print(playerData.daysPlayed)
+			require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(playerData.daysPlayed)
 			return
 		end
 		if table.find(playerData.daysClaimed, rewardDay) then
@@ -148,11 +148,9 @@ function purchaseService.start()
 		end
 		info.callback(playerData, player)
 		table.insert(playerData.daysClaimed, rewardDay)
-		print(playerData)
+		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(playerData)
 		-- Removed task.defer for immediate saving
-		task.delay(1, function()
-			dataService.updatePlayerData(player, playerData)
-		end)
+		dataService.updatePlayerData(player, playerData)
 	end)
 
 	zap.checkRecipient.SetCallback(function(player, data)

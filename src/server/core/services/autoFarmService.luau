@@ -27,7 +27,9 @@ local function onPlayerRemoving(player)
 end
 
 function autoFarmService.migrate(player)
-	print("[AutoFarmService] " .. "Migrating : " .. player.Name)
+	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+		"[AutoFarmService] " .. "Migrating : " .. player.Name
+	)
 	local teleportOptions = Instance.new("TeleportOptions")
 	local teleportData = {
 		autoFarming = true,
@@ -57,13 +59,15 @@ function autoFarmService.start()
 				local startTime = startTimes[v.Name]
 				if startTime then
 					local timeElapsed = os.time() - startTime
-					print(string.format("[AutoFarmService] Player %s autofarming for %d seconds.", v.Name, timeElapsed))
+					require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+						string.format("[AutoFarmService] Player %s autofarming for %d seconds.", v.Name, timeElapsed)
+					)
 					if timeElapsed > 20 or RunService:IsStudio() then
 						autoFarmService.migrate(v)
 					end
 				else
 					-- Handle case where startTime is unexpectedly nil, maybe reset it?
-					print(
+					require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
 						string.format(
 							"[AutoFarmService] Warning: No start time found for player %s. Resetting.",
 							v.Name

@@ -71,7 +71,7 @@ function controlsController.start()
 
 	local function Ragdoll(bool)
 		if Player.Character.Humanoid.Health > 0 then
-			print(bool)
+			require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(bool)
 			RagdollEvent:Fire(bool)
 		end
 	end
@@ -79,7 +79,7 @@ function controlsController.start()
 	local function ActivateRagdoll(actionName, actionState, inputObj)
 		if actionState == Enum.UserInputState.Begin then
 			local State = Player.Character.Humanoid:GetState()
-			print(State)
+			require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(State)
 			if State ~= Enum.HumanoidStateType.Physics then
 				Ragdoll(true)
 			else

@@ -14,7 +14,7 @@ end
 local PhysicsModule = {}
 
 function PhysicsModule:OnApplyForce(part, velocity, rotvelocity, position)
-	print("Go")
+	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log("Go")
 	assert(typeof(part) == "Instance" and part:IsA("BasePart"), "not a part")
 
 	if part.Anchored or (part:IsGrounded()) then

@@ -17,7 +17,9 @@ end
 
 function folderService.start()
 	Players.PlayerAdded:Connect(function(player)
-		print("Player " .. player.Name .. " has joined the game")
+		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+			"Player " .. player.Name .. " has joined the game"
+		)
 
 		local PersonalFolder = {}
 		PlayerInfo[player.Name] = PersonalFolder
@@ -34,7 +36,9 @@ function folderService.start()
 	end)
 
 	Players.PlayerRemoving:Connect(function(oldPlayer)
-		print("Player " .. oldPlayer.Name .. " has left the game")
+		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+			"Player " .. oldPlayer.Name .. " has left the game"
+		)
 
 		local OldFolder = PlayerInfo[oldPlayer.Name]
 		if OldFolder then

@@ -12,7 +12,9 @@ local DEBUG = false
 -- Debug logging function
 local function debugLog(message)
 	if DEBUG then
-		print("[NotificationService DEBUG] " .. message)
+		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+			"[NotificationService DEBUG] " .. message
+		)
 	end
 end
 
@@ -255,7 +257,9 @@ function notificationService.sendNotification(userId, info, notificationKey, tim
 		end
 	end
 
-	print("Attempting to send notification " .. notificationKey .. " to user " .. userId)
+	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+		"Attempting to send notification " .. notificationKey .. " to user " .. userId
+	)
 	local userNotification = {
 		payload = {
 			messageId = info.assetid,
@@ -273,7 +277,7 @@ function notificationService.sendNotification(userId, info, notificationKey, tim
 		if typeof(result) == "table" and result.statusCode then
 			if result.statusCode == 200 then
 				notificationSentSuccessfully = true -- Set flag for later data update
-				print(
+				require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
 					"[Notification Service] Successfully sent notification "
 						.. notificationKey
 						.. " via API for user "
@@ -320,7 +324,9 @@ function notificationService.sendNotification(userId, info, notificationKey, tim
 		end)
 
 		if updateSuccess then
-			print("[Notification Service] Successfully updated notificationQueue for user " .. userId)
+			require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+				"[Notification Service] Successfully updated notificationQueue for user " .. userId
+			)
 			return true
 		else
 			warn("[Notification Service] API call succeeded but failed to update notificationQueue for user " .. userId)
@@ -339,7 +345,9 @@ function notificationService.processPlayerNotifications(playerUserId)
 	local success = false -- Flag to track if GetAsync succeeded within safeCall
 	safeCall(function()
 		lastPlayedTime = playerBase:GetAsync(tostring(playerUserId)) -- Assign inside callback
-		print(playerUserId .. "'s lastJoined " .. lastPlayedTime .. " TimeElapsed " .. os.time() - lastPlayedTime)
+		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+			playerUserId .. "'s lastJoined " .. lastPlayedTime .. " TimeElapsed " .. os.time() - lastPlayedTime
+		)
 		success = true -- Mark success if pcall didn't error
 	end)
 
@@ -424,7 +432,9 @@ end
 
 -- Recalculate total user count and update MemoryStore
 local function updateTotalUsersData()
-	print("[Notification Service] Starting recalculation of total users...")
+	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+		"[Notification Service] Starting recalculation of total users..."
+	)
 	local userCount = 0
 	local pages = nil
 	local success
@@ -451,7 +461,7 @@ local function updateTotalUsersData()
 		-- If successful but items is nil/empty, loop will handle it correctly below
 
 		for i, v in pairs(items) do
-			print(tostring(v.KeyName))
+			require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(tostring(v.KeyName))
 		end
 
 		userCount += #items
@@ -482,7 +492,9 @@ local function updateTotalUsersData()
 	end)
 
 	if setSuccess then
-		print("[Notification Service] Successfully updated total users count in MemoryStore to: " .. userCount)
+		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+			"[Notification Service] Successfully updated total users count in MemoryStore to: " .. userCount
+		)
 		return true
 	else
 		-- safeCall already warned
@@ -539,7 +551,9 @@ local function getAllPlayerKeys()
 		task.wait(INTER_PAGE_WAIT) -- Be nice to DataStore APIs between page fetches
 	end
 
-	print(string.format("[Notification Service] Successfully fetched %d total player keys.", #allKeys))
+	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+		string.format("[Notification Service] Successfully fetched %d total player keys.", #allKeys)
+	)
 	return allKeys
 end
 
@@ -556,13 +570,17 @@ local function runProcessingLoop()
 
 		-- Check if data is stale (older than the update interval)
 		if os.time() - usersData.lastUpdated > USER_COUNT_UPDATE_INTERVAL_SECONDS then
-			print("[Notification Service] User count data is stale or missing, triggering update.")
+			require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+				"[Notification Service] User count data is stale or missing, triggering update."
+			)
 			-- Call update function; it returns true/false based on its internal safeCalls
 			if not updateTotalUsersData() then
 				warn("[Notification Service] Failed to update user count, waiting before retry...")
 				task.wait(WORK_LOOP_INTERVAL_SECONDS) -- Wait longer on failure
 			else
-				print("[Notification Service] User count updated, waiting before starting work loop...")
+				require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+					"[Notification Service] User count updated, waiting before starting work loop..."
+				)
 				task.wait(RECALCULATION_WAIT_SECONDS)
 			end
 			continue -- Restart loop to re-fetch potentially updated data
@@ -594,7 +612,7 @@ local function runProcessingLoop()
 		-- 3. Calculate the starting index for this server (1-based)
 		-- Ensure totalUserKeys > 0 before modulo
 		local startIndex = (SERVER_START_INDEX % totalUserKeys) + 1
-		print(
+		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
 			string.format(
 				"[Notification Service] Starting processing cycle for %d users. This server starts at index %d.",
 				totalUserKeys,
@@ -605,13 +623,17 @@ local function runProcessingLoop()
 		local processedCount = 0
 
 		-- 4. Process from startIndex to end
-		print(string.format("[Notification Service] Processing from index %d to %d", startIndex, totalUserKeys))
+		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+			string.format("[Notification Service] Processing from index %d to %d", startIndex, totalUserKeys)
+		)
 		for i = startIndex, totalUserKeys do
 			local userIdStr = allUserKeys[i]
 			local userIdNum = tonumber(userIdStr)
 			if userIdNum and userIdNum > 0 then
 				processedCount += 1
-				print(string.format("[Notification Service] Processing user %s (Index %d)", userIdStr, i)) -- Uncommented print
+				require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+					string.format("[Notification Service] Processing user %s (Index %d)", userIdStr, i)
+				) -- Uncommented print
 				task.spawn(notificationService.processPlayerNotifications, userIdNum)
 				task.wait(INTRA_PAGE_WAIT) -- Wait between processing individual users
 			else
@@ -621,13 +643,17 @@ local function runProcessingLoop()
 
 		-- 5. Process from beginning to startIndex - 1 (wrap around)
 		if startIndex > 1 then
-			print(string.format("[Notification Service] Processing wrapped from index 1 to %d", startIndex - 1))
+			require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+				string.format("[Notification Service] Processing wrapped from index 1 to %d", startIndex - 1)
+			)
 			for i = 1, startIndex - 1 do
 				local userIdStr = allUserKeys[i]
 				local userIdNum = tonumber(userIdStr)
 				if userIdNum and userIdNum > 0 then
 					processedCount += 1
-					print(string.format("[Notification Service] Processing user %s (Index %d - wrapped)", userIdStr, i)) -- Uncommented print
+					require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+						string.format("[Notification Service] Processing user %s (Index %d - wrapped)", userIdStr, i)
+					) -- Uncommented print
 					task.spawn(notificationService.processPlayerNotifications, userIdNum)
 					task.wait(INTRA_PAGE_WAIT) -- Wait between processing individual users
 				else
@@ -636,7 +662,9 @@ local function runProcessingLoop()
 			end
 		end
 
-		print(string.format("[Notification Service] Finished processing cycle. Processed %d users.", processedCount))
+		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+			string.format("[Notification Service] Finished processing cycle. Processed %d users.", processedCount)
+		)
 		task.wait(WORK_LOOP_INTERVAL_SECONDS) -- Wait before starting the next full cycle
 	end
 end
@@ -644,14 +672,18 @@ end
 -- Initialize service
 function notificationService.start()
 	if RunService:IsStudio() then
-		print("[Notification Service] Running in Studio mode.")
+		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+			"[Notification Service] Running in Studio mode."
+		)
 		-- Optionally trigger a single update/process cycle for testing
 		-- task.spawn(runProcessingLoop)
 		-- return
 	end
 
 	if game.PrivateServerId ~= "" then
-		print("[Notification Service] Disabled in private servers.")
+		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+			"[Notification Service] Disabled in private servers."
+		)
 		return
 	end
 
@@ -674,7 +706,7 @@ function notificationService.start()
 
 	task.spawn(runProcessingLoop)
 
-	print("[Notification Service] Started.")
+	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log("[Notification Service] Started.")
 end
 
 return notificationService

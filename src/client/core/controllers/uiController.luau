@@ -46,7 +46,7 @@ local reactUtil = require(ReplicatedStorage.shared.utilities.reactUtil)
 
 -- Modified function to fire an event instead of rendering directly
 function uiController.renderNotification(text: string, color: Color3, startPosition: UDim2)
-	print("Queueing Notification!")
+	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log("Queueing Notification!")
 	addNotificationEvent:Fire({
 		id = HttpService:GenerateGUID(false),
 		text = text,

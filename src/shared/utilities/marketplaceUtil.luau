@@ -43,7 +43,7 @@ function marketplaceUtil.getProductInfo(gamepassId, infoType)
 		return gamepassInfoCache[gamepassId]
 	end
 	safeCall(function()
-		print(gamepassId)
+		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(gamepassId)
 		gamepassInfoCache[gamepassId] = MarketplaceService:GetProductInfo(gamepassId, infoType)
 	end)
 	return gamepassInfoCache[gamepassId]

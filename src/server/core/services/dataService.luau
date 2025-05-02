@@ -8,6 +8,7 @@ local serverPackages = ServerStorage.serverPackages
 local profileStore = require(serverPackages.ProfileStore)
 
 local Players = game:GetService("Players")
+local TeleportService = game:GetService("TeleportService")
 
 local profileTemplate = require(ServerStorage.server.modules.profileTemplate)
 local PlayerStore = profileStore.New("SavedPlayerDataV3", profileTemplate)
@@ -147,7 +148,9 @@ function dataService.updateOfflinePlayerData(userId, updateCallback)
 		return false
 	end
 
-	print(`[DataService] Successfully updated offline data for user {userId} via Get/SetAsync.`)
+	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+		`[DataService] Successfully updated offline data for user {userId} via Get/SetAsync.`
+	)
 	return true
 end
 
@@ -190,7 +193,9 @@ function dataService.loadGamepasses(player)
 		if v.cannonName then
 			if marketplaceUtil.userOwnsGamepass(player, v.id) then
 				if not table.find(playerProfile.Data.cannons, v.cannonName) then
-					print("INSERTED: " .. v.cannonName)
+					require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+						"INSERTED: " .. v.cannonName
+					)
 					table.insert(playerProfile.Data.cannons, v.cannonName)
 				end
 			end
@@ -211,8 +216,30 @@ function dataService.start()
 			profile:AddUserId(player.UserId)
 			profile:Reconcile()
 			profile.OnSessionEnd:Connect(function()
+				-- Temporary fix for potential premature OnSessionEnd firing
+				if player and player.Parent == Players then
+					warn(
+						string.format(
+							"[DataService] OnSessionEnd fired for player %s (%d) while still parented to Players. Attempting re-teleport.",
+							player.Name,
+							player.UserId
+						)
+					)
+					local success, err = pcall(function()
+						TeleportService:TeleportAsync(game.PlaceId, { player })
+					end)
+					if not success then
+						warn(
+							string.format(
+								"[DataService] Re-teleport failed for player %s: %s",
+								player.Name,
+								tostring(err)
+							)
+						)
+					end
+				end
 				Profiles[player] = nil
-				player:Kick(`Profile session end - Please rejoin`)
+				-- Original teleport removed as it's now handled conditionally above
 			end)
 			if player.Parent == Players then
 				Profiles[player] = profile
@@ -228,7 +255,9 @@ function dataService.start()
 					connection:Disconnect()
 				end)
 
-				print(`Profile loaded for {player.DisplayName}!`)
+				require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+					`Profile loaded for {player.DisplayName}!`
+				)
 
 				profile.Data.lastEntered = os.time()
 
@@ -246,7 +275,9 @@ function dataService.start()
 				task.delay(3, function()
 					-- Check if player and profile still exist before forced save
 					if player and player.Parent == Players and Profiles[player] then
-						print(`[DataService] Performing delayed initial forced save for {player.Name}`)
+						require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+							`[DataService] Performing delayed initial forced save for {player.Name}`
+						)
 						-- Call updatePlayerData with forceSave = true, using the current data
 						dataService.updatePlayerData(player, Profiles[player].Data, true)
 					end
@@ -263,7 +294,9 @@ function dataService.start()
 							local newData = profile.Data
 							newData.floors += GROUP_REWARD_FLOORS
 							newData.joinedGroupReward = true
-							print(`Granted group reward ({GROUP_REWARD_FLOORS} floors) to {player.Name}`)
+							require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+								`Granted group reward ({GROUP_REWARD_FLOORS} floors) to {player.Name}`
+							)
 							-- Fire notification to the client
 							zap.giftReceived.Fire(
 								player,
@@ -358,7 +391,7 @@ function dataService.updatePlayerData(player: Player, newData, forceSave: boolea
 	-- Note: ProfileService automatically handles saving on Release or periodically.
 	-- Explicitly calling profile:Save() is generally not needed unless for critical moments.
 	-- If a forced immediate save to datastore is *required* here (unlikely), you'd call profile:Save()
-	-- print(`[DataService] Updated data for {player.Name}. Forced: {forceSave}`)
+	-- require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(`[DataService] Updated data for {player.Name}. Forced: {forceSave}`)
 end
 
 function dataService.getPlayerData(player: Player)
@@ -380,7 +413,9 @@ function dataService.addCannon(player: Player, cannonName: string)
 		table.insert(profile.Data.cannons, cannonName)
 		zap.dataChanged.Fire(player, profile.Data) -- Fire signal to notify listeners of the change
 		dataService.dataChanged:Fire(player, profile.Data) -- Fire generic data changed signal
-		print(`[DataService] Added cannon '{cannonName}' to player {player.Name}`)
+		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+			`[DataService] Added cannon '{cannonName}' to player {player.Name}`
+		)
 		return true
 	end
 	return false -- Cannon already exists

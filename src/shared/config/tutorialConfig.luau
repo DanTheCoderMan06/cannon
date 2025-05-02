@@ -15,7 +15,7 @@ local config = {
 
 				-- Use Trove to manage the delay task
 				local delayTask = task.delay(2.5, function()
-					print("Next Signal")
+					require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log("Next Signal")
 					nextSignal:Fire()
 				end)
 				-- Add task cancellation function to the trove
