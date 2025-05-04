@@ -30,6 +30,7 @@ local Player = Players.LocalPlayer
 local castleFolder = workspace:WaitForChild("castles")
 local castleFloor = ReplicatedStorage.assets.castleFloor
 local floorHeight = 22 -- castleFloor:FindFirstChild("ceiling", true).Position.Y - castleFloor:FindFirstChild("floor", true).Position.Y
+local MAX_TEXTURE_DISTANCE = 1024
 
 local platformConfig = require(ReplicatedStorage.shared.config.platformConfig)
 
@@ -425,7 +426,7 @@ local function changeTransparency(item, toOne)
 		if v:IsA("BasePart") then
 			v.LocalTransparencyModifier = toOne and 1 or 0
 		else
-			v.Transparency = toOne and 1 or 0.6
+			v.Transparency = toOne and 1 or 0
 		end
 	end
 end
@@ -689,7 +690,7 @@ function castleController.start()
 		for _, v in pairs(Players:GetPlayers()) do
 			local totalProportion = playerStats[v.Name] / totalFloors
 			local playerSpot = teleports:WaitForChild(v.Name)
-			castleController.updateSpot(playerSpot, math.round(totalProportion * 48) + 1, players, playerStats[v.Name])
+			castleController.updateSpot(playerSpot, math.round(totalProportion * 24) + 1, players, playerStats[v.Name])
 		end
 	end
 
@@ -765,12 +766,21 @@ function castleController.start()
 		local playerSpot = castleFolder:FindFirstChild(targetPlayer.Name)
 		local playerCastle = playerSpot:FindFirstChildWhichIsA("Model")
 
-		local totalFloorsObject = targetPlayer:WaitForChild("leaderstats"):WaitForChild("Floors 🏢")
+		local totalFloorsObject = targetPlayer:WaitForChild("leaderstats"):FindFirstChild("Floors 🏢")
+			or targetPlayer:WaitForChild("leaderstats"):FindFirstChild("Floors") -- Handle potential name variations
+		if not totalFloorsObject then
+			warn("Could not find Floors stat for player: " .. targetPlayer.Name)
+			return
+		end
+
+		local FLOORS_PER_PART = 90
+		local BASE_FLOOR_HEIGHT = 22 -- Extracted from original scaling logic
+		local TOP_FLOOR_COUNT = 2 -- How many floors at the top use the special model
+		local topFloorModelTemplate = ReplicatedStorage.assets.castleFloor
 
 		local function runUpdate()
-			local totalFloors = totalFloorsObject.Value
 			--[[
-			task.spawn(function()
+			task.spawn(function() -- This old logic seems to be for individual floor models, keeping commented out
 				local currentFloor = totalFloors - 1
 				while currentFloor >= 0 do
 					for i = 1, CHUNK_SIZE do
@@ -793,14 +803,105 @@ function castleController.start()
 				end
 			end)
 			--]]
-			local castlePart
-			if not playerCastle:FindFirstChild("castlePart") then
-				castlePart = ReplicatedStorage.assets.castleFloorLerp:Clone()
-				castlePart.Name = "castlePart"
-				castlePart.Parent = playerCastle
+			local totalFloors = totalFloorsObject.Value
+			local floorsForSegments = math.max(0, totalFloors - TOP_FLOOR_COUNT)
+			local numPartsNeeded = math.max(0, math.ceil(floorsForSegments / FLOORS_PER_PART)) -- Calculate parts needed ONLY for floors below the top ones
+			local segmentedHeight = floorsForSegments * BASE_FLOOR_HEIGHT -- Total height of the segmented parts section
+
+			-- 1. Create/Update necessary segmented parts (below the top floors)
+			for i = 1, numPartsNeeded do
+				local partName = "castlePart_" .. i
+				local castlePart = playerCastle:FindFirstChild(partName)
+
+				-- Ensure the part exists and has the attribute for optimization later
+				if not castlePart then
+					castlePart = ReplicatedStorage.assets.castleFloorLerp:Clone()
+					castlePart:SetAttribute("isCastlePart", true)
+					castlePart.Name = partName
+					castlePart.Parent = playerCastle
+				end
+
+				-- Calculate floors for *this specific segment* based on remaining floorsForSegments
+				local floorsInThisPart = math.min(FLOORS_PER_PART, floorsForSegments - (i - 1) * FLOORS_PER_PART)
+
+				if floorsInThisPart <= 0 then -- This segment is no longer needed (e.g., floors decreased)
+					if castlePart then -- Destroy if it exists
+						castlePart:Destroy()
+					end
+					continue
+				end
+
+				local sizeY = BASE_FLOOR_HEIGHT * floorsInThisPart
+				local size = Vector3.new(80.822, math.max(0.01, sizeY), 80.822) -- Ensure size is not exactly zero to avoid issues
+
+				local previousPartsHeight = (i - 1) * FLOORS_PER_PART * BASE_FLOOR_HEIGHT
+				local positionY = previousPartsHeight + (sizeY / 2) -- Center of this part, relative to base
+				local position = playerSpot.Position + Vector3.new(0, positionY, 0)
+
+				if castlePart.PrimaryPart then
+					castlePart.PrimaryPart.Size = size
+					castlePart.PrimaryPart.Position = position
+				else
+					warn("Castle part " .. partName .. " missing PrimaryPart!")
+				end
 			end
-			castlePart.PrimaryPart.Size = Vector3.new(80.822, 22.406 * totalFloors, 80.822)
-			castlePart.PrimaryPart.Position = playerSpot.Position + Vector3.new(0, 22.406 * totalFloors / 2, 0)
+
+			-- 2. Remove extra segmented parts if floorsForSegments decreased
+			local currentPartIndex = numPartsNeeded + 1 -- Start checking from the part after the last needed one
+			while true do
+				local partName = "castlePart_" .. currentPartIndex
+				local extraPart = playerCastle:FindFirstChild(partName)
+				if extraPart then
+					extraPart:Destroy()
+					currentPartIndex = currentPartIndex + 1
+				else
+					break -- No more extra parts found
+				end
+			end
+
+			-- 3. Handle the top two special floors
+			local topFloor1 = playerCastle:FindFirstChild("topFloor_1") -- The very top floor
+			local topFloor2 = playerCastle:FindFirstChild("topFloor_2") -- The one below the top
+
+			-- Top Floor (Floor N)
+			if totalFloors >= 1 then
+				if not topFloor1 then
+					topFloor1 = topFloorModelTemplate:Clone()
+					topFloor1.Name = "topFloor_1"
+					topFloor1.Parent = playerCastle
+				end
+				-- Position based on the center of the Nth floor
+				local targetPos1 = playerSpot.Position + Vector3.new(0, (totalFloors - 0.5) * BASE_FLOOR_HEIGHT + 7, 0)
+				topFloor1:PivotTo(
+					CFrame.new(targetPos1)
+						* CFrame.Angles(0, 0, math.rad(-0))
+						* CFrame.Angles(math.rad(-90), math.rad(180), 0)
+				)
+			else
+				if topFloor1 then
+					topFloor1:Destroy()
+				end
+			end
+
+			-- Second Top Floor (Floor N-1)
+			if totalFloors >= 2 then
+				if not topFloor2 then
+					topFloor2 = topFloorModelTemplate:Clone()
+					topFloor2.Name = "topFloor_2"
+					topFloor2.Parent = playerCastle
+				end
+				-- Position based on the center of the (N-1)th floor
+				local targetPos2 = playerSpot.Position + Vector3.new(0, (totalFloors - 1.5) * BASE_FLOOR_HEIGHT + 7, 0)
+				topFloor2:PivotTo(
+					CFrame.new(targetPos2)
+						* CFrame.Angles(0, 0, math.rad(-0))
+						* CFrame.Angles(math.rad(-90), math.rad(180), 0)
+				)
+			else
+				if topFloor2 then
+					topFloor2:Destroy()
+				end
+			end
 		end
 
 		totalFloorsObject:GetPropertyChangedSignal("Value"):Connect(function()
@@ -823,6 +924,30 @@ function castleController.start()
 	end
 
 	Players.PlayerAdded:Connect(castleUpdates)
+
+	task.spawn(function()
+		while true do
+			task.wait(1)
+			local char = Players.LocalPlayer.Character
+			if not char then
+				continue
+			end
+			if not char.PrimaryPart then
+				continue
+			end
+			for _, v in pairs(castleFolder:GetDescendants()) do
+				if not v:GetAttribute("isCastlePart") then
+					continue
+				end
+				local isTooFar = (char.PrimaryPart.Position - v.PrimaryPart.Position).Magnitude > MAX_TEXTURE_DISTANCE
+				for e, z in pairs(v:GetChildren()) do
+					if z:IsA("Texture") then
+						z.Transparency = isTooFar and 1 or 0.6
+					end
+				end
+			end
+		end
+	end)
 end
 
 return castleController

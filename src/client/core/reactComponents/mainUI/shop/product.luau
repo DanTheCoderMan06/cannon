@@ -99,7 +99,7 @@ local function tierFrame(props)
 		end),
 		ZIndex = 100,
 	}, {
-		uIStroke = React.createElement("UIStroke", { Thickness = reactUtil.scalePixelSize(1) }),
+		uIStroke = React.createElement("UIStroke", { Thickness = reactUtil.scalePixelSize(1.5) }),
 	})
 end
 
