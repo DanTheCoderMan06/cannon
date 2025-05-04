@@ -6,6 +6,7 @@ local sharedPackages = ReplicatedStorage.sharedPackages
 local React = require(sharedPackages.React)
 local ReactSpring = require(sharedPackages.ReactSpring)
 local Sift = require(sharedPackages.Sift)
+local reactUtil = require(shared.utilities.reactUtil)
 local components = ReplicatedStorage.client.reactComponents
 
 -- props: { id: string, text: string, color: Color3, start: UDim2, onComplete: (id: string) -> () }
@@ -52,6 +53,7 @@ return function(props)
 		Visible = visible,
 	}, {
 		uIStroke = React.createElement("UIStroke", {
+			Thickness = reactUtil.scalePixelSize(1),
 			Transparency = styles.transparency,
 		}),
 

@@ -25,6 +25,7 @@ return function(props)
 		Position = UDim2.fromScale(0.5, 0.0),
 		Size = UDim2.fromScale(1, 1),
 		ZIndex = 0,
+		Visible = not _G.isMobile,
 	}, {
 		uIAspectRatioConstraint = React.createElement("UIAspectRatioConstraint", {
 			AspectRatio = 1.78,

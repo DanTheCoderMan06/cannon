@@ -9,6 +9,7 @@ local ReactSpring = require(sharedPackages.ReactSpring)
 local Sift = require(sharedPackages.Sift)
 local components = ReplicatedStorage.client.reactComponents
 
+local reactUtil = require(shared.utilities.reactUtil)
 local closeButton = require(script.closeButton)
 
 return function(props)
@@ -54,7 +55,7 @@ return function(props)
 				TextWrapped = true,
 			}, {
 				uIStroke = React.createElement("UIStroke", {
-					Thickness = 2,
+					Thickness = reactUtil.scalePixelSize(2),
 				}),
 			}),
 

@@ -7,6 +7,7 @@ local sharedPackages = ReplicatedStorage.sharedPackages
 local React = require(sharedPackages.React)
 local ReactSpring = require(sharedPackages.ReactSpring)
 local components = ReplicatedStorage.client.reactComponents
+local reactUtil = require(shared.utilities.reactUtil)
 
 return function(props)
 	local styles, api = ReactSpring.useSpring(function()
@@ -89,7 +90,7 @@ return function(props)
 			ZIndex = 2,
 		}, {
 			uIStroke = React.createElement("UIStroke", {
-				Thickness = 4,
+				Thickness = reactUtil.scalePixelSize(4),
 			}),
 
 			uIAspectRatioConstraint = React.createElement("UIAspectRatioConstraint", {
@@ -134,7 +135,7 @@ return function(props)
 			}),
 
 			uIStroke = React.createElement("UIStroke", {
-				Thickness = 4,
+				Thickness = reactUtil.scalePixelSize(4),
 				Color = Color3.fromHex("ffd700"),
 				Transparency = styles.gold:map(function(val)
 					return 1 - val

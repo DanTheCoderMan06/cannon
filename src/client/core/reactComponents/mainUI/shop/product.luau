@@ -11,9 +11,12 @@ local Trove = require(sharedPackages.Trove)
 local components = ReplicatedStorage.client.reactComponents
 
 local marketplaceUtil = require(ReplicatedStorage.shared.utilities.marketplaceUtil)
+local reactUtil = require(ReplicatedStorage.shared.utilities.reactUtil)
 
 local rewardsConfig = require(ReplicatedStorage.shared.config.rewardsConfig)
 local gamepassConfig = require(ReplicatedStorage.shared.config.gamepassConfig)
+
+local MOBILE_BUTTON_SCALE = 1.08
 
 local function convertToNumeral(number)
 	local result = ""
@@ -66,7 +69,7 @@ local function lockedFrame(props)
 			}),
 
 			iStroke = React.createElement("UIStroke", {
-				Thickness = 1.5,
+				Thickness = reactUtil.scalePixelSize(1.5),
 			}),
 		}),
 	})
@@ -96,7 +99,7 @@ local function tierFrame(props)
 		end),
 		ZIndex = 100,
 	}, {
-		uIStroke = React.createElement("UIStroke"),
+		uIStroke = React.createElement("UIStroke", { Thickness = reactUtil.scalePixelSize(1) }),
 	})
 end
 
@@ -179,8 +182,13 @@ return function(props)
 		end),
 		LayoutOrder = props.index,
 	}, {
+		uIScale = React.createElement("UIScale", {
+			Scale = _G.isMobile and MOBILE_BUTTON_SCALE or 1,
+		}),
+		aspect = React.createElement("UIAspectRatioConstraint", {
+			AspectType = Enum.AspectType.ScaleWithParentSize,
+		}),
 		lockedFrame = React.createElement(lockedFrame, { owned = owned }),
-
 		content = React.createElement("ImageLabel", {
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
@@ -228,6 +236,228 @@ return function(props)
 				}),
 			}),
 
+			buttons = React.createElement("Frame", {
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				BackgroundTransparency = 1,
+				Position = UDim2.fromScale(0.5, 0.805),
+				Size = UDim2.new(0.868, 0, 0.263, 0),
+			}, {
+				buy = React.createElement("ImageButton", {
+					AnchorPoint = Vector2.new(0.5, 0.5),
+					BackgroundTransparency = 1,
+					Image = "rbxassetid://85156488647867",
+					LayoutOrder = 3,
+					ZIndex = 0,
+					ScaleType = Enum.ScaleType.Fit,
+					Size = UDim2.fromScale(0.686529, 1.00653),
+					Rotation = styles.hover:map(function(val)
+						return val * 4
+					end),
+					ImageTransparency = 1,
+				}, {
+					content = React.createElement("ImageButton", { -- Image = "rbxassetid://85156488647867",
+						AnchorPoint = Vector2.new(0.5, 0.5),
+						BackgroundTransparency = 1,
+						Image = "rbxassetid://85156488647867",
+						LayoutOrder = 3,
+						Position = styles.clicked:map(function(val)
+							return UDim2.fromScale(0.5, 0.5):Lerp(UDim2.fromScale(0.5, 0.45), val)
+						end),
+						ScaleType = Enum.ScaleType.Fit,
+						Size = styles.hover:map(function(val)
+							return UDim2.fromScale(1, 1):Lerp(UDim2.fromScale(1.1, 1.1), val)
+						end),
+						Rotation = styles.hover:map(function(val)
+							return val * 4
+						end),
+						ZIndex = 5,
+					}, {
+						price = React.createElement("TextLabel", {
+							AnchorPoint = Vector2.new(0.5, 0.5),
+							BackgroundTransparency = 1,
+							FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
+							Position = UDim2.fromScale(0.5, 0.5),
+							Size = UDim2.fromScale(1.19, 0.893),
+							Text = currentPrice:map(function(val)
+								return "" .. val
+							end),
+							TextColor3 = Color3.new(1, 1, 1),
+							TextScaled = true,
+						}, {
+							iAspectRatioConstraint3 = React.createElement("UIAspectRatioConstraint", {
+								AspectRatio = 4.38,
+							}),
+						}),
+					}),
+
+					clicker = React.createElement("ImageButton", {
+						AnchorPoint = Vector2.new(0.5, 0.5),
+						BackgroundTransparency = 1,
+						ImageTransparency = 1,
+						Position = UDim2.fromScale(0.5, 0.5),
+						ScaleType = Enum.ScaleType.Fit,
+						Size = UDim2.fromScale(1, 1),
+						ZIndex = 10,
+						[React.Event.MouseEnter] = function()
+							api.start({
+								hover = 1,
+								config = {
+									tension = 900,
+									friction = 15,
+								},
+							})
+						end,
+						[React.Event.MouseLeave] = function()
+							api.start({
+								hover = 0,
+								config = {
+									tension = 900,
+									friction = 15,
+								},
+							})
+						end,
+						[React.Event.Activated] = function()
+							SoundService.effects.uiClick:Play()
+							task.spawn(function()
+								api.start({
+									clicked = 1,
+									config = {
+										tension = 700,
+										friction = 30,
+									},
+								})
+								if not owned:getValue() then
+									props.onActivated()
+								end
+								task.delay(0.05, function()
+									api.start({
+										clicked = 0,
+										config = {
+											tension = 700,
+											friction = 30,
+										},
+									})
+								end)
+							end)
+						end,
+					}),
+
+					iAspectRatioConstraint2 = React.createElement("UIAspectRatioConstraint", {
+						AspectRatio = 2.77,
+					}),
+
+					uIScale = React.createElement("UIScale", {
+						Scale = _G.isMobile and MOBILE_BUTTON_SCALE or 1,
+					}),
+				}),
+
+				uIListLayout = React.createElement("UIListLayout", {
+					FillDirection = Enum.FillDirection.Horizontal,
+					HorizontalAlignment = Enum.HorizontalAlignment.Center,
+					SortOrder = Enum.SortOrder.LayoutOrder,
+					VerticalAlignment = Enum.VerticalAlignment.Center,
+				}),
+
+				gift = React.createElement("ImageButton", {
+					AnchorPoint = Vector2.new(0.5, 0.5),
+					BackgroundTransparency = 1,
+					Image = "rbxassetid://104467331888744",
+					ImageColor3 = Color3.fromRGB(255, 0, 0),
+					ImageTransparency = 1,
+					LayoutOrder = 3,
+					Position = UDim2.fromScale(0.82622, 0.495789),
+					ScaleType = Enum.ScaleType.Fit,
+					Size = UDim2.fromScale(0.306819, 0.991578),
+					ZIndex = 5,
+					Visible = props.extraInfo.giftName ~= nil,
+				}, {
+
+					clicker = React.createElement("ImageButton", {
+						AnchorPoint = Vector2.new(0.5, 0.5),
+						BackgroundTransparency = 1,
+						ImageTransparency = 1,
+						Position = UDim2.fromScale(0.5, 0.5),
+						ScaleType = Enum.ScaleType.Fit,
+						Size = UDim2.fromScale(1, 1),
+						ZIndex = 10,
+						[React.Event.MouseEnter] = function()
+							api.start({
+								hover2 = 1,
+								config = {
+									tension = 900,
+									friction = 15,
+								},
+							})
+						end,
+						[React.Event.MouseLeave] = function()
+							api.start({
+								hover2 = 0,
+								config = {
+									tension = 900,
+									friction = 15,
+								},
+							})
+						end,
+						[React.Event.Activated] = function()
+							SoundService.effects.uiClick:Play()
+							task.spawn(function()
+								api.start({
+									clicked2 = 1,
+									config = {
+										tension = 700,
+										friction = 30,
+									},
+								})
+								props.buyGift(props.productKey)
+								task.delay(0.05, function()
+									api.start({
+										clicked2 = 0,
+										config = {
+											tension = 700,
+											friction = 30,
+										},
+									})
+								end)
+							end)
+						end,
+					}),
+
+					content = React.createElement("ImageButton", {
+						AnchorPoint = Vector2.new(0.5, 0.5),
+						BackgroundTransparency = 1,
+						Image = "rbxassetid://104467331888744",
+						ImageColor3 = Color3.fromRGB(255, 0, 0),
+						LayoutOrder = 3,
+						Position = styles.clicked2:map(function(val)
+							return UDim2.fromScale(0.5, 0.45):Lerp(UDim2.fromScale(0.5, 0.4), val)
+						end),
+						ScaleType = Enum.ScaleType.Fit,
+						Size = styles.hover2:map(function(val)
+							return UDim2.fromScale(1, 1):Lerp(UDim2.fromScale(1.1, 1.1), val)
+						end),
+						Rotation = styles.hover2:map(function(val)
+							return val * 4
+						end),
+						ZIndex = 5,
+					}, {
+						label = React.createElement("ImageLabel", {
+							AnchorPoint = Vector2.new(0.5, 0.5),
+							BackgroundTransparency = 1,
+							Image = "rbxassetid://109156736467684",
+							Position = UDim2.fromScale(0.5, 0.5),
+							Size = UDim2.fromScale(0.6, 0.6),
+						}),
+					}),
+
+					uIScale = React.createElement("UIScale", {
+						Scale = _G.isMobile and 1.15 or 1,
+					}),
+
+					iAspectRatioConstraint2 = React.createElement("UIAspectRatioConstraint"),
+				}),
+			}),
+
+			--[[
 			gift = React.createElement("ImageButton", {
 				AnchorPoint = Vector2.new(0.5, 0.5),
 				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
@@ -239,8 +469,8 @@ return function(props)
 				LayoutOrder = 3,
 				ZIndex = 5,
 				Position = styles.clicked2:map(function(val)
-					return UDim2.fromScale(if _G.isMobile then 0.85 else 0.79, 0.799)
-						:Lerp(UDim2.fromScale(if _G.isMobile then 0.85 else 0.79, 0.81), val)
+					return UDim2.fromScale(if _G.isMobileOff then 0.85 else 0.79, 0.799)
+						:Lerp(UDim2.fromScale(if _G.isMobileOff then 0.85 else 0.79, 0.81), val)
 				end),
 				ScaleType = Enum.ScaleType.Fit,
 				Size = styles.hover2:map(function(val)
@@ -249,10 +479,10 @@ return function(props)
 				Rotation = styles.hover2:map(function(val)
 					return val * 4
 				end),
-				Visible = props.extraInfo.giftName ~= nil,
+				Visible = false, --props.extraInfo.giftName ~= nil,
 			}, {
 				uIScale = React.createElement("UIScale", {
-					Scale = _G.isMobile and 1.35 or 1,
+					Scale = _G.isMobileOffOff and 1.35 or 1,
 				}),
 				clicker = React.createElement("ImageButton", {
 					AnchorPoint = Vector2.new(0.5, 0.5),
@@ -320,7 +550,8 @@ return function(props)
 					Size = UDim2.fromScale(0.6, 0.6),
 				}),
 			}),
-
+			--]]
+			--[[
 			buy = React.createElement("ImageButton", {
 				AnchorPoint = Vector2.new(0.5, 0.5),
 				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
@@ -402,7 +633,7 @@ return function(props)
 				}),
 
 				uIScale = React.createElement("UIScale", {
-					Scale = _G.isMobile and 1.35 or 1,
+					Scale = _G.isMobileOffOff and 1.35 or 1,
 				}),
 
 				price = React.createElement("TextLabel", {
@@ -429,7 +660,7 @@ return function(props)
 					}),
 				}),
 			}),
-
+			--]]
 			text = React.createElement("TextLabel", {
 				AnchorPoint = Vector2.new(0.5, 0.5),
 				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
@@ -446,7 +677,7 @@ return function(props)
 				TextWrapped = true,
 			}, {
 				uIStroke = React.createElement("UIStroke", {
-					Thickness = 1.5,
+					Thickness = reactUtil.scalePixelSize(1.5),
 				}),
 
 				uIAspectRatioConstraint4 = React.createElement("UIAspectRatioConstraint", {

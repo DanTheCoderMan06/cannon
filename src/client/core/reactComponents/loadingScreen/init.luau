@@ -7,6 +7,7 @@ local sharedPackages = ReplicatedStorage.sharedPackages
 local React = require(sharedPackages.React)
 local ReactSpring = require(sharedPackages.ReactSpring)
 local components = ReplicatedStorage.client.reactComponents
+local reactUtil = require(shared.utilities.reactUtil)
 
 local rotator = require(components.loadingScreen.rotator)
 
@@ -95,7 +96,7 @@ return function()
 			TextWrapped = true,
 		}, {
 			uIStroke = React.createElement("UIStroke", {
-				Thickness = 4,
+				Thickness = reactUtil.scalePixelSize(4),
 			}),
 		}),
 
@@ -125,7 +126,7 @@ return function()
 				TextWrapped = true,
 			}, {
 				uIStroke1 = React.createElement("UIStroke", {
-					Thickness = 4,
+					Thickness = reactUtil.scalePixelSize(4),
 				}),
 			}),
 		}),

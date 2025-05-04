@@ -84,7 +84,6 @@ local function cost(targetLevel, boughtLevels)
 	end
 	local currentLevelApprox = getApproxCannonLevelFromFloors(floorBase) + 1
 	local totalCost = cannonConfig.costFormula(currentLevelApprox + 1, 0) / getValue(currentLevelApprox)
-	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(MAX_FLOORS)
 	if floorBase >= MAX_FLOORS then
 		totalCost *= math.pow(1.02, floorBase - MAX_FLOORS)
 	end

@@ -74,7 +74,7 @@ return function(props)
 			end),
 		}, {
 			uIScale = React.createElement("UIScale", {
-				Scale = _G.isMobile and 1.12 or 1,
+				Scale = _G.isMobile and 1.176 or 1,
 			}),
 
 			text = React.createElement("TextLabel", {
@@ -99,7 +99,7 @@ return function(props)
 				}),
 
 				uIStroke = React.createElement("UIStroke", {
-					Thickness = 4,
+					Thickness = reactUtil.scalePixelSize(4),
 				}),
 			}),
 

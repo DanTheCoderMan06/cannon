@@ -8,6 +8,7 @@ local React = require(sharedPackages.React)
 local Trove = require(sharedPackages.Trove)
 local ReactSpring = require(sharedPackages.ReactSpring)
 local components = ReplicatedStorage.client.reactComponents
+local reactUtil = require(shared.utilities.reactUtil)
 
 return function(props)
 	local styles, api = ReactSpring.useSpring(function()
@@ -74,7 +75,7 @@ return function(props)
 			}),
 
 			uIStroke = React.createElement("UIStroke", {
-				Thickness = 4,
+				Thickness = reactUtil.scalePixelSize(4),
 			}),
 		}),
 
@@ -98,7 +99,7 @@ return function(props)
 			}),
 
 			uIStroke1 = React.createElement("UIStroke", {
-				Thickness = 4,
+				Thickness = reactUtil.scalePixelSize(4),
 			}),
 		}),
 
@@ -194,7 +195,7 @@ return function(props)
 				TextWrapped = true,
 			}, {
 				uIStroke2 = React.createElement("UIStroke", {
-					Thickness = 4,
+					Thickness = reactUtil.scalePixelSize(4),
 				}),
 			}),
 

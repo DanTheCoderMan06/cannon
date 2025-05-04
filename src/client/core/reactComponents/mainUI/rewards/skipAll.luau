@@ -10,6 +10,7 @@ local React = require(sharedPackages.React)
 local Trove = require(sharedPackages.Trove)
 local ReactSpring = require(sharedPackages.ReactSpring)
 local components = ReplicatedStorage.client.reactComponents
+local reactUtil = require(shared.utilities.reactUtil)
 local marketplaceUtil = require(ReplicatedStorage.shared.utilities.marketplaceUtil) -- Added import
 
 local SKIP_ALL_PRODUCT_ID = 3101617187 -- Define the product ID
@@ -66,7 +67,7 @@ return function(props)
 			}),
 
 			uIStroke = React.createElement("UIStroke", {
-				Thickness = 4,
+				Thickness = reactUtil.scalePixelSize(4),
 			}),
 		}),
 

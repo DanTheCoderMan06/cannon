@@ -29,18 +29,26 @@ function debugUtil.log(...)
 			whitelistUser = true
 		end
 		if RunService:IsStudio() or ENABLE_LOGGING_OUTSIDE_STUDIO or whitelistUser then
+			-- Get caller script information
+			local source = debug.info(3, "s") -- Level 3 should be the caller
+			local scriptName = "UnknownScript"
+			if source then
+				scriptName = string.match(source, "([^/\\]+)$") or scriptName -- Extract filename
+			end
+			local prefix = "[" .. scriptName .. "]: "
+
 			if #args == 1 then
-				print(args[1])
+				print(prefix, args[1]) -- Prepend script name
 				return
 			end
 			local strings = {}
+			strings[1] = prefix -- Start with the prefix
 			for i = 1, #args do
-				strings[i] = args[i]
+				strings[i + 1] = args[i] -- Shift original args
 			end
 			-- Use the global print function for the actual output
 			print(table.concat(strings, " "))
 		end
-		-- If not in Studio and logging outside Studio is disabled, do nothing
 	end)
 end
 

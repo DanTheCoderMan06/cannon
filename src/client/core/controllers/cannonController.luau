@@ -69,7 +69,6 @@ function cannonController.createCannon(cannonName: string)
 	targetCannon.PrimaryPart.CFrame = playerPlatform:FindFirstChild("cannonPosition").CFrame
 	targetCannon:SetAttribute("cannonName", cannonName)
 	local baseScale = targetCannon:GetScale()
-	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(playerData.cannonTier)
 	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
 		"NEW SCALE: " .. baseScale * (playerData.cannonTier * 0.1 + 1)
 	)
@@ -208,8 +207,6 @@ function cannonController.start()
 		cameraController.startAir()
 
 		cannonController.playLaunchSound(1, 5)
-
-		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(physics.verticalVelocity)
 
 		-- Pre-calculate theoretical max height and scale velocity if needed
 		local initialVerticalVelocity = physics.verticalVelocity

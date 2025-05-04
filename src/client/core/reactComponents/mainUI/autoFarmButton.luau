@@ -9,6 +9,7 @@ local sharedPackages = ReplicatedStorage.sharedPackages
 local React = require(sharedPackages.React)
 local ReactSpring = require(sharedPackages.ReactSpring)
 local components = ReplicatedStorage.client.reactComponents
+local reactUtil = require(shared.utilities.reactUtil)
 
 local zap = require(ReplicatedStorage.zap)
 
@@ -81,12 +82,12 @@ return function(props)
 		}),
 
 		uIStroke = React.createElement("UIStroke", {
-			Thickness = 2,
+			Thickness = reactUtil.scalePixelSize(2),
 		}),
 
 		uIStroke1 = React.createElement("UIStroke", {
 			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-			Thickness = 2,
+			Thickness = reactUtil.scalePixelSize(2),
 		}),
 
 		uIScale = React.createElement("UIScale", {
@@ -110,7 +111,7 @@ return function(props)
 		}, {
 			uIStroke2 = React.createElement("UIStroke", {
 				Color = Color3.fromRGB(12, 86, 4),
-				Thickness = 2.5,
+				Thickness = reactUtil.scalePixelSize(2.5),
 			}),
 		}),
 		clicker = React.createElement("TextButton", {

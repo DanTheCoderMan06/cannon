@@ -30,7 +30,7 @@ local floorStorage = Instance.new("Folder")
 floorStorage.Name = "floorStorage"
 floorStorage.Parent = ServerStorage
 
-local floors = objectcache.new({ Template = castleFloor, CacheParent = floorStorage })
+--local floors = objectcache.new({ Template = castleFloor, CacheParent = floorStorage })
 
 local CHUNK_SIZE = 10
 
@@ -43,6 +43,7 @@ function castleService.updateTower(player)
 
 	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(totalFloors)
 
+	--[[
 	task.spawn(function()
 		local currentFloor = totalFloors - 1
 		while currentFloor >= 0 do
@@ -55,7 +56,7 @@ function castleService.updateTower(player)
 						floors:ExpandCache(50)
 					end
 					local newFloor =
-						floors:Get(playerSpot.CFrame * CFrame.new(0, floorHeight * (currentFloor + 0.5), 0))
+						floors:Get(playerSpot.CFrame * CFrame.new(0, floorHeight * (currentFloor + 0.5) + 7.563, 0))
 					newFloor.Name = tostring(currentFloor)
 					newFloor.Parent = playerCastle
 				end
@@ -63,14 +64,8 @@ function castleService.updateTower(player)
 			end
 			task.wait()
 		end
-	end)
-
-	-- Update platforms in the same function call if you need immediate updates
-	for _, v in pairs(playerPlatforms:GetChildren()) do
-		if v:GetAttribute("currentTower") == player.Name then
-			castleService.updatePlatform(Players:FindFirstChild(v.Name), playerSpot)
-		end
-	end
+	end) Removal for kitbash
+	--]]
 
 	if not playerCastle:FindFirstChild("topFloor") then
 		local playerTopFloor = ReplicatedStorage.assets.castleFloor:Clone()
@@ -87,6 +82,13 @@ function castleService.updateTower(player)
 				* CFrame.new(0, floorHeight * (totalFloors + 0.5) + 6, 0)
 				* CFrame.Angles(math.rad(-90), math.rad(180), 0)
 		)
+	end
+
+	-- Update platforms in the same function call if you need immediate updates
+	for _, v in pairs(playerPlatforms:GetChildren()) do
+		if v:GetAttribute("currentTower") == player.Name then
+			castleService.updatePlatform(Players:FindFirstChild(v.Name), playerSpot)
+		end
 	end
 end
 
@@ -190,7 +192,7 @@ function castleService.start()
 						if countItem % 10 == 0 then
 							task.wait()
 						end
-						floors:Return(floorItem)
+						--floors:Return(floorItem)
 					end
 				end
 				v:ClearAllChildren()

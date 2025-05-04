@@ -8,6 +8,7 @@ local sharedPackages = ReplicatedStorage.sharedPackages
 local React = require(sharedPackages.React)
 local ReactSpring = require(sharedPackages.ReactSpring)
 local components = ReplicatedStorage.client.reactComponents
+local reactUtil = require(shared.utilities.reactUtil)
 
 local Trove = require(ReplicatedStorage.sharedPackages.Trove)
 
@@ -95,7 +96,7 @@ return function(props)
 		}, {
 			uIStroke = React.createElement("UIStroke", {
 				Color = Color3.fromRGB(11, 60, 76),
-				Thickness = 2.3,
+				Thickness = reactUtil.scalePixelSize(2.3),
 			}),
 		}),
 	})

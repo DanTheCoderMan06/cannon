@@ -99,7 +99,7 @@ return function(props)
 		}, {
 			uIStroke = React.createElement("UIStroke", {
 				Color = Color3.fromRGB(11, 60, 76),
-				Thickness = 2.3,
+				Thickness = reactUtil.scalePixelSize(2.3),
 			}),
 		}),
 	})

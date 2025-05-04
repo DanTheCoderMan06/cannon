@@ -11,6 +11,7 @@ local Trove = require(sharedPackages.Trove)
 local ReactSpring = require(sharedPackages.ReactSpring)
 local zap = require(ReplicatedStorage.zap)
 local Sift = require(sharedPackages.Sift)
+local reactUtil = require(shared.utilities.reactUtil)
 local components = ReplicatedStorage.client.reactComponents
 
 local giftConfig = require(shared.config.giftConfig)
@@ -236,7 +237,7 @@ return function(props)
 				}),
 
 				uIStroke = React.createElement("UIStroke", {
-					Thickness = 4,
+					Thickness = reactUtil.scalePixelSize(4),
 				}),
 			}),
 
@@ -266,7 +267,7 @@ return function(props)
 				}),
 
 				uIStroke1 = React.createElement("UIStroke", {
-					Thickness = 4,
+					Thickness = reactUtil.scalePixelSize(4),
 				}),
 			}),
 		}),

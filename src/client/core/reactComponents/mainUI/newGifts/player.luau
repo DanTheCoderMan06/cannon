@@ -10,6 +10,7 @@ local React = require(sharedPackages.React)
 local Trove = require(sharedPackages.Trove)
 local ReactSpring = require(sharedPackages.ReactSpring)
 local zap = require(ReplicatedStorage.zap)
+local reactUtil = require(shared.utilities.reactUtil)
 local Sift = require(sharedPackages.Sift)
 
 local giftConfig = require(ReplicatedStorage.shared.config.giftConfig)
@@ -70,7 +71,7 @@ return function(props)
 			TextWrapped = true,
 		}, {
 			uIStroke = React.createElement("UIStroke", {
-				Thickness = 2,
+				Thickness = reactUtil.scalePixelSize(2),
 			}),
 		}),
 		imageHolder = React.createElement("ImageLabel", {

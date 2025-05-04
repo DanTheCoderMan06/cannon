@@ -23,7 +23,7 @@ return function(props)
 		BorderSizePixel = 0,
 		Position = UDim2.fromScale(0.984, -0.00141),
 		ScaleType = Enum.ScaleType.Fit,
-		Size = _G.isMobile and UDim2.fromScale(0.1677, 0.3094) or UDim2.fromScale(0.129, 0.238), -- 1.3x bigger on mobile
+		Size = UDim2.fromScale(0.129, 0.238), -- 1.3x bigger on mobile
 		ZIndex = 5,
 		[React.Event.MouseEnter] = function()
 			api.start({
@@ -44,6 +44,9 @@ return function(props)
 			})
 		end,
 	}, {
+		uIScale = React.createElement("UIScale", {
+			Scale = _G.isMobile and 1.05 or 1,
+		}),
 		uIAspectRatioConstraint = React.createElement("UIAspectRatioConstraint"),
 		content = React.createElement("ImageButton", {
 			AnchorPoint = Vector2.new(0.5, 0.5),

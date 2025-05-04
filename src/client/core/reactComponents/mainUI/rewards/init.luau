@@ -7,6 +7,7 @@ local React = require(sharedPackages.React)
 local Trove = require(sharedPackages.Trove)
 local ReactSpring = require(sharedPackages.ReactSpring)
 local components = ReplicatedStorage.client.reactComponents
+local reactUtil = require(shared.utilities.reactUtil)
 
 local rewards = ReplicatedStorage.client.reactComponents.mainUI.rewards
 
@@ -129,7 +130,7 @@ return function(props)
 				}),
 
 				uIStroke = React.createElement("UIStroke", {
-					Thickness = 4,
+					Thickness = reactUtil.scalePixelSize(4),
 				}),
 			}),
 

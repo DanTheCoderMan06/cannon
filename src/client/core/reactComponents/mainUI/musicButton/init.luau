@@ -8,6 +8,7 @@ local React = require(sharedPackages.React)
 local ReactSpring = require(sharedPackages.ReactSpring)
 local Sift = require(sharedPackages.Sift)
 local components = ReplicatedStorage.client.reactComponents
+local reactUtil = require(shared.utilities.reactUtil)
 
 return function(props)
 	local isOn, setIsOn = React.useBinding(true)
@@ -82,7 +83,7 @@ return function(props)
 			ZIndex = 50,
 		}, {
 			iStroke = React.createElement("UIStroke", {
-				Thickness = 4,
+				Thickness = reactUtil.scalePixelSize(4),
 			}),
 		}),
 	})

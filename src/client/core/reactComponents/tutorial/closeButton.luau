@@ -21,7 +21,7 @@ return function(props)
 		BackgroundTransparency = 1,
 		BorderColor3 = Color3.fromRGB(0, 0, 0),
 		BorderSizePixel = 0,
-		Position = UDim2.fromScale(0.5, -0.3),
+		Position = UDim2.fromScale(0.5, if _G.isMobile then -0.6 else -0.3),
 		ScaleType = Enum.ScaleType.Fit,
 		Size = UDim2.fromScale(0.034, 0.559),
 		ZIndex = 5,
@@ -44,6 +44,9 @@ return function(props)
 			})
 		end,
 	}, {
+		uIScale = React.createElement("UIScale", {
+			Scale = _G.isMobile and 2 or 1,
+		}),
 		uIAspectRatioConstraint = React.createElement("UIAspectRatioConstraint"),
 		content = React.createElement("ImageButton", {
 			AnchorPoint = Vector2.new(0.5, 0.5),

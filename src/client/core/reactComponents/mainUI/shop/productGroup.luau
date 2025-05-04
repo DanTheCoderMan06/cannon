@@ -43,7 +43,7 @@ local function productsGroup(props)
 				return val == 0
 			end),
 			ScrollBarThickness = props.transparency:map(function(val)
-				return val < 1 and 10 or 0
+				return val < 1 and 5 or 0
 			end),
 			ZIndex = 9,
 		}, {
@@ -178,7 +178,7 @@ return function(props)
 		BorderSizePixel = 0,
 		Position = UDim2.fromScale(0.5, 0.554),
 		Selectable = false,
-		Size = UDim2.fromScale(0.956, 0.873),
+		Size = UDim2.fromScale(0.986, 0.9),
 		ZIndex = 9,
 	}, {
 		cannons = React.createElement(productsGroup, { products = sections["cannons"], transparency = styles.cannons }),

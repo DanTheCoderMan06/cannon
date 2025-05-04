@@ -89,4 +89,25 @@ function reactUtil.formatNumber(number)
 	end
 end
 
+-- Scales a target pixel size based on the current screen width relative to a 1920px base width.
+-- @param targetPixelSize number - The desired pixel size at 1920px width.
+-- @return number - The scaled pixel size for the current viewport width.
+function reactUtil.scalePixelSize(targetPixelSize: number): number
+	local camera = workspace.CurrentCamera
+	if not camera then
+		warn("reactUtil.scalePixelSize: Could not find workspace.CurrentCamera")
+		return targetPixelSize -- Return original size if camera isn't available
+	end
+
+	local viewportSize = camera.ViewportSize
+	local scaleFactor = viewportSize.X / 1920
+
+	-- Ensure scaleFactor is not zero to avoid division by zero or unexpected results
+	if scaleFactor <= 0 then
+		warn("reactUtil.scalePixelSize: Invalid viewport width or scale factor <= 0. ViewportSize.X:", viewportSize.X)
+		return targetPixelSize -- Return original size on invalid scale
+	end
+
+	return targetPixelSize * scaleFactor
+end
 return reactUtil

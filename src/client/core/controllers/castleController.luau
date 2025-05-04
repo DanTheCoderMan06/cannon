@@ -15,7 +15,11 @@ local ReactRoblox = require(game.ReplicatedStorage.sharedPackages.ReactRoblox)
 local React = require(game.ReplicatedStorage.sharedPackages.React)
 local Sift = require(game.ReplicatedStorage.sharedPackages.Sift)
 local Signal = require(game.ReplicatedStorage.sharedPackages.Signal)
-local ObjectCache = require(game.ReplicatedStorage.sharedPackages.objectcache)
+local objectcache = require(game.ReplicatedStorage.sharedPackages.objectcache)
+
+local floorStorage = Instance.new("Folder")
+floorStorage.Name = "floors"
+floorStorage.Parent = game.ReplicatedFirst
 
 local enabledPlatforms = {}
 
@@ -315,7 +319,6 @@ end
 local playerTroves = {}
 
 function castleController.updatePlayer(player)
-	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(player.Name)
 	playerTroves[player.Name] = Trove.new()
 	local playerSpot = castleController.findSpot()
 	playerSpot.Name = player.Name
@@ -412,6 +415,9 @@ function castleController.updatePlayer(player)
 end
 
 local function changeTransparency(item, toOne)
+	if item:IsA("BasePart") then
+		item.LocalTransparencyModifier = toOne and 1 or 0
+	end
 	for _, v in pairs(item:GetDescendants()) do
 		if not v:IsA("BasePart") and not v:IsA("Texture") then
 			continue
@@ -733,6 +739,90 @@ function castleController.start()
 		end
 		playerData = newData
 	end)
+
+	local playerPlatforms = workspace:WaitForChild("playerPlatforms")
+	playerPlatforms.ChildAdded:Connect(function(child)
+		if child.Name == Players.LocalPlayer.Name then
+			return
+		end
+		if child:IsA("Model") then
+			child:Destroy()
+		end
+	end)
+	for _, v in pairs(playerPlatforms:GetChildren()) do
+		if v.Name == Players.LocalPlayer.Name then
+			continue
+		end
+		v:Destroy()
+	end
+
+	local floors = objectcache.new({ Template = castleFloor, CacheParent = floorStorage })
+
+	local CHUNK_SIZE = 10
+
+	--Attempt at kitbashing.
+	local function castleUpdates(targetPlayer)
+		local playerSpot = castleFolder:FindFirstChild(targetPlayer.Name)
+		local playerCastle = playerSpot:FindFirstChildWhichIsA("Model")
+
+		local totalFloorsObject = targetPlayer:WaitForChild("leaderstats"):WaitForChild("Floors 🏢")
+
+		local function runUpdate()
+			local totalFloors = totalFloorsObject.Value
+			--[[
+			task.spawn(function()
+				local currentFloor = totalFloors - 1
+				while currentFloor >= 0 do
+					for i = 1, CHUNK_SIZE do
+						if currentFloor < 0 then
+							break
+						end
+						if not playerCastle:FindFirstChild(tostring(currentFloor)) then
+							if #floors._FreeObjects < i then
+								floors:ExpandCache(50)
+							end
+							local newFloor = floors:Get(
+								playerSpot.CFrame * CFrame.new(0, floorHeight * (currentFloor + 0.5) + 7.563, 0)
+							)
+							newFloor.Name = tostring(currentFloor)
+							newFloor.Parent = playerCastle
+						end
+						currentFloor = currentFloor - 1
+					end
+					task.wait()
+				end
+			end)
+			--]]
+			local castlePart
+			if not playerCastle:FindFirstChild("castlePart") then
+				castlePart = ReplicatedStorage.assets.castleFloorLerp:Clone()
+				castlePart.Name = "castlePart"
+				castlePart.Parent = playerCastle
+			end
+			castlePart.PrimaryPart.Size = Vector3.new(80.822, 22.406 * totalFloors, 80.822)
+			castlePart.PrimaryPart.Position = playerSpot.Position + Vector3.new(0, 22.406 * totalFloors / 2, 0)
+		end
+
+		totalFloorsObject:GetPropertyChangedSignal("Value"):Connect(function()
+			runUpdate()
+		end)
+
+		totalFloorsObject.Destroying:Connect(function()
+			for _, v in pairs(playerCastle:GetChildren()) do
+				if v:IsA("Model") then
+					floors:Return(v)
+				end
+			end
+		end)
+
+		runUpdate()
+	end
+
+	for _, v in pairs(Players:GetPlayers()) do
+		castleUpdates(v)
+	end
+
+	Players.PlayerAdded:Connect(castleUpdates)
 end
 
 return castleController
