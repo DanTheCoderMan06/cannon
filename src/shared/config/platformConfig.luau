@@ -28,6 +28,12 @@ local startTimeLuckyBlock = tick() - rewardsConfig.luckyBlockSkipInitial
 
 local changedCannonSignal = Signal.new()
 
+-- Define standard colors for callback feedback
+local SUCCESS_COLOR = Color3.fromRGB(233, 255, 87) -- Greenish-yellow
+local FAILURE_COLOR = Color3.fromRGB(255, 94, 88) -- Red
+local DEFAULT_COLOR = Color3.new(0, 1, 81 / 255) -- Original Blue
+local GREY_FLASH_COLOR = Color3.new(0.8, 0.8, 0.8) -- Grey for specific feedback
+
 -- Helper function to format numbers into K/M strings
 
 local function switchPlatformColor(model, target)
@@ -89,15 +95,15 @@ return {
 			initModel = ReplicatedStorage.assets:WaitForChild("luckyBlock"),
 			callbackFunction = function(success, states)
 				if success then
-					switchPlatformColor(states.model, Color3.new(0.992156, 1, 0.580392))
+					switchPlatformColor(states.model, SUCCESS_COLOR)
 				else
 					local luckyBlockId = gamepassConfig.luckyBlockSkip.getId(dataController.getData())
 					MarketplaceService:PromptProductPurchase(Players.LocalPlayer, luckyBlockId)
-					switchPlatformColor(states.model, Color3.new(1, 0, 0))
+					switchPlatformColor(states.model, FAILURE_COLOR)
 				end
 
 				task.delay(0.5, function()
-					switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255))
+					switchPlatformColor(states.model, DEFAULT_COLOR)
 				end)
 			end,
 		},
@@ -215,13 +221,13 @@ return {
 				local targetColor
 				if not playerData.joinedGroupReward then
 					-- State 1: Group reward not claimed. Flash grey as feedback for clicking.
-					targetColor = Color3.new(0.8, 0.8, 0.8) -- Grey flash
+					targetColor = GREY_FLASH_COLOR -- Use defined grey flash
 				else
 					-- State 2: Group reward claimed. Show success/fail for friend invite action.
 					if success then
-						targetColor = Color3.new(0.992156, 1, 0.580392) -- Green
+						targetColor = SUCCESS_COLOR
 					else
-						targetColor = Color3.new(1, 0, 0) -- Red
+						targetColor = FAILURE_COLOR
 					end
 				end
 
@@ -233,7 +239,7 @@ return {
 				-- Reset color after delay, ensuring model still exists
 				task.delay(0.5, function()
 					if states and states.model and states.model.Parent then
-						switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255)) -- Original Blue
+						switchPlatformColor(states.model, DEFAULT_COLOR) -- Reset to default blue
 					end
 				end)
 			end,
@@ -332,9 +338,9 @@ return {
 			end,
 			callbackFunction = function(success, states)
 				if success then
-					switchPlatformColor(states.model, Color3.new(0.992156, 1, 0.580392))
+					switchPlatformColor(states.model, SUCCESS_COLOR)
 				else
-					switchPlatformColor(states.model, Color3.new(1, 0, 0))
+					switchPlatformColor(states.model, FAILURE_COLOR)
 					local playerData = dataController.getData()
 					if playerData.cannon < cannonConfig.maxLevel then
 						local id = gamepassConfig.upgradeCannon.getId(dataController.getData())
@@ -343,7 +349,7 @@ return {
 				end
 
 				task.delay(0.5, function()
-					switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255))
+					switchPlatformColor(states.model, DEFAULT_COLOR)
 				end)
 			end,
 		},
@@ -496,13 +502,13 @@ return {
 			initModel = ReplicatedStorage.assets.miniFloor,
 			callbackFunction = function(success, states)
 				if success then
-					switchPlatformColor(states.model, Color3.new(0.992156, 1, 0.580392))
+					switchPlatformColor(states.model, SUCCESS_COLOR)
 				else
-					switchPlatformColor(states.model, Color3.new(1, 0, 0))
+					switchPlatformColor(states.model, FAILURE_COLOR)
 				end
 
 				task.delay(0.5, function()
-					switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255))
+					switchPlatformColor(states.model, DEFAULT_COLOR)
 				end)
 			end,
 		},
@@ -749,7 +755,7 @@ return {
 					if playerData.towerStatus == 0 then
 						switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255))
 					elseif playerData.towerStatus == 1 then
-						switchPlatformColor(states.model, Color3.new(0.474509, 0.505882, 0.792156))
+						switchPlatformColor(states.model, Color3.fromRGB(95, 84, 255))
 					else
 						switchPlatformColor(states.model, Color3.new(1, 0, 0)) -- Bright Red for Private
 					end
@@ -801,19 +807,19 @@ return {
 			end,
 			callbackFunction = function(success, states) -- callBackFunction is just a function to change the staes if needed
 				if success then
-					switchPlatformColor(states.model, Color3.new(0.992156, 1, 0.580392))
+					switchPlatformColor(states.model, SUCCESS_COLOR)
 				else
-					switchPlatformColor(states.model, Color3.new(1, 0, 0))
+					switchPlatformColor(states.model, FAILURE_COLOR)
 				end
 
 				task.delay(0.5, function()
 					local newData = dataController.getData()
 					if newData.towerStatus == 0 then
-						switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255))
+						switchPlatformColor(states.model, DEFAULT_COLOR) -- Public uses default blue
 					elseif newData.towerStatus == 1 then
-						switchPlatformColor(states.model, Color3.new(0.474509, 0.505882, 0.792156))
+						switchPlatformColor(states.model, Color3.new(0.474509, 0.505882, 0.792156)) -- Friends Only (keep specific color)
 					else
-						switchPlatformColor(states.model, Color3.new(1, 0, 0)) -- Bright Red for Private
+						switchPlatformColor(states.model, FAILURE_COLOR) -- Private uses failure red
 					end
 				end)
 			end,
@@ -925,13 +931,13 @@ return {
 			end,
 			callbackFunction = function(success, states)
 				if success then
-					switchPlatformColor(states.model, Color3.new(0.992156, 1, 0.580392))
+					switchPlatformColor(states.model, SUCCESS_COLOR)
 				else
-					switchPlatformColor(states.model, Color3.new(1, 0, 0))
+					switchPlatformColor(states.model, FAILURE_COLOR)
 				end
 
 				task.delay(0.5, function()
-					switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255))
+					switchPlatformColor(states.model, DEFAULT_COLOR)
 				end)
 			end,
 		},
@@ -1037,13 +1043,13 @@ return {
 			end,
 			callbackFunction = function(success, states)
 				if success then
-					switchPlatformColor(states.model, Color3.new(0.992156, 1, 0.580392))
+					switchPlatformColor(states.model, SUCCESS_COLOR)
 				else
-					switchPlatformColor(states.model, Color3.new(1, 0, 0))
+					switchPlatformColor(states.model, FAILURE_COLOR)
 				end
 
 				task.delay(0.5, function()
-					switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255))
+					switchPlatformColor(states.model, DEFAULT_COLOR)
 				end)
 			end,
 		},
