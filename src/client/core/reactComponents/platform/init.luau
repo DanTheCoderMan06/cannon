@@ -80,7 +80,7 @@ return function(props)
 			bTrove:Add(
 				props.callbackSignal:Connect(function(data)
 					if props.callbackFunction ~= nil then
-						props.callbackFunction(data, { model = props.modelUsed })
+						props.callbackFunction(data, { model = props.modelUsed, targetColor = props.targetColor })
 					end
 				end),
 				"Disconnect"

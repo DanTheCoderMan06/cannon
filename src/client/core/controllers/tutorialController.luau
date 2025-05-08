@@ -222,9 +222,9 @@ function tutorialController.start()
 				>= floorsConfig.costFormula(currentData.floors + 1, currentData.boughtFloors)
 
 			if canAffordCannon then
-				targetCFrame = localPlayerPlatform.platforms:WaitForChild("cannon").CFrame
+				targetCFrame = localPlayerPlatform.platforms:WaitForChild("oneLevel").CFrame
 			elseif canAffordFloor then
-				targetCFrame = localPlayerPlatform.platforms:WaitForChild("floor").CFrame
+				targetCFrame = localPlayerPlatform.platforms:WaitForChild("upgradeFloor").CFrame
 				-- Condition 2: If target is floor AND player is viewing another tower, point to cannon instead
 				if localPlayerPlatform:GetAttribute("currentTower") ~= Players.LocalPlayer.Name then
 					targetCFrame = localPlayerPlatform:WaitForChild("cannonPosition", true).CFrame -- Point to cannon

@@ -102,5 +102,29 @@ return function(props)
 				Thickness = reactUtil.scalePixelSize(2.3),
 			}),
 		}),
+		label2 = React.createElement("TextLabel", {
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+			BackgroundTransparency = 1,
+			BorderColor3 = Color3.fromRGB(0, 0, 0),
+			BorderSizePixel = 0,
+			FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
+			Position = UDim2.fromScale(0.56, 0.55),
+			Size = UDim2.fromScale(0.547, 0.505),
+			Text = currentMoney:map(function(val)
+				return reactUtil.formatNumber(val)
+			end),
+			TextColor3 = Color3.fromRGB(0, 0, 0),
+			TextScaled = true,
+			TextSize = 14,
+			TextWrapped = true,
+			TextXAlignment = Enum.TextXAlignment.Left,
+			ZIndex = 3,
+		}, {
+			uIStroke = React.createElement("UIStroke", {
+				Color = Color3.fromRGB(11, 60, 76),
+				Thickness = reactUtil.scalePixelSize(2.3),
+			}),
+		}),
 	})
 end

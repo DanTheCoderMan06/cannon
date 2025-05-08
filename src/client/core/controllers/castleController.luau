@@ -170,15 +170,21 @@ function castleController.getCannonLevel(targetPlayer)
 	end
 end
 
-function castleController.setupPlatform(targetPlatform, callbackSignal, modelUsed, platformInfo)
+function castleController.setupPlatform(targetPlatform, callbackSignal, modelUsed, platformInfo, hideEvent)
 	local container = ReactRoblox.createRoot(Instance.new("Folder"))
 
 	local targetHover = platformConfig.defaultHoverDistance
 
-	if platformConfig[targetPlatform.Name] then
-		targetHover = platformConfig[targetPlatform.Name].hoverDistance
+	if platformConfig.platforms[targetPlatform.Name] then
+		--targetHover = platformConfig.platforms[targetPlatform.Name].hoverDistance or targetHover
 	end
-
+	print(platformConfig.platforms[targetPlatform.Name].targetColor)
+	local enabled, setEnabled = React.createBinding(true)
+	if hideEvent then
+		hideEvent:Connect(function(toggle)
+			setEnabled(toggle)
+		end)
+	end
 	container:render(ReactRoblox.createPortal(
 		React.createElement("BillboardGui", {
 			Active = true,
@@ -191,13 +197,16 @@ function castleController.setupPlatform(targetPlatform, callbackSignal, modelUse
 			Adornee = targetPlatform,
 			ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
 			ResetOnSpawn = false,
+			Enabled = enabled,
 		}, {
 			React.createElement(
 				platformUI,
-				Sift.Dictionary.merge(
-					platformInfo,
-					{ name = targetPlatform.Name, callbackSignal = callbackSignal, modelUsed = modelUsed }
-				)
+				Sift.Dictionary.merge(platformInfo, {
+					name = targetPlatform.Name,
+					callbackSignal = callbackSignal,
+					modelUsed = modelUsed,
+					targetColor = platformConfig.platforms[targetPlatform.Name].targetColor,
+				})
 			),
 		}),
 		Players.LocalPlayer.PlayerGui,
@@ -476,14 +485,31 @@ function castleController.start()
 
 			local callbackSignal = Signal.new()
 			local newPurchase = ReplicatedStorage.assets.purchasePlatform:Clone()
+
+			local hideEvent
+
+			if platform.checkToHide then
+				hideEvent = Signal.new()
+				platform.checkToHide(hideEvent)
+			end
+
 			castleController.setupPlatform(
 				playerPlatform:WaitForChild("platforms"):WaitForChild(platformName),
 				callbackSignal,
 				newPurchase,
-				platform
+				platform,
+				hideEvent
 			)
 
 			local modelFolder = Instance.new("Folder")
+			for _, v in pairs(newPurchase:GetChildren()) do
+				if v == newPurchase.PrimaryPart then
+					continue
+				end
+				print(platformName)
+				v.Color = platform.targetColor
+			end
+
 			newPurchase:PivotTo(playerPlatform.platforms:WaitForChild(platformName).CFrame)
 			newPurchase.Parent = playerPlatform.platforms:WaitForChild(platformName)
 
@@ -552,6 +578,18 @@ function castleController.start()
 
 				task.defer(function()
 					platform.initModel(updateTrove, updateSignal)
+				end)
+			end
+
+			if hideEvent then
+				hideEvent:Connect(function(toggle)
+					for _, v in pairs(newPurchase:GetDescendants()) do
+						if v:IsA("BasePart") then
+							v.Transparency = toggle and 0 or 1
+						elseif v:IsA("Texture") then
+							v.Transparency = toggle and 0.6 or 1
+						end
+					end
 				end)
 			end
 

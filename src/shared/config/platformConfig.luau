@@ -31,7 +31,6 @@ local changedCannonSignal = Signal.new()
 -- Define standard colors for callback feedback
 local SUCCESS_COLOR = Color3.fromRGB(233, 255, 87) -- Greenish-yellow
 local FAILURE_COLOR = Color3.fromRGB(255, 94, 88) -- Red
-local DEFAULT_COLOR = Color3.new(0, 1, 81 / 255) -- Original Blue
 local GREY_FLASH_COLOR = Color3.new(0.8, 0.8, 0.8) -- Grey for specific feedback
 
 -- Helper function to format numbers into K/M strings
@@ -48,6 +47,7 @@ return {
 	changedCannonSignal = changedCannonSignal,
 	platforms = {
 		luckyBlock = {
+			targetColor = Color3.fromRGB(98, 252, 255),
 			hoverDistance = 2,
 			callback = function(callbackEvent)
 				local success = zap.requestLuckyBlock.Call()
@@ -103,11 +103,12 @@ return {
 				end
 
 				task.delay(0.5, function()
-					switchPlatformColor(states.model, DEFAULT_COLOR)
+					switchPlatformColor(states.model, states.targetColor)
 				end)
 			end,
 		},
 		tasks = {
+			targetColor = Color3.fromRGB(98, 252, 255),
 			hoverDistance = 2.5,
 			callback = function(callbackEvent)
 				local playerData = dataController.getData()
@@ -232,19 +233,17 @@ return {
 				end
 
 				-- Apply the determined color flash
-				if states and states.model and states.model.Parent then
-					switchPlatformColor(states.model, targetColor)
-				end
+				switchPlatformColor(states.model, targetColor)
 
 				-- Reset color after delay, ensuring model still exists
 				task.delay(0.5, function()
-					if states and states.model and states.model.Parent then
-						switchPlatformColor(states.model, DEFAULT_COLOR) -- Reset to default blue
-					end
+					print(states.targetColor)
+					switchPlatformColor(states.model, states.targetColor) -- Reset to default blue
 				end)
 			end,
 		},
-		cannon = {
+		oneLevel = {
+			targetColor = Color3.fromRGB(255, 212, 103),
 			hoverDistance = 3,
 			callback = function(callbackEvent)
 				local success = zap.purchaseUpgrade.Call("cannon")
@@ -349,11 +348,12 @@ return {
 				end
 
 				task.delay(0.5, function()
-					switchPlatformColor(states.model, DEFAULT_COLOR)
+					switchPlatformColor(states.model, states.targetColor)
 				end)
 			end,
 		},
-		floor = {
+		upgradeFloor = {
+			targetColor = Color3.fromRGB(255, 212, 103),
 			hoverDistance = 2,
 			callback = function(callbackEvent)
 				local localPlayer = Players.LocalPlayer
@@ -508,11 +508,12 @@ return {
 				end
 
 				task.delay(0.5, function()
-					switchPlatformColor(states.model, DEFAULT_COLOR)
+					switchPlatformColor(states.model, states.targetColor)
 				end)
 			end,
 		},
 		tenFloors = {
+			targetColor = Color3.fromRGB(70, 255, 113),
 			hoverDistance = 2,
 			callback = function(callbackEvent)
 				local playerData = dataController.getData()
@@ -620,9 +621,10 @@ return {
 				-- Call the function once initially to set the correct state
 				updateTenFloorsDisplay()
 			end,
-			initModel = ReplicatedStorage.assets.twofloors,
+			initModel = ReplicatedStorage.assets.fivefloors,
 		},
 		fiftyFloors = {
+			targetColor = Color3.fromRGB(70, 255, 113),
 			hoverDistance = 2,
 			callback = function(callbackEvent)
 				local playerData = dataController.getData()
@@ -667,7 +669,7 @@ return {
 			end,
 			title = "+50 FLOORS", -- Title remains static
 			description = "Loading...", -- Initial description, updated by init/updateValues
-			initModel = ReplicatedStorage.assets.fivefloors,
+			initModel = ReplicatedStorage.assets.fiftyFloors,
 			updateValues = function(trove, updateEvent)
 				local Players = game:GetService("Players")
 				local stats = Players.LocalPlayer:WaitForChild("leaderstats")
@@ -732,7 +734,9 @@ return {
 				updateFiftyFloorsDisplay()
 			end,
 		},
-		changeTower = {
+
+		changeTowerPrivacy = {
+			targetColor = Color3.fromRGB(70, 255, 113),
 			callback = function(callbackEvent)
 				local localPlayer = Players.LocalPlayer
 				local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(localPlayer.Name)
@@ -753,7 +757,7 @@ return {
 				local function updateColor()
 					local playerData = dataController.currentData
 					if playerData.towerStatus == 0 then
-						switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255))
+						switchPlatformColor(states.model, Color3.fromRGB(70, 255, 113))
 					elseif playerData.towerStatus == 1 then
 						switchPlatformColor(states.model, Color3.fromRGB(95, 84, 255))
 					else
@@ -773,7 +777,7 @@ return {
 								else "PRIVATE 🔒",
 						})
 					else
-						switchPlatformColor(states.model, Color3.new(0, 1, 81 / 255))
+						switchPlatformColor(states.model, Color3.fromRGB(70, 255, 113))
 						updateEvent:Fire({
 							title = "TELEPORT",
 							description = "RETURN TO YOUR TOWER",
@@ -815,7 +819,7 @@ return {
 				task.delay(0.5, function()
 					local newData = dataController.getData()
 					if newData.towerStatus == 0 then
-						switchPlatformColor(states.model, DEFAULT_COLOR) -- Public uses default blue
+						switchPlatformColor(states.model, states.targetColor) -- Public uses default blue
 					elseif newData.towerStatus == 1 then
 						switchPlatformColor(states.model, Color3.new(0.474509, 0.505882, 0.792156)) -- Friends Only (keep specific color)
 					else
@@ -824,7 +828,8 @@ return {
 				end)
 			end,
 		},
-		upgradeCannon = {
+		oneTier = {
+			targetColor = Color3.fromRGB(70, 255, 113),
 			hoverDistance = 3,
 			callback = function(callbackEvent)
 				local Players = game:GetService("Players")
@@ -937,11 +942,12 @@ return {
 				end
 
 				task.delay(0.5, function()
-					switchPlatformColor(states.model, DEFAULT_COLOR)
+					switchPlatformColor(states.model, states.targetColor)
 				end)
 			end,
 		},
 		switchCannon = {
+			targetColor = Color3.fromRGB(70, 255, 113),
 			hoverDistance = 3,
 			checkToLoad = function(loadEvent)
 				local playerData = dataController.getData()
@@ -1049,7 +1055,213 @@ return {
 				end
 
 				task.delay(0.5, function()
-					switchPlatformColor(states.model, DEFAULT_COLOR)
+					switchPlatformColor(states.model, states.targetColor)
+				end)
+			end,
+		},
+		twoHundredFiftyFloors = {
+			checkToHide = function(hideEvent)
+				local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
+				playerPlatform:GetAttributeChangedSignal("currentTower"):Connect(function()
+					hideEvent:Fire(playerPlatform:GetAttribute("currentTower") == Players.LocalPlayer.Name)
+				end)
+			end,
+			targetColor = Color3.fromRGB(95, 84, 255),
+			hoverDistance = 2,
+			callback = function(callbackEvent)
+				local playerData = dataController.getData()
+				local localPlayer = Players.LocalPlayer
+				local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(localPlayer.Name)
+				if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
+					-- Check product tier, defaulting to 0 if nil
+					if (playerData.productTiers.products["floors"] or 0) >= 5 then
+						MarketplaceService:PromptProductPurchase(
+							Players.LocalPlayer,
+							gamepassConfig.twoHundredFiftyFloorsTier2.id
+						)
+					else
+						MarketplaceService:PromptProductPurchase(
+							Players.LocalPlayer,
+							gamepassConfig.twoHundredFiftyFloors.id
+						)
+					end
+					callbackEvent:Fire(true)
+				else
+					local playerData = dataController.getData()
+					zap.checkRecipient.Call({
+						selectedPlayer = playerPlatform:GetAttribute("currentTower"),
+						selectedGift = "twoHundredFifty",
+						override = true,
+					})
+					-- Check gift tier, defaulting to 0 if nil
+					if (playerData.productTiers.gifts["floors"] or 0) >= 5 then
+						MarketplaceService:PromptProductPurchase(localPlayer, giftConfig.twoHundredFiftyTier2.id)
+						callbackEvent:Fire(true)
+						return
+					end
+					MarketplaceService:PromptProductPurchase(localPlayer, giftConfig.twoHundredFifty.id)
+					callbackEvent:Fire(true)
+				end
+			end,
+			init = function()
+				-- Fetch initial dynamic price for self-purchase
+				local productId = gamepassConfig.twoHundredFiftyFloors.id
+				-- TODO: Add logic to check playerData.productTiers.products["floors"] for tier 2 ID if necessary
+				local itemInfo = marketplaceUtil.getProductInfo(productId, Enum.InfoType.Product)
+				local priceDesc = itemInfo and itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
+					or "Loading..."
+				return { title = "+250 FLOORS", description = priceDesc }
+			end,
+			title = "+250 FLOORS", -- Title remains static
+			description = "Loading...", -- Initial description, updated by init/updateValues
+			initModel = ReplicatedStorage.assets.twoHundredFiftyFloors,
+			updateValues = function(trove, updateEvent)
+				local Players = game:GetService("Players")
+				local stats = Players.LocalPlayer:WaitForChild("leaderstats")
+				local floorValue
+				local localPlayer = Players.LocalPlayer
+				local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(localPlayer.Name)
+
+				-- Local function to update the platform display based on current tower
+				local function updateFiftyFloorsDisplay()
+					local playerData = dataController.getData() -- Get current data for tier checks
+					local title, productId, giftId
+					if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
+						title = "+250 FLOORS"
+						productId = gamepassConfig.twoHundredFiftyFloors.id
+						local itemInfo
+						-- Check product tier, defaulting to 0 if nil
+						if (playerData.productTiers.products["floors"] or 0) >= 5 then
+							title = "+250 FLOORS (TIER 2)"
+							productId = gamepassConfig.twoHundredFiftyFloorsTier2.id
+							itemInfo = marketplaceUtil.getProductInfo(productId, Enum.InfoType.Product)
+						end
+						itemInfo = itemInfo or marketplaceUtil.getProductInfo(productId, Enum.InfoType.Product)
+						local priceDesc = itemInfo and itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
+							or "Loading..."
+						updateEvent:Fire({ title = title, description = priceDesc })
+					else
+						local itemInfo
+						title = "GIFT 250 FLOORS"
+						giftId = giftConfig.twoHundredFifty.id
+						-- Check gift tier, defaulting to 0 if nil
+						if (playerData.productTiers.gifts["floors"] or 0) >= 5 then
+							giftId = giftConfig.twoHundredFiftyTier2.id
+							title = "GIFT 250 FLOORS (TIER 2)"
+							itemInfo = marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
+						end
+						itemInfo = itemInfo or marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
+						local priceDesc = itemInfo and itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
+							or "Loading..."
+						updateEvent:Fire({ title = title, description = priceDesc })
+					end
+				end
+
+				-- Connect the attribute change signal to the update function
+				trove:Add(playerPlatform:GetAttributeChangedSignal("currentTower"):Connect(updateFiftyFloorsDisplay))
+
+				local currentData = dataController.getData()
+				local oldGifts = currentData.productTiers.gifts["floors"] or 0
+				local oldDevs = currentData.productTiers.products["floors"] or 0
+				dataController.dataChanged:Connect(function(newData)
+					-- Check product and gift tiers, defaulting to 0 if nil
+					local newGifts = newData.productTiers.gifts["floors"] or 0
+					local newDevs = newData.productTiers.products["floors"] or 0
+					if oldGifts == newGifts and oldDevs == newDevs then
+						return
+					end
+					oldDevs = newDevs
+					oldGifts = newGifts
+					updateFiftyFloorsDisplay()
+				end)
+
+				-- Call the function once initially to set the correct state
+				updateFiftyFloorsDisplay()
+			end,
+		},
+		tenLevels = {
+			targetColor = Color3.fromRGB(70, 255, 113),
+			hoverDistance = 3,
+			callback = function(callbackEvent)
+				local id = gamepassConfig.upgradeCannon.getId(dataController.getData())
+				MarketplaceService:PromptProductPurchase(Players.LocalPlayer, id)
+				callbackEvent:Fire(true)
+			end,
+			title = "+10 LEVELS",
+			description = "N/A",
+			updateValues = function(trove, updateEvent)
+				local Players = game:GetService("Players")
+				local stats = Players.LocalPlayer:WaitForChild("leaderstats")
+				local playerData = dataController.currentData
+				local cannonValue
+				for _, v in pairs(stats:GetChildren()) do
+					if v:GetAttribute("statName") ~= "cannon" then
+						continue
+					end
+					cannonValue = v
+				end
+				trove:Add(dataController.dataChanged:Connect(function(newdata)
+					if playerData.cannon == newdata.cannon then
+						return
+					end
+					playerData = newdata
+					if cannonValue.Value == cannonConfig.maxLevel then
+						updateEvent:Fire({
+							title = "LEVEL " .. tostring(cannonValue.Value),
+							description = "MAX",
+						})
+					else
+						local id = gamepassConfig.upgradeCannon.getId(playerData)
+						local itemInfo = marketplaceUtil.getProductInfo(id, Enum.InfoType.Product)
+						updateEvent:Fire({
+							title = "LEVEL " .. tostring(math.min(cannonConfig.maxLevel, cannonValue.Value + 10)),
+							description = '<font color="#008000">\u{E002}</font>' .. itemInfo.PriceInRobux, -- Fixed $ placement
+						})
+					end
+				end))
+			end,
+			init = function()
+				local Players = game:GetService("Players")
+				local stats = Players.LocalPlayer:WaitForChild("leaderstats")
+				local playerData = dataController.currentData
+				for _, v in pairs(stats:GetChildren()) do
+					if v:GetAttribute("statName") == "cannon" then
+						local id = gamepassConfig.upgradeCannon.getId(dataController.getData())
+						local itemInfo = marketplaceUtil.getProductInfo(id, Enum.InfoType.Product)
+						return {
+							title = "LEVEL " .. tostring(math.min(cannonConfig.maxLevel, v.Value + 10)),
+							description = '<font color="#008000">\u{E002}</font>' .. itemInfo.PriceInRobux,
+						}
+					end
+				end
+			end,
+			initModel = function(modelTrove, updateModelEvent)
+				local Players = game:GetService("Players")
+				local leaderstatsstats = Players.LocalPlayer:WaitForChild("leaderstats")
+				local function updateModel(value)
+					local newModel = ReplicatedStorage.assets.cannons:FindFirstChild(cannonConfig.getCannon(value + 1))
+					require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(newModel.Name)
+					updateModelEvent:Fire(newModel)
+				end
+				for _, v in pairs(leaderstatsstats:GetChildren()) do
+					if v:GetAttribute("statName") ~= "cannon" then
+						continue
+					end
+					modelTrove:Add(v:GetPropertyChangedSignal("Value"):Connect(function()
+						updateModel(math.min(cannonConfig.maxLevel, v.Value + 10))
+					end))
+					updateModel(math.min(cannonConfig.maxLevel, v.Value + 10))
+				end
+			end,
+			callbackFunction = function(success, states)
+				if success then
+					switchPlatformColor(states.model, SUCCESS_COLOR)
+				else
+					switchPlatformColor(states.model, FAILURE_COLOR)
+				end
+
+				task.delay(0.5, function()
+					switchPlatformColor(states.model, states.targetColor)
 				end)
 			end,
 		},
