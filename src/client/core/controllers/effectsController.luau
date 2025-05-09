@@ -161,7 +161,7 @@ function effectsController.updateHighscore()
 	currentHighScore = newHighScore
 	local hsArea = workspace:FindFirstChild("highscorePlate")
 	if not hsArea then
-		hsArea = ReplicatedStorage.assets:WaitForChild("highscorePlate")
+		hsArea = ReplicatedStorage.assets.effects.highscorePlate:Clone()
 		hsArea.Parent = workspace
 	end
 	hsArea:FindFirstChild("record", true).Text = newHighScore .. " studs"
@@ -171,7 +171,7 @@ function effectsController.updateHighscore()
 end
 
 function effectsController.rewardPopup(location: Vector3, text: string)
-	local p = ReplicatedStorage.assets.effectRewardPart:Clone()
+	local p = ReplicatedStorage.assets.effects.effectRewardPart:Clone()
 	p.Position = location
 	p.Parent = workspace
 
@@ -291,7 +291,7 @@ function effectsController.finishedPath(results, track, animationInstance)
 	end
 
 	-- Create the effects part
-	local finishedPathEffects = ReplicatedStorage.assets.finishedPath:Clone()
+	local finishedPathEffects = ReplicatedStorage.assets.effects.finishedPath:Clone()
 	finishedPathEffects.PrimaryPart.Position = character.PrimaryPart.Position * Vector3.new(1, 0, 1)
 	finishedPathEffects.PrimaryPart.Orientation = Vector3.new(0, 0, 90)
 	finishedPathEffects.Parent = workspace

@@ -28,7 +28,7 @@ local zap = require(ReplicatedStorage.zap)
 local Player = Players.LocalPlayer
 
 local castleFolder = workspace:WaitForChild("castles")
-local castleFloor = ReplicatedStorage.assets.castleFloor
+local castleFloor = ReplicatedStorage.assets.playerCastleAssets.castleFloor
 local floorHeight = 22 -- castleFloor:FindFirstChild("ceiling", true).Position.Y - castleFloor:FindFirstChild("floor", true).Position.Y
 local MAX_TEXTURE_DISTANCE = 1024
 
@@ -227,7 +227,7 @@ function castleController.updateSpot(spot, newValue, places, playerFloors)
 		for i = currentValue, newValue do
 			if not spot:FindFirstChildWhichIsA("Model"):FindFirstChild(i) then
 				local weld = Instance.new("Weld")
-				local newMiniFloor = ReplicatedStorage.assets.miniFloorTeleport:Clone()
+				local newMiniFloor = ReplicatedStorage.assets.playerCastleAssets.miniFloorTeleport:Clone()
 				table.insert(parts, newMiniFloor.PrimaryPart)
 				weld.C0 = CFrame.new(0, ((i - 1) * floorHeight * 0.025) + 1.1, 0)
 				newMiniFloor.Name = tostring(i)
@@ -336,11 +336,11 @@ function castleController.updatePlayer(player)
 	local towerModel = Instance.new("Model")
 	towerModel.Name = player.Name
 
-	ReplicatedStorage.assets.towerHighlight:Clone().Parent = towerModel
+	ReplicatedStorage.assets.playerCastleAssets.towerHighlight:Clone().Parent = towerModel
 
 	towerModel.Parent = playerSpot
 
-	local towerPrompt = ReplicatedStorage.assets.towerPrompt:Clone()
+	local towerPrompt = ReplicatedStorage.assets.playerCastleAssets.towerPrompt:Clone()
 
 	local playerCastle = castleFolder:WaitForChild(player.Name):FindFirstChildWhichIsA("Model")
 
@@ -446,7 +446,7 @@ local function updateTopFloor()
 	local playerSpot = workspace.castles:WaitForChild(Player.Name)
 	local playerPlatform = workspace.playerPlatforms:WaitForChild(Player.Name)
 	if not clientTopFloor then
-		clientTopFloor = ReplicatedStorage.assets.topFloor:Clone()
+		clientTopFloor = ReplicatedStorage.assets.playerCastleAssets.topFloor:Clone()
 		clientTopFloor.Parent = workspace
 	end
 	if
@@ -484,7 +484,7 @@ function castleController.start()
 			end
 
 			local callbackSignal = Signal.new()
-			local newPurchase = ReplicatedStorage.assets.purchasePlatform:Clone()
+			local newPurchase = ReplicatedStorage.assets.playerCastleAssets.purchasePlatform:Clone()
 
 			local hideEvent
 
@@ -814,7 +814,7 @@ function castleController.start()
 		local FLOORS_PER_PART = 90
 		local BASE_FLOOR_HEIGHT = 22 -- Extracted from original scaling logic
 		local TOP_FLOOR_COUNT = 2 -- How many floors at the top use the special model
-		local topFloorModelTemplate = ReplicatedStorage.assets.castleFloor
+		local topFloorModelTemplate = ReplicatedStorage.assets.playerCastleAssets.castleFloor
 
 		local function runUpdate()
 			--[[
@@ -853,7 +853,7 @@ function castleController.start()
 
 				-- Ensure the part exists and has the attribute for optimization later
 				if not castlePart then
-					castlePart = ReplicatedStorage.assets.castleFloorLerp:Clone()
+					castlePart = ReplicatedStorage.assets.playerCastleAssets.castleFloorLerp:Clone()
 					castlePart:SetAttribute("isCastlePart", true)
 					castlePart.Name = partName
 					castlePart.Parent = playerCastle

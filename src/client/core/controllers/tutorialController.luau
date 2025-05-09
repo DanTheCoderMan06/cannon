@@ -142,7 +142,7 @@ function tutorialController.startTutorial()
 		end)
 	end
 	local currentIndex = 1
-	tutorialItems = ReplicatedStorage.assets.tutorial:Clone()
+	tutorialItems = ReplicatedStorage.assets.effects.tutorial:Clone()
 	tutorialItems.Parent = workspace
 
 	nextPageSignal:Connect(function()
@@ -185,7 +185,7 @@ function tutorialController.start()
 	end)
 
 	--Set up guiding beam
-	local guiderModel = ReplicatedStorage.assets.guiding:Clone()
+	local guiderModel = ReplicatedStorage.assets.effects.guiding:Clone()
 	guiderModel.Parent = workspace
 	guiderModel.Name = "initialGuider"
 	local start = tick()

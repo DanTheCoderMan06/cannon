@@ -19,7 +19,7 @@ local zap = require(ReplicatedStorage.zap)
 local Player = Players.LocalPlayer
 
 local castleFolder = workspace:WaitForChild("castles")
-local castleFloor = ReplicatedStorage.assets.castleFloor
+local castleFloor = ReplicatedStorage.assets.playerCastleAssets.castleFloor
 local floorHeight = 22 -- castleFloor:FindFirstChild("ceiling", true).Position.Y - castleFloor:FindFirstChild("floor", true).Position.Y
 
 local forceUtil = require(ReplicatedStorage.shared.utilities.forceUtil)
@@ -136,7 +136,7 @@ function cannonController.start()
 		local character = Players.LocalPlayer.Character
 		local pTrove = Trove.new()
 		pTrove:AttachToInstance(character)
-		local movePart = ReplicatedStorage.assets.movePart:Clone()
+		local movePart = ReplicatedStorage.assets.effects.movePart:Clone()
 		movePart.CFrame = character.PrimaryPart.CFrame
 
 		movePart.CFrame = cannonPosition:FindFirstChild("characterPosition", true).WorldCFrame
@@ -184,7 +184,7 @@ function cannonController.start()
 		targetParams.FilterDescendantsInstances = { character }
 		windController.toggle(true)
 
-		local trailEffects = ReplicatedStorage.assets.trailEffects
+		local trailEffects = ReplicatedStorage.assets.effects.trailEffects
 		local characterTrails = {}
 
 		for _, attachmentName in pairs(effectsConfig.attachToAttachments) do

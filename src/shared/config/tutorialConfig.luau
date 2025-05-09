@@ -141,7 +141,7 @@ local config = {
 				local start = items.beamPart.start
 				local target = items.beamPart.target
 				local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
-				local upgradePlatform = playerPlatform.platforms:FindFirstChild("floor")
+				local upgradePlatform = playerPlatform.platforms:FindFirstChild("upgradeFloor")
 				highlight.Adornee = upgradePlatform:FindFirstChildWhichIsA("Model", true)
 				items.beam.Attachment0 =
 					Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChildWhichIsA("Attachment")
@@ -157,7 +157,7 @@ local config = {
 				end)
 
 				states.toggleEntrance(false)
-				states.togglePlatform("floor", true)
+				states.togglePlatform("upgradeFloor", true)
 			end,
 		},
 		{

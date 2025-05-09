@@ -92,7 +92,7 @@ return {
 					description = "UNTIL REWARD",
 				}
 			end,
-			initModel = ReplicatedStorage.assets:WaitForChild("luckyBlock"),
+			initModel = ReplicatedStorage.assets.playerCastleAssets:WaitForChild("luckyBlock"),
 			callbackFunction = function(success, states)
 				if success then
 					switchPlatformColor(states.model, SUCCESS_COLOR)
@@ -216,7 +216,7 @@ return {
 					return { title = formattedReward, description = initialDescription }
 				end
 			end,
-			initModel = ReplicatedStorage.assets:FindFirstChild("rewardSuitcase"),
+			initModel = ReplicatedStorage.assets.purchaseAssets.rewardSuitcase,
 			callbackFunction = function(success, states)
 				local playerData = dataController.getData()
 				local targetColor
@@ -340,11 +340,6 @@ return {
 					switchPlatformColor(states.model, SUCCESS_COLOR)
 				else
 					switchPlatformColor(states.model, FAILURE_COLOR)
-					local playerData = dataController.getData()
-					if playerData.cannon < cannonConfig.maxLevel then
-						local id = gamepassConfig.upgradeCannon.getId(dataController.getData())
-						MarketplaceService:PromptProductPurchase(Players.LocalPlayer, id)
-					end
 				end
 
 				task.delay(0.5, function()
@@ -499,7 +494,7 @@ return {
 					end
 				end
 			end,
-			initModel = ReplicatedStorage.assets.miniFloor,
+			initModel = ReplicatedStorage.assets.purchaseAssets.miniFloor,
 			callbackFunction = function(success, states)
 				if success then
 					switchPlatformColor(states.model, SUCCESS_COLOR)
@@ -621,7 +616,7 @@ return {
 				-- Call the function once initially to set the correct state
 				updateTenFloorsDisplay()
 			end,
-			initModel = ReplicatedStorage.assets.fivefloors,
+			initModel = ReplicatedStorage.assets.purchaseAssets.fivefloors,
 		},
 		fiftyFloors = {
 			targetColor = Color3.fromRGB(70, 255, 113),
@@ -669,7 +664,7 @@ return {
 			end,
 			title = "+50 FLOORS", -- Title remains static
 			description = "Loading...", -- Initial description, updated by init/updateValues
-			initModel = ReplicatedStorage.assets.fiftyFloors,
+			initModel = ReplicatedStorage.assets.purchaseAssets.fiftyFloors,
 			updateValues = function(trove, updateEvent)
 				local Players = game:GetService("Players")
 				local stats = Players.LocalPlayer:WaitForChild("leaderstats")
@@ -896,26 +891,129 @@ return {
 				local leaderstatsstats = Players.LocalPlayer:WaitForChild("leaderstats")
 				local playerData = dataController.getData()
 				local function updateModel(value, cannonTier)
-					local newModel = ReplicatedStorage.assets.cannons:FindFirstChild(cannonConfig.getCannon(value))
+					local cannonAsset = ReplicatedStorage.assets.cannons:FindFirstChild(cannonConfig.getCannon(value))
+					local modelToDisplay = cannonAsset -- Default to the original asset
 					local targetColor
 					local targetScaleUp
-					if playerData.cannonTier == 0 then
-						targetColor = Color3.new(0.0509804, 0.411765, 0.67451)
-						targetScaleUp = 1.1
-					elseif playerData.cannonTier == 1 then
-						targetColor = Color3.new(0.050980, 0.674509, 0.050980)
-						targetScaleUp = 1.2
-					elseif playerData.cannonTier == 2 then
-						targetColor = Color3.new(0.752941, 0.729411, 0.4)
-						targetScaleUp = 1.3
+
+					if playerData.cannonTier == 0 or playerData.cannonTier == 1 or playerData.cannonTier == 2 then
+						local visualPartToClone = cannonAsset:FindFirstChildWhichIsA("Model")
+
+						if visualPartToClone and visualPartToClone.PrimaryPart then
+							local containerModel = Instance.new("Model")
+							containerModel.Name = cannonAsset.Name .. "_Group_Tier" .. tostring(playerData.cannonTier)
+							-- The event consumer will handle parenting of containerModel.
+
+							local numCannons
+							if playerData.cannonTier == 0 then
+								numCannons = 2
+								targetScaleUp = 1.1
+							elseif playerData.cannonTier == 1 then
+								numCannons = 3
+								targetScaleUp = 1.2
+							else -- cannonTier == 2
+								numCannons = 4
+								targetScaleUp = 1.3
+							end
+
+							local miniSize = cannonAsset:GetAttribute("miniSize")
+							miniSize *= 2 / numCannons
+
+							local cannonsInGroup = {}
+							local baseSizeX = visualPartToClone.PrimaryPart.Size.X * miniSize
+							if not (baseSizeX and baseSizeX > 0) then
+								baseSizeX = 1
+							end -- Fallback size if invalid
+							local gap = baseSizeX / miniSize * 0.25 * 2 / numCannons -- Made gap smaller for a tighter fit
+
+							local mainCannonPrimaryPart = nil
+							local firstCannonInstance = nil
+							containerModel:SetAttribute("miniSize", 1)
+							-- First pass: Clone cannons, parent them, and identify the first cannon instance and its PrimaryPart.
+							for i = 1, numCannons do
+								local cannonInstance = visualPartToClone:Clone()
+								cannonInstance.Name = visualPartToClone.Name .. "_Clone" .. i
+								cannonInstance:ScaleTo(miniSize)
+								cannonInstance.PrimaryPart.Anchored = false
+								cannonInstance.Parent = containerModel
+								table.insert(cannonsInGroup, cannonInstance)
+							end
+
+							local totalWidth = (numCannons * baseSizeX) + (math.max(0, numCannons - 1) * gap)
+							local currentXOffset = -totalWidth / 2 + baseSizeX / 2
+
+							local mainCannonPrimaryPart = Instance.new("Part")
+							mainCannonPrimaryPart.Anchored = true
+							mainCannonPrimaryPart.Transparency = 1
+							mainCannonPrimaryPart.CanCollide = false
+							mainCannonPrimaryPart.Parent = containerModel
+
+							-- Second pass: Position cannons. If mainCannonPrimaryPart exists, weld subsequent cannons to it.
+							-- The CFrames set here are world CFrames, assuming the containerModel is being assembled at the origin
+							-- before being passed to the updateModelEvent.
+							for i, currentCannonInstance in ipairs(cannonsInGroup) do
+								local targetWorldCFrame = CFrame.new(0, 0, currentXOffset)
+
+								if currentCannonInstance.PrimaryPart then
+									currentCannonInstance:SetPrimaryPartCFrame(targetWorldCFrame)
+
+									-- If this is NOT the first cannon, and a valid mainCannonPrimaryPart (from the first cannon) exists,
+									-- and the current cannon also has a PrimaryPart, then create a weld.
+									if mainCannonPrimaryPart and currentCannonInstance.PrimaryPart then
+										local weld = Instance.new("Weld")
+										weld.Name = "WeldToMainCannon_" .. i
+										weld.Part0 = mainCannonPrimaryPart -- The PrimaryPart of the first cannon.
+										weld.Part1 = currentCannonInstance.PrimaryPart -- The PrimaryPart of the current (subsequent) cannon.
+
+										-- C0 is the CFrame of the weld relative to Part0. We set it to identity.
+										weld.C0 = CFrame.new()
+										-- C1 is the CFrame of the weld relative to Part1.
+										-- To maintain the current world positions: Part0.CFrame * C0 = Part1.CFrame * C1
+										-- With C0 as identity: Part0.CFrame = Part1.CFrame * C1
+										-- So, C1 = Part1.CFrame:Inverse() * Part0.CFrame
+										-- This is equivalent to Part1.CFrame:ToObjectSpace(Part0.CFrame)
+										weld.C1 = currentCannonInstance.PrimaryPart.CFrame:ToObjectSpace(
+											mainCannonPrimaryPart.CFrame
+										)
+
+										weld.Parent = mainCannonPrimaryPart -- Parent the weld to the main cannon's PrimaryPart for organization.
+									end
+								else
+									-- Fallback positioning for models without a PrimaryPart.
+									currentCannonInstance.CFrame = targetWorldCFrame
+								end
+								currentXOffset = currentXOffset + baseSizeX + gap
+							end
+							containerModel.PrimaryPart = mainCannonPrimaryPart
+							modelToDisplay = containerModel
+							targetColor = nil -- No color tint for grouped cannons
+						else
+							-- Fallback: visualPartToClone or its PrimaryPart not found / invalid size.
+							-- Use original colors and scales for these tiers. modelToDisplay remains cannonAsset.
+							if playerData.cannonTier == 0 then
+								targetColor = Color3.new(0.0509804, 0.411765, 0.67451)
+								targetScaleUp = 1.1
+							elseif playerData.cannonTier == 1 then
+								targetColor = Color3.new(0.050980, 0.674509, 0.050980)
+								targetScaleUp = 1.2
+							else -- cannonTier == 2
+								targetColor = Color3.new(0.752941, 0.729411, 0.4)
+								targetScaleUp = 1.3
+							end
+						end
 					elseif playerData.cannonTier == 3 then
 						targetColor = Color3.new(0.713725, 0.301960, 0.301960)
 						targetScaleUp = 1.4
+						-- modelToDisplay remains cannonAsset
 					elseif playerData.cannonTier == 4 then
-						targetColor = Color3.new(0.713725, 0.301960, 0.301960)
+						targetColor = Color3.new(0.678431, 0.301960, 0.713725)
 						targetScaleUp = 1.5
+						-- modelToDisplay remains cannonAsset
+					else
+						-- Potentially handle other tiers or ensure targetScaleUp is defined for safety.
+						-- Current logic matches original behavior where they might be nil if tier is unexpected.
 					end
-					updateModelEvent:Fire(newModel, targetColor, targetScaleUp)
+					updateModelEvent:Fire(modelToDisplay, targetColor, targetScaleUp)
 				end
 				for _, v in pairs(leaderstatsstats:GetChildren()) do
 					if v:GetAttribute("statName") ~= "cannon" then
@@ -1114,7 +1212,7 @@ return {
 			end,
 			title = "+250 FLOORS", -- Title remains static
 			description = "Loading...", -- Initial description, updated by init/updateValues
-			initModel = ReplicatedStorage.assets.twoHundredFiftyFloors,
+			initModel = ReplicatedStorage.assets.purchaseAssets.twoHundredFiftyFloors,
 			updateValues = function(trove, updateEvent)
 				local Players = game:GetService("Players")
 				local stats = Players.LocalPlayer:WaitForChild("leaderstats")

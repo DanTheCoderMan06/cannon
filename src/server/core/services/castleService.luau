@@ -17,7 +17,7 @@ local dataService = require(ServerStorage.server.services.dataService)
 
 local objectcache = require(sharedPackages.objectcache)
 
-local castleFloor = ReplicatedStorage.assets:WaitForChild("castleFloor")
+local castleFloor = ReplicatedStorage.assets.playerCastleAssets:WaitForChild("castleFloor")
 local floorHeight = 22 -- castleFloor:FindFirstChild("ceiling", true).Position.Y - castleFloor:FindFirstChild("floor", true).Position.Y
 
 local playerPlatforms = workspace:WaitForChild("playerPlatforms")
@@ -68,7 +68,7 @@ function castleService.updateTower(player)
 	--]]
 
 	if not playerCastle:FindFirstChild("topFloor") then
-		local playerTopFloor = ReplicatedStorage.assets.castleFloor:Clone()
+		local playerTopFloor = ReplicatedStorage.assets.playerCastleAssets.castleFloor:Clone()
 		playerTopFloor:PivotTo(
 			playerSpot.CFrame
 				* CFrame.new(0, floorHeight * (totalFloors + 0.5) + 6, 0)
@@ -173,7 +173,7 @@ function castleService.start()
 		local playerData = dataService.getPlayerData(player)
 		playerFloorsCache[player] = playerData.floors -- Initialize cache
 		castleService.updateTower(player) -- Initial tower build on join
-		local newplatform = ReplicatedStorage.assets.playerPlatform:Clone()
+		local newplatform = ReplicatedStorage.assets.playerCastleAssets.playerPlatform:Clone()
 		newplatform:AddPersistentPlayer(player)
 		newplatform.Name = player.Name
 		newplatform.Parent = playerPlatforms
