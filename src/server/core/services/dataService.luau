@@ -280,37 +280,39 @@ function dataService.start()
 						)
 						-- Call updatePlayerData with forceSave = true, using the current data
 						dataService.updatePlayerData(player, Profiles[player].Data, true)
+
+						-- Check for Group Reward
+						local GROUP_ID = 13101898
+						local GROUP_REWARD_FLOORS = 20
+
+						if not profile.Data.joinedGroupReward then
+							local success, isInGroup = pcall(function()
+								return player:IsInGroup(GROUP_ID)
+							end)
+							if success and isInGroup then
+								local newData = profile.Data
+								newData.floors += GROUP_REWARD_FLOORS
+								newData.joinedGroupReward = true
+								require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+									`Granted group reward ({GROUP_REWARD_FLOORS} floors) to {player.Name}`
+								)
+								-- Fire notification to the client
+								zap.giftReceived.Fire(
+									player,
+									`👍Thank you for joining our group for {GROUP_REWARD_FLOORS} bonus floors!👍`
+								)
+								dataService.updatePlayerData(player, newData, true)
+							elseif not success then
+								warn(`Failed to check group status for player {player.Name}`)
+							end
+						end					
+						profile.Data.firstTimeRewards = false
+						profile.Data.firstTime = false
 					end
 
-					-- Check for Group Reward
-					local GROUP_ID = 13101898
-					local GROUP_REWARD_FLOORS = 20
-
-					if not profile.Data.joinedGroupReward then
-						local success, isInGroup = pcall(function()
-							return player:IsInGroup(GROUP_ID)
-						end)
-						if success and isInGroup then
-							local newData = profile.Data
-							newData.floors += GROUP_REWARD_FLOORS
-							newData.joinedGroupReward = true
-							require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
-								`Granted group reward ({GROUP_REWARD_FLOORS} floors) to {player.Name}`
-							)
-							-- Fire notification to the client
-							zap.giftReceived.Fire(
-								player,
-								`👍Thank you for joining our group for {GROUP_REWARD_FLOORS} bonus floors!👍`
-							)
-							dataService.updatePlayerData(player, newData, true)
-						elseif not success then
-							warn(`Failed to check group status for player {player.Name}`)
-						end
-					end
+					
 				end)
 
-				profile.Data.firstTimeRewards = false
-				profile.Data.firstTime = false
 			else
 				profile:EndSession()
 			end
