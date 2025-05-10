@@ -87,12 +87,12 @@ for level = 1, 100 do
 	)
 end
 
-table.insert(outputLines, "\n--- Floor Upgrade Costs (Intervals of 50 up to 1000) ---")
+table.insert(outputLines, "\n--- Floor Upgrade Costs (Intervals of 50 up to 3000) ---")
 table.insert(outputLines, string.format("%-10s | %-15s", "Level Range", "Cost"))
 table.insert(outputLines, string.rep("-", 10 + 3 + 15))
 
 local previousIntervalLevel = 0
-for level = 50, 1000, 50 do
+for level = 50, 3000, 50 do
 	-- Cost calculation uses the latest floorConfig.costFormula.
 	-- As before, this calculates the cost *to reach* 'level' from 0 based on the formula's logic.
 	local costForLevel = floorConfig.costFormula(level, 0)
