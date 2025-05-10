@@ -72,7 +72,19 @@ function cannonController.createCannon(cannonName: string)
 	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
 		"NEW SCALE: " .. baseScale * (playerData.cannonTier * 0.1 + 1)
 	)
-	targetCannon:ScaleTo(targetCannon:GetScale() * (playerData.cannonTier * 0.1 + 1))
+	local multiplier = 1
+	if playerData.cannonTier == 1 then
+		multiplier = 1.25
+	elseif playerData.cannonTier == 2 then
+		multiplier = 1.5
+	elseif playerData.cannonTier == 3 then
+		multiplier = 1.75
+	elseif playerData.cannonTier == 4 then
+		multiplier = 2
+	elseif playerData.cannonTier == 5 then
+		multiplier = 2.5
+	end
+	targetCannon:ScaleTo(targetCannon:GetScale() * multiplier)
 	targetCannon.Parent = playerPlatform:FindFirstChild("cannonPosition")
 	cTrove:AttachToInstance(targetCannon)
 end

@@ -20,14 +20,7 @@ local function luckyBlockReward(floors, boughtFloors)
 	end
 
 	local finalReward = math.round(totalCost)
-	print(
-		string.format(
-			"[RewardsConfig Debug] Calculated lucky block reward. Floors: %d, BoughtFloors: %d, Reward: %d",
-			floors,
-			boughtFloors,
-			finalReward
-		)
-	)
+	
 	return finalReward
 end
 

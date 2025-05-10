@@ -178,7 +178,6 @@ function castleController.setupPlatform(targetPlatform, callbackSignal, modelUse
 	if platformConfig.platforms[targetPlatform.Name] then
 		--targetHover = platformConfig.platforms[targetPlatform.Name].hoverDistance or targetHover
 	end
-	print(platformConfig.platforms[targetPlatform.Name].targetColor)
 	local enabled, setEnabled = React.createBinding(true)
 	if hideEvent then
 		hideEvent:Connect(function(toggle)
@@ -506,7 +505,6 @@ function castleController.start()
 				if v == newPurchase.PrimaryPart then
 					continue
 				end
-				print(platformName)
 				v.Color = platform.targetColor
 			end
 
@@ -773,8 +771,8 @@ function castleController.start()
 		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(cannons)
 		if #cannons > 0 and tick() - dataStart > 5 then
 			task.wait()
-			platformConfig.changedCannonSignal:Fire(#newData.cannons)
 			zap.toggleCannon.Call(newData.cannons[#newData.cannons])
+			platformConfig.changedCannonSignal:Fire(#newData.cannons)
 		end
 		playerData = newData
 	end)

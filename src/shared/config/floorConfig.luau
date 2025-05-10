@@ -47,13 +47,11 @@ local function getValue(level)
 	end
 end
 
---Calculate Integral
 local totalSum = 0
 for i = 0, 101 do
 	totalSum = totalSum + getValue(i)
 end
 MAX_FLOORS = totalSum
---
 
 local function getApproxCannonLevelFromFloors(targetTotalFloors)
 	if targetTotalFloors <= 0 then

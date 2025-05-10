@@ -110,7 +110,7 @@ function cameraController.startAir()
 			return
 		end
 		lastShook = tick()
-		camShake:Shake(miniBump(1)) -- Use default magnitude for regular bumps
+		camShake:Shake(miniBump(2)) -- Use default magnitude for regular bumps
 		cI += 1
 		if not SoundService.hitFloor:FindFirstChild(tostring(cI)) then
 			cI = 1
