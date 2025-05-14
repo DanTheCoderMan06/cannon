@@ -107,6 +107,9 @@ function castleService.updatePlatform(player, newspot)
 			(dataService.getPlayerData(Players:FindFirstChild(newspot.Name)).floors + 1) * floorHeight - 1,
 			0
 		)
+	print(
+		"New Height " .. (dataService.getPlayerData(Players:FindFirstChild(newspot.Name)).floors + 1) * floorHeight - 1
+	)
 	playerPlatforms:FindFirstChild(player.Name):PivotTo(targetCFrame)
 	player.RespawnLocation = playerPlatforms:FindFirstChild(player.Name):FindFirstChildWhichIsA("SpawnLocation")
 	playerPlatforms

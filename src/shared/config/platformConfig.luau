@@ -347,6 +347,56 @@ return {
 			end,
 		},
 		upgradeFloor = {
+			checkToHide = function(hideEvent)
+				local localPlayer = Players.LocalPlayer
+				if not localPlayer then
+					return
+				end -- Guard clause
+				local playerPlatform = workspace:WaitForChild("playerPlatforms"):FindFirstChild(localPlayer.Name)
+				if not playerPlatform then
+					return
+				end -- Guard clause
+
+				local currentEquippedCannonIndex = 0 -- Assume 0 is default cannon index (matches switchCannon logic)
+
+				local trove = require(ReplicatedStorage.sharedPackages.Trove)
+				local connections = trove.new()
+
+				local function updateVisibility()
+					if not playerPlatform:IsDescendantOf(workspace) then -- Check if platform still exists
+						connections:Destroy()
+						return
+					end
+					local isViewingOwnTower = (playerPlatform:GetAttribute("currentTower") == localPlayer.Name)
+						or not playerPlatform:GetAttribute("currentTower")
+					local isDefaultCannonEquipped = (currentEquippedCannonIndex == 0)
+
+					print(isViewingOwnTower)
+
+					hideEvent:Fire(isViewingOwnTower)
+				end
+
+				connections:Add(changedCannonSignal:Connect(function(newIndex)
+					currentEquippedCannonIndex = newIndex
+					updateVisibility()
+				end))
+
+				connections:Add(playerPlatform:GetAttributeChangedSignal("currentTower"):Connect(updateVisibility))
+
+				-- Clean up connections when the hideEvent itself is disconnected (e.g. UI unmounts)
+				-- This assumes hideEvent has a :Disconnect() or similar mechanism if it's a custom signal wrapper
+				-- If hideEvent is a simple function callback, alternative cleanup is needed, e.g. via parent UI lifecycle
+				if
+					typeof(hideEvent) == "RBXScriptSignal" or (typeof(hideEvent) == "table" and hideEvent.Disconnect)
+				then
+					local disconnector = typeof(hideEvent) == "RBXScriptSignal" and hideEvent:Connect(function() end)
+						or hideEvent
+					connections:Add(disconnector) -- Add the signal itself or its disconnect method to trove
+				end
+
+				updateVisibility() -- Initial check
+				return connections -- Return trove for external cleanup if needed by the caller of checkToHide
+			end,
 			targetColor = Color3.fromRGB(255, 212, 103),
 			hoverDistance = 2,
 			callback = function(callbackEvent)
@@ -525,16 +575,16 @@ return {
 					local playerData = dataController.getData()
 					zap.checkRecipient.Call({
 						selectedPlayer = playerPlatform:GetAttribute("currentTower"),
-						selectedGift = "fiftyFloors",
+						selectedGift = "tenFloors", -- Corrected from fiftyFloors
 						override = true,
 					})
 					-- Check gift tier, defaulting to 0 if nil
 					if (playerData.productTiers.gifts["floors"] or 0) >= 5 then
-						MarketplaceService:PromptProductPurchase(localPlayer, giftConfig.fiftyFloorsTier2.id)
+						MarketplaceService:PromptProductPurchase(localPlayer, giftConfig.tenFloorsTier2.id)
 						callbackEvent:Fire(true)
 						return
 					end
-					MarketplaceService:PromptProductPurchase(localPlayer, giftConfig.fiftyFloors.id)
+					MarketplaceService:PromptProductPurchase(localPlayer, giftConfig.tenFloors.id)
 					callbackEvent:Fire(true)
 				end
 			end,
@@ -549,6 +599,7 @@ return {
 			end,
 			title = "+10 FLOORS", -- Title remains static
 			description = "Loading...", -- Initial description, updated by init/updateValues
+			initModel = ReplicatedStorage.assets.purchaseAssets.fiveFloors,
 			updateValues = function(trove, updateEvent)
 				local Players = game:GetService("Players")
 				local stats = Players.LocalPlayer:WaitForChild("leaderstats")
@@ -578,13 +629,13 @@ return {
 							or "Loading..."
 						updateEvent:Fire({ title = title, description = priceDesc })
 					else
-						title = "GIFT 50 FLOORS"
+						title = "GIFT 10 FLOORS" -- Corrected: was GIFT 50 FLOORS
 						local itemInfo
-						giftId = giftConfig.fiftyFloors.id
+						giftId = giftConfig.tenFloors.id -- Corrected: was fiftyFloors
 						-- Check gift tier, defaulting to 0 if nil
 						if (playerData.productTiers.gifts["floors"] or 0) >= 5 then
-							giftId = giftConfig.fiftyFloorsTier2.id
-							title = "GIFT 50 FLOORS (TIER 2)"
+							giftId = giftConfig.tenFloorsTier2.id -- Corrected
+							title = "GIFT 10 FLOORS (TIER 2)" -- Corrected
 							itemInfo = marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
 						end
 						itemInfo = itemInfo or marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
@@ -615,7 +666,7 @@ return {
 				-- Call the function once initially to set the correct state
 				updateTenFloorsDisplay()
 			end,
-			initModel = ReplicatedStorage.assets.purchaseAssets.fivefloors,
+			-- initModel = ReplicatedStorage.assets.purchaseAssets.fivefloors, -- Replaced by dynamic initModel function
 		},
 		fiftyFloors = {
 			targetColor = Color3.fromRGB(70, 255, 113),
@@ -639,16 +690,16 @@ return {
 					local playerData = dataController.getData()
 					zap.checkRecipient.Call({
 						selectedPlayer = playerPlatform:GetAttribute("currentTower"),
-						selectedGift = "twoHundredFifty",
+						selectedGift = "fiftyFloors", -- Corrected: was twoHundredFifty
 						override = true,
 					})
 					-- Check gift tier, defaulting to 0 if nil
 					if (playerData.productTiers.gifts["floors"] or 0) >= 5 then
-						MarketplaceService:PromptProductPurchase(localPlayer, giftConfig.twoHundredFiftyTier2.id)
+						MarketplaceService:PromptProductPurchase(localPlayer, giftConfig.fiftyFloorsTier2.id) -- Corrected
 						callbackEvent:Fire(true)
 						return
 					end
-					MarketplaceService:PromptProductPurchase(localPlayer, giftConfig.twoHundredFifty.id)
+					MarketplaceService:PromptProductPurchase(localPlayer, giftConfig.fiftyFloors.id) -- Corrected
 					callbackEvent:Fire(true)
 				end
 			end,
@@ -691,12 +742,12 @@ return {
 						updateEvent:Fire({ title = title, description = priceDesc })
 					else
 						local itemInfo
-						title = "GIFT 250 FLOORS"
-						giftId = giftConfig.twoHundredFifty.id
+						title = "GIFT 50 FLOORS" -- Corrected: was GIFT 250 FLOORS
+						giftId = giftConfig.fiftyFloors.id -- Corrected: was twoHundredFifty
 						-- Check gift tier, defaulting to 0 if nil
 						if (playerData.productTiers.gifts["floors"] or 0) >= 5 then
-							giftId = giftConfig.twoHundredFiftyTier2.id
-							title = "GIFT 250 FLOORS (TIER 2)"
+							giftId = giftConfig.fiftyFloorsTier2.id -- Corrected
+							title = "GIFT 50 FLOORS (TIER 2)" -- Corrected
 							itemInfo = marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
 						end
 						itemInfo = itemInfo or marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
@@ -895,13 +946,13 @@ return {
 					local targetColor
 					local targetScaleUp
 
-					if playerData.cannonTier == 0  then
+					if playerData.cannonTier == 0 then
 						targetColor = Color3.new(0.827450, 0.827450, 0.827450)
 						targetScaleUp = 1
-					elseif playerData.cannonTier == 1  then
+					elseif playerData.cannonTier == 1 then
 						targetColor = Color3.new(0.576470, 0.925490, 0.576470)
 						targetScaleUp = 1.25
-					elseif playerData.cannonTier == 2  then
+					elseif playerData.cannonTier == 2 then
 						targetColor = Color3.new(0.635294, 0.776470, 0.819607)
 						targetScaleUp = 1.5
 					elseif playerData.cannonTier == 3 then
@@ -1061,12 +1112,12 @@ return {
 			end,
 		},
 		twoHundredFiftyFloors = {
-			checkToHide = function(hideEvent)
-				local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
-				playerPlatform:GetAttributeChangedSignal("currentTower"):Connect(function()
-					hideEvent:Fire(playerPlatform:GetAttribute("currentTower") == Players.LocalPlayer.Name)
-				end)
-			end,
+			-- checkToHide = function(hideEvent) -- Removed as per requirement to transform, not hide
+			-- 	local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
+			-- 	playerPlatform:GetAttributeChangedSignal("currentTower"):Connect(function()
+			-- 		hideEvent:Fire(playerPlatform:GetAttribute("currentTower") == Players.LocalPlayer.Name)
+			-- 	end)
+			-- end,
 			targetColor = Color3.fromRGB(95, 84, 255),
 			hoverDistance = 2,
 			callback = function(callbackEvent)
@@ -1116,6 +1167,7 @@ return {
 			title = "+250 FLOORS", -- Title remains static
 			description = "Loading...", -- Initial description, updated by init/updateValues
 			initModel = ReplicatedStorage.assets.purchaseAssets.twoHundredFiftyFloors,
+
 			updateValues = function(trove, updateEvent)
 				local Players = game:GetService("Players")
 				local stats = Players.LocalPlayer:WaitForChild("leaderstats")
@@ -1124,7 +1176,7 @@ return {
 				local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(localPlayer.Name)
 
 				-- Local function to update the platform display based on current tower
-				local function updateFiftyFloorsDisplay()
+				local function updateTwoHundredFiftyFloorsDisplay() -- Renamed for clarity
 					local playerData = dataController.getData() -- Get current data for tier checks
 					local title, productId, giftId
 					if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
@@ -1159,7 +1211,9 @@ return {
 				end
 
 				-- Connect the attribute change signal to the update function
-				trove:Add(playerPlatform:GetAttributeChangedSignal("currentTower"):Connect(updateFiftyFloorsDisplay))
+				trove:Add(
+					playerPlatform:GetAttributeChangedSignal("currentTower"):Connect(updateTwoHundredFiftyFloorsDisplay)
+				) -- Renamed for clarity
 
 				local currentData = dataController.getData()
 				local oldGifts = currentData.productTiers.gifts["floors"] or 0
@@ -1173,11 +1227,11 @@ return {
 					end
 					oldDevs = newDevs
 					oldGifts = newGifts
-					updateFiftyFloorsDisplay()
+					updateTwoHundredFiftyFloorsDisplay() -- Renamed for clarity
 				end)
 
 				-- Call the function once initially to set the correct state
-				updateFiftyFloorsDisplay()
+				updateTwoHundredFiftyFloorsDisplay() -- Renamed for clarity
 			end,
 		},
 		tenLevels = {

@@ -59,7 +59,7 @@ return function(props)
 				end,
 			}),
 			cannons = React.createElement(button, {
-				buttonText = "Special Cannons",
+				buttonText = "Cannons",
 				index = 1,
 				onActivated = function()
 					props.selectSectionEvent:Fire("cannons")

@@ -134,7 +134,7 @@ function uiController.start()
 			task.spawn(function()
 				uiController.renderNotification(
 					"+ $" .. reactUtil.formatNumber(math.round(newData.money - currentData.money)), -- Fixed $ placement
-					Color3.new(0.419607, 0.572549, 0.349019),
+					Color3.fromRGB(255, 255, 0),
 					UDim2.fromScale(0.349, 0.12) -- Position below money stat
 				)
 			end)
@@ -144,7 +144,7 @@ function uiController.start()
 			task.spawn(function()
 				uiController.renderNotification(
 					"+ " .. math.round(newData.floors - currentData.floors) .. " Floors",
-					Color3.new(0.333333, 0.392156, 0.592156),
+					Color3.fromRGB(0, 241, 241),
 					UDim2.fromScale(0.639, 0.12) -- Position below floors stat
 				)
 			end)
@@ -177,7 +177,7 @@ function uiController.start()
 		-- Render gift notification (using a default position and color)
 		uiController.renderNotification(
 			message,
-			Color3.fromRGB(170, 85, 255), -- Purple color for gifts
+			Color3.fromRGB(85, 187, 255), -- Purple color for gifts
 			UDim2.fromScale(0.5, 0.1) -- Default top-center position
 		)
 	end)
