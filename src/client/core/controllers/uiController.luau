@@ -113,6 +113,7 @@ local function app()
 		completed = completed,
 		tasksDone = tasksDone,
 		notificationsPossible = notificationsPossible,
+		vipClaimAvailable = vipClaimAvailable,
 	})
 end
 
@@ -188,6 +189,14 @@ function uiController.start()
 			end
 		end
 		currentData = newData
+
+		-- Update VIP claim availability
+		local data = dataController.getData()
+		if data and data.infiniteVIP == false and notificationsPossible then
+			setVipClaimAvailable(true)
+		else
+			setVipClaimAvailable(false)
+		end
 	end)
 
 	ExperienceNotificationService.OptInPromptClosed:Connect(function()

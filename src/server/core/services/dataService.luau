@@ -14,7 +14,7 @@ local profileTemplate = require(ServerStorage.server.modules.profileTemplate)
 local PlayerStore = profileStore.New("SavedPlayerDataV3", profileTemplate)
 local realPlayerStore = PlayerStore
 if RunService:IsStudio() then
-	--PlayerStore = PlayerStore.Mock
+	PlayerStore = PlayerStore.Mock
 end
 local Profiles = {}
 

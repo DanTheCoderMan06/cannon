@@ -229,6 +229,6 @@ event claimFriendReward = {
     type: Reliable,
     call: SingleAsync,
     data: struct {
-        blockId: string 
+        blockId: string
     }
 }

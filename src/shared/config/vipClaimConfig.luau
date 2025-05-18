@@ -1,5 +1,6 @@
 local policyService = game:GetService("PolicyService")
 local experienceNotificationService = game:GetService("ExperienceNotificationService")
+local RunService = game:GetService("RunService")
 return {
 	tasks = {
 		{
@@ -14,10 +15,10 @@ return {
 					return not canOptIn
 				end
 				experienceNotificationService.OptInPromptClosed:Connect(function()
-					updateEvent:Fire(check() and "notifications")
+					updateEvent:Fire(if check() then "notifications" else "")
 				end)
 				task.delay(0.25, function()
-					updateEvent:Fire(check() and "notifications")
+					updateEvent:Fire(if check() then "notifications" else "")
 				end)
 			end,
 		},
@@ -25,7 +26,7 @@ return {
 			name = "playTime",
 			taskText = "Play for 5 minutes!",
 			execute = function(updateEvent, initialData)
-				local timeLeft = 300 - (os.time() - initialData.timeCreated)
+				local timeLeft = (RunService:IsStudio() and 20 or 300) - (os.time() - initialData.timeCreated)
 				if timeLeft < 0 then
 					updateEvent:Fire("playTime")
 					return

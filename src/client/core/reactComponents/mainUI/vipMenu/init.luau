@@ -8,6 +8,7 @@ local Trove = require(sharedPackages.Trove)
 
 local React = require(sharedPackages.React)
 local ReactSpring = require(sharedPackages.ReactSpring)
+-- Removed zap require
 
 local taskFrame = require(script.task)
 local closeButton = require(script.closeButton)
@@ -69,7 +70,10 @@ return function(props)
 		BorderSizePixel = 0,
 		Position = UDim2.fromScale(0.5, 0.5),
 		GroupTransparency = styles.transparency,
-		Size = UDim2.fromScale(1, 1),
+		Visible = props.vipClaimAvailable,
+		Size = styles.transparency:map(function(val)
+			return UDim2.fromScale(1 - val, 1 - val)
+		end),
 		Rotation = styles.transparency:map(function(val)
 			return 0 * val
 		end),
@@ -90,41 +94,6 @@ return function(props)
 				onActivated = function()
 					props.selectedUIEvent:Fire("")
 				end,
-			}),
-			button = React.createElement("ImageButton", {
-				AnchorPoint = Vector2.new(0.5, 0.5),
-				BackgroundTransparency = 1,
-				Position = UDim2.fromScale(0.984, -0.00141),
-				ScaleType = Enum.ScaleType.Fit,
-				Size = UDim2.fromScale(0.129, 0.238),
-				ZIndex = 5,
-			}, {
-				iAspectRatioConstraint = React.createElement("UIAspectRatioConstraint"),
-
-				content = React.createElement("ImageButton", {
-					AnchorPoint = Vector2.new(0.5, 0.5),
-					BackgroundTransparency = 1,
-					Image = "rbxassetid://123565630442478",
-					Position = UDim2.fromScale(0.5, 0.5),
-					ScaleType = Enum.ScaleType.Fit,
-					Size = UDim2.fromScale(0.95, 0.95),
-					ZIndex = 5,
-				}, {
-					text = React.createElement("ImageLabel", {
-						AnchorPoint = Vector2.new(0.5, 0.5),
-						BackgroundTransparency = 1,
-						Image = "rbxassetid://91168667582185",
-						Position = UDim2.fromScale(0.503, 0.469),
-						Rotation = 5,
-						ScaleType = Enum.ScaleType.Fit,
-						Size = UDim2.fromScale(0.532, 0.645),
-						ZIndex = 7,
-					}, {
-						iAspectRatioConstraint1 = React.createElement("UIAspectRatioConstraint", {
-							AspectRatio = 0.872,
-						}),
-					}),
-				}),
 			}),
 
 			iScale = React.createElement("UIScale"),
@@ -251,7 +220,13 @@ return function(props)
 			}),
 
 			var_task = React.createElement("TextLabel", {
-				BackgroundColor3 = Color3.fromRGB(255, 247, 187),
+				BackgroundColor3 = props.tasksDone:map(function(val)
+					if val == #vipTaskConfig.tasks then
+						return Color3.fromRGB(117, 184, 117)
+					else
+						return Color3.fromRGB(255, 247, 187)
+					end
+				end), -- Color3.fromRGB(255, 247, 187)
 				FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
 				Position = UDim2.fromScale(0.372377, 0.122822),
 				Size = UDim2.fromScale(0.482156, 0.0577395),
@@ -306,15 +281,35 @@ return function(props)
 				React.createElement(React.Fragment, nil, tasks),
 			}),
 
+			timeInfo = React.createElement("TextLabel", {
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				BackgroundTransparency = 1,
+				FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
+				Position = UDim2.fromScale(0.617783, 0.21239),
+				Size = UDim2.fromScale(0.621193, 0.0556961),
+				Text = "WAIT 24 HOURS FOR YOUR PRIZE",
+				TextColor3 = Color3.new(1, 1, 1),
+				TextScaled = true,
+			}, {
+				iStroke1 = React.createElement("UIStroke", {
+					Thickness = 2,
+				}),
+			}),
+
 			turnon = React.createElement("TextButton", {
 				BackgroundColor3 = Color3.fromRGB(67, 255, 57),
 				FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
 				Position = UDim2.fromScale(0.293973, 0.908046),
 				Size = UDim2.fromScale(0.411065, 0.0624597),
-				Visible = props.completed,
-				Text = "CLAIM",
+				Text = "Turn On",
 				TextColor3 = Color3.new(1, 1, 1),
 				TextScaled = true,
+				[React.Event.Activated] = function()
+					if props.promptIn then
+						props.promptIn()
+					end
+					props.selectedUIEvent:Fire("") -- Close UI after claiming
+				end,
 			}, {
 				uIStroke = React.createElement("UIStroke", {
 					ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
