@@ -66,7 +66,7 @@ return function(props)
 		}),
 
 		uIAspectRatioConstraint = React.createElement("UIAspectRatioConstraint"),
-		React.createElement("TextLabel", {
+		musicText = React.createElement("TextLabel", {
 			AnchorPoint = Vector2.new(0.5, 0.5),
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 			BackgroundTransparency = 1,
@@ -77,6 +77,26 @@ return function(props)
 			Size = UDim2.fromScale(0.9, 0.8),
 			Text = "Music",
 			TextColor3 = Color3.fromRGB(255, 255, 255),
+			TextScaled = true,
+			TextSize = 14,
+			TextWrapped = true,
+			ZIndex = 51,
+		}, {
+			iStroke = React.createElement("UIStroke", {
+				Thickness = reactUtil.scalePixelSize(4),
+			}),
+		}),
+		musicTextShadow = React.createElement("TextLabel", {
+			AnchorPoint = Vector2.new(0.5, 0.5),
+			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+			BackgroundTransparency = 1,
+			BorderColor3 = Color3.fromRGB(0, 0, 0),
+			BorderSizePixel = 0,
+			FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
+			Position = UDim2.fromScale(0.5, 0.46),
+			Size = UDim2.fromScale(0.9, 0.8),
+			Text = "Music",
+			TextColor3 = Color3.fromRGB(0, 0, 0),
 			TextScaled = true,
 			TextSize = 14,
 			TextWrapped = true,

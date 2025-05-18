@@ -71,26 +71,81 @@ return function(props)
 			}),
 		}),
 
-		buy = React.createElement("ImageButton", {
+		BuyButtonContainer = React.createElement("Frame", {
 			AnchorPoint = Vector2.new(0.5, 0.5),
-			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 			BackgroundTransparency = 1,
-			BorderColor3 = Color3.fromRGB(0, 0, 0),
 			BorderSizePixel = 0,
-			Image = "rbxassetid://85156488647867",
-			LayoutOrder = 3,
+			LayoutOrder = 3, -- Keep original LayoutOrder if it was on the button itself
 			Position = styles.clicked:map(function(val)
 				return UDim2.fromScale(0.5, 0.805):Lerp(UDim2.fromScale(0.5, 0.82), val)
 			end),
-			ScaleType = Enum.ScaleType.Fit,
 			Size = styles.hover:map(function(val)
 				return UDim2.fromScale(0.608 * 0.9, 0.827 * 0.9):Lerp(UDim2.fromScale(0.608, 0.827), val)
 			end),
 			Rotation = styles.hover:map(function(val)
 				return val * 4
 			end),
-			ZIndex = 0,
+			ZIndex = 0, -- Keep original ZIndex if it was on the button itself
 		}, {
+			uIAspectRatioConstraintContainer = React.createElement("UIAspectRatioConstraint", {
+				AspectRatio = 2.77,
+			}),
+			uIScaleContainer = React.createElement("UIScale", {
+				Scale = _G.isMobile and 1.35 or 1,
+			}),
+
+			ShadowImageButton = React.createElement("ImageButton", {
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				Position = UDim2.new(0.5, 0, 0.5, reactUtil.scalePixelSize(3)), -- Only vertical offset
+				Size = UDim2.fromScale(1, 1),
+				Image = "rbxassetid://85156488647867",
+				ImageColor3 = Color3.fromRGB(0, 0, 0),
+				BackgroundTransparency = 1,
+				BorderSizePixel = 0,
+				ScaleType = Enum.ScaleType.Fit,
+				Active = false,
+				Selectable = false,
+				ZIndex = 1,
+			}),
+
+			MainBuyImageButton = React.createElement("ImageButton", {
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+				BackgroundTransparency = 1,
+				BorderColor3 = Color3.fromRGB(0, 0, 0),
+				BorderSizePixel = 0,
+				Image = "rbxassetid://85156488647867",
+				Position = UDim2.fromScale(0.5, 0.5),
+				ScaleType = Enum.ScaleType.Fit,
+				Size = UDim2.fromScale(1, 1),
+				ZIndex = 2,
+			}, {
+				price = React.createElement("TextLabel", {
+					AnchorPoint = Vector2.new(0.5, 0.5),
+					BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+					BackgroundTransparency = 1,
+					BorderColor3 = Color3.fromRGB(0, 0, 0),
+					BorderSizePixel = 0,
+					FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
+					Position = UDim2.fromScale(0.5, 0.5),
+					Size = UDim2.fromScale(1.19, 0.893),
+					Text = price:map(function(val)
+						return "" .. val
+					end),
+					TextColor3 = styles.clicked:map(function(val)
+						return Color3.fromRGB(255, 255, 255):Lerp(Color3.fromRGB(89, 160, 136), val)
+					end),
+					TextScaled = true,
+					TextSize = 14,
+					TextWrapped = true,
+					ZIndex = 3,
+				}, {
+					uIAspectRatioConstraint3 = React.createElement("UIAspectRatioConstraint", {
+						AspectRatio = 4.38,
+					}),
+				}),
+			}),
+
 			clicker = React.createElement("ImageButton", {
 				AnchorPoint = Vector2.new(0.5, 0.5),
 				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
@@ -131,7 +186,7 @@ return function(props)
 								friction = 30,
 							},
 						})
-						MarketplaceService:PromptProductPurchase(Players.LocalPlayer, 3101617187)
+						MarketplaceService:PromptProductPurchase(Players.LocalPlayer, SKIP_ALL_PRODUCT_ID) -- Use defined constant
 						task.delay(0.05, function()
 							api.start({
 								clicked = 0,
@@ -143,38 +198,6 @@ return function(props)
 						end)
 					end)
 				end,
-			}),
-			uIAspectRatioConstraint2 = React.createElement("UIAspectRatioConstraint", {
-				AspectRatio = 2.77,
-			}),
-
-			uIScale = React.createElement("UIScale", {
-				Scale = _G.isMobile and 1.35 or 1,
-			}),
-
-			price = React.createElement("TextLabel", {
-				AnchorPoint = Vector2.new(0.5, 0.5),
-				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-				BackgroundTransparency = 1,
-				BorderColor3 = Color3.fromRGB(0, 0, 0),
-				BorderSizePixel = 0,
-				FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
-				Position = UDim2.fromScale(0.5, 0.5),
-				Size = UDim2.fromScale(1.19, 0.893),
-				-- Update Text to use the price state
-				Text = price:map(function(val)
-					return "" .. val -- Display Robux icon and fetched price
-				end),
-				TextColor3 = styles.clicked:map(function(val)
-					return Color3.fromRGB(255, 255, 255):Lerp(Color3.fromRGB(89, 160, 136), val)
-				end),
-				TextScaled = true,
-				TextSize = 14,
-				TextWrapped = true,
-			}, {
-				uIAspectRatioConstraint3 = React.createElement("UIAspectRatioConstraint", {
-					AspectRatio = 4.38,
-				}),
 			}),
 		}),
 

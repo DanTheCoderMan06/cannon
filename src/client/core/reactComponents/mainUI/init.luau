@@ -16,6 +16,7 @@ local autoFarmButton = require(components.mainUI.autoFarmButton)
 local statsFrame = require(components.mainUI.statsFrame)
 local musicButton = require(components.mainUI.musicButton)
 local newGifts = require(components.mainUI.newGifts)
+local vipMenu = require(components.mainUI.vipMenu)
 
 return function(props)
 	return React.createElement("Frame", {
@@ -36,5 +37,7 @@ return function(props)
 		rewards = React.createElement(rewards, props),
 		statsFrame = React.createElement(statsFrame, props),
 		musicButton = React.createElement(musicButton, props),
+
+		vipMenu = React.createElement(vipMenu, props),
 	})
 end

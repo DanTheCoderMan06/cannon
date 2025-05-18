@@ -36,7 +36,7 @@ function vipService.start()
 					player:SetAttribute("isVIP", true)
 					playerData.hasVIPOn = true
 					if playerData.firstTimeVIP then
-						playerData.floors += 100
+						playerData.floors += 10
 						playerData.firstTimeVIP = false
 						require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log("Give floors!")
 						-- castleService.updateTower(player) -- Update tower after giving floors -- Removed, handled by dataChanged now

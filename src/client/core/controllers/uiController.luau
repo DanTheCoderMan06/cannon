@@ -10,6 +10,7 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local TeleportService = game:GetService("TeleportService")
 local UserInputService = game:GetService("UserInputService")
+local PolicyService = game:GetService("PolicyService")
 
 local sharedPackages = ReplicatedStorage.sharedPackages
 local React = require(sharedPackages.React)
@@ -33,6 +34,8 @@ local claimedItemEvent = Signal.new()
 local resetEvent = Signal.new()
 local addNotificationEvent = Signal.new() -- Add signal for adding notifications
 
+local vipClaimConfig = require(ReplicatedStorage.shared.config.vipClaimConfig)
+local marketplaceUtil = require(ReplicatedStorage.shared.utilities.marketplaceUtil)
 local effectsController = require(ReplicatedStorage.client.controllers.effectsController)
 local dataController = require(ReplicatedStorage.client.controllers.dataController)
 local musicController = require(ReplicatedStorage.client.controllers.musicController)
@@ -40,6 +43,13 @@ local rewardsConfig = require(ReplicatedStorage.shared.config.rewardsConfig)
 uiController.promptInEvent = Signal.new()
 
 local reactUtil = require(ReplicatedStorage.shared.utilities.reactUtil)
+
+local eventCompleted = Signal.new()
+local doneTasks = {}
+local tasksDone, setTasksDone = React.createBinding(0)
+local completed, setCompleted = React.createBinding(false)
+local vipClaimAvailable, setVipClaimAvailable = React.createBinding(false)
+local notificationsPossible = false
 
 -- Removed unused getRandomPosition function
 -- Removed old notifContainer root
@@ -99,10 +109,15 @@ local function app()
 		end,
 		selectedGift = selectedGift,
 		setSelectedGift = setSelectedGift,
+		eventCompleted = eventCompleted,
+		completed = completed,
+		tasksDone = tasksDone,
+		notificationsPossible = notificationsPossible,
 	})
 end
 
 function uiController.start()
+	notificationsPossible = PolicyService:GetPolicyInfoForPlayerAsync(Players.LocalPlayer).AreAdsAllowed
 	_G.isMobile = UserInputService.TouchEnabled
 
 	local container = ReactRoblox.createRoot(Instance.new("Folder"))
@@ -149,6 +164,13 @@ function uiController.start()
 				)
 			end)
 		end
+		if newData.floors == 20 or newData.floors == 40 then
+			print("prompt in")
+			if marketplaceUtil.canPromptIn() then
+				print("Send")
+				marketplaceUtil.promptOptIn()
+			end
+		end
 		if newData.daysPlayed == 0 and currentData.daysPlayed ~= 0 then
 			resetEvent:Fire()
 			currentData = newData
@@ -180,6 +202,19 @@ function uiController.start()
 			Color3.fromRGB(85, 187, 255), -- Purple color for gifts
 			UDim2.fromScale(0.5, 0.1) -- Default top-center position
 		)
+	end)
+
+	eventCompleted:Connect(function(name)
+		print(name)
+		doneTasks[name] = true
+		setTasksDone(#Sift.Dictionary.keys(doneTasks))
+		setCompleted(#Sift.Dictionary.keys(doneTasks) == #vipClaimConfig.tasks)
+	end)
+
+	task.delay(5, function()
+		for _, taskToDo in pairs(vipClaimConfig.tasks) do
+			taskToDo.execute(eventCompleted, dataController.getData())
+		end
 	end)
 end
 

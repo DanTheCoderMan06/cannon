@@ -14,7 +14,7 @@ local profileTemplate = require(ServerStorage.server.modules.profileTemplate)
 local PlayerStore = profileStore.New("SavedPlayerDataV3", profileTemplate)
 local realPlayerStore = PlayerStore
 if RunService:IsStudio() then
-	PlayerStore = PlayerStore.Mock
+	--PlayerStore = PlayerStore.Mock
 end
 local Profiles = {}
 
@@ -305,14 +305,11 @@ function dataService.start()
 							elseif not success then
 								warn(`Failed to check group status for player {player.Name}`)
 							end
-						end					
+						end
 						profile.Data.firstTimeRewards = false
 						profile.Data.firstTime = false
 					end
-
-					
 				end)
-
 			else
 				profile:EndSession()
 			end

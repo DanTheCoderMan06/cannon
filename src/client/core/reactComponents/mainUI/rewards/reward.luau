@@ -107,102 +107,147 @@ return function(props)
 			AspectRatio = 1,
 		}),
 
-		claim = React.createElement("ImageButton", {
-			AnchorPoint = Vector2.new(0.5, 0.5),
-			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-			BackgroundTransparency = 1,
-			BorderColor3 = Color3.fromRGB(0, 0, 0),
-			BorderSizePixel = 0,
-			Image = claimed:map(function(val)
-				return val and "rbxassetid://105652446380406" or "rbxassetid://133893845022134"
-			end),
-			LayoutOrder = 3,
-			Position = styles.clicked:map(function(val)
-				return UDim2.fromScale(0.497, 0.913):Lerp(UDim2.fromScale(0.497, 0.913 + 0.02), val)
-			end),
-			ScaleType = Enum.ScaleType.Fit,
-			Size = styles.hover:map(function(val)
-				return UDim2.fromScale(0.694 * 0.9, 0.255 * 0.9):Lerp(UDim2.fromScale(0.694, 0.255), val)
-			end),
-			Visible = locked:map(function(val)
-				return not val
-			end),
-			Rotation = styles.hover:map(function(val)
-				return val * 5
-			end),
-			[React.Event.MouseEnter] = function()
-				api.start({
-					hover = 1,
-					config = {
-						tension = 900,
-						friction = 15,
-					},
-				})
-			end,
-			[React.Event.MouseLeave] = function()
-				api.start({
-					hover = 0,
-					config = {
-						tension = 900,
-						friction = 15,
-					},
-				})
-			end,
-			[React.Event.Activated] = function()
-				SoundService.effects.uiClick:Play()
-				task.spawn(function()
-					api.start({
-						clicked = 1,
-						config = {
-							tension = 700,
-							friction = 30,
-						},
-					})
-					props.onActivated()
-					task.delay(0.05, function()
+		ClaimButtonContainer = React.createElement(
+			"Frame",
+			{ -- This Frame handles position, size, rotation, visibility
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				BackgroundTransparency = 1,
+				BorderSizePixel = 0,
+				LayoutOrder = 3,
+				Position = styles.clicked:map(function(val)
+					return UDim2.fromScale(0.497, 0.913):Lerp(UDim2.fromScale(0.497, 0.913 + 0.02), val)
+				end),
+				Size = styles.hover:map(function(val)
+					return UDim2.fromScale(0.694 * 0.9, 0.255 * 0.9):Lerp(UDim2.fromScale(0.694, 0.255), val)
+				end),
+				Visible = locked:map(function(val)
+					return not val
+				end),
+				Rotation = styles.hover:map(function(val)
+					return val * 5
+				end),
+			},
+			{
+				uIScaleContainer = React.createElement("UIScale", {
+					Scale = _G.isMobile and 1.2 or 1,
+				}),
+				uIAspectRatioConstraintContainer = React.createElement("UIAspectRatioConstraint", {
+					AspectRatio = 2.73,
+				}),
+
+				ShadowImageButton = React.createElement("ImageButton", {
+					AnchorPoint = Vector2.new(0.5, 0.5),
+					Position = UDim2.new(0.5, 0, 0.5, reactUtil.scalePixelSize(3)), -- Only vertical offset
+					Size = UDim2.fromScale(1, 1),
+					Image = claimed:map(function(val)
+						return val and "rbxassetid://105652446380406" or "rbxassetid://133893845022134"
+					end),
+					ImageColor3 = Color3.fromRGB(0, 0, 0),
+					BackgroundTransparency = 1,
+					BorderSizePixel = 0,
+					ScaleType = Enum.ScaleType.Fit,
+					Active = false,
+					Selectable = false,
+					ZIndex = 1,
+				}),
+
+				MainClaimImageButton = React.createElement("ImageButton", {
+					AnchorPoint = Vector2.new(0.5, 0.5),
+					BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+					BackgroundTransparency = 1,
+					BorderColor3 = Color3.fromRGB(0, 0, 0),
+					BorderSizePixel = 0,
+					Image = claimed:map(function(val)
+						return val and "rbxassetid://105652446380406" or "rbxassetid://133893845022134"
+					end),
+					Position = UDim2.fromScale(0.5, 0.5),
+					ScaleType = Enum.ScaleType.Fit,
+					Size = UDim2.fromScale(1, 1),
+					ZIndex = 2,
+				}, {
+					text = React.createElement("TextLabel", {
+						AnchorPoint = Vector2.new(0.5, 0.5),
+						BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+						BackgroundTransparency = 1,
+						BorderColor3 = Color3.fromRGB(0, 0, 0),
+						BorderSizePixel = 0,
+						FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
+						Position = UDim2.fromScale(0.5, 0.5),
+						Size = UDim2.fromScale(0.723, 0.862),
+						Text = claimed:map(function(val)
+							return val and "Claimed" or "Claim"
+						end),
+						TextColor3 = styles.clicked:map(function(val)
+							local isClaimedValue = claimed:getValue() -- Get current boolean value
+							return Color3.fromRGB(255, 255, 255):Lerp(
+								isClaimedValue and Color3.fromRGB(255, 128, 128) or Color3.fromRGB(134, 231, 199),
+								val
+							)
+						end),
+						TextScaled = true,
+						TextSize = 14,
+						TextWrapped = true,
+						ZIndex = 3,
+					}, {
+						uIStroke2 = React.createElement("UIStroke", {
+							Thickness = reactUtil.scalePixelSize(4),
+						}),
+					}),
+				}),
+
+				ClickTargetButton = React.createElement("ImageButton", { -- Transparent button for interaction
+					AnchorPoint = Vector2.new(0.5, 0.5),
+					Position = UDim2.fromScale(0.5, 0.5),
+					Size = UDim2.fromScale(1, 1),
+					BackgroundTransparency = 1,
+					ImageTransparency = 1, -- Make image part transparent too
+					ZIndex = 10, -- Ensure it's on top for clicks
+					[React.Event.MouseEnter] = function()
 						api.start({
-							clicked = 0,
+							hover = 1,
 							config = {
-								tension = 700,
-								friction = 30,
+								tension = 900,
+								friction = 15,
 							},
 						})
-					end)
-				end)
-			end,
-		}, {
-			uIScale = React.createElement("UIScale", {
-				Scale = _G.isMobile and 1.2 or 1,
-			}),
-			text = React.createElement("TextLabel", {
-				AnchorPoint = Vector2.new(0.5, 0.5),
-				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-				BackgroundTransparency = 1,
-				BorderColor3 = Color3.fromRGB(0, 0, 0),
-				BorderSizePixel = 0,
-				FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
-				Position = UDim2.fromScale(0.5, 0.5),
-				Size = UDim2.fromScale(0.723, 0.862),
-				Text = claimed:map(function(val)
-					return val and "Claimed" or "Claim"
-				end),
-				TextColor3 = styles.clicked:map(function(val)
-					return Color3.fromRGB(255, 255, 255)
-						:Lerp(claimed and Color3.fromRGB(255, 128, 128) or Color3.fromRGB(134, 231, 199), val)
-				end),
-				TextScaled = true,
-				TextSize = 14,
-				TextWrapped = true,
-			}, {
-				uIStroke2 = React.createElement("UIStroke", {
-					Thickness = reactUtil.scalePixelSize(4),
+					end,
+					[React.Event.MouseLeave] = function()
+						api.start({
+							hover = 0,
+							config = {
+								tension = 900,
+								friction = 15,
+							},
+						})
+					end,
+					[React.Event.Activated] = function()
+						if claimed:getValue() then
+							return
+						end -- Don't do anything if already claimed
+						SoundService.effects.uiClick:Play()
+						task.spawn(function()
+							api.start({
+								clicked = 1,
+								config = {
+									tension = 700,
+									friction = 30,
+								},
+							})
+							props.onActivated()
+							task.delay(0.05, function()
+								api.start({
+									clicked = 0,
+									config = {
+										tension = 700,
+										friction = 30,
+									},
+								})
+							end)
+						end)
+					end,
 				}),
-			}),
-
-			uIAspectRatioConstraint3 = React.createElement("UIAspectRatioConstraint", {
-				AspectRatio = 2.73,
-			}),
-		}),
+			}
+		),
 
 		image = React.createElement("Frame", {
 			AnchorPoint = Vector2.new(0.5, 0.5),

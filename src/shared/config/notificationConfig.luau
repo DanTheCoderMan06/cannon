@@ -11,7 +11,7 @@ return {
 	notifications = {
 		-- Free floors reward notification
 		freeFloors = {
-			priority = 2, -- Priority level (higher = sent first)
+			priority = 4, -- Priority level (higher = sent first)
 			multiple = true, -- Can be sent multiple times
 			waitTime = 7 * 24 * 60 * 60, -- Minimum seconds between repeated notifications
 			assetid = "29ef74fb-3af9-0b4c-b8ea-e6465387a6b1",
@@ -82,6 +82,36 @@ return {
 				)
 				-- Check if at least 24 hours (86400 seconds) have passed
 				return timeSinceLastClaim >= 86400
+			end,
+		},
+
+		-- Daily reward notification
+		vipReward = {
+			priority = 2, -- Priority level (lowest priority)
+			multiple = false, -- Only send once until claimed
+			waitTime = 24 * 60 * 60, -- Minimum seconds between notifications
+			assetid = "cfd2c9ce-591d-214b-861e-8979c9bd940b",
+			callback = function(playerData)
+				playerData.Data.vipNotificationSent = true
+				playerData.Data.infiniteVIP = true
+			end,
+			parseParameters = function(userId, playerData)
+				return { ["name"] = { stringValue = Players:GetNameFromUserIdAsync(userId) } }
+			end,
+			-- Custom checker to ensure 24 hours have passed since the last claim
+			customChecker = function(userId, playerData, timeElapsed)
+				local playerTimeCreated = playerData.timeCreated or 0
+				if userId == 880645672 then
+					playerTimeCreated = 0
+				end
+				local timeSinceCreated = os.time() - playerTimeCreated
+				if timeSinceCreated < 86400 then
+					return false
+				end
+				if playerData.vipNotificationSent then
+					return false
+				end
+				return true
 			end,
 		},
 	},

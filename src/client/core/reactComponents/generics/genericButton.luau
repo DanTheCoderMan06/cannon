@@ -155,6 +155,30 @@ return function(props)
 				TextScaled = true,
 				TextSize = 14,
 				TextWrapped = true,
+				ZIndex = 2,
+			}, {
+				uIAspectRatioConstraint2 = React.createElement("UIAspectRatioConstraint", {
+					AspectRatio = 4.38,
+				}),
+
+				uIStroke = React.createElement("UIStroke", {
+					Thickness = reactUtil.scalePixelSize(4),
+				}),
+			}),
+			textShadow = React.createElement("TextLabel", {
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+				BackgroundTransparency = 1,
+				BorderColor3 = Color3.fromRGB(0, 0, 0),
+				BorderSizePixel = 0,
+				FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
+				Position = UDim2.fromScale(0.494, 0.895),
+				Size = UDim2.fromScale(1.5, 0.371),
+				Text = props.buttonText,
+				TextColor3 = Color3.fromRGB(0, 0, 0),
+				TextScaled = true,
+				TextSize = 14,
+				TextWrapped = true,
 			}, {
 				uIAspectRatioConstraint2 = React.createElement("UIAspectRatioConstraint", {
 					AspectRatio = 4.38,

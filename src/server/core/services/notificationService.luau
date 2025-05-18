@@ -37,8 +37,8 @@ local USER_COUNT_UPDATE_INTERVAL_SECONDS = 3600 -- Check/update total user count
 local USER_COUNT_MS_EXPIRY_SECONDS = USER_COUNT_UPDATE_INTERVAL_SECONDS * 2 -- Expire MemoryStore data after 2 intervals
 local WORK_LOOP_INTERVAL_SECONDS = 600 -- Wait 10 minutes between full processing cycles
 local RECALCULATION_WAIT_SECONDS = 30 -- Wait after recalculating user count before starting work
-local INTER_PAGE_WAIT = 1 -- Wait 1 second between processing pages of users
-local INTRA_PAGE_WAIT = 0.1 -- Wait 0.1 seconds after processing a user assigned to this server
+local INTER_PAGE_WAIT = 5 -- Wait 1 second between processing pages of users
+local INTRA_PAGE_WAIT = 4 -- Wait 0.1 seconds after processing a user assigned to this server
 local LIST_KEYS_PAGE_SIZE = 100 -- Number of keys to fetch per ListKeysAsync page
 local MAX_SAFE_CALL_ATTEMPTS = 3
 local SAFE_CALL_RETRY_DELAY = 1
@@ -377,7 +377,6 @@ function notificationService.processPlayerNotifications(playerUserId)
 
 	local timeElapsed = currentTime - lastPlayedTime
 	local sortedNotifications = getSortedNotificationsByPriority()
-
 	local notificationSent = false
 	for _, notificationData in ipairs(sortedNotifications) do
 		local sent = notificationService.sendNotification(

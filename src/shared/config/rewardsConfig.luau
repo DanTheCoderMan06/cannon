@@ -20,7 +20,7 @@ local function luckyBlockReward(floors, boughtFloors)
 	end
 
 	local finalReward = math.round(totalCost)
-	
+
 	return finalReward
 end
 

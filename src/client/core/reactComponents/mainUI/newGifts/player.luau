@@ -107,24 +107,69 @@ return function(props)
 			}),
 		}),
 
-		buy = React.createElement("ImageButton", {
+		ButtonContainer = React.createElement("Frame", {
 			AnchorPoint = Vector2.new(0.5, 0.5),
-			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 			BackgroundTransparency = 1,
-			BorderColor3 = Color3.fromRGB(0, 0, 0),
 			BorderSizePixel = 0,
-			Image = "rbxassetid://85156488647867",
-			LayoutOrder = 3,
 			Position = styles.clicked:map(function(val)
 				return UDim2.fromScale(0.5, 0.824):Lerp(UDim2.fromScale(0.5, 0.844), val)
 			end),
-			ScaleType = Enum.ScaleType.Fit,
 			Size = styles.hover:map(function(val)
 				return UDim2.fromScale(0.608, 0.827):Lerp(UDim2.fromScale(0.608 * 1.1, 0.827 * 1.1), val)
 			end),
 		}, {
-			uIAspectRatioConstraint2 = React.createElement("UIAspectRatioConstraint", {
+			uIAspectRatioConstraintContainer = React.createElement("UIAspectRatioConstraint", {
 				AspectRatio = 2.77,
+			}),
+
+			ShadowButton = React.createElement("ImageButton", {
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				Position = UDim2.new(0.5, 0, 0.5, reactUtil.scalePixelSize(3)), -- Only vertical offset
+				Size = UDim2.fromScale(1, 1),
+				Image = "rbxassetid://85156488647867",
+				ImageColor3 = Color3.fromRGB(0, 0, 0),
+				BackgroundTransparency = 1,
+				BorderSizePixel = 0,
+				ScaleType = Enum.ScaleType.Fit,
+				Active = false,
+				Selectable = false,
+				ZIndex = 1,
+			}),
+
+			MainImageButton = React.createElement("ImageButton", {
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+				BackgroundTransparency = 1,
+				BorderColor3 = Color3.fromRGB(0, 0, 0),
+				BorderSizePixel = 0,
+				Image = "rbxassetid://85156488647867",
+				Position = UDim2.fromScale(0.5, 0.5),
+				ScaleType = Enum.ScaleType.Fit,
+				Size = UDim2.fromScale(1, 1),
+				ZIndex = 2,
+			}, {
+				price = React.createElement("TextLabel", {
+					AnchorPoint = Vector2.new(0.5, 0.5),
+					BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+					BackgroundTransparency = 1,
+					BorderColor3 = Color3.fromRGB(0, 0, 0),
+					BorderSizePixel = 0,
+					FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
+					Position = UDim2.fromScale(0.5, 0.5),
+					Size = UDim2.fromScale(1.19, 0.893), -- Consider if this needs to be 1,1 and text fits within padding
+					Text = canGet:map(function(val)
+						return val and "BUY" or "OWNS"
+					end),
+					TextColor3 = Color3.fromRGB(255, 255, 255),
+					TextScaled = true,
+					TextSize = 14,
+					TextWrapped = true,
+					ZIndex = 3, -- Above MainImageButton
+				}, {
+					uIAspectRatioConstraint3 = React.createElement("UIAspectRatioConstraint", {
+						AspectRatio = 4.38,
+					}),
+				}),
 			}),
 
 			clicker = React.createElement("ImageButton", {
@@ -133,11 +178,11 @@ return function(props)
 				BackgroundTransparency = 1,
 				BorderColor3 = Color3.fromRGB(0, 0, 0),
 				BorderSizePixel = 0,
-				Image = "",
+				Image = "", -- Invisible
 				Position = UDim2.fromScale(0.5, 0.5),
 				ScaleType = Enum.ScaleType.Fit,
-				Size = UDim2.fromScale(1, 1),
-				ZIndex = 10,
+				Size = UDim2.fromScale(1, 1), -- Covers container
+				ZIndex = 10, -- On top
 				ImageTransparency = 1,
 				[React.Event.MouseEnter] = function()
 					api.start({
@@ -181,28 +226,6 @@ return function(props)
 						end)
 					end)
 				end,
-			}),
-
-			price = React.createElement("TextLabel", {
-				AnchorPoint = Vector2.new(0.5, 0.5),
-				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-				BackgroundTransparency = 1,
-				BorderColor3 = Color3.fromRGB(0, 0, 0),
-				BorderSizePixel = 0,
-				FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
-				Position = UDim2.fromScale(0.5, 0.5),
-				Size = UDim2.fromScale(1.19, 0.893),
-				Text = canGet:map(function(val)
-					return val and "BUY" or "OWNS"
-				end),
-				TextColor3 = Color3.fromRGB(255, 255, 255),
-				TextScaled = true,
-				TextSize = 14,
-				TextWrapped = true,
-			}, {
-				uIAspectRatioConstraint3 = React.createElement("UIAspectRatioConstraint", {
-					AspectRatio = 4.38,
-				}),
 			}),
 		}),
 	})

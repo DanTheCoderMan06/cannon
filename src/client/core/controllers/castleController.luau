@@ -455,6 +455,11 @@ local function updateTopFloor()
 		clientTopFloor:PivotTo(playerSpot.CFrame * CFrame.new(0, floorHeight * (newData.floors + 0.5) + 6, 0))
 	else
 		local otherPlayer = Players:FindFirstChild(playerPlatform:GetAttribute("currentTower"))
+		if not otherPlayer then -- Error ??
+			local newData = dataController.getData()
+			clientTopFloor:PivotTo(playerSpot.CFrame * CFrame.new(0, floorHeight * (newData.floors + 0.5) + 6, 0))
+			return
+		end
 		local otherPlayerSpot = workspace.castles:WaitForChild(otherPlayer.Name)
 		local otherPlayerFloors = 0
 		for _, v in pairs(otherPlayer:WaitForChild("leaderstats"):GetChildren()) do

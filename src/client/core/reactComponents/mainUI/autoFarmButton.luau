@@ -29,118 +29,146 @@ return function(props)
 		api.start({ toggle = autoFarmingEnabled and 0 or 1, config = { friction = 30, tension = 300 } })
 	end, {})
 
-	return React.createElement("TextButton", {
+	return React.createElement("Frame", { -- Container Frame
 		AnchorPoint = Vector2.new(0.5, 0.5),
-		BackgroundColor3 = styles.toggle:map(function(val)
-			return Color3.fromRGB(0, 255, 0):Lerp(Color3.fromRGB(255, 0, 0), val)
-		end),
-		BorderColor3 = Color3.fromRGB(0, 0, 0),
+		BackgroundTransparency = 1,
 		BorderSizePixel = 0,
-		FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
 		Position = UDim2.fromScale(if _G.isMobile then 0.89 else 0.92, if _G.isMobile then 0.657 else 0.617),
 		Size = styles.hover:map(function(val)
 			return UDim2.fromScale(0.135, 0.0499):Lerp(UDim2.fromScale(0.135 * 1.1, 0.0499 * 1.1), val)
 		end),
-		Text = enabled:map(function(val)
-			return val == 0 and "Stop Farm" or "Auto Farm"
-		end),
-		TextColor3 = Color3.fromRGB(255, 255, 255),
-		TextScaled = true,
-		TextSize = 14,
-		TextWrapped = true,
-		[React.Event.MouseEnter] = function()
-			api.start({
-				hover = 1,
-				config = {
-					tension = 900,
-					friction = 15,
-				},
-			})
-		end,
-		[React.Event.MouseLeave] = function()
-			api.start({
-				hover = 0,
-				config = {
-					tension = 900,
-					friction = 15,
-				},
-			})
-		end,
 		Rotation = styles.hover:map(function(val)
 			return val * 6
 		end),
+		-- MouseEnter and MouseLeave will be handled by the clicker button
 	}, {
-		uICorner = React.createElement("UICorner", {
-			CornerRadius = UDim.new(0.3, 0),
-		}),
-
-		uIPadding = React.createElement("UIPadding", {
-			PaddingBottom = UDim.new(0.1, 0),
-			PaddingLeft = UDim.new(0.1, 0),
-			PaddingRight = UDim.new(0.1, 0),
-			PaddingTop = UDim.new(0.1, 0),
-		}),
-
-		uIStroke = React.createElement("UIStroke", {
-			Thickness = reactUtil.scalePixelSize(2),
-		}),
-
-		uIStroke1 = React.createElement("UIStroke", {
-			ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-			Thickness = reactUtil.scalePixelSize(2),
-		}),
-
-		uIScale = React.createElement("UIScale", {
+		ContainerUIScale = React.createElement("UIScale", {
 			Scale = isMobile and 1.5 or 1.1,
 		}),
 
-		textLabel = React.createElement("TextLabel", {
+		ShadowButton = React.createElement("TextButton", {
 			AnchorPoint = Vector2.new(0.5, 0.5),
-			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-			BackgroundTransparency = 1,
-			BorderColor3 = Color3.fromRGB(0, 0, 0),
+			Position = UDim2.new(0.5, 0, 0.5, reactUtil.scalePixelSize(3)), -- Offset for shadow
+			Size = UDim2.fromScale(1, 1),
+			BackgroundColor3 = Color3.fromRGB(0, 0, 0),
 			BorderSizePixel = 0,
-			FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
-			Position = UDim2.fromScale(0, -0.2),
-			Size = UDim2.fromScale(0.438, 0.6),
-			Text = "FREE!",
-			TextColor3 = Color3.fromRGB(21, 208, 11),
-			TextScaled = true,
-			TextSize = 14,
-			TextWrapped = true,
+			Text = "",
+			Active = false,
+			Selectable = false,
+			ZIndex = 1,
 		}, {
-			uIStroke2 = React.createElement("UIStroke", {
-				Color = Color3.fromRGB(12, 86, 4),
-				Thickness = reactUtil.scalePixelSize(2.5),
+			uICorner = React.createElement("UICorner", {
+				CornerRadius = UDim.new(0.3, 0),
 			}),
 		}),
-		clicker = React.createElement("TextButton", {
+
+		MainButton = React.createElement("TextButton", {
 			AnchorPoint = Vector2.new(0.5, 0.5),
-			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
-			BackgroundTransparency = 1,
+			Position = UDim2.fromScale(0.5, 0.5), -- Centered in container
+			Size = UDim2.fromScale(1, 1), -- Fills container
+			BackgroundColor3 = styles.toggle:map(function(val)
+				return Color3.fromRGB(0, 255, 0):Lerp(Color3.fromRGB(255, 0, 0), val)
+			end),
 			BorderColor3 = Color3.fromRGB(0, 0, 0),
 			BorderSizePixel = 0,
 			FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
-			Position = UDim2.fromScale(0.5, 0.5),
-			Size = UDim2.fromScale(1, 1),
-			Text = "",
-			TextColor3 = Color3.fromRGB(21, 208, 11),
+			Text = enabled:map(function(val)
+				return val == 0 and "Stop Farm" or "Auto Farm"
+			end),
+			TextColor3 = Color3.fromRGB(255, 255, 255),
 			TextScaled = true,
 			TextSize = 14,
 			TextWrapped = true,
-			ZIndex = 100,
-			[React.Event.Activated] = function()
-				if tick() - lastCalled < 0.5 then
-					return
-				end
-				lastCalled = tick()
-				SoundService.effects.uiClick:Play()
-				local success = zap.toggleAutoFarm.Call()
-				if success then
-					api.start({ toggle = not enabled:getValue() and 0 or 1 })
-					setEnabled(not enabled:getValue())
-				end
-			end,
-		}, {}),
+			ZIndex = 2,
+		}, {
+			uICorner = React.createElement("UICorner", {
+				CornerRadius = UDim.new(0.3, 0),
+			}),
+
+			uIPadding = React.createElement("UIPadding", {
+				PaddingBottom = UDim.new(0.1, 0),
+				PaddingLeft = UDim.new(0.1, 0),
+				PaddingRight = UDim.new(0.1, 0),
+				PaddingTop = UDim.new(0.1, 0),
+			}),
+
+			uIStroke = React.createElement("UIStroke", {
+				Thickness = reactUtil.scalePixelSize(2),
+			}),
+
+			uIStroke1 = React.createElement("UIStroke", {
+				ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+				Thickness = reactUtil.scalePixelSize(2),
+			}),
+
+			textLabel = React.createElement("TextLabel", {
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+				BackgroundTransparency = 1,
+				BorderColor3 = Color3.fromRGB(0, 0, 0),
+				BorderSizePixel = 0,
+				FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
+				Position = UDim2.fromScale(0, -0.2),
+				Size = UDim2.fromScale(0.438, 0.6),
+				Text = "FREE!",
+				TextColor3 = Color3.fromRGB(21, 208, 11),
+				TextScaled = true,
+				TextSize = 14,
+				TextWrapped = true,
+				ZIndex = 3, -- Ensure it's above main button background but below clicker
+			}, {
+				uIStroke2 = React.createElement("UIStroke", {
+					Color = Color3.fromRGB(12, 86, 4),
+					Thickness = reactUtil.scalePixelSize(2.5),
+				}),
+			}),
+
+			clicker = React.createElement("TextButton", {
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+				BackgroundTransparency = 1,
+				BorderColor3 = Color3.fromRGB(0, 0, 0),
+				BorderSizePixel = 0,
+				FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
+				Position = UDim2.fromScale(0.5, 0.5),
+				Size = UDim2.fromScale(1, 1),
+				Text = "",
+				TextColor3 = Color3.fromRGB(21, 208, 11),
+				TextScaled = true,
+				TextSize = 14,
+				TextWrapped = true,
+				ZIndex = 100,
+				[React.Event.MouseEnter] = function()
+					api.start({
+						hover = 1,
+						config = {
+							tension = 900,
+							friction = 15,
+						},
+					})
+				end,
+				[React.Event.MouseLeave] = function()
+					api.start({
+						hover = 0,
+						config = {
+							tension = 900,
+							friction = 15,
+						},
+					})
+				end,
+				[React.Event.Activated] = function()
+					if tick() - lastCalled < 0.5 then
+						return
+					end
+					lastCalled = tick()
+					SoundService.effects.uiClick:Play()
+					local success = zap.toggleAutoFarm.Call()
+					if success then
+						api.start({ toggle = not enabled:getValue() and 0 or 1 })
+						setEnabled(not enabled:getValue())
+					end
+				end,
+			}, {}),
+		}),
 	})
 end

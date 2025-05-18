@@ -35,6 +35,7 @@ return {
 	doubleMoney = false,
 	infiniteVIP = false,
 	firstTimeVIP = true,
+	vipNotificationSent = false, -- For debugging + to see if user has gotten his first reward yet!
 
 	--Tutorial
 	boughtFloorYet = false,
@@ -45,4 +46,7 @@ return {
 
 	--Friend Join Reward Cooldowns { [friendUserId]: timestamp }
 	friendJoinRewards = {},
+
+	--Time Created
+	timeCreated = os.time(),
 }

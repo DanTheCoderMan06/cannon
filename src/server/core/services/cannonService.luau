@@ -83,7 +83,7 @@ function cannonService.launchPlayer(player)
 	end
 
 	if player:GetAttribute("isVIP") then
-		cannonPower *= 1.5
+		cannonPower *= 1.2
 		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
 			string.format("[CannonService Debug] Player %s VIP bonus applied. New power: %f", player.Name, cannonPower)
 		)
