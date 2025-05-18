@@ -214,7 +214,9 @@ function uiController.start()
 	end)
 
 	eventCompleted:Connect(function(name)
-		print(name)
+		if string.len(name) == 0 then
+			return
+		end
 		doneTasks[name] = true
 		setTasksDone(#Sift.Dictionary.keys(doneTasks))
 		setCompleted(#Sift.Dictionary.keys(doneTasks) == #vipClaimConfig.tasks)

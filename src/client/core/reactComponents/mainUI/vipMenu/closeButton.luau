@@ -36,9 +36,9 @@ return function(props)
 		BackgroundTransparency = 1,
 		BorderColor3 = Color3.fromRGB(0, 0, 0),
 		BorderSizePixel = 0,
-		Position = UDim2.fromScale(0.984, 0),
+		Position = UDim2.fromScale(1.0, -0.0),
 		ScaleType = Enum.ScaleType.Fit,
-		Size = UDim2.fromScale(0.129, 0.238),
+		Size = UDim2.fromScale(0.208, 0.157),
 		ZIndex = 5,
 		[React.Event.MouseEnter] = function()
 			api.start({

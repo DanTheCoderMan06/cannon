@@ -15,6 +15,7 @@ return {
 					return not canOptIn
 				end
 				experienceNotificationService.OptInPromptClosed:Connect(function()
+					task.wait(2)
 					updateEvent:Fire(if check() then "notifications" else "")
 				end)
 				task.delay(0.25, function()

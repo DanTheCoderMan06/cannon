@@ -41,7 +41,7 @@ return function(props)
 
 	return React.createElement("Frame", {
 		BackgroundColor3 = Color3.new(1, 1, 1),
-		BackgroundTransparency = 0.7,
+		BackgroundTransparency = 0.999,
 		BorderColor3 = Color3.new(),
 		BorderSizePixel = 0,
 		LayoutOrder = 2,
@@ -50,11 +50,12 @@ return function(props)
 		description = React.createElement("TextLabel", {
 			BackgroundColor3 = Color3.fromRGB(241, 241, 241),
 			FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
-			Position = UDim2.fromScale(0.260108, 0.328489),
-			Size = UDim2.fromScale(0.646045, 0.328273),
+			Position = UDim2.fromScale(0.6, 0.5),
+			Size = UDim2.fromScale(0.646045, 0.9),
 			Text = props.taskText,
 			TextColor3 = Color3.new(1, 1, 1),
 			TextScaled = true,
+			AnchorPoint = Vector2.new(0.5, 0.5),
 		}, {
 			uICorner = React.createElement("UICorner", {
 				CornerRadius = UDim.new(0.025, 8),
@@ -71,7 +72,7 @@ return function(props)
 
 		button = React.createElement("Frame", {
 			BackgroundColor3 = Color3.fromRGB(193, 193, 193),
-			Position = UDim2.fromScale(0.048, 0.076),
+			Position = UDim2.fromScale(0.01, 0.076),
 			Size = UDim2.fromScale(0.215, 0.842),
 		}, {
 			uIAspectRatioConstraint = React.createElement("UIAspectRatioConstraint"),
