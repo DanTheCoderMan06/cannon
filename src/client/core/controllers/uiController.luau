@@ -92,6 +92,35 @@ end
 local function app()
 	local selectedGift, setSelectedGift = React.createBinding("")
 	local giftSelectedEvent = Signal.new()
+	local menuReadyForDisplay, setMenuReadyForDisplay = React.useBinding(false)
+
+	React.useEffect(function()
+		local currentData = dataController.getData()
+		if currentData.cannon > 1 then
+			setMenuReadyForDisplay(true)
+			return
+		end
+		local purchases = 0
+
+		local uiTrove = Trove.new()
+		uiTrove:Add(
+			dataController.dataChanged:Connect(function(newData)
+				if newData.floors > currentData.floors then
+					if newData.floors - currentData.floors <= 1 then
+						purchases += 1
+					end
+				end
+				if purchases >= 10 then
+					setMenuReadyForDisplay(true)
+					uiTrove:Destroy()
+					return
+				end
+				currentData = newData
+			end),
+			"Disconnect"
+		)
+	end, {})
+
 	return React.createElement(menuUi, {
 		selectedUIEvent = selectedUIEvent,
 		selectSectionEvent = selectSectionEvent,
@@ -101,6 +130,7 @@ local function app()
 		giftSelectedEvent = giftSelectedEvent,
 		getData = dataController.getData,
 		resetEvent = resetEvent,
+		setVipClaimAvailable = setVipClaimAvailable,
 		toggleMusicEvent = musicController.toggleMusicEvent,
 		promptIn = function()
 			if uiController.canPromptIn() then
@@ -114,6 +144,7 @@ local function app()
 		tasksDone = tasksDone,
 		notificationsPossible = notificationsPossible,
 		vipClaimAvailable = vipClaimAvailable,
+		menuReadyForDisplay = menuReadyForDisplay,
 	})
 end
 

@@ -20,7 +20,8 @@ function luckyBlockController.start()
 		-- Correctly find the player's platform model
 		local playerPlatformModel = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
 		-- Clone the lucky block template from ReplicatedStorage
-		local newLuckyBlock = ReplicatedStorage.assets.playerCastleAssets:WaitForChild("luckyBlock"):Clone()
+		local newLuckyBlock =
+			ReplicatedStorage.assets:WaitForChild("playerCastleAssets"):WaitForChild("luckyBlock"):Clone()
 		-- Find the specific block spawn part
 		local blockSpawnPart = playerPlatformModel:FindFirstChild("blockSpawn", true)
 		if not blockSpawnPart then

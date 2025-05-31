@@ -92,7 +92,7 @@ return {
 					description = "UNTIL REWARD",
 				}
 			end,
-			initModel = ReplicatedStorage.assets.playerCastleAssets:WaitForChild("luckyBlock"),
+			initModel = ReplicatedStorage.assets:WaitForChild("playerCastleAssets"):WaitForChild("luckyBlock"),
 			callbackFunction = function(success, states)
 				if success then
 					switchPlatformColor(states.model, SUCCESS_COLOR)
@@ -947,7 +947,6 @@ return {
 					local targetScaleUp
 
 					if playerData.cannonTier == 0 then
-						targetColor = Color3.new(0.827450, 0.827450, 0.827450)
 						targetScaleUp = 1
 					elseif playerData.cannonTier == 1 then
 						targetColor = Color3.new(0.576470, 0.925490, 0.576470)

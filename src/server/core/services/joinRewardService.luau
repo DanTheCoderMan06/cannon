@@ -9,7 +9,7 @@ local dataService = require(ServerStorage.server.services.dataService)
 local rewardsConfig = require(ReplicatedStorage.shared.config.rewardsConfig)
 local zap = require(ServerStorage.zap)
 local assets = ReplicatedStorage:WaitForChild("assets")
-local friendRewardPrefab = assets.playerCastleAssets:WaitForChild("friendReward")
+local friendRewardPrefab = assets:WaitForChild("playerCastleAssets"):WaitForChild("friendReward")
 
 local joinRewardService = {}
 -- Cache: [player] = { [blockId] = rewardAmount } - Allows multiple pending rewards per player

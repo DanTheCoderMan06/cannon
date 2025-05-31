@@ -7,6 +7,7 @@ local sharedPackages = ReplicatedStorage.sharedPackages
 
 local React = require(sharedPackages.React)
 local ReactSpring = require(sharedPackages.ReactSpring)
+-- Removed Trove require
 
 local generics = ReplicatedStorage.client.reactComponents.generics
 
@@ -14,10 +15,39 @@ local button = require(generics.genericButton)
 
 local isMobile = UserInputService.TouchEnabled
 
+local startTime = tick() -- Restored module-level startTime
+
 local function claimVIPButton(props)
 	local styles, api = ReactSpring.useSpring(function()
 		return { gold = 0, rotate = 0 }
 	end)
+
+	-- Removed startTime binding
+	React.useEffect(function()
+		-- Removed Trove initialization and management
+		props.selectedUIEvent:Connect(function(name)
+			if not props.vipClaimAvailable:getValue() then
+				return
+			end
+			if name == "claimVIP" then
+				startTime = math.huge -- Use module-level startTime
+			else
+				startTime = tick() -- Use module-level startTime
+			end
+		end)
+		task.spawn(function()
+			while true do
+				task.wait(1)
+				if not props.menuReadyForDisplay:getValue() then
+					startTime = tick()
+				end
+				if tick() - startTime > 60 then -- Use module-level startTime
+					props.setVipClaimAvailable(false)
+				end
+			end
+		end)
+		-- Removed Trove destroy
+	end, {}) -- Removed props.vipButtonReadyForNewPlayer dependency
 
 	return React.createElement("ImageButton", {
 		AnchorPoint = Vector2.new(0.5, 0.5),
@@ -25,10 +55,11 @@ local function claimVIPButton(props)
 		BackgroundTransparency = 1,
 		BorderColor3 = Color3.fromRGB(0, 0, 0),
 		BorderSizePixel = 0,
-		Position = UDim2.fromScale(0.5, 0.5),
+		Position = UDim2.fromScale(0.182, 0.278),
 		ScaleType = Enum.ScaleType.Fit,
-		Size = UDim2.fromScale(6.51, 1.43),
-		Visible = props.vipClaimAvailable,
+		Size = UDim2.fromScale(0.12, 0.157),
+		Rotation = -7.5,
+		Visible = props.vipClaimAvailable, -- Reverted Visible prop
 		[React.Event.MouseEnter] = function()
 			api.start({
 				rotate = 1,
@@ -66,6 +97,7 @@ local function claimVIPButton(props)
 			Size = styles.rotate:map(function(val)
 				return UDim2.fromScale(0.9, 0.9):Lerp(UDim2.fromScale(1, 1), 1 - val)
 			end),
+			Visible = props.menuReadyForDisplay, -- Second chek
 			ZIndex = 5,
 		}, {
 			uIAspectRatioConstraint1 = React.createElement("UIAspectRatioConstraint"),
@@ -81,7 +113,11 @@ local function claimVIPButton(props)
 					[React.Event.MouseButton1Down] = function()
 						SoundService.effects.uiClick:Play()
 						task.spawn(function()
-							props.selectedUIEvent:Fire("claimVIP")
+							if startTime < 2 * tick() then
+								props.selectedUIEvent:Fire("claimVIP")
+							else
+								props.selectedUIEvent:Fire("")
+							end
 							api.start({
 								gold = 1,
 								config = {
@@ -178,50 +214,59 @@ end
 
 return function(props)
 	return React.createElement("Frame", {
-		AnchorPoint = Vector2.new(0, 0.5),
+		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 		BackgroundTransparency = 1,
 		BorderColor3 = Color3.fromRGB(0, 0, 0),
 		BorderSizePixel = 0,
-		Position = UDim2.fromScale(0.0, 0.5),
-		Size = UDim2.fromScale(0.0521, 0.0926),
+		Position = UDim2.fromScale(0.5, 0.5),
+		Size = UDim2.fromScale(1, 1),
 	}, {
-		uIAspectRatioConstraint = React.createElement("UIAspectRatioConstraint"),
-
-		uIListLayout = React.createElement("UIListLayout", {
-			HorizontalAlignment = Enum.HorizontalAlignment.Center,
-			SortOrder = Enum.SortOrder.LayoutOrder,
-			VerticalAlignment = Enum.VerticalAlignment.Center,
-		}),
-
-		claimVIPButtonFrame = React.createElement(claimVIPButton, props),
-
-		shop = React.createElement("ImageButton", {
-			AnchorPoint = Vector2.new(0.5, 0.5),
+		vipButton = React.createElement(claimVIPButton, props),
+		shop = React.createElement("Frame", {
+			AnchorPoint = Vector2.new(0, 0.5),
 			BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 			BackgroundTransparency = 1,
 			BorderColor3 = Color3.fromRGB(0, 0, 0),
 			BorderSizePixel = 0,
-			Position = UDim2.fromScale(5.76, 1.08),
-			ScaleType = Enum.ScaleType.Fit,
-			Size = UDim2.fromScale(6.51, 1.43),
+			Position = UDim2.fromScale(0.0, 0.5),
+			Size = UDim2.fromScale(0.0521, 0.0926),
 		}, {
-			content = React.createElement(button, {
-				overlayImage = "rbxassetid://102670220460799",
-				buttonText = "Shop",
-				image = "rbxassetid://134400435773268",
-				onActivated = function()
-					props.selectedUIEvent:Fire("shop")
-				end,
+			uIAspectRatioConstraint = React.createElement("UIAspectRatioConstraint"),
+
+			uIListLayout = React.createElement("UIListLayout", {
+				HorizontalAlignment = Enum.HorizontalAlignment.Center,
+				SortOrder = Enum.SortOrder.LayoutOrder,
+				VerticalAlignment = Enum.VerticalAlignment.Center,
 			}),
-		}),
 
-		uIPadding = React.createElement("UIPadding", {
-			PaddingLeft = UDim.new(0.8, 0),
-		}),
+			shop = React.createElement("ImageButton", {
+				AnchorPoint = Vector2.new(0.5, 0.5),
+				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
+				BackgroundTransparency = 1,
+				BorderColor3 = Color3.fromRGB(0, 0, 0),
+				BorderSizePixel = 0,
+				Position = UDim2.fromScale(5.76, 1.08),
+				ScaleType = Enum.ScaleType.Fit,
+				Size = UDim2.fromScale(6.51, 1.43),
+			}, {
+				content = React.createElement(button, {
+					overlayImage = "rbxassetid://102670220460799",
+					buttonText = "Shop",
+					image = "rbxassetid://134400435773268",
+					onActivated = function()
+						props.selectedUIEvent:Fire("shop")
+					end,
+				}),
+			}),
 
-		uIScale = React.createElement("UIScale", {
-			Scale = isMobile and 1.5 or 1.1,
+			uIPadding = React.createElement("UIPadding", {
+				PaddingLeft = UDim.new(0.8, 0),
+			}),
+
+			uIScale = React.createElement("UIScale", {
+				Scale = isMobile and 1.5 or 1.1,
+			}),
 		}),
 	})
 end

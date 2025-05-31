@@ -26,16 +26,8 @@ local config = {
 				end)
 
 				-- Connect using Trove's Connect method
-				states.trove:Connect(
-					Players.LocalPlayer.Character:WaitForChild("Humanoid"):GetPropertyChangedSignal("MoveDirection"),
-					function() end
-				)
-				Players.LocalPlayer.Character:WaitForChild("Humanoid"):GetPropertyChangedSignal("MoveDirection"):Wait()
-
-				-- Connect to CharacterRemoving with Trove
-				states.trove:Connect(Players.LocalPlayer.CharacterRemoving, function(character)
-					nextSignal:Fire()
-				end)
+				task.wait()
+				nextSignal:Fire()
 			end,
 		},
 		{

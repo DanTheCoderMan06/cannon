@@ -121,18 +121,19 @@ function tutorialController.endTutorial()
 	cannonController.toggleEntrance(true)
 	RAN_TUTORIAL = false
 	nextPageSignal:Destroy()
-	toggleEvent:Fire(false)
 	if tutorialItems then
 		tutorialItems:Destroy()
 	end
 
 	oldActionTrove = nil
+	Players.LocalPlayer:SetAttribute("inTutorial", false)
 end
 
 function tutorialController.startTutorial()
 	if RAN_TUTORIAL then
 		return
 	end
+	Players.LocalPlayer:SetAttribute("inTutorial", true)
 	RAN_TUTORIAL = true
 	if toggleEvent then
 		toggleEvent:Fire(true)
@@ -146,6 +147,7 @@ function tutorialController.startTutorial()
 	tutorialItems.Parent = workspace
 
 	nextPageSignal:Connect(function()
+		print("Next page!")
 		currentIndex += 1
 		tutorialController.loadPage(currentIndex)
 	end)
@@ -167,10 +169,12 @@ function tutorialController.start()
 	loadedSignal = Signal.new()
 
 	task.delay(0.25, function()
+		--[[
 		local container = ReactRoblox.createRoot(Instance.new("Folder"))
 		container:render(
 			ReactRoblox.createPortal(React.createElement(app), Players.LocalPlayer.PlayerGui, "tutorialUI")
 		)
+		--]]
 
 		local connection
 

@@ -4,6 +4,20 @@ local RunService = game:GetService("RunService")
 return {
 	tasks = {
 		{
+			name = "playTime",
+			taskText = "Play for 5 minutes!",
+			execute = function(updateEvent, initialData)
+				local timeLeft = 1 - (os.time() - initialData.timeCreated)
+				if timeLeft < 0 then
+					updateEvent:Fire("playTime")
+					return
+				end
+				task.delay(timeLeft + 1, function()
+					updateEvent:Fire("playTime")
+				end)
+			end,
+		},
+		{
 			name = "notifications",
 			taskText = "Enable Notifications",
 			execute = function(updateEvent, ...)
@@ -20,20 +34,6 @@ return {
 				end)
 				task.delay(0.25, function()
 					updateEvent:Fire(if check() then "notifications" else "")
-				end)
-			end,
-		},
-		{
-			name = "playTime",
-			taskText = "Play for 5 minutes!",
-			execute = function(updateEvent, initialData)
-				local timeLeft = (RunService:IsStudio() and 20 or 300) - (os.time() - initialData.timeCreated)
-				if timeLeft < 0 then
-					updateEvent:Fire("playTime")
-					return
-				end
-				task.delay(timeLeft + 1, function()
-					updateEvent:Fire("playTime")
 				end)
 			end,
 		},

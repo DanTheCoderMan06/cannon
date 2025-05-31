@@ -48,7 +48,7 @@ return function(props)
 
 		ShadowButton = React.createElement("TextButton", {
 			AnchorPoint = Vector2.new(0.5, 0.5),
-			Position = UDim2.new(0.5, 0, 0.5, reactUtil.scalePixelSize(3)), -- Offset for shadow
+			Position = UDim2.new(0.5, 0, 0.5, reactUtil.scalePixelSize(4)), -- Offset for shadow
 			Size = UDim2.fromScale(1, 1),
 			BackgroundColor3 = Color3.fromRGB(0, 0, 0),
 			BorderSizePixel = 0,
@@ -93,12 +93,12 @@ return function(props)
 			}),
 
 			uIStroke = React.createElement("UIStroke", {
-				Thickness = reactUtil.scalePixelSize(2),
+				Thickness = reactUtil.scalePixelSize(1),
 			}),
 
 			uIStroke1 = React.createElement("UIStroke", {
 				ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-				Thickness = reactUtil.scalePixelSize(2),
+				Thickness = reactUtil.scalePixelSize(1),
 			}),
 
 			textLabel = React.createElement("TextLabel", {

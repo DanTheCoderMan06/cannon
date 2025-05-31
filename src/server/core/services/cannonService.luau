@@ -13,7 +13,7 @@ local Sift = require(sharedPackages.Sift)
 local castleFolder = workspace:WaitForChild("castles")
 local dataService = require(ServerStorage.server.services.dataService)
 
-local castleFloor = ReplicatedStorage.assets.playerCastleAssets:WaitForChild("castleFloor")
+local castleFloor = ReplicatedStorage.assets:WaitForChild("playerCastleAssets"):WaitForChild("castleFloor")
 
 local playerPlatforms = workspace:WaitForChild("playerPlatforms")
 
