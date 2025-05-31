@@ -92,7 +92,7 @@ return {
 					description = "UNTIL REWARD",
 				}
 			end,
-			initModel = ReplicatedStorage.assets:WaitForChild("playerCastleAssets"):WaitForChild("luckyBlock"),
+			initModel = ReplicatedStorage.assets.playerCastleAssets:WaitForChild("luckyBlock"),
 			callbackFunction = function(success, states)
 				if success then
 					switchPlatformColor(states.model, SUCCESS_COLOR)
@@ -940,13 +940,29 @@ return {
 				local Players = game:GetService("Players")
 				local leaderstatsstats = Players.LocalPlayer:WaitForChild("leaderstats")
 				local playerData = dataController.getData()
+				local currentEquippedCannonIndex = 0
+
 				local function updateModel(value, cannonTier)
-					local cannonAsset = ReplicatedStorage.assets.cannons:FindFirstChild(cannonConfig.getCannon(value))
-					local modelToDisplay = cannonAsset -- Default to the original asset
+					local cannonAsset
 					local targetColor
 					local targetScaleUp
 
+					local playerPlatform =
+						workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
+					local isDefaultCannonEquipped = (currentEquippedCannonIndex == 0)
+					print(isDefaultCannonEquipped)
+
+					if isDefaultCannonEquipped then
+						cannonAsset = ReplicatedStorage.assets.cannons:FindFirstChild(cannonConfig.getCannon(value))
+					else
+						cannonAsset = ReplicatedStorage.assets.cannons:FindFirstChild(
+							dataController.getData().cannons[currentEquippedCannonIndex]
+						)
+					end
+					local modelToDisplay = cannonAsset
+
 					if playerData.cannonTier == 0 then
+						targetColor = Color3.new(0.827450, 0.827450, 0.827450)
 						targetScaleUp = 1
 					elseif playerData.cannonTier == 1 then
 						targetColor = Color3.new(0.576470, 0.925490, 0.576470)
@@ -960,13 +976,13 @@ return {
 						-- modelToDisplay remains cannonAsset
 					elseif playerData.cannonTier == 4 then
 						targetColor = Color3.new(0.678431, 0.301960, 0.713725)
-						targetScaleUp = 2
+						targetScaleUp = 2.25
 						-- modelToDisplay remains cannonAsset
 					else
 						-- Potentially handle other tiers or ensure targetScaleUp is defined for safety.
 						-- Current logic matches original behavior where they might be nil if tier is unexpected.
 					end
-					updateModelEvent:Fire(modelToDisplay, targetColor, targetScaleUp)
+					updateModelEvent:Fire(modelToDisplay, nil, targetScaleUp)
 				end
 				for _, v in pairs(leaderstatsstats:GetChildren()) do
 					if v:GetAttribute("statName") ~= "cannon" then
@@ -984,6 +1000,13 @@ return {
 					end))
 					updateModel(v.Value)
 				end
+				local trove = require(ReplicatedStorage.sharedPackages.Trove)
+				local connections = trove.new()
+
+				connections:Add(changedCannonSignal:Connect(function(newIndex)
+					currentEquippedCannonIndex = newIndex
+					updateModel()
+				end))
 			end,
 			callbackFunction = function(success, states)
 				if success then

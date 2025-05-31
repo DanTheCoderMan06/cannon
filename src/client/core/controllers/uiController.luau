@@ -97,7 +97,7 @@ local function app()
 	React.useEffect(function()
 		local currentData = dataController.getData()
 		if currentData.cannon > 1 then
-			setMenuReadyForDisplay(true)
+			setMenuReadyForDisplay(false)
 			return
 		end
 		local purchases = 0

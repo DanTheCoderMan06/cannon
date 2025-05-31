@@ -14,6 +14,7 @@ local generics = ReplicatedStorage.client.reactComponents.generics
 local button = require(generics.genericButton)
 
 local isMobile = UserInputService.TouchEnabled
+local vipClaimConfig = require(ReplicatedStorage.shared.config.vipClaimConfig)
 
 local startTime = tick() -- Restored module-level startTime
 
@@ -41,8 +42,14 @@ local function claimVIPButton(props)
 				if not props.menuReadyForDisplay:getValue() then
 					startTime = tick()
 				end
-				if tick() - startTime > 60 then -- Use module-level startTime
-					props.setVipClaimAvailable(false)
+				if props.tasksDone:getValue() < #vipClaimConfig.tasks then
+					if tick() - startTime > 60 then -- Use module-level startTime
+						props.setVipClaimAvailable(false)
+					end
+				else
+					if tick() - startTime > 0.1 then -- Use module-level startTime
+						props.setVipClaimAvailable(false)
+					end
 				end
 			end
 		end)

@@ -82,8 +82,12 @@ function cannonController.createCannon(cannonName: string)
 	elseif playerData.cannonTier == 4 then
 		multiplier = 2
 	elseif playerData.cannonTier == 5 then
-		multiplier = 2.5
+		multiplier = 2.25
 	end
+
+	local baseCannonPartSize = Vector3.new(17, 13, 22)
+	playerPlatform:WaitForChild("cannonPart").Size = baseCannonPartSize * multiplier
+
 	targetCannon:ScaleTo(targetCannon:GetScale() * multiplier)
 	targetCannon.Parent = playerPlatform:FindFirstChild("cannonPosition")
 	cTrove:AttachToInstance(targetCannon)

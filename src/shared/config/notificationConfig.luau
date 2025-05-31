@@ -101,9 +101,6 @@ return {
 			-- Custom checker to ensure 24 hours have passed since the last claim
 			customChecker = function(userId, playerData, timeElapsed)
 				local playerTimeCreated = playerData.timeCreated or 0
-				if userId == 880645672 then
-					playerTimeCreated = 0
-				end
 				local timeSinceCreated = os.time() - playerTimeCreated
 				if timeSinceCreated < 86400 then
 					return false
