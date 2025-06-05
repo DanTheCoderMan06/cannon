@@ -47,7 +47,7 @@ local function claimVIPButton(props)
 						props.setVipClaimAvailable(false)
 					end
 				else
-					if tick() - startTime > 0.1 then -- Use module-level startTime
+					if tick() - startTime > 10 then -- Use module-level startTime
 						props.setVipClaimAvailable(false)
 					end
 				end
@@ -115,7 +115,7 @@ local function claimVIPButton(props)
 			}, {
 				imageButton = React.createElement("ImageButton", {
 					BackgroundTransparency = 1,
-					Image = "rbxassetid://113506016578458",
+					Image = "rbxassetid://84399549169895",
 					Size = UDim2.fromScale(1, 0.904461),
 					[React.Event.MouseButton1Down] = function()
 						SoundService.effects.uiClick:Play()
@@ -153,58 +153,6 @@ local function claimVIPButton(props)
 						Size = UDim2.fromScale(0.498, 0.21),
 						Text = "FREE!",
 						TextColor3 = Color3.fromRGB(21, 208, 11),
-						TextScaled = true,
-						ZIndex = 2,
-					}, {
-						iStroke2 = React.createElement("UIStroke", {
-							Color = Color3.fromRGB(12, 86, 4),
-							Thickness = 2.4974,
-						}),
-					}),
-				}),
-
-				shadow = React.createElement("ImageButton", {
-					BackgroundTransparency = 1,
-					Image = "rbxassetid://113506016578458",
-					ImageColor3 = Color3.new(),
-					Position = UDim2.fromScale(0, 0.0271335),
-					Size = UDim2.fromScale(1, 0.90446),
-					ZIndex = 0,
-				}, {
-					label = React.createElement("TextLabel", {
-						AnchorPoint = Vector2.new(0.5, 0.5),
-						BackgroundTransparency = 1,
-						FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
-						Position = UDim2.fromScale(0.83, 1.005),
-						Size = UDim2.fromScale(0.498, 0.21),
-						Text = "FREE!",
-						TextColor3 = Color3.fromRGB(7, 59, 3),
-						TextScaled = true,
-						ZIndex = 2,
-					}, {
-						iStroke2 = React.createElement("UIStroke", {
-							Color = Color3.fromRGB(12, 86, 4),
-							Thickness = 2.4974,
-						}),
-					}),
-				}),
-
-				shadow2 = React.createElement("ImageButton", {
-					BackgroundTransparency = 1,
-					Image = "rbxassetid://113506016578458",
-					ImageColor3 = Color3.new(),
-					Position = UDim2.fromScale(0, 0.0271335),
-					Size = UDim2.fromScale(1, 0.90446),
-					ZIndex = 0,
-				}, {
-					label = React.createElement("TextLabel", {
-						AnchorPoint = Vector2.new(0.5, 0.5),
-						BackgroundTransparency = 1,
-						FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
-						Position = UDim2.fromScale(0.83, 1.005),
-						Size = UDim2.fromScale(0.498, 0.21),
-						Text = "FREE!",
-						TextColor3 = Color3.fromRGB(7, 59, 3),
 						TextScaled = true,
 						ZIndex = 2,
 					}, {

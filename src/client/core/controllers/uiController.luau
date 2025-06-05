@@ -150,6 +150,7 @@ end
 
 function uiController.start()
 	notificationsPossible = PolicyService:GetPolicyInfoForPlayerAsync(Players.LocalPlayer).AreAdsAllowed
+	uiController.notificationsPossible = notificationsPossible
 	_G.isMobile = UserInputService.TouchEnabled
 
 	local container = ReactRoblox.createRoot(Instance.new("Folder"))
@@ -171,6 +172,7 @@ function uiController.start()
 	))
 
 	local currentData = nil
+	local hasSetInitially = false
 	dataController.dataChanged:Connect(function(newData)
 		if not currentData then
 			currentData = newData
@@ -223,15 +225,21 @@ function uiController.start()
 
 		-- Update VIP claim availability
 		local data = dataController.getData()
-		if data and data.infiniteVIP == false and notificationsPossible then
+		if data and data.infiniteVIP == false and notificationsPossible and not hasSetInitially then
 			setVipClaimAvailable(true)
+			--hasSetInitially = true
 		else
 			setVipClaimAvailable(false)
 		end
 	end)
 
 	ExperienceNotificationService.OptInPromptClosed:Connect(function()
-		uiController.promptInEvent:Fire(true)
+		task.wait(2)
+		if notificationsPossible and not uiController.canPromptIn() then
+			uiController.promptInEvent:Fire(true)
+			return
+		end
+		uiController.promptInEvent:Fire(false)
 	end)
 
 	-- Listen for gift received notifications from the server

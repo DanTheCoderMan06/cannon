@@ -110,4 +110,15 @@ function reactUtil.scalePixelSize(targetPixelSize: number): number
 
 	return targetPixelSize * scaleFactor
 end
+
+function reactUtil.secondsToHHMMSS(seconds: number)
+	if type(seconds) ~= "number" or seconds < 0 then
+		return "00:00:00"
+	end
+
+	local hours = math.floor(seconds / 3600)
+	local minutes = math.floor((seconds % 3600) / 60)
+	local secs = math.floor(seconds % 60)
+	return string.format("%02d:%02d:%02d", hours, minutes, secs)
+end
 return reactUtil

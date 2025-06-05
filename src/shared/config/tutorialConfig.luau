@@ -44,8 +44,10 @@ local config = {
 					Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChildWhichIsA("Attachment")
 				local cannonPart = playerPlatform:FindFirstChild("cannonPart")
 				items.beam.Attachment1 = cannonPart and cannonPart:FindFirstChild("center", true) or target -- Assign to center attachment, fallback to original target
-
 				-- Connect to GetAttributeChangedSignal using Trove
+				states.trove:Add(upgradePlatform.ChildAdded:Connect(function(child)
+					highlight.Adornee = upgradePlatform:FindFirstChildWhichIsA("Model", true)
+				end))
 				states.trove:Connect(Players.LocalPlayer.Character:GetAttributeChangedSignal("inCannon"), function()
 					if Players.LocalPlayer.Character:GetAttribute("inCannon") then
 						if items:FindFirstChild("beam") then
@@ -53,7 +55,7 @@ local config = {
 						else
 							return
 						end
-						items.beam.Attachment0 = nil
+						highlight.Adornee = nil
 						Players.LocalPlayer.Character:GetAttributeChangedSignal("inCannon"):Wait()
 						nextSignal:Fire()
 					end
@@ -103,7 +105,9 @@ local config = {
 				-- Assuming the target should be the cannon entrance area like step 2
 				local cannonPart = playerPlatform:FindFirstChild("cannonPart")
 				items.beam.Attachment1 = cannonPart and cannonPart:FindFirstChild("center") or target -- Assign to center attachment, fallback to original target
-
+				states.trove:Add(upgradePlatform.ChildAdded:Connect(function(child)
+					highlight.Adornee = upgradePlatform:FindFirstChildWhichIsA("Model", true)
+				end))
 				-- Connect to inCannon attribute change using Trove
 				states.trove:Connect(Players.LocalPlayer.Character:GetAttributeChangedSignal("inCannon"), function()
 					if Players.LocalPlayer.Character:GetAttribute("inCannon") then
@@ -112,6 +116,7 @@ local config = {
 						else
 							return
 						end
+						highlight.Adornee = nil
 						Players.LocalPlayer.Character:GetAttributeChangedSignal("inCannon"):Wait()
 						nextSignal:Fire()
 					end
@@ -165,7 +170,7 @@ local config = {
 				states.toggleEntrance(false)
 
 				-- Use Trove to manage the delay
-				local delayTask = task.delay(2.5, function()
+				local delayTask = task.delay(0.1, function()
 					nextSignal:Fire()
 				end)
 				states.trove:Add(function()

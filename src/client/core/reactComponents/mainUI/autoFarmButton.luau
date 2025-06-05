@@ -93,12 +93,12 @@ return function(props)
 			}),
 
 			uIStroke = React.createElement("UIStroke", {
-				Thickness = reactUtil.scalePixelSize(1),
+				Thickness = reactUtil.scalePixelSize(2.5),
 			}),
 
 			uIStroke1 = React.createElement("UIStroke", {
 				ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
-				Thickness = reactUtil.scalePixelSize(1),
+				Thickness = reactUtil.scalePixelSize(2.5),
 			}),
 
 			textLabel = React.createElement("TextLabel", {

@@ -675,11 +675,14 @@ return function(props)
 				TextScaled = true,
 				TextSize = 14,
 				TextWrapped = true,
+				RichText = true,
 			}, {
 				uIStroke = React.createElement("UIStroke", {
 					Thickness = reactUtil.scalePixelSize(1.5),
 				}),
-
+				minTextSize = React.createElement("UITextSizeConstraint", {
+					MinTextSize = 14,
+				}),
 				uIAspectRatioConstraint4 = React.createElement("UIAspectRatioConstraint", {
 					AspectRatio = 4.38,
 				}),
