@@ -110,7 +110,8 @@ local function app()
 						purchases += 1
 					end
 				end
-				if purchases >= 10 then
+				if (purchases >= 10) or (RunService:IsStudio() and purchases >= 1) then
+					print("Menu ready for display")
 					setMenuReadyForDisplay(true)
 					uiTrove:Destroy()
 					return
@@ -221,16 +222,38 @@ function uiController.start()
 				unlockedItemEvent:Fire(currentData.daysPlayed + i)
 			end
 		end
-		currentData = newData
-
 		-- Update VIP claim availability
-		local data = dataController.getData()
-		if data and data.infiniteVIP == false and notificationsPossible and not hasSetInitially then
-			setVipClaimAvailable(true)
-			--hasSetInitially = true
+		if newData and newData.infiniteVIP == false and notificationsPossible then
+			if not hasSetInitially then
+				setVipClaimAvailable(true)
+				hasSetInitially = true
+			end
 		else
 			setVipClaimAvailable(false)
 		end
+		currentData = newData
+	end)
+
+	local launches
+
+	task.delay(3, function()
+		Players.LocalPlayer.Character:GetAttributeChangedSignal("inCannon"):Connect(function()
+			local inCannon = Players.LocalPlayer.Character:GetAttribute("inCannon")
+			if vipClaimAvailable:getValue() then
+				return
+			end
+			if not inCannon then
+				launches += 1
+			end
+			if not launches then
+				launches = 0
+			end
+			if (launches == 10) or (RunService:IsStudio() and launches == 1) then
+				if uiController.canPromptIn() then
+					uiController.promptOptIn()
+				end
+			end
+		end)
 	end)
 
 	ExperienceNotificationService.OptInPromptClosed:Connect(function()

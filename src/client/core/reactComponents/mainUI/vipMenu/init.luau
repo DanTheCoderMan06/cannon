@@ -78,6 +78,7 @@ return function(props)
 			pcall(function()
 				canPromptInNew = ExperienceNotificationService:CanPromptOptInAsync()
 			end)
+			print(canPromptInNew)
 			setCanPromptIn(canPromptInNew)
 		end))
 
