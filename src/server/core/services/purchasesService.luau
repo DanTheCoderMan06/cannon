@@ -26,6 +26,7 @@ local giftConfig = require(ReplicatedStorage.shared.config.giftConfig)
 
 local castleService = require(ServerStorage.server.services.castleService)
 local cannonService = require(ServerStorage.server.services.cannonService)
+local globalGiftService = require(ServerStorage.server.services.globalGiftService)
 
 local targets = {}
 
@@ -75,6 +76,9 @@ function purchaseService.handlePurchase(recieptInfo)
 			if not targets[player.Name] then
 				return Enum.ProductPurchaseDecision.NotProcessedYet
 			end
+			
+			globalGiftService.announceGiftPurchase(player, targets[player.Name], info)
+
 			info.callback(player, targets[player.Name])
 
 			return Enum.ProductPurchaseDecision.PurchaseGranted

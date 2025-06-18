@@ -21,6 +21,8 @@ return {
 		tiers = true,
 		tier2Name = "tenFloorsTier2",
 		type = "floors",
+		formalName = "10 Floors",
+		giftColor = Color3.new(0.5, 1, 0.5),
 		callback = function(player, target)
 			-- If player is gifting themselves, use a single data operation
 			if player == target then
@@ -59,10 +61,16 @@ return {
 		check = function(targetPlayer)
 			return true
 		end,
+		Name = "10 Floors",
+		AnnouncementMessage = function(player, target)
+			return player.Name .. " has gifted " .. target.Name .. " 10 Floors!"
+		end,
 	},
 	tenFloorsTier2 = {
 		type = "floors",
 		id = 2706012608, -- Gift 10 Floors (Tier II)
+		formalName = "10 Floors",
+		giftColor = Color3.new(0.5, 1, 0.5),
 		callback = function(player, target)
 			if player == target then
 				local playerData = dataService.getPlayerData(player)
@@ -94,6 +102,9 @@ return {
 		check = function(targetPlayer)
 			return true
 		end,
+		AnnouncementMessage = function(player, target)
+			return player.Name .. " has gifted " .. target.Name .. " 10 Floors!"
+		end,
 	},
 	fiftyFloors = {
 		id = 2691917042, -- Gift 50 Floors (Tier II)
@@ -101,6 +112,8 @@ return {
 		shouldAppear = true,
 		tiers = true,
 		tier2Name = "fiftyFloorsTier2",
+		formalName = "50 Floors",
+		giftColor = Color3.new(0.5, 0.5, 1),
 		callback = function(player, target)
 			if player == target then
 				local playerData = dataService.getPlayerData(player)
@@ -137,10 +150,16 @@ return {
 		check = function(targetPlayer)
 			return true
 		end,
+		Name = "50 Floors",
+		AnnouncementMessage = function(player, target)
+			return player.Name .. " has gifted " .. target.Name .. " 50 Floors!"
+		end,
 	},
 	fiftyFloorsTier2 = {
 		id = 2706012927, -- Gift 50 Floors (Tier II)
 		type = "floors",
+		formalName = "50 Floors",
+		giftColor = Color3.new(0.5, 0.5, 1),
 		callback = function(player, target)
 			if player == target then
 				local playerData = dataService.getPlayerData(player)
@@ -171,6 +190,9 @@ return {
 		shouldAppear = false,
 		check = function(targetPlayer)
 			return true
+		end,
+		AnnouncementMessage = function(player, target)
+			return player.Name .. " has gifted " .. target.Name .. " 50 Floors!"
 		end,
 	},
 	twoHundredFifty = {
@@ -179,6 +201,8 @@ return {
 		tiers = true,
 		type = "floors",
 		tier2Name = "twoHundredFiftyTier2",
+		formalName = "250 Floors",
+		giftColor = Color3.new(0.5, 0.5, 1),
 		callback = function(player, target)
 			if player == target then
 				local playerData = dataService.getPlayerData(player)
@@ -215,10 +239,16 @@ return {
 		check = function(targetPlayer)
 			return true
 		end,
+		Name = "250 Floors",
+		AnnouncementMessage = function(player, target)
+			return player.Name .. " has gifted " .. target.Name .. " 250 Floors!"
+		end,
 	},
 	twoHundredFiftyTier2 = {
 		id = 2706013070, -- Gift 250 Floors (Tier II)
 		type = "floors",
+		formalName = "250 Floors",
+		giftColor = Color3.new(0.5, 0.5, 1),
 		callback = function(player, target)
 			if player == target then
 				local playerData = dataService.getPlayerData(player)
@@ -250,6 +280,9 @@ return {
 		check = function(targetPlayer)
 			return true
 		end,
+		AnnouncementMessage = function(player, target)
+			return player.Name .. " has gifted " .. target.Name .. " 250 Floors!"
+		end,
 	},
 	doubleDistance = {
 		id = 3106616737, -- 2x Distance (Gift)
@@ -257,6 +290,8 @@ return {
 		tiers = false,
 		type = "gamepasses",
 		tier2Name = "doubleDistanceTier2",
+		formalName = "2x Distance",
+		giftColor = Color3.new(0.7, 0.5, 0.7),
 		callback = function(player, target)
 			if player == target then
 				local playerData = dataService.getPlayerData(player)
@@ -299,6 +334,10 @@ return {
 				return false
 			end
 			return true
+		end,
+		Name = "2x Distance",
+		AnnouncementMessage = function(player, target)
+			return player.Name .. " has gifted " .. target.Name .. " 2x Distance!"
 		end,
 	},
 	--[[
@@ -345,6 +384,8 @@ return {
 		tiers = false,
 		type = "gamepasses",
 		tier2Name = "doubleMoneyTier2",
+		formalName = "2x Cash",
+		giftColor = Color3.new(0.7, 0.5, 0.7),
 		callback = function(player, target)
 			if player == target then
 				local playerData = dataService.getPlayerData(player)
@@ -387,6 +428,10 @@ return {
 				return false
 			end
 			return true
+		end,
+		Name = "2x Cash",
+		AnnouncementMessage = function(player, target)
+			return player.Name .. " has gifted " .. target.Name .. " 2x Cash!"
 		end,
 	},
 	--[[
@@ -433,6 +478,8 @@ return {
 		tiers = false,
 		type = "gamepasses",
 		tier2Name = "giveVIPTier2",
+		formalName = "VIP",
+		giftColor = Color3.new(0.7, 0.5, 0.7),
 		callback = function(player, target)
 			if player == target then
 				local playerData = dataService.getPlayerData(player)
@@ -469,6 +516,10 @@ return {
 				return false
 			end
 			return true
+		end,
+		Name = "VIP",
+		AnnouncementMessage = function(player, target)
+			return player.Name .. " has gifted " .. target.Name .. " VIP!"
 		end,
 	},
 	--[[
@@ -515,6 +566,8 @@ return {
 		tiers = true,
 		type = "cannons",
 		tier2Name = "giftArtilleryTier2",
+		formalName = "Artillery Cannon",
+		giftColor = Color3.new(0.5, 0.67, 1),
 		callback = function(player, target)
 			if player == target then
 				local playerData = dataService.getPlayerData(player)
@@ -553,10 +606,16 @@ return {
 		end,
 		--Gift Compat
 		giftName = "giftArtillery",
+		Name = "Artillery Cannon",
+		AnnouncementMessage = function(player, target)
+			return player.Name .. " has gifted " .. target.Name .. " the Artillery Cannon!"
+		end,
 	},
 	giftArtilleryTier2 = {
 		id = 3106618096, -- Special Cannon 1 (Gift)
 		type = "cannons",
+		formalName = "Artillery Cannon",
+		giftColor = Color3.new(0.5, 0.73, 1),
 		shouldAppear = false,
 		callback = function(player, target)
 			if player == target then
@@ -588,6 +647,9 @@ return {
 			end
 			return true
 		end,
+		AnnouncementMessage = function(player, target)
+			return player.Name .. " has gifted " .. target.Name .. " the Artillery Cannon!"
+		end,
 	},
 	giftRailgun = {
 		id = 3106618239, -- Special Cannon 2 (Gift)
@@ -595,6 +657,8 @@ return {
 		tiers = false,
 		type = "cannons",
 		tier2Name = "giftRailgunTier2",
+		formalName = "Railgun Cannon",
+		giftColor = Color3.new(0.7, 0.5, 0.7),
 		callback = function(player, target)
 			if player == target then
 				local playerData = dataService.getPlayerData(player)
@@ -632,10 +696,16 @@ return {
 			end
 			return true
 		end,
+		Name = "Railgun Cannon",
+		AnnouncementMessage = function(player, target)
+			return player.Name .. " has gifted " .. target.Name .. " the Railgun Cannon!"
+		end,
 	},
 	giftRailgunTier2 = {
 		id = 3106618239, -- Special Cannon 2 (Gift)
 		type = "cannons",
+		formalName = "Railgun Cannon",
+		giftColor = Color3.new(0.7, 0.5, 0.7),
 		shouldAppear = false,
 		callback = function(player, target)
 			if player == target then
@@ -667,6 +737,9 @@ return {
 				return false
 			end
 			return true
+		end,
+		AnnouncementMessage = function(player, target)
+			return player.Name .. " has gifted " .. target.Name .. " the Railgun Cannon!"
 		end,
 	},
 }

@@ -213,6 +213,13 @@ event giftReceived = {
     data: string -- The notification message
 }
 
+event giftPurchased = {
+    from: Server,
+    type: Reliable,
+    call: SingleAsync,
+    data: string -- The notification message
+}
+
 -- Friend Reward Block
 event spawnFriendRewardBlock = {
     from: Server,

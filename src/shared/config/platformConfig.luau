@@ -23,6 +23,7 @@ local giftConfig = require(ReplicatedStorage.shared.config.giftConfig)
 
 local marketplaceUtil = require(ReplicatedStorage.shared.utilities.marketplaceUtil)
 local reactUtil = require(ReplicatedStorage.shared.utilities.reactUtil)
+local debugUtil = require(ReplicatedStorage.shared.utilities.debugUtil)
 
 local startTimeLuckyBlock = tick() - rewardsConfig.luckyBlockSkipInitial
 
@@ -264,7 +265,7 @@ return {
 				local leaderstatsstats = Players.LocalPlayer:WaitForChild("leaderstats")
 				local function updateModel(value)
 					local newModel = ReplicatedStorage.assets.cannons:FindFirstChild(cannonConfig.getCannon(value + 1))
-					require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(newModel.Name)
+					debugUtil.log(newModel.Name)
 					updateModelEvent:Fire(newModel)
 				end
 				for _, v in pairs(leaderstatsstats:GetChildren()) do
@@ -314,7 +315,7 @@ return {
 						or not playerPlatform:GetAttribute("currentTower")
 					local isDefaultCannonEquipped = (currentEquippedCannonIndex == 0)
 
-					print(isViewingOwnTower)
+					debugUtil.log(isViewingOwnTower)
 
 					hideEvent:Fire(isViewingOwnTower)
 				end
@@ -395,7 +396,7 @@ return {
 				end
 
 				trove:Add(dataController.dataChanged:Connect(function(newdata)
-					require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log("go")
+					debugUtil.log("go")
 					playerData = newdata
 					if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
 						updateEvent:Fire({
@@ -433,7 +434,7 @@ return {
 							giftId = giftConfig.tenFloorsTier2.id
 							itemInfo = marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
 							title = "GIFT 10 FLOORS (TIER 2)"
-							require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(itemInfo)
+							debugUtil.log(itemInfo)
 						end
 						itemInfo = itemInfo or marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
 						local priceDesc = itemInfo and itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
@@ -554,9 +555,7 @@ return {
 				local function updateTenFloorsDisplay()
 					local playerData = dataController.getData() -- Get current data for tier checks
 					local title, productId, giftId
-					require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
-						playerData.productTiers.products
-					)
+					debugUtil.log(playerData.productTiers.products)
 					if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
 						title = "+10 FLOORS"
 						productId = gamepassConfig.tenFloors.id
@@ -893,7 +892,7 @@ return {
 					local playerPlatform =
 						workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
 					local isDefaultCannonEquipped = (currentEquippedCannonIndex == 0)
-					print(isDefaultCannonEquipped)
+					debugUtil.log(isDefaultCannonEquipped)
 
 					if isDefaultCannonEquipped then
 						cannonAsset = ReplicatedStorage.assets.cannons:FindFirstChild(cannonConfig.getCannon(value))
@@ -1004,7 +1003,7 @@ return {
 			updateValues = function(trove, updateEvent)
 				trove:Add(changedCannonSignal:Connect(function(newIndex)
 					if newIndex > 0 then
-						require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log("Update")
+						debugUtil.log("Update")
 						local playerData = dataController.getData()
 						local newCannon = playerData.cannons[newIndex]
 						updateEvent:Fire({
@@ -1271,7 +1270,7 @@ return {
 				local leaderstatsstats = Players.LocalPlayer:WaitForChild("leaderstats")
 				local function updateModel(value)
 					local newModel = ReplicatedStorage.assets.cannons:FindFirstChild(cannonConfig.getCannon(value + 1))
-					require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(newModel.Name)
+					debugUtil.log(newModel.Name)
 					updateModelEvent:Fire(newModel)
 				end
 				for _, v in pairs(leaderstatsstats:GetChildren()) do

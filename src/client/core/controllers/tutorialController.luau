@@ -36,6 +36,7 @@ local floorsConfig = require(ReplicatedStorage.shared.config.floorConfig)
 local tutorialConfig = require(ReplicatedStorage.shared.config.tutorialConfig)
 
 local reactUtil = require(ReplicatedStorage.shared.utilities.reactUtil)
+local debugUtil = require(ReplicatedStorage.shared.utilities.debugUtil)
 
 local nextPageSignal = Signal.new()
 
@@ -55,10 +56,7 @@ local function app()
 
 		uiTrove:Add(
 			toggleEvent:Connect(function(toggle)
-				require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
-					"Toggle event received:",
-					toggle
-				)
+				debugUtil.log("Toggle event received:", toggle)
 				api.start({
 					transparency = toggle and 0 or 1,
 					config = {
@@ -147,7 +145,7 @@ function tutorialController.startTutorial()
 	tutorialItems.Parent = workspace
 
 	nextPageSignal:Connect(function()
-		print("Next page!")
+		debugUtil.log("Next page!")
 		currentIndex += 1
 		tutorialController.loadPage(currentIndex)
 	end)

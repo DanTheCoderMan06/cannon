@@ -43,6 +43,7 @@ local rewardsConfig = require(ReplicatedStorage.shared.config.rewardsConfig)
 uiController.promptInEvent = Signal.new()
 
 local reactUtil = require(ReplicatedStorage.shared.utilities.reactUtil)
+local debugUtil = require(ReplicatedStorage.shared.utilities.debugUtil)
 
 local eventCompleted = Signal.new()
 local doneTasks = {}
@@ -56,7 +57,7 @@ local notificationsPossible = false
 
 -- Modified function to fire an event instead of rendering directly
 function uiController.renderNotification(text: string, color: Color3, startPosition: UDim2)
-	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log("Queueing Notification!")
+	debugUtil.log("Queueing Notification!")
 	addNotificationEvent:Fire({
 		id = HttpService:GenerateGUID(false),
 		text = text,
@@ -111,7 +112,7 @@ local function app()
 					end
 				end
 				if (purchases >= 10) or (RunService:IsStudio() and purchases >= 1) then
-					print("Menu ready for display")
+					debugUtil.log("Menu ready for display")
 					setMenuReadyForDisplay(true)
 					uiTrove:Destroy()
 					return
@@ -200,9 +201,9 @@ function uiController.start()
 			end)
 		end
 		if newData.floors == 20 or newData.floors == 40 then
-			print("prompt in")
+			debugUtil.log("prompt in")
 			if marketplaceUtil.canPromptIn() then
-				print("Send")
+				debugUtil.log("Send")
 				marketplaceUtil.promptOptIn()
 			end
 		end
@@ -242,7 +243,7 @@ function uiController.start()
 			if vipClaimAvailable:getValue() then
 				return
 			end
-			if not inCannon then
+			if not inCannon and launches then
 				launches += 1
 			end
 			if not launches then
