@@ -54,7 +54,7 @@ return {
 				local success = zap.requestLuckyBlock.Call()
 				callbackEvent:Fire(success)
 			end,
-			title = "LUCKY BLOCK!",
+			title = "Lucky Block!",
 			description = "00:00",
 			updateValues = function(trove, updateEvent)
 				zap.spawnLuckyBlock.On(function()
@@ -76,8 +76,8 @@ return {
 						))
 
 						updateEvent:Fire({
-							title = timeLeft > 0 and reactUtil.secondsToMMSS(timeLeft) or "READY!",
-							description = "UNTIL REWARD",
+							title = timeLeft > 0 and reactUtil.secondsToMMSS(timeLeft) or "Ready!",
+							description = "Until Reward",
 						})
 
 						if Players.LocalPlayer:GetAttribute("autoFarming") == true then
@@ -90,7 +90,7 @@ return {
 			init = function()
 				return {
 					title = "Loading...",
-					description = "UNTIL REWARD",
+					description = "Until Reward",
 				}
 			end,
 			initModel = ReplicatedStorage.assets.playerCastleAssets:WaitForChild("luckyBlock"),
@@ -118,8 +118,8 @@ return {
 				end)
 				callbackEvent:Fire(success) -- Fire success/failure for visual feedback
 			end,
-			title = "INVITE A PLAYER", -- Static title
-			description = "FOR A REWARD!", -- Static description, reward amount dynamic in updateValues
+			title = "Invite a Player", -- Static title
+			description = "For a Reward!", -- Static description, reward amount dynamic in updateValues
 			updateValues = function(trove, updateEvent)
 				local currentFloors = -1
 				local currentBoughtFloors = -1
@@ -128,8 +128,8 @@ return {
 				local function updateDisplay(playerData)
 					local rewardAmount = rewardsConfig.playerJoinReward(playerData.floors, playerData.boughtFloors)
 					local newState = {
-						title = reactUtil.formatNumber(rewardAmount) .. " REWARD!",
-						description = "INVITE A PLAYER",
+						title = reactUtil.formatNumber(rewardAmount) .. " Reward!",
+						description = "Invite a Player",
 					}
 
 					-- Only fire update if title or description actually changes
@@ -161,8 +161,8 @@ return {
 				-- Always show friend invite prompt
 				local playerData = dataController.getData()
 				local initialReward = rewardsConfig.playerJoinReward(playerData.floors, playerData.boughtFloors)
-				local formattedReward = reactUtil.formatNumber(initialReward) .. " REWARD!"
-				return { title = formattedReward, description = "INVITE A NEW PLAYER" }
+				local formattedReward = reactUtil.formatNumber(initialReward) .. " Reward!"
+				return { title = formattedReward, description = "Invite a New Player" }
 			end,
 			initModel = ReplicatedStorage.assets.purchaseAssets.rewardSuitcase,
 			callbackFunction = function(success, states)
@@ -192,7 +192,7 @@ return {
 				local success = zap.purchaseUpgrade.Call("cannon")
 				callbackEvent:Fire(success)
 			end,
-			title = "UPGRADE CANNON",
+			title = "Upgrade Cannon",
 			description = "N/A",
 			updateValues = function(trove, updateEvent)
 				local Players = game:GetService("Players")
@@ -207,12 +207,12 @@ return {
 					trove:Add(v:GetPropertyChangedSignal("Value"):Connect(function()
 						if v.Value == cannonConfig.maxLevel then
 							updateEvent:Fire({
-								title = "LEVEL " .. tostring(v.Value),
+								title = "Level " .. tostring(v.Value),
 								description = "MAX",
 							})
 						else
 							updateEvent:Fire({
-								title = "LEVEL " .. tostring(v.Value),
+								title = "Level " .. tostring(v.Value),
 								description = "$ " .. tostring(
 									reactUtil.formatNumber(
 										cannonConfig.costFormula(v.Value + 1, playerData.boughtLevels)
@@ -226,12 +226,12 @@ return {
 					playerData = newdata
 					if cannonValue.Value == cannonConfig.maxLevel then
 						updateEvent:Fire({
-							title = "LEVEL " .. tostring(cannonValue.Value),
+							title = "Level " .. tostring(cannonValue.Value),
 							description = "MAX",
 						})
 					else
 						updateEvent:Fire({
-							title = "LEVEL " .. tostring(cannonValue.Value),
+							title = "Level " .. tostring(cannonValue.Value),
 
 							description = "$ " .. tostring(
 								reactUtil.formatNumber(
@@ -249,7 +249,7 @@ return {
 				for _, v in pairs(stats:GetChildren()) do
 					if v:GetAttribute("statName") == "cannon" then
 						return {
-							title = "LEVEL " .. v.Value,
+							title = "Level " .. v.Value,
 							description = "$ "
 								.. tostring(
 									reactUtil.formatNumber(
@@ -366,7 +366,7 @@ return {
 					callbackEvent:Fire(true)
 				end
 			end,
-			title = "+1 FLOOR",
+			title = "+1 Floor",
 			description = "N/A",
 			updateValues = function(trove, updateEvent)
 				local Players = game:GetService("Players")
@@ -384,7 +384,7 @@ return {
 					trove:Add(v:GetPropertyChangedSignal("Value"):Connect(function()
 						if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
 							updateEvent:Fire({
-								title = "LEVEL " .. tostring(v.Value),
+								title = "Level " .. tostring(v.Value),
 								description = "$ " .. tostring(
 									reactUtil.formatNumber(
 										floorConfig.costFormula(v.Value + 1, playerData.boughtFloors)
@@ -400,7 +400,7 @@ return {
 					playerData = newdata
 					if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
 						updateEvent:Fire({
-							title = "LEVEL " .. tostring(floorValue.Value),
+							title = "Level " .. tostring(floorValue.Value),
 
 							description = "$ " .. tostring(
 								reactUtil.formatNumber(
@@ -415,7 +415,7 @@ return {
 					local newPlayerData = dataController.getData()
 					if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
 						updateEvent:Fire({
-							title = "LEVEL " .. tostring(floorValue.Value),
+							title = "Level " .. tostring(floorValue.Value),
 
 							description = "$ " .. tostring(
 								reactUtil.formatNumber(
@@ -428,12 +428,12 @@ return {
 						local giftId = giftConfig.tenFloors.id
 						-- TODO: Add logic to check playerData.productTiers.gifts["floors"] for tier 2 ID if necessary
 						local itemInfo
-						local title = "GIFT 10 FLOORS"
+						local title = "Gift 10 Floors"
 						-- Check product tier, defaulting to 0 if nil
 						if (newPlayerData.productTiers.gifts["floors"] or 0) >= 5 then
 							giftId = giftConfig.tenFloorsTier2.id
 							itemInfo = marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
-							title = "GIFT 10 FLOORS (TIER 2)"
+							title = "Gift 10 Floors (Tier 2)"
 							debugUtil.log(itemInfo)
 						end
 						itemInfo = itemInfo or marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
@@ -476,7 +476,7 @@ return {
 				for _, v in pairs(stats:GetChildren()) do
 					if v:GetAttribute("statName") == "floors" then
 						return {
-							title = "LEVEL " .. v.Value,
+							title = "Level " .. v.Value,
 							description = "$ "
 								.. tostring(
 									reactUtil.formatNumber(
@@ -539,9 +539,9 @@ return {
 				local itemInfo = marketplaceUtil.getProductInfo(productId, Enum.InfoType.Product)
 				local priceDesc = itemInfo and itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
 					or "Loading..."
-				return { title = "+10 FLOORS", description = priceDesc }
+				return { title = "+10 Floors", description = priceDesc }
 			end,
-			title = "+10 FLOORS", -- Title remains static
+			title = "+10 Floors", -- Title remains static
 			description = "Loading...", -- Initial description, updated by init/updateValues
 			initModel = ReplicatedStorage.assets.purchaseAssets.fiveFloors,
 			updateValues = function(trove, updateEvent)
@@ -557,13 +557,13 @@ return {
 					local title, productId, giftId
 					debugUtil.log(playerData.productTiers.products)
 					if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
-						title = "+10 FLOORS"
+						title = "+10 Floors"
 						productId = gamepassConfig.tenFloors.id
 						local itemInfo
 						-- Check product tier, defaulting to 0 if nil
 						if (playerData.productTiers.products["floors"] or 0) >= 5 then
 							productId = gamepassConfig.tenFloorsTier2.id
-							title = "+10 FLOORS (TIER 2)"
+							title = "+10 Floors (Tier 2)"
 							itemInfo = marketplaceUtil.getProductInfo(productId, Enum.InfoType.Product)
 						end
 						itemInfo = itemInfo or marketplaceUtil.getProductInfo(productId, Enum.InfoType.Product)
@@ -571,13 +571,13 @@ return {
 							or "Loading..."
 						updateEvent:Fire({ title = title, description = priceDesc })
 					else
-						title = "GIFT 10 FLOORS" -- Corrected: was GIFT 50 FLOORS
+						title = "Gift 10 Floors" -- Corrected: was GIFT 50 FLOORS
 						local itemInfo
 						giftId = giftConfig.tenFloors.id -- Corrected: was fiftyFloors
 						-- Check gift tier, defaulting to 0 if nil
 						if (playerData.productTiers.gifts["floors"] or 0) >= 5 then
 							giftId = giftConfig.tenFloorsTier2.id -- Corrected
-							title = "GIFT 10 FLOORS (TIER 2)" -- Corrected
+							title = "Gift 10 Floors (Tier 2)" -- Corrected
 							itemInfo = marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
 						end
 						itemInfo = itemInfo or marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
@@ -652,9 +652,9 @@ return {
 				local itemInfo = marketplaceUtil.getProductInfo(productId, Enum.InfoType.Product)
 				local priceDesc = itemInfo and itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
 					or "Loading..."
-				return { title = "+50 FLOORS", description = priceDesc }
+				return { title = "+50 Floors", description = priceDesc }
 			end,
-			title = "+50 FLOORS", -- Title remains static
+			title = "+50 Floors", -- Title remains static
 			description = "Loading...", -- Initial description, updated by init/updateValues
 			initModel = ReplicatedStorage.assets.purchaseAssets.fiftyFloors,
 			updateValues = function(trove, updateEvent)
@@ -669,12 +669,12 @@ return {
 					local playerData = dataController.getData() -- Get current data for tier checks
 					local title, productId, giftId
 					if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
-						title = "+50 FLOORS"
+						title = "+50 Floors"
 						productId = gamepassConfig.fiftyFloors.id
 						local itemInfo
 						-- Check product tier, defaulting to 0 if nil
 						if (playerData.productTiers.products["floors"] or 0) >= 5 then
-							title = "+50 FLOORS (TIER 2)"
+							title = "+50 Floors (Tier 2)"
 							productId = gamepassConfig.fiftyFloorsTier2.id
 							itemInfo = marketplaceUtil.getProductInfo(productId, Enum.InfoType.Product)
 						end
@@ -684,12 +684,12 @@ return {
 						updateEvent:Fire({ title = title, description = priceDesc })
 					else
 						local itemInfo
-						title = "GIFT 50 FLOORS" -- Corrected: was GIFT 250 FLOORS
+						title = "Gift 50 Floors" -- Corrected: was GIFT 250 FLOORS
 						giftId = giftConfig.fiftyFloors.id -- Corrected: was twoHundredFifty
 						-- Check gift tier, defaulting to 0 if nil
 						if (playerData.productTiers.gifts["floors"] or 0) >= 5 then
 							giftId = giftConfig.fiftyFloorsTier2.id -- Corrected
-							title = "GIFT 50 FLOORS (TIER 2)" -- Corrected
+							title = "Gift 50 Floors (Tier 2)" -- Corrected
 							itemInfo = marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
 						end
 						itemInfo = itemInfo or marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
@@ -735,8 +735,8 @@ return {
 					callbackEvent:Fire(result)
 				end
 			end,
-			title = "SET STATUS",
-			description = "PUBLIC 👥",
+			title = "Set Status",
+			description = "Public 👥",
 			updateValues = function(trove, updateEvent, states)
 				local localPlayer = Players.LocalPlayer
 				local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(localPlayer.Name)
@@ -757,17 +757,17 @@ return {
 						local playerData = dataController.getData()
 						updateColor()
 						updateEvent:Fire({
-							title = "TOWER STATUS",
+							title = "Tower Status",
 							description = if playerData.towerStatus == 0
-								then "PUBLIC 🌐"
-								elseif playerData.towerStatus == 1 then "FRIENDS ONLY 👥"
-								else "PRIVATE 🔒",
+								then "Public 🌐"
+								elseif playerData.towerStatus == 1 then "Friends Only 👥"
+								else "Private 🔒",
 						})
 					else
 						switchPlatformColor(states.model, Color3.fromRGB(70, 255, 113))
 						updateEvent:Fire({
-							title = "TELEPORT",
-							description = "RETURN TO YOUR TOWER",
+							title = "Teleport",
+							description = "Return to Your Tower",
 						})
 					end
 				end))
@@ -775,11 +775,11 @@ return {
 				trove:Add(dataController.dataChanged:Connect(function(newdata)
 					if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
 						updateEvent:Fire({
-							title = "TOWER STATUS",
+							title = "Tower Status",
 							description = if newdata.towerStatus == 0
-								then "PUBLIC 🌐"
-								elseif newdata.towerStatus == 1 then "FRIENDS ONLY 👥"
-								else "PRIVATE 🔒",
+								then "Public 🌐"
+								elseif newdata.towerStatus == 1 then "Friends Only 👥"
+								else "Private 🔒",
 						})
 					end
 				end))
@@ -789,11 +789,11 @@ return {
 			init = function()
 				local playerData = dataController.getData()
 				return {
-					title = "TOWER STATUS",
+					title = "Tower Status",
 					description = if playerData.towerStatus == 0
-						then "PUBLIC 🌐"
-						elseif playerData.towerStatus == 1 then "FRIENDS ONLY 👥"
-						else "PRIVATE 🔒",
+						then "Public 🌐"
+						elseif playerData.towerStatus == 1 then "Friends Only 👥"
+						else "Private 🔒",
 				}
 			end,
 			callbackFunction = function(success, states) -- callBackFunction is just a function to change the staes if needed
@@ -831,13 +831,14 @@ return {
 
 				MarketplaceService:PromptProductPurchase(Players.LocalPlayer, tierInfo.id)
 			end,
-			title = "UPGRADE CANNON TIER",
+			title = "Upgrade Cannon Tier",
 			description = '100 <font color="#008000">\u{E002}</font>',
 			updateValues = function(trove, updateEvent)
 				local Players = game:GetService("Players")
 				local stats = Players.LocalPlayer:WaitForChild("leaderstats")
 				local playerData = dataController.currentData
 				local cannonValue
+				local tierNames = { "Double", "Triple", "Quadruple", "Quintuple", "Sextuple" }
 
 				trove:Add(dataController.dataChanged:Connect(function(newdata)
 					if newdata.cannonTier == playerData.cannonTier then
@@ -851,8 +852,8 @@ return {
 
 					updateEvent:Fire({
 						title = if #tierConfig.cannonTiers ~= playerData.cannonTier
-							then "TIER " .. playerData.cannonTier + 1
-							else "MAX TIER",
+							then (tierNames[playerData.cannonTier + 1] or "Tier " .. tostring(playerData.cannonTier + 1)) .. " Cannon"
+							else "Max Tier",
 						description = if #tierConfig.cannonTiers ~= playerData.cannonTier
 							then itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
 							else " ",
@@ -863,6 +864,7 @@ return {
 				local Players = game:GetService("Players")
 				local stats = Players.LocalPlayer:WaitForChild("leaderstats")
 				local playerData = dataController.currentData
+				local tierNames = { "Double", "Triple", "Quadruple", "Quintuple", "Sextuple" }
 
 				local tierInfo =
 					tierConfig.cannonTiers[math.clamp(playerData.cannonTier + 1, 1, #tierConfig.cannonTiers)]
@@ -871,8 +873,8 @@ return {
 
 				return {
 					title = if #tierConfig.cannonTiers ~= playerData.cannonTier
-						then "TIER " .. playerData.cannonTier + 1
-						else "MAX TIER",
+						then (tierNames[playerData.cannonTier + 1] or "Tier " .. tostring(playerData.cannonTier + 1)) .. " Cannon"
+						else "Max Tier",
 					description = if #tierConfig.cannonTiers ~= playerData.cannonTier
 						then itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
 						else " ",
@@ -998,8 +1000,8 @@ return {
 				end
 				callbackEvent:Fire(success)
 			end,
-			title = "CHANGE CANNON",
-			description = "DEFAULT",
+			title = "Change Cannon",
+			description = "Default",
 			updateValues = function(trove, updateEvent)
 				trove:Add(changedCannonSignal:Connect(function(newIndex)
 					if newIndex > 0 then
@@ -1007,21 +1009,21 @@ return {
 						local playerData = dataController.getData()
 						local newCannon = playerData.cannons[newIndex]
 						updateEvent:Fire({
-							title = "CHANGE CANNON",
-							description = string.upper(newCannon),
+							title = "Change Cannon",
+							description = newCannon:gsub("^%l", string.upper),
 						})
 					else
 						updateEvent:Fire({
-							title = "CHANGE CANNON",
-							description = "DEFAULT",
+							title = "Change Cannon",
+							description = "Default",
 						})
 					end
 				end))
 			end,
 			init = function()
 				return {
-					title = "CHANGE CANNON",
-					description = "DEFAULT",
+					title = "Change Cannon",
+					description = "Default",
 				}
 			end,
 			initModel = function(modelTrove, updateModelEvent)
@@ -1126,9 +1128,9 @@ return {
 				local itemInfo = marketplaceUtil.getProductInfo(productId, Enum.InfoType.Product)
 				local priceDesc = itemInfo and itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
 					or "Loading..."
-				return { title = "+250 FLOORS", description = priceDesc }
+				return { title = "+250 Floors", description = priceDesc }
 			end,
-			title = "+250 FLOORS", -- Title remains static
+			title = "+250 Floors", -- Title remains static
 			description = "Loading...", -- Initial description, updated by init/updateValues
 			initModel = ReplicatedStorage.assets.purchaseAssets.twoHundredFiftyFloors,
 
@@ -1144,12 +1146,12 @@ return {
 					local playerData = dataController.getData() -- Get current data for tier checks
 					local title, productId, giftId
 					if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
-						title = "+250 FLOORS"
+						title = "+250 Floors"
 						productId = gamepassConfig.twoHundredFiftyFloors.id
 						local itemInfo
 						-- Check product tier, defaulting to 0 if nil
 						if (playerData.productTiers.products["floors"] or 0) >= 5 then
-							title = "+250 FLOORS (TIER 2)"
+							title = "+250 Floors (Tier 2)"
 							productId = gamepassConfig.twoHundredFiftyFloorsTier2.id
 							itemInfo = marketplaceUtil.getProductInfo(productId, Enum.InfoType.Product)
 						end
@@ -1159,12 +1161,12 @@ return {
 						updateEvent:Fire({ title = title, description = priceDesc })
 					else
 						local itemInfo
-						title = "GIFT 250 FLOORS"
+						title = "Gift 250 Floors"
 						giftId = giftConfig.twoHundredFifty.id
 						-- Check gift tier, defaulting to 0 if nil
 						if (playerData.productTiers.gifts["floors"] or 0) >= 5 then
 							giftId = giftConfig.twoHundredFiftyTier2.id
-							title = "GIFT 250 FLOORS (TIER 2)"
+							title = "Gift 250 Floors (Tier 2)"
 							itemInfo = marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
 						end
 						itemInfo = itemInfo or marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
@@ -1217,7 +1219,7 @@ return {
 				MarketplaceService:PromptProductPurchase(Players.LocalPlayer, id)
 				callbackEvent:Fire(true)
 			end,
-			title = "+10 LEVELS",
+			title = "+10 Levels",
 			description = "N/A",
 			updateValues = function(trove, updateEvent)
 				local Players = game:GetService("Players")
@@ -1237,14 +1239,14 @@ return {
 					playerData = newdata
 					if cannonValue.Value == cannonConfig.maxLevel then
 						updateEvent:Fire({
-							title = "LEVEL " .. tostring(cannonValue.Value),
+							title = "Level " .. tostring(cannonValue.Value),
 							description = "MAX",
 						})
 					else
 						local id = gamepassConfig.upgradeCannon.getId(playerData)
 						local itemInfo = marketplaceUtil.getProductInfo(id, Enum.InfoType.Product)
 						updateEvent:Fire({
-							title = "LEVEL " .. tostring(math.min(cannonConfig.maxLevel, cannonValue.Value + 10)),
+							title = "Level " .. tostring(math.min(cannonConfig.maxLevel, cannonValue.Value + 10)),
 							description = '<font color="#008000">\u{E002}</font>' .. itemInfo.PriceInRobux, -- Fixed $ placement
 						})
 					end
@@ -1259,7 +1261,7 @@ return {
 						local id = gamepassConfig.upgradeCannon.getId(dataController.getData())
 						local itemInfo = marketplaceUtil.getProductInfo(id, Enum.InfoType.Product)
 						return {
-							title = "LEVEL " .. tostring(math.min(cannonConfig.maxLevel, v.Value + 10)),
+							title = "Level " .. tostring(math.min(cannonConfig.maxLevel, v.Value + 10)),
 							description = '<font color="#008000">\u{E002}</font>' .. itemInfo.PriceInRobux,
 						}
 					end

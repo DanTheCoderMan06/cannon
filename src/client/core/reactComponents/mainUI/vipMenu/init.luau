@@ -324,6 +324,9 @@ return function(props)
 				}),
 
 				uIStroke2 = React.createElement("UIStroke"), -- This stroke doesn't have a Thickness defined, so it's not scaled.
+				iAspectRatioConstraint = React.createElement("UIAspectRatioConstraint", {
+					AspectRatio = 4.38,
+				}),
 			}) or nil, -- Render nil if props.promptIn is nil
 		}),
 	})
