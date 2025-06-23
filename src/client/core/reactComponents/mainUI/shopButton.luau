@@ -62,7 +62,7 @@ local function claimVIPButton(props)
 		BackgroundTransparency = 1,
 		BorderColor3 = Color3.fromRGB(0, 0, 0),
 		BorderSizePixel = 0,
-		Position = UDim2.fromScale(0.1, 0.2),
+		Position = if _G.isMobile then UDim2.fromScale(0.1, 0.2) else UDim2.fromScale(0.4, 0.2),
 		ScaleType = Enum.ScaleType.Fit,
 		Size = UDim2.fromScale(0.12, 0.157),
 		Rotation = -7.5,
