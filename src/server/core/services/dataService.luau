@@ -189,18 +189,24 @@ end
 function dataService.loadGamepasses(player)
 	local playerProfile = Profiles[player]
 
+	local newCannons = {}
+
 	for _, v in pairs(gamepasses) do
 		if v.cannonName then
 			if marketplaceUtil.userOwnsGamepass(player, v.id) then
-				if not table.find(playerProfile.Data.cannons, v.cannonName) then
-					require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
-						"INSERTED: " .. v.cannonName
-					)
-					table.insert(playerProfile.Data.cannons, v.cannonName)
-				end
+				table.insert(newCannons, v.cannonName)
 			end
 		end
 	end
+
+	playerProfile.Data.cannons = newCannons
+
+	playerProfile.Data.infiniteVIP = marketplaceUtil.userOwnsGamepass(player, gamepasses.buyVIP.id)
+
+	playerProfile.Data.doubleMoney = marketplaceUtil.userOwnsGamepass(player, gamepasses.buyDoubleMoney.id)
+
+	playerProfile.Data.doubleDistance =  marketplaceUtil.userOwnsGamepass(player, gamepasses.buyDoubleDistance.id)
+
 end
 
 function dataService.start()
@@ -315,6 +321,9 @@ function dataService.start()
 			end
 		else
 			player:Kick(`Profile load fail - Please rejoin`)
+		end
+		if RunService:IsStudio() then
+			print(profile.Data)
 		end
 	end
 

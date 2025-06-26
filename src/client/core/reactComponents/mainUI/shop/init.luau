@@ -59,6 +59,9 @@ return function(props)
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		GroupTransparency = styles.transparency,
 		ZIndex = 10,
+		Visible = styles.transparency:map(function(val)
+			return val < 1
+		end)
 	}, {
 		content = React.createElement("ImageLabel", {
 			AnchorPoint = Vector2.new(0.5, 0.5),

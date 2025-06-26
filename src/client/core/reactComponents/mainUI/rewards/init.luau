@@ -102,6 +102,9 @@ return function(props)
 		Rotation = styles.transparency:map(function(val)
 			return 0 * val
 		end),
+		Visible = styles.transparency:map(function(val)
+			return val < 1
+		end),
 		ZIndex = 10,
 	}, {
 		uIScale = React.createElement("UIScale", {

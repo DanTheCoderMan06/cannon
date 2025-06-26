@@ -107,6 +107,9 @@ function cannonController.start()
 			return
 		end
 		local spawnPosition = playerPlatform:FindFirstChildWhichIsA("SpawnLocation", true).Position
+		if not character.PrimaryPart then
+			return -- Attempt to index nil with Position (cannonController LAUNCHFIX)
+		end
 		if (character.PrimaryPart.Position - spawnPosition).Magnitude > 50 then
 			character:MoveTo(spawnPosition)
 		end
@@ -320,62 +323,72 @@ function cannonController.start()
 		end)
 
 		finishedSignal:Connect(function() --TODO: Use raycast + spr to  finish up dummy falling
+
 			local track, animationInstance = effectsController.playDanceAnimation()
 
-			cameraController.endAir()
-			SoundService.effects.falling:Stop() -- Stop the airtime sound
-			spr.target(workspace.CurrentCamera, 1, 0.25, { FieldOfView = 70 })
-			cameraController.shakeBump()
-			local mapParams = RaycastParams.new()
-			mapParams.FilterDescendantsInstances = { workspace.Map }
-			mapParams.FilterType = Enum.RaycastFilterType.Include
-			local direction = (newPosition.Position - oldPosition.Position).Unit * 1000
-			local endPosition = workspace:Raycast(newPosition.Position, direction, mapParams)
-			if not endPosition then
-				endPosition = { Position = newPosition.Position * Vector3.new(1, 0, 1) } -- No direction found?
-			end
-			character:PivotTo(
-				CFrame.new(newPosition.Position, endPosition.Position):Lerp(
-					CFrame.new(newPosition.Position, endPosition.Position)
-						* CFrame.new(0, 0, -(endPosition.Position - newPosition.Position).Magnitude),
-					0.5
+			local S, R = pcall(function()
+
+				cameraController.endAir()
+				SoundService.effects.falling:Stop() -- Stop the airtime sound
+				spr.target(workspace.CurrentCamera, 1, 0.25, { FieldOfView = 70 })
+				cameraController.shakeBump()
+				local mapParams = RaycastParams.new()
+				mapParams.FilterDescendantsInstances = { workspace.Map }
+				mapParams.FilterType = Enum.RaycastFilterType.Include
+				local direction = (newPosition.Position - oldPosition.Position).Unit * 1000
+				local endPosition = workspace:Raycast(newPosition.Position, direction, mapParams)
+				if not endPosition then
+					endPosition = { Position = newPosition.Position * Vector3.new(1, 0, 1) } -- No direction found?
+				end
+				character:PivotTo(
+					CFrame.new(newPosition.Position, endPosition.Position):Lerp(
+						CFrame.new(newPosition.Position, endPosition.Position)
+							* CFrame.new(0, 0, -(endPosition.Position - newPosition.Position).Magnitude),
+						0.5
+					)
 				)
-			)
 
-			for _, v in pairs(character:GetDescendants()) do
-				if v:IsA("BasePart") then
-					v.AssemblyLinearVelocity = (endPosition.Position - newPosition.Position).Unit
-							* math.clamp(
-								(endPosition.Position - newPosition.Position).Magnitude,
-								MAX_IMPACT / 2,
-								MAX_IMPACT
-							)
-						+ Vector3.new(40, 0, 0)
-					v.AssemblyLinearVelocity = v.AssemblyLinearVelocity * Vector3.new(2, 0, 2) --TODO: Edit variables here to make character bounce forward
-						+ Vector3.new(0, -math.min(70, v.AssemblyLinearVelocity.Y), 0)
-					v.AssemblyAngularVelocity = Vector3.new(1, 1, 1) * MAX_IMPACT
-				end
-			end
-
-			-- Play impact sound only if velocity magnitude is high enough
-			SoundService.effects.hitFloor:Play()
-
-			character.PrimaryPart.Anchored = false
-
-			RunService:BindToRenderStep("noFallThrough", Enum.RenderPriority.Character.Value + 1, function(dt)
-				local currentPos = Players.LocalPlayer.Character.PrimaryPart.Position
-				if currentPos.Y > 0 then
-					return
-				end
 				for _, v in pairs(character:GetDescendants()) do
 					if v:IsA("BasePart") then
-						v.AssemblyLinearVelocity = Vector3.new()
+						v.AssemblyLinearVelocity = (endPosition.Position - newPosition.Position).Unit
+								* math.clamp(
+									(endPosition.Position - newPosition.Position).Magnitude,
+									MAX_IMPACT / 2,
+									MAX_IMPACT
+								)
+							+ Vector3.new(40, 0, 0)
+						v.AssemblyLinearVelocity = v.AssemblyLinearVelocity * Vector3.new(2, 0, 2) --TODO: Edit variables here to make character bounce forward
+							+ Vector3.new(0, -math.min(70, v.AssemblyLinearVelocity.Y), 0)
+						v.AssemblyAngularVelocity = Vector3.new(1, 1, 1) * MAX_IMPACT
 					end
 				end
-				Players.LocalPlayer.Character:PivotTo(
-					CFrame.new(currentPos * Vector3.new(1, 0, 1) + Vector3.new(0, 20, 0) - Vector3.new(1, 0, 1))
-				)
+
+				-- Play impact sound only if velocity magnitude is high enough
+				SoundService.effects.hitFloor:Play()
+
+				character.PrimaryPart.Anchored = false
+
+				RunService:BindToRenderStep("noFallThrough", Enum.RenderPriority.Character.Value + 1, function(dt)
+					local currentPos = Players.LocalPlayer.Character.PrimaryPart.Position
+					if currentPos.Y > 0 then
+						return
+					end
+					for _, v in pairs(character:GetDescendants()) do
+						if v:IsA("BasePart") then
+							v.AssemblyLinearVelocity = Vector3.new()
+						end
+					end
+					Players.LocalPlayer.Character:PivotTo(
+						CFrame.new(currentPos * Vector3.new(1, 0, 1) + Vector3.new(0, 20, 0) - Vector3.new(1, 0, 1))
+					)
+				end)
 			end)
+
+			if not S then
+				warn("Floor calculation failed: " .. R) 
+			end
+
+		
 
 			local startWait = tick()
 			task.delay(1, function() -- Reduced outer delay

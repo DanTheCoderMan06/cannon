@@ -107,7 +107,7 @@ return function(props)
 							if giftName then
 								require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(giftName)
 								props.setSelectedGift(giftName)
-								task.delay(0.2, function()
+								task.delay(0.6, function()
 									props.giftSelectedEvent:Fire()
 									props.selectedUIEvent:Fire("newGifts")
 								end)

@@ -96,6 +96,7 @@ if RunService:IsClient() then
 		if not wasPurchased then
 			return
 		end
+		
 		playerCache[player.UserId][gamePassId] = true
 		if playerEvents[player.UserId] then
 			playerEvents[player.UserId]:Fire(gamePassId)

@@ -1,6 +1,8 @@
 -- src/shared/services/DebugService.luau
 
 local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local debugUtil = require(ReplicatedStorage.shared.utilities.debugUtil)
 
 local DebugService = {}
 
@@ -13,13 +15,7 @@ local DebugService = {}
 ]]
 function DebugService.log(...)
 	if RunService:IsStudio() then
-		local args = { ... }
-		local strings = {}
-		for i = 1, #args do
-			strings[i] = tostring(args[i])
-		end
-		-- Use the global print function for the actual output in Studio
-		print(table.concat(strings, " "))
+		debugUtil.log(...)
 	end
 	-- If not in Studio, do nothing
 end

@@ -40,6 +40,10 @@ local config = {
 				local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
 				local upgradePlatform = playerPlatform:FindFirstChild("cannonPosition")
 				highlight.Adornee = upgradePlatform:FindFirstChildWhichIsA("Model", true)
+				local sWait = tick() --LAUNCHFIX
+				repeat
+					task.wait()
+				until Players.LocalPlayer.Character or tick() - sWait > 3 
 				items.beam.Attachment0 =
 					Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChildWhichIsA("Attachment")
 				local cannonPart = playerPlatform:FindFirstChild("cannonPart")

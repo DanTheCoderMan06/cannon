@@ -20,7 +20,7 @@ return function(props)
 		return { hover = 0, clicked = 0 }
 	end)
 
-	local canGet, setCanGet = React.useBinding(false)
+	local canGet, setCanGet = React.useBinding(true)
 
 	React.useEffect(function()
 		local uiTrove = Trove.new()
@@ -35,6 +35,13 @@ return function(props)
 				selectedGift = props.selectedGift:getValue(),
 				override = false,
 			})
+
+			require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(props.id .. "CHECK : " .. tostring(canGive))
+
+
+			if canGive == nil then
+				canGive = true
+			end
 
 			setCanGet(canGive)
 		end))
@@ -158,7 +165,7 @@ return function(props)
 					Position = UDim2.fromScale(0.5, 0.5),
 					Size = UDim2.fromScale(1.19, 0.893), -- Consider if this needs to be 1,1 and text fits within padding
 					Text = canGet:map(function(val)
-						return val and "BUY" or "OWNS"
+						return if val == true then "BUY" else "OWNS"
 					end),
 					TextColor3 = Color3.fromRGB(255, 255, 255),
 					TextScaled = true,
@@ -212,9 +219,7 @@ return function(props)
 								friction = 30,
 							},
 						})
-						if canGet:getValue() then
-							props.onActivated()
-						end
+						props.onActivated()
 						task.delay(0.05, function()
 							api.start({
 								clicked = 0,

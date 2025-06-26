@@ -38,9 +38,9 @@ local USER_COUNT_MS_EXPIRY_SECONDS = USER_COUNT_UPDATE_INTERVAL_SECONDS * 2 -- E
 local WORK_LOOP_INTERVAL_SECONDS = 600 -- Wait 10 minutes between full processing cycles
 local RECALCULATION_WAIT_SECONDS = 30 -- Wait after recalculating user count before starting work
 local INTER_PAGE_WAIT = 5 -- Wait 1 second between processing pages of users
-local INTRA_PAGE_WAIT = 4 -- Wait 0.1 seconds after processing a user assigned to this server
+local INTRA_PAGE_WAIT = 1 -- Wait 0.1 seconds after processing a user assigned to this server
 local LIST_KEYS_PAGE_SIZE = 100 -- Number of keys to fetch per ListKeysAsync page
-local MAX_SAFE_CALL_ATTEMPTS = 3
+local MAX_SAFE_CALL_ATTEMPTS = 1
 local SAFE_CALL_RETRY_DELAY = 1
 
 -- DataStores & MemoryStores

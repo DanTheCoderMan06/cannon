@@ -128,7 +128,7 @@ function tutorialController.endTutorial()
 end
 
 function tutorialController.startTutorial()
-	if RAN_TUTORIAL or RunService:IsStudio() then
+	if RAN_TUTORIAL  then
 		return
 	end
 	Players.LocalPlayer:SetAttribute("inTutorial", true)

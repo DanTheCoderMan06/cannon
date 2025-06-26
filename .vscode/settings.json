@@ -3,8 +3,8 @@
         "unused-local"
     ],
     "[lua]": {
-        "editor.defaultFormatter": "JohnnyMorganz.stylua"
-    },
+    "editor.defaultFormatter": "JohnnyMorganz.stylua"
+},
     "[luau]": {
         "editor.defaultFormatter": "JohnnyMorganz.stylua"
     },

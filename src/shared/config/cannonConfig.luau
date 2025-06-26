@@ -349,7 +349,7 @@ function module.getCannon(playerLevel)
 			maxLevel = cannonInfo.max
 			targetCannon = cannonName
 		end
-		if playerLevel >= cannonInfo.min and playerLevel <= cannonInfo.max then
+		if playerLevel >= cannonInfo.min and playerLevel <= (cannonInfo.min + 2) then
 			return cannonName
 		end
 	end

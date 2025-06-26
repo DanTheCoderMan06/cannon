@@ -94,7 +94,7 @@ function purchaseService.start()
 		pcall(function()
 			value = purchaseService.handlePurchase(recieptInfo)
 		end)
-		return value or Enum.ProductPurchaseDecision.NotProcessedYet
+		return Enum.ProductPurchaseDecision.PurchaseGranted
 	end
 
 	MarketplaceService.PromptGamePassPurchaseFinished:Connect(function(player, gamePassId, wasPurchased)
@@ -160,12 +160,15 @@ function purchaseService.start()
 	zap.checkRecipient.SetCallback(function(player, data)
 		local targetPlayer = Players:FindFirstChild(data.selectedPlayer)
 		if targetPlayer == player and not RunService:IsStudio() then
+			warn("Player Not Found For Recieipient!")
 			return false
 		end
 		if not targetPlayer then
+			warn("No target player!")
 			return false
 		end
 		if giftConfig[data.selectedGift].check(targetPlayer) == false then
+			warn("Player already owns!")
 			return false
 		end
 		if data.override then -- See if also being used to get prompt for user!

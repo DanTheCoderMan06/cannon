@@ -86,7 +86,7 @@ function effectsController.playDanceAnimation()
 end
 
 function effectsController.getHighScore()
-	for _, v in pairs(Players.LocalPlayer:WaitForChild("leaderstats"):GetChildren()) do
+	for _, v in pairs(Players.LocalPlayer:WaitForChild("leaderstats", 3):GetChildren()) do
 		if v:GetAttribute("statName") == "highscore" then
 			return v
 		end
@@ -281,67 +281,71 @@ end
 
 function effectsController.finishedPath(results, track, animationInstance)
 	local character = Players.LocalPlayer.Character
-	local isHighscore = effectsController.getHighScore().Value < math.round(results.distance)
 	local playerData = dataController.currentData
 	local reward = cannonConfig.rewardFormula(results.distance, playerData.floors or 0)
 	local startTime = tick()
 
-	if playerData.doubleMoney then
-		reward *= 2
-	end
+	local success, error = pcall(function()
+		local isHighscore = effectsController.getHighScore().Value < math.round(results.distance)
+		if playerData.doubleMoney then
+			reward *= 2
+		end
 
-	-- Create the effects part
-	local finishedPathEffects = ReplicatedStorage.assets.effects.finishedPath:Clone()
-	finishedPathEffects.PrimaryPart.Position = character.PrimaryPart.Position * Vector3.new(1, 0, 1)
-	finishedPathEffects.PrimaryPart.Orientation = Vector3.new(0, 0, 90)
-	finishedPathEffects.Parent = workspace
+		-- Create the effects part
+		local finishedPathEffects = ReplicatedStorage.assets.effects.finishedPath:Clone()
+		finishedPathEffects.PrimaryPart.Position = character.PrimaryPart.Position * Vector3.new(1, 0, 1)
+		finishedPathEffects.PrimaryPart.Orientation = Vector3.new(0, 0, 90)
+		finishedPathEffects.Parent = workspace
 
-	-- Set up the trove for animations and cleanup
-	local partTrove = Trove.new()
-	partTrove:AttachToInstance(finishedPathEffects)
+		-- Set up the trove for animations and cleanup
+		local partTrove = Trove.new()
+		partTrove:AttachToInstance(finishedPathEffects)
 
-	-- Check for first floor purchase bonus
-	-- Assumes 'boughtFloorYet' boolean exists in playerData, otherwise this check might grant bonus repeatedly.
-	if not playerData.boughtFloorYet then
-		local firstFloorCost = floorConfig.costFormula(playerData.floors + 1, 0) -- Cost for level 1 from level 0
-		reward += firstFloorCost
-	end
+		-- Check for first floor purchase bonus
+		-- Assumes 'boughtFloorYet' boolean exists in playerData, otherwise this check might grant bonus repeatedly.
+		if not playerData.boughtFloorYet then
+			local firstFloorCost = floorConfig.costFormula(playerData.floors + 1, 0) -- Cost for level 1 from level 0
+			reward += firstFloorCost
+		end
 
-	if not playerData.boughtCannonYet then
-		local firstCannon = cannonConfig.costFormula(playerData.cannon + 1, 0) -- Cost for level 1 from level 0
-		reward += firstCannon
-	end
+		if not playerData.boughtCannonYet then
+			local firstCannon = cannonConfig.costFormula(playerData.cannon + 1, 0) -- Cost for level 1 from level 0
+			reward += firstCannon
+		end
 
-	-- If we have a preloaded UI, use it
-	preloadedUI.setReward(reward)
-	preloadedUI.setTime(results.time)
-	preloadedUI.setIsHighScore(isHighscore)
-	preloadedUI.billboardRef:getValue().Enabled = true
+		-- If we have a preloaded UI, use it
+		preloadedUI.setReward(reward)
+		preloadedUI.setTime(results.time)
+		preloadedUI.setIsHighScore(isHighscore)
+		if preloadedUI.billboardRef:getValue() then
+			preloadedUI.billboardRef:getValue().Enabled = true
+		end
 
-	-- Set up animation for the effects
-	partTrove:BindToRenderStep("moveCircle", Enum.RenderPriority.Last.Value, function(dt)
-		local increaseFactor = math.sin(math.rad((tick() - startTime) * 167)) * 1
-		finishedPathEffects:FindFirstChildWhichIsA("BasePart").CFrame *= CFrame.Angles(math.rad(0.5), 0, 0)
-		finishedPathEffects:FindFirstChildWhichIsA("BasePart").Size =
-			Vector3.new(0.7, 12 + increaseFactor, 12 + increaseFactor)
-		finishedPathEffects:FindFirstChildWhichIsA("BasePart").Color =
-			reactUtil.getSmoothColorFromElapsedTime(tick() - startTime, 2)
-		preloadedUI.setTargetColor(reactUtil.getSmoothColorFromElapsedTime(tick() - startTime, 2))
+		-- Set up animation for the effects
+		partTrove:BindToRenderStep("moveCircle", Enum.RenderPriority.Last.Value, function(dt)
+			local increaseFactor = math.sin(math.rad((tick() - startTime) * 167)) * 1
+			finishedPathEffects:FindFirstChildWhichIsA("BasePart").CFrame *= CFrame.Angles(math.rad(0.5), 0, 0)
+			finishedPathEffects:FindFirstChildWhichIsA("BasePart").Size =
+				Vector3.new(0.7, 12 + increaseFactor, 12 + increaseFactor)
+			finishedPathEffects:FindFirstChildWhichIsA("BasePart").Color =
+				reactUtil.getSmoothColorFromElapsedTime(tick() - startTime, 2)
+			preloadedUI.setTargetColor(reactUtil.getSmoothColorFromElapsedTime(tick() - startTime, 2))
+		end)
+
+		SoundService.effects.victory:Play()
+
+		task.wait(2)
+
+		preloadedUI.billboardRef:getValue().Enabled = false
+
+		billboardContainer:unmount()
+
+		preloadedUI = nil
+
+		-- Clean up the effects
+		finishedPathEffects:Destroy()
+		partTrove:Destroy()
 	end)
-
-	SoundService.effects.victory:Play()
-
-	task.wait(2)
-
-	preloadedUI.billboardRef:getValue().Enabled = false
-
-	billboardContainer:unmount()
-
-	preloadedUI = nil
-
-	-- Clean up the effects
-	finishedPathEffects:Destroy()
-	partTrove:Destroy()
 
 	character.PrimaryPart.Anchored = false
 	character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)

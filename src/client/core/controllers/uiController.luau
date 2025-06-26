@@ -107,17 +107,18 @@ local function app()
 		uiTrove:Add(
 			dataController.dataChanged:Connect(function(newData)
 				if newData.floors > currentData.floors then
-					if newData.floors - currentData.floors <= 1 then
+					if newData.floors - currentData.floors == 1 then
 						purchases += 1
 					end
 				end
-				if (purchases >= 10) or (RunService:IsStudio() and purchases >= 1) then
+				currentData = newData
+				require(ReplicatedStorage.shared.utilities.debugUtil).log("FLOOR PURCHASES: " .. purchases)
+				if (purchases >= 10) or (RunService:IsStudio() and purchases >= 2) then
 					debugUtil.log("Menu ready for display")
 					setMenuReadyForDisplay(true)
 					uiTrove:Destroy()
 					return
 				end
-				currentData = newData
 			end),
 			"Disconnect"
 		)
@@ -153,6 +154,7 @@ end
 function uiController.start()
 	notificationsPossible = PolicyService:GetPolicyInfoForPlayerAsync(Players.LocalPlayer).AreAdsAllowed
 	uiController.notificationsPossible = notificationsPossible
+		require(ReplicatedStorage.shared.utilities.debugUtil).log("Notifications Possible: " .. tostring(notificationsPossible))
 	_G.isMobile = UserInputService.TouchEnabled
 
 	local container = ReactRoblox.createRoot(Instance.new("Folder"))
@@ -175,6 +177,7 @@ function uiController.start()
 
 	local currentData = nil
 	local hasSetInitially = false
+	local floorPurchases = 0
 	dataController.dataChanged:Connect(function(newData)
 		if not currentData then
 			currentData = newData
@@ -200,7 +203,10 @@ function uiController.start()
 				)
 			end)
 		end
-		if newData.floors == 20 or newData.floors == 40 then
+		if newData.floors - currentData.floors == 1 then
+			floorPurchases += 1
+		end
+		if floorPurchases == 10 then
 			debugUtil.log("prompt in")
 			if marketplaceUtil.canPromptIn() then
 				debugUtil.log("Send")
@@ -249,7 +255,7 @@ function uiController.start()
 			if not launches then
 				launches = 0
 			end
-			if (launches == 10) or (RunService:IsStudio() and launches == 1) then
+			if (launches == 5) or (RunService:IsStudio() and launches == 1) then
 				if uiController.canPromptIn() then
 					uiController.promptOptIn()
 				end

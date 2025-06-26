@@ -330,7 +330,7 @@ return {
 		end,
 		check = function(targetPlayer)
 			local playerData = dataService.getPlayerData(targetPlayer)
-			if playerData.doubleDistance then
+			if playerData.doubleDistance == true then
 				return false
 			end
 			return true

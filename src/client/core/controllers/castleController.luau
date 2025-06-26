@@ -245,9 +245,11 @@ function castleController.updateSpot(spot, newValue, places, playerFloors)
 		end
 	end
 
-	require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
+	if RunService:IsStudio() then
+		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
 		spot:FindFirstChild("characterModel", true):FindFirstChild("centerWeld")
 	)
+	end
 	if not spot:FindFirstChild("characterModel", true):FindFirstChild("centerWeld") then
 		local weld = Instance.new("Weld")
 		weld.Name = "centerWeld"
@@ -342,7 +344,7 @@ function castleController.updatePlayer(player)
 
 	local towerPrompt = ReplicatedStorage.assets:WaitForChild("playerCastleAssets").towerPrompt:Clone()
 
-	local playerCastle = castleFolder:WaitForChild(player.Name):FindFirstChildWhichIsA("Model")
+	local playerCastle = castleFolder:WaitForChild(player.Name):WaitForChild(player.Name, 3) -- LAUNCHFIX
 
 	towerPrompt.Parent = playerSpot
 
@@ -712,13 +714,17 @@ function castleController.start()
 		local totalFloors = 0
 		local playerStats = {}
 		local players = {}
-		for _, v in pairs(Players:GetPlayers()) do
+		local fetchedPlayers = Players:GetPlayers() -- LAUNCHFIX
+		for _, v in pairs(fetchedPlayers) do
 			local floorCount
 			for e, z in pairs(v:WaitForChild("leaderstats"):GetChildren()) do
 				if z:GetAttribute("statName") == "floors" then
 					floorCount = z.Value
 					break
 				end
+			end
+			if not floorCount then
+				floorCount = 10
 			end
 			playerStats[v.Name] = floorCount
 			table.insert(players, v.Name)
@@ -729,7 +735,7 @@ function castleController.start()
 			return playerStats[b] < playerStats[a]
 		end)
 
-		for _, v in pairs(Players:GetPlayers()) do
+		for _, v in pairs(fetchedPlayers) do
 			local totalProportion = playerStats[v.Name] / totalFloors
 			local playerSpot = teleports:WaitForChild(v.Name)
 			castleController.updateSpot(playerSpot, math.round(totalProportion * 24) + 1, players, playerStats[v.Name])
@@ -745,11 +751,15 @@ function castleController.start()
 	end)
 
 	Players.PlayerRemoving:Connect(function(playerWhoLeft)
-		playerTroves[playerWhoLeft.Name]:Destroy()
-		local leftPlayerSpot = playerPlatform.teleports:FindFirstChild(playerWhoLeft.Name)
-		leftPlayerSpot.Name = "spot"
-		spr.stop(leftPlayerSpot:FindFirstChildWhichIsA("Highlight", true), "OutlineTransparency")
-		leftPlayerSpot:ClearAllChildren()
+		pcall(function()
+			playerTroves[playerWhoLeft.Name]:Destroy() --LAUNCHFIX
+		end)
+		pcall(function()
+			local leftPlayerSpot = playerPlatform.teleports:FindFirstChild(playerWhoLeft.Name)
+			leftPlayerSpot.Name = "spot"
+			spr.stop(leftPlayerSpot:FindFirstChildWhichIsA("Highlight", true), "OutlineTransparency")
+			leftPlayerSpot:ClearAllChildren()
+		end)
 		updateTowers()
 	end)
 
@@ -806,8 +816,10 @@ function castleController.start()
 	--Attempt at kitbashing.
 	local function castleUpdates(targetPlayer)
 		local playerSpot = castleFolder:FindFirstChild(targetPlayer.Name)
-		local playerCastle = playerSpot:FindFirstChildWhichIsA("Model")
-
+		local playerCastle = playerSpot:WaitForChild(targetPlayer.Name,3) --LAUNCHFIX
+		if not playerCastle then
+			return
+		end
 		local totalFloorsObject = targetPlayer:WaitForChild("leaderstats"):FindFirstChild("Floors 🏢")
 			or targetPlayer:WaitForChild("leaderstats"):FindFirstChild("Floors") -- Handle potential name variations
 		if not totalFloorsObject then

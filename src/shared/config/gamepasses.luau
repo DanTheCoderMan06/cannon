@@ -26,4 +26,11 @@ return {
 	newCannon = {
 		id = 2697043453,
 	},
+	buyDoubleDistance = {
+		id = 1022787535, -- 2x Distance
+	},
+
+	buyDoubleMoney = {
+		id = 1022657721, -- 2x Money
+	},
 }
