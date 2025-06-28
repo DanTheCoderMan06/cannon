@@ -9,6 +9,7 @@ local ReactSpring = require(sharedPackages.ReactSpring)
 local components = ReplicatedStorage.client.reactComponents
 local Trove = require(sharedPackages.Trove)
 local Sift = require(sharedPackages.Sift)
+local spr = require(sharedPackages.spr)
 
 local genericButton = require(components.generics.genericButton)
 
@@ -80,6 +81,7 @@ local rewardsLoaded = false
 
 return function(props)
 	local currentData = dataController.getData()
+	local canvasRef = React.useRef()
 	local rewards = React.useMemo(function()
 		local newRewards = {}
 
@@ -129,6 +131,23 @@ return function(props)
 		return newRewards
 	end, { props, currentData }) -- list dependencies that, when changed, should re-run the computation
 
+	React.useEffect(function()
+		local uiTrove = Trove.new()
+
+		uiTrove:Add(props.selectedUIEvent:Connect(function(uiName)
+			if uiName == "rewards" then
+				task.delay(1,function()
+					local currentData = dataController.getData()
+					local size = 0.0641 / 2
+					local newCanvasPos = Vector2.new(size * canvasRef:getValue().AbsoluteCanvasSize.X * currentData.daysPlayed,0)
+					spr.target(canvasRef:getValue(),1,.5,{CanvasPosition = newCanvasPos})
+					task.wait(1)
+					spr.stop(canvasRef:getValue())
+				end)
+			end
+			
+		end))
+	end, {})
 	return React.createElement("ScrollingFrame", {
 		AnchorPoint = Vector2.new(0.5, 0.5),
 		BackgroundColor3 = Color3.fromRGB(255, 255, 255),
@@ -141,6 +160,7 @@ return function(props)
 		Selectable = false,
 		Size = UDim2.fromScale(0.963, 0.84),
 		ClipsDescendants = false,
+		ref = canvasRef,
 	}, {
 		uIListLayout = React.createElement("UIListLayout", {
 			FillDirection = Enum.FillDirection.Horizontal,

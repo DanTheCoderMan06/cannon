@@ -14,7 +14,7 @@ local profileTemplate = require(ServerStorage.server.modules.profileTemplate)
 local PlayerStore = profileStore.New("SavedPlayerDataV3", profileTemplate)
 local realPlayerStore = PlayerStore
 if RunService:IsStudio() then
-	PlayerStore = PlayerStore.Mock
+	--PlayerStore = PlayerStore.Mock
 end
 local Profiles = {}
 
@@ -201,11 +201,17 @@ function dataService.loadGamepasses(player)
 
 	playerProfile.Data.cannons = newCannons
 
+	if marketplaceUtil.userOwnsGamepass(player, gamepasses.buyVIP.id) then
+		playerProfile.Data.infiniteVIP = true
+	end
 	playerProfile.Data.infiniteVIP = marketplaceUtil.userOwnsGamepass(player, gamepasses.buyVIP.id)
 
-	playerProfile.Data.doubleMoney = marketplaceUtil.userOwnsGamepass(player, gamepasses.buyDoubleMoney.id)
-
-	playerProfile.Data.doubleDistance =  marketplaceUtil.userOwnsGamepass(player, gamepasses.buyDoubleDistance.id)
+	if marketplaceUtil.userOwnsGamepass(player, gamepasses.buyDoubleMoney.id) then
+		playerProfile.Data.doubleMoney = true
+	end
+	if marketplaceUtil.userOwnsGamepass(player, gamepasses.buyDoubleDistance.id) then
+		playerProfile.Data.doubleDistance =  true 		
+	end
 
 end
 

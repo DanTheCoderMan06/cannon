@@ -119,7 +119,9 @@ return function(props)
 		BorderSizePixel = 0,
 		Position = UDim2.fromScale(0.5, 0.5),
 		GroupTransparency = styles.transparency,
-		Visible = props.vipClaimAvailable,
+		Visible = styles.transparency:map(function(val)
+			return val < 1
+		end),
 		Size = styles.transparency:map(function(val)
 			return UDim2.fromScale(1 - val, 1 - val)
 		end),
@@ -138,6 +140,7 @@ return function(props)
 			Position = UDim2.fromScale(0.49982, 0.499818),
 			ScaleType = Enum.ScaleType.Fit,
 			Size = UDim2.fromScale(0.286203, 0.697235),
+			Visible = props.vipClaimAvailable,
 		}, {
 			closeButton = React.createElement(closeButton, {
 				onActivated = function()

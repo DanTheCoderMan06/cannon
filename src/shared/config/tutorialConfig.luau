@@ -44,8 +44,10 @@ local config = {
 				repeat
 					task.wait()
 				until Players.LocalPlayer.Character or tick() - sWait > 3 
-				items.beam.Attachment0 =
-					Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChildWhichIsA("Attachment")
+				local rootPart = Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart", 5)
+				if rootPart then
+					items.beam.Attachment0 = rootPart:FindFirstChildWhichIsA("Attachment")
+				end
 				local cannonPart = playerPlatform:FindFirstChild("cannonPart")
 				items.beam.Attachment1 = cannonPart and cannonPart:FindFirstChild("center", true) or target -- Assign to center attachment, fallback to original target
 				-- Connect to GetAttributeChangedSignal using Trove
@@ -77,8 +79,10 @@ local config = {
 				local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
 				local upgradePlatform = playerPlatform.platforms:FindFirstChild("oneLevel")
 				highlight.Adornee = upgradePlatform:FindFirstChildWhichIsA("Model", true)
-				items.beam.Attachment0 =
-					Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChildWhichIsA("Attachment")
+				local rootPart = Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart", 5)
+				if rootPart then
+					items.beam.Attachment0 = rootPart:FindFirstChildWhichIsA("Attachment")
+				end
 				items.beam.Attachment1 = upgradePlatform and upgradePlatform:FindFirstChild("center") or target -- Assign to center attachment, fallback to original target
 
 				local oldCannon = states.getData().cannon
@@ -104,8 +108,10 @@ local config = {
 				local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
 				local upgradePlatform = playerPlatform:FindFirstChild("cannonPosition")
 				highlight.Adornee = upgradePlatform:FindFirstChildWhichIsA("Model", true)
-				items.beam.Attachment0 =
-					Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChildWhichIsA("Attachment")
+				local rootPart = Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart", 5)
+				if rootPart then
+					items.beam.Attachment0 = rootPart:FindFirstChildWhichIsA("Attachment")
+				end
 				-- Assuming the target should be the cannon entrance area like step 2
 				local cannonPart = playerPlatform:FindFirstChild("cannonPart")
 				items.beam.Attachment1 = cannonPart and cannonPart:FindFirstChild("center") or target -- Assign to center attachment, fallback to original target
@@ -144,8 +150,10 @@ local config = {
 				local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
 				local upgradePlatform = playerPlatform.platforms:FindFirstChild("upgradeFloor")
 				highlight.Adornee = upgradePlatform:FindFirstChildWhichIsA("Model", true)
-				items.beam.Attachment0 =
-					Players.LocalPlayer.Character.HumanoidRootPart:FindFirstChildWhichIsA("Attachment")
+				local rootPart = Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart", 5)
+				if rootPart then
+					items.beam.Attachment0 = rootPart:FindFirstChildWhichIsA("Attachment")
+				end
 				items.beam.Attachment1 = upgradePlatform and upgradePlatform:FindFirstChild("center") or target -- Assign to center attachment, fallback to original target
 
 				local oldFloors = states.getData().floors

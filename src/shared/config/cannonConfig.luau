@@ -6,19 +6,7 @@ end
 --]]
 
 local function requiredLaunches(x)
-	if x >= 90 then
-		return 70
-	elseif x >= 70 then
-		return 50
-	elseif x >= 40 then
-		return 25
-	elseif x >= 20 then
-		return 15
-	elseif x >= 10 then
-		return 3
-	else
-		return 2.5
-	end
+	return x / 3
 end
 
 local function cost(targetLevel, boughtLevels)
@@ -93,7 +81,6 @@ local function power(x)
 
 	-- Ensure power is monotonically increasing: take the max of current calc and previous level's result
 	local result = math.max(currentCalculatedPower, previousLevelPower)
-
 	-- Store result in memoization table and return
 	savedPower[x] = result
 	return result

@@ -243,8 +243,9 @@ function uiController.start()
 
 	local launches
 
-	task.delay(3, function()
-		Players.LocalPlayer.Character:GetAttributeChangedSignal("inCannon"):Connect(function()
+	task.delay(1, function()
+		local character = Players.LocalPlayer.Character or Players.LocalPlayer.CharacterAdded:Wait()
+		character:GetAttributeChangedSignal("inCannon"):Connect(function()
 			local inCannon = Players.LocalPlayer.Character:GetAttribute("inCannon")
 			if vipClaimAvailable:getValue() then
 				return

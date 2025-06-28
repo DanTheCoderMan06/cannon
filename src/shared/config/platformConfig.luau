@@ -432,13 +432,21 @@ return {
 						-- Check product tier, defaulting to 0 if nil
 						if (newPlayerData.productTiers.gifts["floors"] or 0) >= 5 then
 							giftId = giftConfig.tenFloorsTier2.id
-							itemInfo = marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
+							local success, itemInfo = pcall(
+								marketplaceUtil.getProductInfo,
+								giftId,
+								Enum.InfoType.Product
+							)
 							title = "Gift 10 Floors (Tier 2)"
 							debugUtil.log(itemInfo)
 						end
-						itemInfo = itemInfo or marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
-						local priceDesc = itemInfo and itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
-							or "Loading..."
+						local success, itemInfo = pcall(marketplaceUtil.getProductInfo, giftId, Enum.InfoType.Product)
+						local priceDesc = "N/A"
+						if success and itemInfo and itemInfo.PriceInRobux then
+							priceDesc = itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
+						else
+							priceDesc = "Loading..."
+						end
 						updateEvent:Fire({
 							title = title,
 							description = priceDesc,
@@ -536,9 +544,13 @@ return {
 				-- Fetch initial dynamic price for self-purchase
 				local productId = gamepassConfig.tenFloors.id
 				-- TODO: Add logic to check playerData.productTiers.products["floors"] for tier 2 ID if necessary
-				local itemInfo = marketplaceUtil.getProductInfo(productId, Enum.InfoType.Product)
-				local priceDesc = itemInfo and itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
-					or "Loading..."
+				local success, itemInfo = pcall(marketplaceUtil.getProductInfo, productId, Enum.InfoType.Product)
+				local priceDesc = "N/A"
+				if success and itemInfo and itemInfo.PriceInRobux then
+					priceDesc = itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
+				else
+					priceDesc = "Loading..."
+				end
 				return { title = "+10 Floors", description = priceDesc }
 			end,
 			title = "+10 Floors", -- Title remains static
@@ -564,25 +576,30 @@ return {
 						if (playerData.productTiers.products["floors"] or 0) >= 5 then
 							productId = gamepassConfig.tenFloorsTier2.id
 							title = "+10 Floors (Tier 2)"
-							itemInfo = marketplaceUtil.getProductInfo(productId, Enum.InfoType.Product)
 						end
-						itemInfo = itemInfo or marketplaceUtil.getProductInfo(productId, Enum.InfoType.Product)
-						local priceDesc = itemInfo and itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
-							or "Loading..."
+						local success, itemInfo = pcall(marketplaceUtil.getProductInfo, productId, Enum.InfoType.Product)
+						local priceDesc = "N/A"
+						if success and itemInfo and itemInfo.PriceInRobux then
+							priceDesc = itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
+						else
+							priceDesc = "Loading..."
+						end
 						updateEvent:Fire({ title = title, description = priceDesc })
 					else
 						title = "Gift 10 Floors" -- Corrected: was GIFT 50 FLOORS
-						local itemInfo
 						giftId = giftConfig.tenFloors.id -- Corrected: was fiftyFloors
 						-- Check gift tier, defaulting to 0 if nil
 						if (playerData.productTiers.gifts["floors"] or 0) >= 5 then
 							giftId = giftConfig.tenFloorsTier2.id -- Corrected
 							title = "Gift 10 Floors (Tier 2)" -- Corrected
-							itemInfo = marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
 						end
-						itemInfo = itemInfo or marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
-						local priceDesc = itemInfo and itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
-							or "Loading..."
+						local success, itemInfo = pcall(marketplaceUtil.getProductInfo, giftId, Enum.InfoType.Product)
+						local priceDesc = "N/A"
+						if success and itemInfo and itemInfo.PriceInRobux then
+							priceDesc = itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
+						else
+							priceDesc = "Loading..."
+						end
 						updateEvent:Fire({ title = title, description = priceDesc })
 					end
 				end
@@ -649,9 +666,13 @@ return {
 				-- Fetch initial dynamic price for self-purchase
 				local productId = gamepassConfig.fiftyFloors.id
 				-- TODO: Add logic to check playerData.productTiers.products["floors"] for tier 2 ID if necessary
-				local itemInfo = marketplaceUtil.getProductInfo(productId, Enum.InfoType.Product)
-				local priceDesc = itemInfo and itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
-					or "Loading..."
+				local success, itemInfo = pcall(marketplaceUtil.getProductInfo, productId, Enum.InfoType.Product)
+				local priceDesc = "N/A"
+				if success and itemInfo and itemInfo.PriceInRobux then
+					priceDesc = itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
+				else
+					priceDesc = "Loading..."
+				end
 				return { title = "+50 Floors", description = priceDesc }
 			end,
 			title = "+50 Floors", -- Title remains static
@@ -676,25 +697,30 @@ return {
 						if (playerData.productTiers.products["floors"] or 0) >= 5 then
 							title = "+50 Floors (Tier 2)"
 							productId = gamepassConfig.fiftyFloorsTier2.id
-							itemInfo = marketplaceUtil.getProductInfo(productId, Enum.InfoType.Product)
 						end
-						itemInfo = itemInfo or marketplaceUtil.getProductInfo(productId, Enum.InfoType.Product)
-						local priceDesc = itemInfo and itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
-							or "Loading..."
+						local success, itemInfo = pcall(marketplaceUtil.getProductInfo, productId, Enum.InfoType.Product)
+						local priceDesc = "N/A"
+						if success and itemInfo and itemInfo.PriceInRobux then
+							priceDesc = itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
+						else
+							priceDesc = "Loading..."
+						end
 						updateEvent:Fire({ title = title, description = priceDesc })
 					else
-						local itemInfo
 						title = "Gift 50 Floors" -- Corrected: was GIFT 250 FLOORS
 						giftId = giftConfig.fiftyFloors.id -- Corrected: was twoHundredFifty
 						-- Check gift tier, defaulting to 0 if nil
 						if (playerData.productTiers.gifts["floors"] or 0) >= 5 then
 							giftId = giftConfig.fiftyFloorsTier2.id -- Corrected
 							title = "Gift 50 Floors (Tier 2)" -- Corrected
-							itemInfo = marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
 						end
-						itemInfo = itemInfo or marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
-						local priceDesc = itemInfo and itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
-							or "Loading..."
+						local success, itemInfo = pcall(marketplaceUtil.getProductInfo, giftId, Enum.InfoType.Product)
+						local priceDesc = "N/A"
+						if success and itemInfo and itemInfo.PriceInRobux then
+							priceDesc = itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
+						else
+							priceDesc = "Loading..."
+						end
 						updateEvent:Fire({ title = title, description = priceDesc })
 					end
 				end
@@ -848,15 +874,17 @@ return {
 					local tierInfo =
 						tierConfig.cannonTiers[math.clamp(playerData.cannonTier + 1, 1, #tierConfig.cannonTiers)]
 
-					local itemInfo = marketplaceUtil.getProductInfo(tierInfo.id, Enum.InfoType.Product)
+					local success, itemInfo = pcall(marketplaceUtil.getProductInfo, tierInfo.id, Enum.InfoType.Product)
+					local priceDesc = " "
+					if success and itemInfo and itemInfo.PriceInRobux then
+						priceDesc = itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
+					end
 
 					updateEvent:Fire({
 						title = if #tierConfig.cannonTiers ~= playerData.cannonTier
 							then (tierNames[playerData.cannonTier + 1] or "Tier " .. tostring(playerData.cannonTier + 1)) .. " Cannon"
 							else "Max Tier",
-						description = if #tierConfig.cannonTiers ~= playerData.cannonTier
-							then itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
-							else " ",
+						description = if #tierConfig.cannonTiers ~= playerData.cannonTier then priceDesc else " ",
 					})
 				end))
 			end,
@@ -869,15 +897,17 @@ return {
 				local tierInfo =
 					tierConfig.cannonTiers[math.clamp(playerData.cannonTier + 1, 1, #tierConfig.cannonTiers)]
 
-				local itemInfo = marketplaceUtil.getProductInfo(tierInfo.id, Enum.InfoType.Product)
+				local success, itemInfo = pcall(marketplaceUtil.getProductInfo, tierInfo.id, Enum.InfoType.Product)
+				local priceDesc = " "
+				if success and itemInfo and itemInfo.PriceInRobux then
+					priceDesc = itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
+				end
 
 				return {
 					title = if #tierConfig.cannonTiers ~= playerData.cannonTier
 						then (tierNames[playerData.cannonTier + 1] or "Tier " .. tostring(playerData.cannonTier + 1)) .. " Cannon"
 						else "Max Tier",
-					description = if #tierConfig.cannonTiers ~= playerData.cannonTier
-						then itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
-						else " ",
+					description = if #tierConfig.cannonTiers ~= playerData.cannonTier then priceDesc else " ",
 				}
 			end,
 			initModel = function(modelTrove, updateModelEvent)
@@ -949,7 +979,7 @@ return {
 
 				connections:Add(changedCannonSignal:Connect(function(newIndex)
 					currentEquippedCannonIndex = newIndex
-					updateModel()
+					updateModel(leaderstatsstats:FindFirstChild("Cannon💥").Value)
 				end))
 			end,
 			callbackFunction = function(success, states)
@@ -1125,9 +1155,11 @@ return {
 				-- Fetch initial dynamic price for self-purchase
 				local productId = gamepassConfig.twoHundredFiftyFloors.id
 				-- TODO: Add logic to check playerData.productTiers.products["floors"] for tier 2 ID if necessary
-				local itemInfo = marketplaceUtil.getProductInfo(productId, Enum.InfoType.Product)
-				local priceDesc = itemInfo and itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
-					or "Loading..."
+				local success, itemInfo = pcall(marketplaceUtil.getProductInfo, productId, Enum.InfoType.Product)
+				local priceDesc = "Loading..."
+				if success and itemInfo and itemInfo.PriceInRobux then
+					priceDesc = itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
+				end
 				return { title = "+250 Floors", description = priceDesc }
 			end,
 			title = "+250 Floors", -- Title remains static
@@ -1148,30 +1180,30 @@ return {
 					if playerPlatform:GetAttribute("currentTower") == localPlayer.Name then
 						title = "+250 Floors"
 						productId = gamepassConfig.twoHundredFiftyFloors.id
-						local itemInfo
 						-- Check product tier, defaulting to 0 if nil
 						if (playerData.productTiers.products["floors"] or 0) >= 5 then
 							title = "+250 Floors (Tier 2)"
 							productId = gamepassConfig.twoHundredFiftyFloorsTier2.id
-							itemInfo = marketplaceUtil.getProductInfo(productId, Enum.InfoType.Product)
 						end
-						itemInfo = itemInfo or marketplaceUtil.getProductInfo(productId, Enum.InfoType.Product)
-						local priceDesc = itemInfo and itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
-							or "Loading..."
+						local success, itemInfo = pcall(marketplaceUtil.getProductInfo, productId, Enum.InfoType.Product)
+						local priceDesc = "Loading..."
+						if success and itemInfo and itemInfo.PriceInRobux then
+							priceDesc = itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
+						end
 						updateEvent:Fire({ title = title, description = priceDesc })
 					else
-						local itemInfo
 						title = "Gift 250 Floors"
 						giftId = giftConfig.twoHundredFifty.id
 						-- Check gift tier, defaulting to 0 if nil
 						if (playerData.productTiers.gifts["floors"] or 0) >= 5 then
 							giftId = giftConfig.twoHundredFiftyTier2.id
 							title = "Gift 250 Floors (Tier 2)"
-							itemInfo = marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
 						end
-						itemInfo = itemInfo or marketplaceUtil.getProductInfo(giftId, Enum.InfoType.Product)
-						local priceDesc = itemInfo and itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
-							or "Loading..."
+						local success, itemInfo = pcall(marketplaceUtil.getProductInfo, giftId, Enum.InfoType.Product)
+						local priceDesc = "Loading..."
+						if success and itemInfo and itemInfo.PriceInRobux then
+							priceDesc = itemInfo.PriceInRobux .. ' <font color="#008000">\u{E002}</font>'
+						end
 						updateEvent:Fire({ title = title, description = priceDesc })
 					end
 				end
@@ -1244,10 +1276,14 @@ return {
 						})
 					else
 						local id = gamepassConfig.upgradeCannon.getId(playerData)
-						local itemInfo = marketplaceUtil.getProductInfo(id, Enum.InfoType.Product)
+						local success, itemInfo = pcall(marketplaceUtil.getProductInfo, id, Enum.InfoType.Product)
+						local priceDesc = "..."
+						if success and itemInfo and itemInfo.PriceInRobux then
+							priceDesc = '<font color="#008000">\u{E002}</font>' .. itemInfo.PriceInRobux
+						end
 						updateEvent:Fire({
 							title = "Level " .. tostring(math.min(cannonConfig.maxLevel, cannonValue.Value + 10)),
-							description = '<font color="#008000">\u{E002}</font>' .. itemInfo.PriceInRobux, -- Fixed $ placement
+							description = priceDesc, -- Fixed $ placement
 						})
 					end
 				end))
@@ -1259,10 +1295,14 @@ return {
 				for _, v in pairs(stats:GetChildren()) do
 					if v:GetAttribute("statName") == "cannon" then
 						local id = gamepassConfig.upgradeCannon.getId(dataController.getData())
-						local itemInfo = marketplaceUtil.getProductInfo(id, Enum.InfoType.Product)
+						local success, itemInfo = pcall(marketplaceUtil.getProductInfo, id, Enum.InfoType.Product)
+						local priceDesc = "..."
+						if success and itemInfo and itemInfo.PriceInRobux then
+							priceDesc = '<font color="#008000">\u{E002}</font>' .. itemInfo.PriceInRobux
+						end
 						return {
 							title = "Level " .. tostring(math.min(cannonConfig.maxLevel, v.Value + 10)),
-							description = '<font color="#008000">\u{E002}</font>' .. itemInfo.PriceInRobux,
+							description = priceDesc,
 						}
 					end
 				end

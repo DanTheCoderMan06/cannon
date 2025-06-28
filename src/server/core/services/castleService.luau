@@ -108,6 +108,7 @@ function castleService.updatePlatform(player, newspot)
 			(dataService.getPlayerData(Players:FindFirstChild(newspot.Name)).floors + 1) * floorHeight - 1,
 			0
 		)
+		
 	debugUtil.log(
 		"New Height " .. (dataService.getPlayerData(Players:FindFirstChild(newspot.Name)).floors + 1) * floorHeight - 1
 	)
@@ -119,9 +120,12 @@ function castleService.updatePlatform(player, newspot)
 	if player.Character then
 		if not player.Character:GetAttribute("inCannon") then
 			task.defer(function()
+				local offsetFromSpawn = (player.Character.PrimaryPart.Position - newspot.Position) * Vector3.new(1,0,1)
+				local onOther = player.Name ~= newspot.Name
 				player.Character:MoveTo(
 					playerPlatforms:FindFirstChild(player.Name):FindFirstChildWhichIsA("SpawnLocation").Position
 						+ Vector3.new(0, 10, 0) -- Added vertical offset
+						+ (if onOther then offsetFromSpawn else Vector3.new())
 				)
 			end)
 		end

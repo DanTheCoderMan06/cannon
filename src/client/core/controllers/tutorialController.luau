@@ -41,6 +41,7 @@ local debugUtil = require(ReplicatedStorage.shared.utilities.debugUtil)
 local nextPageSignal = Signal.new()
 
 local tutorialItems
+local tutorialArrowTemplate = ReplicatedStorage.assets.effects:WaitForChild("tutorialArrow")
 
 local RAN_TUTORIAL = false
 
@@ -104,6 +105,19 @@ function tutorialController.loadPage(index)
 		oldActionTrove = nil
 	end
 	oldActionTrove = Trove.new()
+
+	-- Arrow spawning loop for this page
+	oldActionTrove:Add(task.spawn(function()
+		while true do
+			if tutorialItems and tutorialItems.Parent and tutorialItems.beam.Attachment0 and tutorialItems.beam.Attachment1 then
+				local arrow = tutorialArrowTemplate:Clone()
+				arrow:SetAttribute("timeCreated", tick())
+				arrow.Parent = tutorialItems.ArrowsFolder
+			end
+			task.wait(.2)
+		end
+	end))
+
 	pageInfo.action(tutorialItems, nextPageSignal, {
 		getData = dataController.getData,
 		dataChanged = dataController.dataChanged,
@@ -143,6 +157,11 @@ function tutorialController.startTutorial()
 	local currentIndex = 1
 	tutorialItems = ReplicatedStorage.assets.effects.tutorial:Clone()
 	tutorialItems.Parent = workspace
+	tutorialItems.beam.Enabled = false -- Disable the beam
+
+	local arrowsFolder = Instance.new("Folder")
+	arrowsFolder.Name = "ArrowsFolder"
+	arrowsFolder.Parent = tutorialItems
 
 	nextPageSignal:Connect(function()
 		debugUtil.log("Next page!")
@@ -152,10 +171,37 @@ function tutorialController.startTutorial()
 
 	local rainbowTrove = Trove.new()
 	local startedTime = tick()
+	local LERP_DURATION = 1.5
 
-	rainbowTrove:BindToRenderStep("rainbowTutorial", Enum.RenderPriority.Last.Value, function(dt)
-		if tutorialItems and tutorialItems:FindFirstChild("beam") then
-			tutorialItems.beam.Color = ColorSequence.new(reactUtil.getSmoothColorFromElapsedTime(tick() - startedTime))
+	rainbowTrove:BindToRenderStep("arrowTutorial", Enum.RenderPriority.Last.Value, function(dt)
+		if not tutorialItems or not tutorialItems.Parent then
+			rainbowTrove:Destroy()
+			return
+		end
+
+		local startPos = tutorialItems.beam.Attachment0 and tutorialItems.beam.Attachment0.WorldPosition
+		local endPos = tutorialItems.beam.Attachment1 and tutorialItems.beam.Attachment1.WorldPosition
+
+		if not startPos or not endPos or (startPos - endPos).Magnitude < 1 then
+			arrowsFolder:ClearAllChildren()
+			return
+		end
+
+		for _, arrow in ipairs(arrowsFolder:GetChildren()) do
+			local timeCreated = arrow:GetAttribute("timeCreated")
+			if not timeCreated then
+				continue
+			end
+
+			local alpha = (tick() - timeCreated) / LERP_DURATION
+			if alpha >= 1 then
+				arrow:Destroy()
+				continue
+			end
+
+			arrow.CFrame = CFrame.new(startPos:Lerp(endPos, alpha), endPos) 
+			arrow.CFrame *= CFrame.Angles(0,math.rad(135),0)
+			arrow.Color = reactUtil.getSmoothColorFromElapsedTime(tick() - startedTime)
 		end
 	end)
 
@@ -190,34 +236,39 @@ function tutorialController.start()
 	local guiderModel = ReplicatedStorage.assets.effects.guiding:Clone()
 	guiderModel.Parent = workspace
 	guiderModel.Name = "initialGuider"
+	guiderModel.beam.Enabled = false -- Disable the beam
+
+	local guiderArrowsFolder = Instance.new("Folder")
+	guiderArrowsFolder.Name = "ArrowsFolder"
+	guiderArrowsFolder.Parent = guiderModel
+
+	local lastArrowSpawn = 0
 	local start = tick()
+	local LERP_DURATION = 1.5
+
 	RunService:BindToRenderStep("guidingBeam", Enum.RenderPriority.Last.Value + 1, function()
 		if RAN_TUTORIAL then
-			guiderModel.beam.Enabled = false
+			guiderModel:Destroy()
+			RunService:UnbindFromRenderStep("guidingBeam") -- Clean up
 			return
 		end
+
 		local character = Players.LocalPlayer.Character
-		if not character then
-			guiderModel.beam.Enabled = false
-			return
-		end
-		if character:GetAttribute("inCannon") then
-			guiderModel.beam.Enabled = false
+		if not character or not character.PrimaryPart or character:GetAttribute("inCannon") then
+			guiderArrowsFolder:ClearAllChildren()
 			return
 		end
 
 		local localPlayerPlatform = workspace.playerPlatforms:WaitForChild(Players.LocalPlayer.Name)
 		local currentData = dataController.getData()
 		local targetCFrame
-		local shouldEnableBeam = true -- Flag to control beam visibility
+		local shouldEnableArrows = true
 
-		-- Condition 1: Disable if cannon level is 20 or higher
 		if currentData.cannon >= 10 then
-			shouldEnableBeam = false
+			shouldEnableArrows = false
 		end
 
-		-- Determine target only if beam might be enabled
-		if shouldEnableBeam then
+		if shouldEnableArrows then
 			local canAffordCannon = currentData.money
 				>= cannonConfig.costFormula(currentData.cannon + 1, currentData.boughtLevels)
 			local canAffordFloor = currentData.money
@@ -227,23 +278,44 @@ function tutorialController.start()
 				targetCFrame = localPlayerPlatform.platforms:WaitForChild("oneLevel").CFrame
 			elseif canAffordFloor then
 				targetCFrame = localPlayerPlatform.platforms:WaitForChild("upgradeFloor").CFrame
-				-- Condition 2: If target is floor AND player is viewing another tower, point to cannon instead
 				if localPlayerPlatform:GetAttribute("currentTower") ~= Players.LocalPlayer.Name then
-					targetCFrame = localPlayerPlatform:WaitForChild("cannonPosition", true).CFrame -- Point to cannon
-					-- Beam remains enabled (shouldEnableBeam is not set to false here)
+					targetCFrame = localPlayerPlatform:WaitForChild("cannonPosition", true).CFrame
 				end
 			else
-				-- Cannot afford either upgrade, point to cannon entrance
 				targetCFrame = localPlayerPlatform:WaitForChild("cannonPosition", true).CFrame
 			end
 		end
 
-		-- Set beam properties based on final decision
-		guiderModel.beam.Enabled = shouldEnableBeam
-		if shouldEnableBeam then
-			guiderModel.beam.Color = ColorSequence.new(reactUtil.getSmoothColorFromElapsedTime(tick() - start, 1))
-			guiderModel.beamPart.start.WorldCFrame = character.HumanoidRootPart.CFrame
-			guiderModel.beamPart.target.WorldCFrame = targetCFrame
+		if not shouldEnableArrows or not targetCFrame then
+			guiderArrowsFolder:ClearAllChildren()
+			return
+		end
+
+		-- Spawn new arrow every 2 seconds
+		if tick() - lastArrowSpawn > .2 then
+			local arrow = tutorialArrowTemplate:Clone()
+			arrow:SetAttribute("timeCreated", tick())
+			arrow.Parent = guiderArrowsFolder
+			lastArrowSpawn = tick()
+		end
+
+		-- Update existing arrows
+		local startPos = character.PrimaryPart.Position
+		for _, arrow in ipairs(guiderArrowsFolder:GetChildren()) do
+			local timeCreated = arrow:GetAttribute("timeCreated")
+			if not timeCreated then
+				continue
+			end
+
+			local alpha = (tick() - timeCreated) / LERP_DURATION
+			if alpha >= 1 then
+				arrow:Destroy()
+				continue
+			end
+
+			arrow.CFrame = CFrame.new(startPos:Lerp(targetCFrame.Position, alpha), targetCFrame.Position)
+			arrow.CFrame *= CFrame.Angles(0,math.rad(135),0)
+			arrow.Color = reactUtil.getSmoothColorFromElapsedTime(tick() - start)
 		end
 	end)
 end

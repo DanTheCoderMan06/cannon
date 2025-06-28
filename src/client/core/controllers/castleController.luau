@@ -29,6 +29,7 @@ local Player = Players.LocalPlayer
 
 local castleFolder = workspace:WaitForChild("castles")
 local castleFloor = ReplicatedStorage.assets:WaitForChild("playerCastleAssets").castleFloor
+local castleFloorLerpMini = ReplicatedStorage.assets:WaitForChild("playerCastleAssets"):WaitForChild("castleFloorLerpMini"):FindFirstChildWhichIsA("BasePart")
 local floorHeight = 22 -- castleFloor:FindFirstChild("ceiling", true).Position.Y - castleFloor:FindFirstChild("floor", true).Position.Y
 local MAX_TEXTURE_DISTANCE = 1024
 
@@ -213,43 +214,28 @@ function castleController.setupPlatform(targetPlatform, callbackSignal, modelUse
 	))
 end
 
-function castleController.updateSpot(spot, newValue, places, playerFloors)
-	local currentValue = 0
-	for _, v in pairs(spot:FindFirstChildWhichIsA("Model"):GetChildren()) do
-		if v:IsA("Model") and tonumber(v.Name) then
-			currentValue += 1
-		end
+function castleController.updateSpot(spot, playerFloors, places)
+	local towerModel = spot:FindFirstChildWhichIsA("Model")
+	if not towerModel then
+		return
 	end
-	if newValue > currentValue then
-		local parts = {}
-		local cframes = {}
-		for i = currentValue, newValue do
-			if not spot:FindFirstChildWhichIsA("Model"):FindFirstChild(i) then
-				local weld = Instance.new("Weld")
-				local newMiniFloor =
-					ReplicatedStorage.assets:WaitForChild("playerCastleAssets").miniFloorTeleport:Clone()
-				table.insert(parts, newMiniFloor.PrimaryPart)
-				weld.C0 = CFrame.new(0, ((i - 1) * floorHeight * 0.025) + 1.1, 0)
-				newMiniFloor.Name = tostring(i)
-				newMiniFloor.Parent = spot:FindFirstChildWhichIsA("Model")
-				weld.Part0 = spot
-				weld.Part1 = newMiniFloor.PrimaryPart
-				weld.Parent = newMiniFloor
-			end
-		end
-	else
-		for i = newValue, currentValue do
-			if spot:FindFirstChildWhichIsA("Model"):FindFirstChild(i) then
-				spot:FindFirstChildWhichIsA("Model"):FindFirstChild(i):Destroy()
-			end
+
+	-- Clear previous floors
+	for _, v in pairs(towerModel:GetChildren()) do
+		if v:GetAttribute("isFloorPart") then
+			v:Destroy()
 		end
 	end
 
-	if RunService:IsStudio() then
-		require(game:GetService("ReplicatedStorage").shared.utilities.debugUtil).log(
-		spot:FindFirstChild("characterModel", true):FindFirstChild("centerWeld")
-	)
-	end
+	local newFloorPart = castleFloorLerpMini:Clone()
+	newFloorPart:SetAttribute("isFloorPart", true)
+	local originalSize = newFloorPart.Size
+	local newYSize = (playerFloors / 20) * 0.665
+	newFloorPart.Size = Vector3.new(originalSize.X, newYSize, originalSize.Z)
+	newFloorPart.Position = spot.Position +  Vector3.new(0,newYSize / 2,0)
+	newFloorPart.Parent = towerModel
+	print(newFloorPart)
+
 	if not spot:FindFirstChild("characterModel", true):FindFirstChild("centerWeld") then
 		local weld = Instance.new("Weld")
 		weld.Name = "centerWeld"
@@ -258,8 +244,7 @@ function castleController.updateSpot(spot, newValue, places, playerFloors)
 		weld.Parent = spot:FindFirstChild("characterModel", true)
 	end
 
-	spot:FindFirstChild("characterModel", true):FindFirstChild("centerWeld").C0 =
-		CFrame.new(0, (newValue * floorHeight * 0.025) + 1.6, 0) -- Lowered offset from 2.1 to 0.9
+	spot:FindFirstChild("characterModel", true):FindFirstChild("centerWeld").C0 = CFrame.new(0, newYSize + 1, 0)
 	spot:FindFirstChild("characterModel", true):FindFirstChild("floors", true).Text = playerFloors .. " Floors!"
 	if places[1] == spot.Name then
 		spot:FindFirstChild("characterModel", true):FindFirstChild("record", true).Text = "🥇1st Place!"
@@ -369,6 +354,9 @@ function castleController.updatePlayer(player)
 	end)
 
 	towerPrompt.Triggered:Connect(function()
+		if Players.LocalPlayer:GetAttribute("inTutorial") then
+			return
+		end
 		local success = zap.selectPlatform.Call(player)
 		SoundService.effects.click:Play()
 		if not towerModel:FindFirstChild("towerHighlight") then
@@ -711,7 +699,6 @@ function castleController.start()
 	local function updateTowers()
 		local playerPlatform = workspace:WaitForChild("playerPlatforms"):WaitForChild(Players.LocalPlayer.Name)
 		local teleports = playerPlatform.teleports
-		local totalFloors = 0
 		local playerStats = {}
 		local players = {}
 		local fetchedPlayers = Players:GetPlayers() -- LAUNCHFIX
@@ -724,21 +711,21 @@ function castleController.start()
 				end
 			end
 			if not floorCount then
-				floorCount = 10
+				floorCount = 0
 			end
 			playerStats[v.Name] = floorCount
 			table.insert(players, v.Name)
-			totalFloors += floorCount
 		end
 
-		players = Sift.Array.sort(players, function(a, b)
+		local sortedPlayers = Sift.Array.sort(players, function(a, b)
 			return playerStats[b] < playerStats[a]
 		end)
 
-		for _, v in pairs(fetchedPlayers) do
-			local totalProportion = playerStats[v.Name] / totalFloors
-			local playerSpot = teleports:WaitForChild(v.Name)
-			castleController.updateSpot(playerSpot, math.round(totalProportion * 24) + 1, players, playerStats[v.Name])
+		for _, player in pairs(fetchedPlayers) do
+			local playerSpot = teleports:WaitForChild(player.Name)
+			if playerSpot then
+				castleController.updateSpot(playerSpot, playerStats[player.Name], sortedPlayers)
+			end
 		end
 	end
 
@@ -760,6 +747,10 @@ function castleController.start()
 			spr.stop(leftPlayerSpot:FindFirstChildWhichIsA("Highlight", true), "OutlineTransparency")
 			leftPlayerSpot:ClearAllChildren()
 		end)
+		updateTowers()
+	end)
+
+	playerPlatform.PrimaryPart:GetPropertyChangedSignal("Position"):Connect(function()
 		updateTowers()
 	end)
 
