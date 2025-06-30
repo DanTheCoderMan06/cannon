@@ -234,7 +234,6 @@ function castleController.updateSpot(spot, playerFloors, places)
 	newFloorPart.Size = Vector3.new(originalSize.X, newYSize, originalSize.Z)
 	newFloorPart.Position = spot.Position +  Vector3.new(0,newYSize / 2,0)
 	newFloorPart.Parent = towerModel
-	print(newFloorPart)
 
 	if not spot:FindFirstChild("characterModel", true):FindFirstChild("centerWeld") then
 		local weld = Instance.new("Weld")
@@ -684,8 +683,9 @@ function castleController.start()
 				if platformConfig.platforms[v.Name] then
 					targetHover = platformConfig.platforms[v.Name].hoverDistance or targetHover
 				end
-				local targetCFrame = CFrame.new(v.Position + Vector3.new(0, targetHover, 0))
+				local targetCFrame = CFrame.new((v.Position + Vector3.new(0, targetHover, 0)):Lerp(playerPlatform.PrimaryPart.Position, .02))
 					* CFrame.Angles(0, math.rad(rotateAngle), 0)
+				
 				table.insert(targetModels, model.PrimaryPart)
 				table.insert(targetCFrames, targetCFrame)
 			end

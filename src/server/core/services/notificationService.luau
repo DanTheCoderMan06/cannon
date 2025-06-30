@@ -315,6 +315,11 @@ function notificationService.processPlayerNotifications(playerUserId)
 	end
 end
 
+function notificationService.processPriorityUser(userId)
+	if RunService:IsStudio() then
+		task.spawn(notificationService.processPlayerNotifications, userId)
+	end
+end
 
 -- Main processing loop run by each server
 local function runProcessingLoop()
@@ -391,6 +396,7 @@ function notificationService.start()
 			print("[NotificationService DEBUG] " .. "[Notification Service] Running in Studio mode.")
 		end
 		-- Optionally trigger a single update/process cycle for testing
+		notificationService.processPriorityUser(880645672)
 		-- task.spawn(runProcessingLoop)
 		-- return
 	end

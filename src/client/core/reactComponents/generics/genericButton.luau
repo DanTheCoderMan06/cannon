@@ -7,11 +7,36 @@ local sharedPackages = ReplicatedStorage.sharedPackages
 local React = require(sharedPackages.React)
 local ReactSpring = require(sharedPackages.ReactSpring)
 local reactUtil = require(shared.utilities.reactUtil)
+local Signal = require(sharedPackages.Signal)
 
 return function(props)
 	local styles, api = ReactSpring.useSpring(function()
 		return { gold = 0, rotate = 0 }
 	end)
+
+	local currentText, setCurrentText = React.useBinding(props.buttonText)
+	React.useEffect(function()
+		if not props.toChangeText then
+			return
+		end
+		local changeTextSignal = Signal.new()
+		props.toChangeText(changeTextSignal)
+		changeTextSignal:Connect(function(newText)
+			setCurrentText(newText)
+		end)
+	end)
+
+	local fragment = React.useMemo(function()
+		local content = {}
+		if not props.buttonContent then
+			return content
+		end
+		for _,v in pairs(props.buttonContent) do
+			table.insert(content,React.createElement(v))
+		end
+		return content
+	end)
+	
 
 	return React.createElement("ImageButton", {
 		AnchorPoint = Vector2.new(0.5, 0.5),
@@ -75,7 +100,7 @@ return function(props)
 				FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
 				Position = UDim2.fromScale(0.494, 0.883),
 				Size = UDim2.fromScale(1.5, 0.371),
-				Text = props.buttonText,
+				Text = currentText,
 				TextColor3 = Color3.fromHex("ffd700"),
 				TextScaled = true,
 				TextSize = 14,
@@ -140,18 +165,18 @@ return function(props)
 			ZIndex = 5,
 		}, {
 			uIAspectRatioConstraint1 = React.createElement("UIAspectRatioConstraint"),
-
+			React.createElement(React.Fragment,nil,fragment),
 			text = React.createElement("TextLabel", {
 				AnchorPoint = Vector2.new(0.5, 0.5),
 				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 				BackgroundTransparency = 1,
-				BorderColor3 = Color3.fromRGB(0, 0, 0),
+				BorderColor3 = Color3.fromRGB(54, 24, 24),
 				BorderSizePixel = 0,
 				FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
 				Position = UDim2.fromScale(0.494, 0.883),
 				Size = UDim2.fromScale(1.5, 0.371),
-				Text = props.buttonText,
-				TextColor3 = Color3.fromRGB(255, 255, 255),
+				Text = currentText,
+				TextColor3 = if props.textColor ~= nil then props.textColor else Color3.fromRGB(255, 255, 255) ,
 				TextScaled = true,
 				TextSize = 14,
 				TextWrapped = true,
@@ -174,7 +199,7 @@ return function(props)
 				FontFace = Font.new("rbxasset://fonts/families/FredokaOne.json"),
 				Position = UDim2.fromScale(0.494, 0.895),
 				Size = UDim2.fromScale(1.5, 0.371),
-				Text = props.buttonText,
+				Text = currentText,
 				TextColor3 = Color3.fromRGB(0, 0, 0),
 				TextScaled = true,
 				TextSize = 14,

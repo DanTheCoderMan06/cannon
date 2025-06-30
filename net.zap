@@ -177,6 +177,12 @@ event claimDailyReward = {
     call: SingleAsync,
     data: u8(..32)
 }
+event vipMenuEnabled = {
+	from: Client,
+    type: Reliable,
+    call: SingleAsync,
+    data: boolean
+}
 --
 
 --Auto Farm

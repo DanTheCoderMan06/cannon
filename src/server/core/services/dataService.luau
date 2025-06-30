@@ -189,17 +189,17 @@ end
 function dataService.loadGamepasses(player)
 	local playerProfile = Profiles[player]
 
-	local newCannons = {}
 
 	for _, v in pairs(gamepasses) do
 		if v.cannonName then
 			if marketplaceUtil.userOwnsGamepass(player, v.id) then
-				table.insert(newCannons, v.cannonName)
+				if not table.find(playerProfile.Data.cannons,v.cannonName) then
+					table.insert(playerProfile.Data.cannons,v.cannonName)
+				end
 			end
 		end
 	end
 
-	playerProfile.Data.cannons = newCannons
 
 	if marketplaceUtil.userOwnsGamepass(player, gamepasses.buyVIP.id) then
 		playerProfile.Data.infiniteVIP = true

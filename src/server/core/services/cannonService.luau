@@ -12,6 +12,7 @@ local Sift = require(sharedPackages.Sift)
 
 local castleFolder = workspace:WaitForChild("castles")
 local dataService = require(ServerStorage.server.services.dataService)
+local funnelService = require(ServerStorage.server.services.funnelService)
 
 local castleFloor = ReplicatedStorage.assets:WaitForChild("playerCastleAssets"):WaitForChild("castleFloor")
 
@@ -199,6 +200,10 @@ function cannonService.awardPlayer(player, playerPath)
 	-- Save updated player data (includes potential flag changes and money updates)
 	-- Force save the data immediately after awarding to prevent data loss
 	dataService.updatePlayerData(player, playerData, true)
+
+	pcall(function()
+		funnelService.onRewardClaimed(player)
+	end)
 end
 
 function cannonService.start()
@@ -279,7 +284,7 @@ function cannonService.start()
 
 		character:MoveTo(
 			playerPlatforms:WaitForChild(player.Name):FindFirstChildWhichIsA("SpawnLocation", true).Position
-				+ Vector3.new(0, 5, 0)
+				+ Vector3.new(0, 10, 0)
 		)
 	end)
 

@@ -12,6 +12,7 @@ local ReactSpring = require(sharedPackages.ReactSpring)
 local reactUtil = require(shared.utilities.reactUtil)
 local dataController = require(ReplicatedStorage.client.controllers.dataController)
 local debugUtil = require(ReplicatedStorage.shared.utilities.debugUtil)
+local zap = require(ReplicatedStorage.zap)
 
 local taskFrame = require(script.task)
 local closeButton = require(script.closeButton)

@@ -53,7 +53,7 @@ return function(props)
 		BorderColor3 = Color3.fromRGB(0, 0, 0),
 		BorderSizePixel = 0,
 		Image = "rbxassetid://103415731180628",
-		Position = UDim2.fromScale(0.349, 0.0684),
+		Position = UDim2.fromScale(0.305, 0.0684),
 		ScaleType = Enum.ScaleType.Fit,
 		Size = UDim2.fromScale(0.349, 0.093),
 		ZIndex = 2,

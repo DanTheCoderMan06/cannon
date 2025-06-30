@@ -6,6 +6,7 @@ local shared = ReplicatedStorage.shared
 local sharedPackages = ReplicatedStorage.sharedPackages
 
 local React = require(sharedPackages.React)
+local zap = require(ReplicatedStorage.zap)
 local ReactSpring = require(sharedPackages.ReactSpring)
 -- Removed Trove require
 
@@ -17,6 +18,8 @@ local isMobile = UserInputService.TouchEnabled
 local vipClaimConfig = require(ReplicatedStorage.shared.config.vipClaimConfig)
 
 local startTime = tick() -- Restored module-level startTime
+
+local sentNotificationYet = false
 
 local function claimVIPButton(props)
 	local styles, api = ReactSpring.useSpring(function()
@@ -50,6 +53,10 @@ local function claimVIPButton(props)
 					if tick() - startTime > 10 then -- Use module-level startTime
 						props.setVipClaimAvailable(false)
 					end
+				end
+				if props.vipClaimAvailable:getValue() == true and props.menuReadyForDisplay:getValue() == true and not sentNotificationYet then
+					sentNotificationYet = true
+					zap.vipMenuEnabled.Fire(true)
 				end
 			end
 		end)
@@ -185,7 +192,7 @@ return function(props)
 			BorderColor3 = Color3.fromRGB(0, 0, 0),
 			BorderSizePixel = 0,
 			Position = UDim2.fromScale(0.0, 0.5),
-			Size = UDim2.fromScale(0.0521, 0.0926),
+			Size = UDim2.fromScale(0.0521 * .9, 0.0926* .9),
 		}, {
 			uIAspectRatioConstraint = React.createElement("UIAspectRatioConstraint"),
 

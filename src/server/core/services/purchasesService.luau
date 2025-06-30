@@ -24,6 +24,7 @@ local rewardsConfig = require(ReplicatedStorage.shared.config.rewardsConfig)
 local tierConfig = require(ReplicatedStorage.shared.config.tierConfig)
 local giftConfig = require(ReplicatedStorage.shared.config.giftConfig)
 
+local funnelService =  require(ServerStorage.server.services.funnelService)
 local castleService = require(ServerStorage.server.services.castleService)
 local cannonService = require(ServerStorage.server.services.cannonService)
 local globalGiftService = require(ServerStorage.server.services.globalGiftService)
@@ -132,6 +133,10 @@ function purchaseService.start()
 			playerData.floors += 1
 			dataService.updatePlayerData(player, playerData)
 		end
+
+		pcall(function()
+			funnelService.onPurchaseUpgrade(player,purchaseType)
+		end)
 
 		return true
 	end)
